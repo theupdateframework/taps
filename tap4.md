@@ -107,6 +107,12 @@ The following is an example of D1:
 }
 ```
 
+In this example:
+
+1. The client would trust only the "django" repository to sign any "*django*" package. If this repository does not provide the metadata, neither the "Flask" nor "PyPI" repository would be consulted.
+2. The client requires both the "Flask" and "PyPI" repositories to provide exactly the same metadata (e.g., hashes, length, custom attributes) about any "*flask*" package, despite different roots of trust. If one provides metadata, but not the other, or if both provide inconsistent metadata, then an error must be reported. Otherwise, if both do not provide metadata about the desired package, then the next delegation would be consulted.
+3. For any "*flask*" package (if and only if both the "Flask" and "PyPI" repositories do not provide metadata about the desired "*flask*" package), or any other package, the "PyPI" repository would be the final consultation. (Note that, in this example, the "*flask*" package would still be missing.)
+
 ## Delegation Features Applicable to Trust Pinning
 
 The assignment of portions of the targets namespace to distinct
