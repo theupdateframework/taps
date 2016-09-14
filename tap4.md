@@ -60,86 +60,58 @@ organization's `pinned.json`").
 
 ### Fields for each pinning specification
 
-The following dictionary constitues pinned.json.
+```pinned.json``` contains a dictionary D1. D1 contains two keys, "repositories" and "delegations".
 
-- It is indexed by names (e.g. 'django' or 'django/*.tar.gz') equivalent to the target filename prefix (or unix-style filename matching pattern). This name specifies the namespace that is being pinned.
-- "repositories" is the only required field for a particular pinning, and it must specify the location of the metadata (in effect, the repository root(s)) to be trusted with targets matching this pinning's namespace. Generally, one should be specified, but if more than one is specified, then the effect is similar to multi-role delegation (See [below](#feature_multi-repository_pinning_delegations])). In particular, for a target matching this namespace to be trusted under this pinning, it must be matched by all repositories (rooted at the metadata) listed here.
- - Each repository is specified minimally by a location field. This specifies the location in the client's local filesystem of the metadata being pinned.
- - The optional url field specifies the location from which updates to the client's currently pinned metadata (for this pinning) will be retrieved. Since pinned delegations are treated as a separate repository's metadata, such updates will have the same kind of TUF security as any other TUF repository (updates to root.json will have to be signed by acceptable root keys in order to be adopted, etc.). If no url is specified, the pinned metadata can only be changed locally by the client user.
-- The optional backtrack field (default False) can be set to True in order to allow targets that match this pinning's namespace but are not specified by the pinned repository to be retrieved from later repositories in this list. In other words, if this is True, then control of the namespace pinned here is not exclusive, but only prioritized. See [below](#feature_backtracking_pinning_delegations) below.
+The value of the "repositories" key in D1 is a dictionary D2. Every key in D2 specifies a shortname for a repository (e.g., "django"). Every value in D2 is a dictionary D3 with at least one key: "metadata_directory" which contains the previous and current metadata for this repository. D3 may also contain the "url" key, which specifies the complete URL needs to resolve metadata and targets.
+
+The value of the "delegations" key in D1 is a list L1. Every member in L1 is a dictionary D4 with at least two keys: "paths" which specifies a target path, and "repositories" which specifies a list L2. L2 contains one or more keys, or repository shortnames, from D2. D4 may also contain the "terminating" key, which is a Boolean attribute indicating whether or not this delegation terminates backtracking in the absence of the required number of signatures for a matching target.
+
+The following is an example of D1:
 
 ```javascript
- {
-   "django": { // name of pinning / target filename prefix
-     "repositories": [
-       {"location": "pinned/django",  // default pinned directory structure
-         "url": "https://www.djangoproject.com/release/metadata", // optional},
-     ],
-     "backtrack": False, // default, optional, see above.
-   },
-   "NumPy/*.tar.gz": { // name of pinning / target filename pattern
-     "repositories": [{"location": "pinned/numpy_targz"}]
-   },
-   "private-requests-beta": {
-     "repositories": [{"location": "pinned/requests"}]
-   },
-   "private-flask-beta": {
-     "repositories": [{"location": "/usr/local/evan/flask-beta"}]
-   }
- }
+{
+  "repositories": {
+    "django": {
+      // metadata would be at https://repository.djangoproject.com/metadata/
+      // targets would be at  https://repository.djangoproject.com/targets/
+      "url": "https://repository.djangoproject.com/",
+      // previous metadata on disk would be in metadata/previous/django
+      // current metadata on disk would be in metadata/current/django
+      "metadata_directory": "django"
+    },
+    "PyPI": {
+      "url": "https://pypi.python.org/repository/",
+      "metadata_directory": "pypi"
+    },
+    "Flask": {
+      "url": "https://flask.pocoo.org/",
+      "metadata_directory": "flask.pocoo.org"
+    }
+  },
+  "delegations": [
+    {
+      "paths": "*django*",
+      "repositories": ["django"],
+      // if the "terminating" Boolean attribute is missing, its default value is false
+      terminating: true
+    },
+    {
+      "paths": "*flask*",
+      "repositories": ["Flask", "PyPI"]
+    },
+    {
+      "paths": "**",
+      "repositories": ["PyPI"]
+    }
+  ]
+}
 ```
 
-## Pinned Metadata
-Pinned metadata lives in a specific default directory, sharing the same layout as a "normal" repo but nested within a prefix namespace, e.g.
+In this example:
 
-```
-pinned
-└── django  // prefix
-    ├── root.json
-    ├── snapshot.json
-    ├── targets.json
-    └── timestamp.json
-```
-
-This can be changed with the `location` field of the `pinned.json` file, which
-may be useful if e.g. sharing a network drive.
-
-Complex ACLs can be enforced and/or bootstrapped by sending a user an
-appropriately generated `pinned.json`, noting that any metadata endpoint (root
-repo, or any pinned repo) can have its own access control mechanism.
-
-## Hiding 
-
-A private package can be omitted from the primary hierarchy entirely, having
-its own `snapshot` and `target` files separate from those provided with `root`.
-The `snapshot.json` and `target.json` could be signed with the same snapshot
-and target keys used for the public parts of the repository, or they can be
-managed and signed by the owner of the private delegated role. Access to these
-private roles is granted by sending the metadata to the appropriate users
-(further restricted by ACLs if needed). A url pointing to where the snapshot
-and timestamp can be found is added to the `pinned.json` file in the case of
-private roles.
-
-## Hard Pinning
-
-Hard pinning, in which a specific set of non-changing keys are used, can be
-accomplished by creating the a pinned metadata repository and not specifying a
-url. Without a url, nothing can convince a client to use different keys. This
-may be useful for priming a box for a one-time initial pull (with the
-assumption that it will be killed rather than updated directly).
-
-The result of pinning a namespace without specifying a url is that, for that namespace, top level metadata (role files) cannot be changed by a repository: the user would have to explicitly pin new metadata.
-
-## Repository structure
-
-With this pinning structure it makes sense to structure namespaces and/or
-packages with their own roots. Alternately, a user can generate a root for a
-given package/target delegation locally if it doesn't exist, by generating keys
-locally and signing.
-
-Because a delegation is also a target file, a global root can delegate to
-target files of other repos. This allows a simple way to provide both global
-and namespaced target files.
+1. The client would trust only the "django" repository to sign any "*django*" package. If this repository does not provide the metadata, neither the "Flask" nor "PyPI" repository would be consulted.
+2. The client requires both the "Flask" and "PyPI" repositories to provide exactly the same metadata (e.g., hashes, length, custom attributes) about any "*flask*" package, despite different roots of trust. If one provides metadata, but not the other, or if both provide inconsistent metadata, then an error must be reported. Otherwise, if both do not provide metadata about the desired package, then the next delegation would be consulted.
+3. For any "*flask*" package (if and only if both the "Flask" and "PyPI" repositories do not provide metadata about the desired "*flask*" package), or any other package, the "PyPI" repository would be the final consultation. (Note that, in this example, the "*flask*" package would still be missing.)
 
 ## Delegation Features Applicable to Trust Pinning
 
@@ -151,10 +123,7 @@ appropriately termed multi-repository delegations).
 
 ### Feature: Backtracking Pinning Delegations
 
-Normal delegations can be backtracking (default) or non-backtracking (a.k.a.
-terminating or cutting). This delegation feature is [documented in the
-repository tool
-code](https://github.com/theupdateframework/tuf/blob/fbc1265170dd3ff97e9849b4789e5f115da75d2d/tuf/repository_tool.py#L2121-L2130).
+Normal delegations can be backtracking (default) or terminating. This delegation feature is documented in [the Diplomat paper](https://www.usenix.org/conference/nsdi16/technical-sessions/presentation/kuppusamy).
 The same concept can be applicable to pinned delegations. If a portion of the
 targets namespace is assigned to a particular root/repository, and that
 repository does not specify a particular target in that namespace, TUF could
@@ -179,6 +148,69 @@ A normal delegation in TUF 1.0 features target filename matching either by
 filename prefix or by Unix-style filename pattern matching. The same option
 will be made available for pinning.
 
+### Interpretating delegations
+
+Every delegation in [the list L1](#fields-for-each-pinning-specification) shall be interpreted as follows. If the desired target matches the "paths" attribute, then download and verify metadata from every repository specified in the "repositories" attribute. Ensure that the targets metadata about the target matches across repositories (i.e., all repositories must provide the same hashes, length, and custom attributes), and return metadata about the target. If all repositories in the current delegation have not signed any metadata about the target, then take one of the following two actions. If the "terminating" attribute is true, report that there is no metadata about the target. Otherwise, proceed to similarly interpret the next delegation.
+
+## Pinned Metadata
+Pinned metadata lives in a specific default directory, sharing the same layout as a "normal" repo but nested within a prefix namespace, e.g.
+
+```
+metadata
+└── previous/django // use the name from "metadata_directory"
+    ├── root.json
+    ├── snapshot.json
+    ├── targets.json
+    └── timestamp.json
+└── previous/flask.pocoo.org
+└── previous/pypi
+└── current/django
+└── current/flask.pocoo.org
+└── current/pypi
+```
+
+This can be changed with the `location` field of the `pinned.json` file, which
+may be useful if e.g. sharing a network drive.
+
+Complex ACLs can be enforced and/or bootstrapped by sending a user an
+appropriately generated `pinned.json`, noting that any metadata endpoint (root
+repo, or any pinned repo) can have its own access control mechanism.
+
+## Hiding 
+
+A private package can be omitted from the primary hierarchy entirely, having
+its own `snapshot` and `target` files separate from those provided with `root`.
+The `snapshot.json` and `target.json` could be signed with the same snapshot
+and target keys used for the public parts of the repository, or they can be
+managed and signed by the owner of the private delegated role. Access to these
+private roles is granted by sending the metadata to the appropriate users
+(further restricted by ACLs if needed). A url pointing to where the snapshot
+and timestamp can be found is added to the `pinned.json` file in the case of
+private roles.
+
+## Hard Pinning		
+		
+Hard pinning, in which a specific set of non-changing keys are used, can be		
+accomplished by creating the a pinned metadata repository and not specifying a		
+url. Without a url, nothing can convince a client to use different keys. This		
+may be useful for priming a box for a one-time initial pull (with the		
+assumption that it will be killed rather than updated directly).		
+ 		
+The result of pinning a namespace without specifying a url is that, for that
+namespace, top level metadata (role files) cannot be changed by a repository:
+the user would have to explicitly pin new metadata.		
+ 
+## Repository structure
+
+With this pinning structure it makes sense to structure namespaces and/or
+packages with their own roots. Alternately, a user can generate a root for a
+given package/target delegation locally if it doesn't exist, by generating keys
+locally and signing.
+
+Because a delegation is also a target file, a global root can delegate to
+target files of other repos. This allows a simple way to provide both global
+and namespaced target files.
+
 # Motivation
 
 See Abstract.
@@ -201,7 +233,6 @@ behavioral risks for users:
 - Orphaned pinnings, in effect, may occur, where metadata is pinned and then fails to be updated, falling out of sync with keys in real use. Project managers may trust their own security and distrust repository security, promoting pinning to users for their own projects. Smaller groups, however, may be less likely to follow up on updating metadata when that is appropriate, often having more constrained means and broader interests than repository metadata. To provide a url for updating pinned metadata is essentially to run one's own TUF server.
 - Complexity / subtlety for users and maintainers of having multiple repositories. (TODO: Elaborate.)
 - TODO: Poll for other concerns.
-
 
 # Backwards Compatibility
 
