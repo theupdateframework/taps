@@ -143,16 +143,6 @@ private roles is granted by sending the metadata to the appropriate users
 and timestamp can be found is added to the `pinned.json` file in the case of
 private roles.
 
-## Hard Pinning
-
-Hard pinning, in which a specific set of non-changing keys are used, can be
-accomplished by creating the a pinned metadata repository and not specifying a
-url. Without a url, nothing can convince a client to use different keys. This
-may be useful for priming a box for a one-time initial pull (with the
-assumption that it will be killed rather than updated directly).
-
-The result of pinning a namespace without specifying a url is that, for that namespace, top level metadata (role files) cannot be changed by a repository: the user would have to explicitly pin new metadata.
-
 ## Repository structure
 
 With this pinning structure it makes sense to structure namespaces and/or
