@@ -62,7 +62,7 @@ organization's `pinned.json`").
 
 ```pinned.json``` contains a dictionary D1. D1 contains two keys, "repositories" and "delegations".
 
-The value of the "repositories" key in D1 is a dictionary D2. Every key in D2 specifies a shortname for a repository (e.g., "django"). Every value in D2 is a dictionary D3 with exactly two keys: "url" which specifies the complete URL needs to resolve metadata and targets, and "metadata_directory" which contains the previous and current metadata for this repository.
+The value of the "repositories" key in D1 is a dictionary D2. Every key in D2 specifies a shortname for a repository (e.g., "django"). Every value in D2 is a dictionary D3 with at least one key: "metadata_directory" which contains the previous and current metadata for this repository. D3 may also contain the "url" key, which specifies the complete URL needs to resolve metadata and targets.
 
 The value of the "delegations" key in D1 is a list L1. Every member in L1 is a dictionary D4 with at least two keys: "paths" which specifies a target path, and "repositories" which specifies a list L2. L2 contains one or more keys, or repository shortnames, from D2. D4 may also contain the "terminating" key, which is a Boolean attribute indicating whether or not this delegation terminates backtracking in the absence of the required number of signatures for a matching target.
 
@@ -182,6 +182,18 @@ private roles is granted by sending the metadata to the appropriate users
 and timestamp can be found is added to the `pinned.json` file in the case of
 private roles.
 
+## Hard Pinning		
+		
+Hard pinning, in which a specific set of non-changing keys are used, can be		
+accomplished by creating the a pinned metadata repository and not specifying a		
+url. Without a url, nothing can convince a client to use different keys. This		
+may be useful for priming a box for a one-time initial pull (with the		
+assumption that it will be killed rather than updated directly).		
+ 		
+The result of pinning a namespace without specifying a url is that, for that
+namespace, top level metadata (role files) cannot be changed by a repository:
+the user would have to explicitly pin new metadata.		
+ 
 ## Repository structure
 
 With this pinning structure it makes sense to structure namespaces and/or
