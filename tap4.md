@@ -64,7 +64,7 @@ organization's `pinned.json`").
 
 The value of the "repositories" key in D1 is a dictionary D2. Every key in D2 specifies a shortname for a repository (e.g., "django"). Every value in D2 is a dictionary D3 with at least one key: "metadata_directory" which contains the previous and current metadata for this repository. D3 may also contain the "url" key, which specifies the complete URL needs to resolve metadata and targets.
 
-The value of the "delegations" key in D1 is a list L1. Every member in L1 is a dictionary D4 with at least two keys: "paths" which specifies a target path, and "repositories" which specifies a list L2. L2 contains one or more keys, or repository shortnames, from D2. D4 may also contain the "terminating" key, which is a Boolean attribute indicating whether or not this delegation terminates backtracking in the absence of the required number of signatures for a matching target.
+The value of the "delegations" key in D1 is a list L1. Every member in L1 is a dictionary D4 with at least two keys: "paths" which specifies a list of target paths of patterns, and "repositories" which specifies a list L2. L2 contains one or more keys, or repository shortnames, from D2. D4 may also contain the "terminating" key, which is a Boolean attribute indicating whether or not this delegation terminates backtracking in the absence of the required number of signatures for a matching target.
 
 The following is an example of D1:
 
@@ -72,11 +72,11 @@ The following is an example of D1:
 {
   "repositories": {
     "django": {
-      // metadata would be at https://repository.djangoproject.com/metadata/
-      // targets would be at  https://repository.djangoproject.com/targets/
+      // metadata might be at https://repository.djangoproject.com/metadata/
+      // targets might be at  https://repository.djangoproject.com/targets/
       "url": "https://repository.djangoproject.com/",
-      // previous metadata on disk would be in metadata/previous/django
-      // current metadata on disk would be in metadata/current/django
+      // previous metadata on disk would be in metadata/previous/django/
+      // current metadata on disk would be in metadata/current/django/
       "metadata_directory": "django"
     },
     "PyPI": {
@@ -84,23 +84,24 @@ The following is an example of D1:
       "metadata_directory": "pypi"
     },
     "Flask": {
-      "url": "https://flask.pocoo.org/",
+      // excluding url means that the metadata is hard-pinned and will not
+      // be updated without user intervention
       "metadata_directory": "flask.pocoo.org"
     }
   },
   "delegations": [
     {
-      "paths": "*django*",
+      "paths": ["django/*"],
       "repositories": ["django"],
-      // if the "terminating" Boolean attribute is missing, its default value is false
+      // if missing, the "terminating" attribute is set to its default, false
       terminating: true
     },
     {
-      "paths": "*flask*",
-      "repositories": ["Flask", "PyPI"]
+      "paths": ["flask/*"],
+      "repositories": ["Flask", "PyPI"] // Flask and PyPI repositories must agree 
     },
     {
-      "paths": "**",
+      "paths": ["*"],
       "repositories": ["PyPI"]
     }
   ]
@@ -109,16 +110,16 @@ The following is an example of D1:
 
 In this example:
 
-1. The client would trust only the "django" repository to sign any "*django*" package. If this repository does not provide the metadata, neither the "Flask" nor "PyPI" repository would be consulted.
-2. The client requires both the "Flask" and "PyPI" repositories to provide exactly the same metadata (e.g., hashes, length, custom attributes) about any "*flask*" package, despite different roots of trust. If one provides metadata, but not the other, or if both provide inconsistent metadata, then an error must be reported. Otherwise, if both do not provide metadata about the desired package, then the next delegation would be consulted.
-3. For any "*flask*" package (if and only if both the "Flask" and "PyPI" repositories do not provide metadata about the desired "*flask*" package), or any other package, the "PyPI" repository would be the final consultation. (Note that, in this example, the "*flask*" package would still be missing.)
+1. The client would trust only the "django" repository to sign any target with repository filepath matching `"django/*"`. That is, that portion of the target namespace is pinned to the "django" repository. Further, because the "terminating" attribute of the pinning is set to `true`, if the "django" repository does not provide a specific target, we will not continue through the list of pinnings to try to find any other pinning relevant to this target. For example, suppose we are interested in target `"django/django-1.7.3.tar.gz"`. Because this filepath matches the `"django/*"` pattern, whether or not it is found in the "django" repository, we will consult no further repositories because this pinning is terminating; neither the "Flask" nor "PyPI" repositories will be consulted for anything matching `"django/*"`.
+2. The client requires both the "Flask" and "PyPI" repositories to provide exactly the same metadata (e.g., hashes, length, custom attributes) about any target matching the pattern `"flask/*"`, despite different roots of trust. If one provides metadata, but not the other, or if both provide inconsistent metadata, then an error must be reported. Otherwise, if both do not provide metadata about the desired package, then the next delegation would be consulted.
+3. For any target file matching the pattern `"flask/*"` package (if and only if both the "Flask" and "PyPI" repositories do not provide metadata about the desired `"flask/*"` package), or any other package, the "PyPI" repository would be the final consultation. (Note that, in this example, the `"flask/*"` package would still be missing.)
 
 ## Delegation Features Applicable to Trust Pinning
 
 The assignment of portions of the targets namespace to distinct
 roots/repositories is similar to a normal, targets delegation. As such, it can
-also profit from targets delegation features like non-backtracking (a.k.a.
-terminating or cutting) delegations or multi-role delegations (here, more
+also profit from targets delegation features like terminating (a.k.a.
+cutting or non-backtracking) delegations or multi-role delegations (here, more
 appropriately termed multi-repository delegations).
 
 ### Feature: Backtracking Pinning Delegations
