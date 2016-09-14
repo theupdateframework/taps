@@ -60,45 +60,68 @@ organization's `pinned.json`").
 
 ### Fields for each pinning specification
 
-The following dictionary constitues pinned.json.
+```pinned.json``` contains a dictionary D1. D1 contains two keys, "repositories" and "delegations".
 
-- It is indexed by names (e.g. 'django' or 'django/*.tar.gz') equivalent to the target filename prefix (or unix-style filename matching pattern). This name specifies the namespace that is being pinned.
-- "repositories" is the only required field for a particular pinning, and it must specify the location of the metadata (in effect, the repository root(s)) to be trusted with targets matching this pinning's namespace. Generally, one should be specified, but if more than one is specified, then the effect is similar to multi-role delegation (See [below](#feature_multi-repository_pinning_delegations])). In particular, for a target matching this namespace to be trusted under this pinning, it must be matched by all repositories (rooted at the metadata) listed here.
- - Each repository is specified minimally by a location field. This specifies the location in the client's local filesystem of the metadata being pinned.
- - The optional url field specifies the location from which updates to the client's currently pinned metadata (for this pinning) will be retrieved. Since pinned delegations are treated as a separate repository's metadata, such updates will have the same kind of TUF security as any other TUF repository (updates to root.json will have to be signed by acceptable root keys in order to be adopted, etc.). If no url is specified, the pinned metadata can only be changed locally by the client user.
-- The optional backtrack field (default False) can be set to True in order to allow targets that match this pinning's namespace but are not specified by the pinned repository to be retrieved from later repositories in this list. In other words, if this is True, then control of the namespace pinned here is not exclusive, but only prioritized. See [below](#feature_backtracking_pinning_delegations) below.
+The value of the "repositories" key in D1 is a dictionary D2. Every key in D2 specifies a shortname for a repository (e.g., "django"). Every value in D2 is a dictionary D3 with exactly two keys: "url" which specifies the complete URL needs to resolve metadata and targets, and "metadata_directory" which contains the previous and current metadata for this repository.
+
+The value of the "delegations" key in D1 is a list L1. Every member in L1 is a dictionary D4 with at least two keys: "paths" which specifies a target path, and "repositories" which specifies a list L2. L2 contains one or more keys, or repository shortnames, from D2. D4 may also contain the "terminating" key, which is a Boolean attribute indicating whether or not this delegation terminates backtracking in the absence of the required number of signatures for a matching target.
+
+The following is an example of D1:
 
 ```javascript
- {
-   "django": { // name of pinning / target filename prefix
-     "repositories": [
-       {"location": "pinned/django",  // default pinned directory structure
-         "url": "https://www.djangoproject.com/release/metadata", // optional},
-     ],
-     "backtrack": False, // default, optional, see above.
-   },
-   "NumPy/*.tar.gz": { // name of pinning / target filename pattern
-     "repositories": [{"location": "pinned/numpy_targz"}]
-   },
-   "private-requests-beta": {
-     "repositories": [{"location": "pinned/requests"}]
-   },
-   "private-flask-beta": {
-     "repositories": [{"location": "/usr/local/evan/flask-beta"}]
-   }
- }
+{
+  "repositories": {
+    "django": {
+      // metadata would be at https://repository.djangoproject.com/metadata/
+      // targets would be at  https://repository.djangoproject.com/targets/
+      "url": "https://repository.djangoproject.com/",
+      // previous metadata on disk would be in metadata/previous/django
+      // current metadata on disk would be in metadata/current/django
+      "metadata_directory": "django"
+    },
+    "PyPI": {
+      "url": "https://pypi.python.org/repository/",
+      "metadata_directory": "pypi"
+    },
+    "Flask": {
+      "url": "https://flask.pocoo.org/",
+      "metadata_directory": "flask.pocoo.org"
+    }
+  },
+  "delegations": [
+    {
+      "paths": "*django*",
+      "repositories": ["django"],
+      // if the "terminating" Boolean attribute is missing, its default value is false
+      terminating: true
+    },
+    {
+      "paths": "*flask*",
+      "repositories": ["Flask", "PyPI"]
+    },
+    {
+      "paths": "**",
+      "repositories": ["PyPI"]
+    }
+  ]
+}
 ```
 
 ## Pinned Metadata
 Pinned metadata lives in a specific default directory, sharing the same layout as a "normal" repo but nested within a prefix namespace, e.g.
 
 ```
-pinned
-└── django  // prefix
+metadata
+└── previous/django // use the name from "metadata_directory"
     ├── root.json
     ├── snapshot.json
     ├── targets.json
     └── timestamp.json
+└── previous/flask.pocoo.org
+└── previous/pypi
+└── current/django
+└── current/flask.pocoo.org
+└── current/pypi
 ```
 
 This can be changed with the `location` field of the `pinned.json` file, which
@@ -201,7 +224,6 @@ behavioral risks for users:
 - Orphaned pinnings, in effect, may occur, where metadata is pinned and then fails to be updated, falling out of sync with keys in real use. Project managers may trust their own security and distrust repository security, promoting pinning to users for their own projects. Smaller groups, however, may be less likely to follow up on updating metadata when that is appropriate, often having more constrained means and broader interests than repository metadata. To provide a url for updating pinned metadata is essentially to run one's own TUF server.
 - Complexity / subtlety for users and maintainers of having multiple repositories. (TODO: Elaborate.)
 - TODO: Poll for other concerns.
-
 
 # Backwards Compatibility
 
