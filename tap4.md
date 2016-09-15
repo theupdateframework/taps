@@ -24,10 +24,11 @@ role and its delegates), the proposed pinning feature can be thought of as
 repository- or root-level delegation.
 
 As a helpful side-effect, the proposed pinning feature also addresses the
-problem of private metadata. In the current TUF spec, there is no way to hide
-all information about the existence of other metadata in the system. This is a
-problem in a multi-tenant scenario where knowledge of meta-metadata could be
-sensitive (e.g. timing of creating a target, names of targets, etc).
+problem of [how to keep certain metadata private](#hiding). In the current TUF
+spec, there is no way to hide all information about the existence of other
+metadata in the system. This is a problem in a multi-tenant scenario where
+knowledge of meta-metadata could be sensitive (e.g. timing of creating a
+target, names of targets, etc).
 
 # Specification
 
@@ -66,7 +67,7 @@ organization's `pinned.json`").
 
 The value of the "repositories" key in D1 is a dictionary D2. Every key in D2 specifies a shortname for a repository (e.g., "django"). Every value in D2 is a dictionary D3 with at least one key: "metadata_directory" which contains the previous and current metadata for this repository. D3 may also contain the "url" key, which specifies the complete URL needs to resolve metadata and targets.
 
-The value of the "delegations" key in D1 is a list L1. Every member in L1 is a dictionary D4 with at least two keys: "paths" which specifies a list of target paths of patterns, and "repositories" which specifies a list L2. L2 contains one or more keys, or repository shortnames, from D2. D4 may also contain the "terminating" key, which is a Boolean attribute indicating whether or not this delegation terminates backtracking in the absence of the required number of signatures for a matching target.
+The value of the "delegations" key in D1 is a list L1. Every member in L1 is a dictionary D4 with at least two keys: "paths" which specifies a list of target paths of patterns, and "repositories" which specifies a list L2. L2 contains one or more keys, or repository shortnames, from D2. D4 may also contain the "terminating" key, which is a Boolean attribute indicating whether or not this [delegation terminates backtracking](#feature-teminating-pinned-delegations).
 
 The following is an example of D1:
 
@@ -124,19 +125,15 @@ also profit from targets delegation features like terminating (a.k.a.
 cutting or non-backtracking) delegations or multi-role delegations (here, more
 appropriately termed multi-repository delegations).
 
-### Feature: Backtracking Pinning Delegations
+### Feature: Terminating Pinning Delegations
 
 Normal delegations can be backtracking (default) or terminating. This delegation feature is documented in [the Diplomat paper](https://www.usenix.org/conference/nsdi16/technical-sessions/presentation/kuppusamy).
 The same concept can be applicable to pinned delegations. If a portion of the
 targets namespace is assigned to a particular root/repository, and that
 repository does not specify a particular target in that namespace, TUF could
 choose either to proceed through the list of pinnings to the next pinning whose
-assigned namespace matches that target (i.e. TUF could backtrack) or not; it
-would seem that the naturally expected behavior from a namespace assignment
-would be *not* to backtrack.
+assigned namespace matches that target (i.e. TUF could backtrack) or not. [Interpreting delegations](#intepreting-delegations) below runs through how this plays out.
 
-As such, pinnings (i.e. repository delegations) should by default not
-backtrack; however, it should probably remain an option to allow backtracking.
 
 ### Feature: Multi-Repository Pinning Delegations
 
