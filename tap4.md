@@ -1,7 +1,7 @@
 * TAP: 4
 * Title: Trust Pinning
 * Version: 1
-* Last-Modified: 14-Sep-2016
+* Last-Modified: 15-Sep-2016
 * Author: Evan Cordell, Jake Moshenko, Justin Cappos, Vladimir Diaz, Sebastien Awwad, Trishank Karthik Kuppusamy
 * Status: Draft
 * Content-Type: text/markdown
@@ -34,7 +34,7 @@ target, names of targets, etc).
 
 We introduce a new, required, client-side, top-level metadata file,
 `pinned.json`, which permits users to pin root files and associate them with
-a particular namespace prefix (or glob/pattern). If an entry matches the
+a particular namespace prefix (or path/filename pattern). If an entry matches the
 current package, the pinned root must be used. If it does not match, there is a
 fallback to the global root.
 
@@ -74,7 +74,7 @@ The following is an example of D1:
 ```javascript
 {
   "repositories": {
-    "django": {
+    "Django": {
       // metadata might be at https://repository.djangoproject.com/metadata/
       // targets might be at  https://repository.djangoproject.com/targets/
       "url": "https://repository.djangoproject.com/",
@@ -111,11 +111,14 @@ The following is an example of D1:
 }
 ```
 
-In this example:
+### Interpreting delegations
 
-1. The client would trust only the "django" repository to sign any target with repository filepath matching `"django/*"`. That is, that portion of the target namespace is pinned to the "django" repository. Further, because the "terminating" attribute of the pinning is set to `true`, if the "django" repository does not provide a specific target, we will not continue through the list of pinnings to try to find any other pinning relevant to this target. For example, suppose we are interested in target `"django/django-1.7.3.tar.gz"`. Because this filepath matches the `"django/*"` pattern, whether or not it is found in the "django" repository, we will consult no further repositories because this pinning is terminating; neither the "Flask" nor "PyPI" repositories will be consulted for anything matching `"django/*"`.
-2. The client requires both the "Flask" and "PyPI" repositories to provide exactly the same metadata (e.g., hashes, length, custom attributes) about any target matching the pattern `"flask/*"`, despite different roots of trust. If one provides metadata, but not the other, or if both provide inconsistent metadata, then an error must be reported. Otherwise, if both do not provide metadata about the desired package, then the next delegation would be consulted.
-3. For any target file matching the pattern `"flask/*"` package (if and only if both the "Flask" and "PyPI" repositories do not provide metadata about the desired `"flask/*"` package), or any other package, the "PyPI" repository would be the final consultation. (Note that, in this example, the `"flask/*"` package would still be missing.)
+Every delegation in [the list L1](#fields-for-each-pinning-specification) shall be interpreted as follows. If the desired target matches the "paths" attribute, then download and verify metadata from every repository specified in the "repositories" attribute. Ensure that the targets metadata about the target matches across repositories (i.e., all repositories must provide the same hashes, length, and custom attributes), and return metadata about the target. If all repositories in the current delegation have not signed any metadata about the target, then take one of the following two actions. If the ["terminating" attribute](#feature-terminating-pinning-delegations) is true, report that there is no metadata about the target. Otherwise, proceed to similarly interpret the next delegation.
+
+For the example pinned.json above, the result is this:
+
+1. The client would trust only the "django" repository to sign any target with repository filepath matching `"django/*"`. That is, that portion of the target namespace is pinned to the "Django" repository. Further, because the "terminating" attribute of the pinning is set to `true`, if the "Django" repository does not provide a specific target, we will not continue through the list of pinnings to try to find any other pinning relevant to this target. For example, suppose we are interested in target `"django/django-1.7.3.tar.gz"`. Because this filepath matches the `"django/*"` pattern, whether or not it is found in the "django" repository, we will consult no further repositories because this pinning is terminating; neither the "Flask" nor "PyPI" repositories will be consulted for anything matching `"django/*"`.
+2. Because the second pinning in this list (`"flask/*"` -> [Flask + PyPI]) lists two repositories, the client will trust metadata for packages matching the `"flask/*"` pattern only if the same metadata (hashes, length, custom attributes) is provided by metadata from both repositories. If one provides metadata, but not the other, or if both provide inconsistent metadata, then an error must be reported. If neither provides metadata on a sought-after target matching the pattern, then, because this pinning does not have "terminating" set to true, the next pinning ("*" -> PyPI) will finally be consulted.
 
 ## Delegation Features Applicable to Trust Pinning
 
@@ -147,10 +150,6 @@ such delegations, pinned delegations can profit from the same logic.
 A normal delegation in TUF 1.0 features target filename matching either by
 filename prefix or by Unix-style filename pattern matching. The same option
 will be made available for pinning.
-
-### Interpreting delegations
-
-Every delegation in [the list L1](#fields-for-each-pinning-specification) shall be interpreted as follows. If the desired target matches the "paths" attribute, then download and verify metadata from every repository specified in the "repositories" attribute. Ensure that the targets metadata about the target matches across repositories (i.e., all repositories must provide the same hashes, length, and custom attributes), and return metadata about the target. If all repositories in the current delegation have not signed any metadata about the target, then take one of the following two actions. If the "terminating" attribute is true, report that there is no metadata about the target. Otherwise, proceed to similarly interpret the next delegation.
 
 ## Pinned Metadata
 Pinned metadata lives in a specific default directory, sharing the same layout as a "normal" repo but nested within a prefix namespace, e.g.
