@@ -69,7 +69,7 @@ The value of the "repositories" key in D1 is a dictionary D2. Every key in D2 sp
 
 The value of the "delegations" key in D1 is a list L1. Every member in L1 is a dictionary D4 with at least two keys: "paths" which specifies a list of target paths of patterns, and "repositories" which specifies a list L2. L2 contains one or more keys, or repository shortnames, from D2. D4 may also contain the "terminating" key, which is a Boolean attribute indicating whether or not this [delegation terminates backtracking](#feature-teminating-pinned-delegations).
 
-The following is an example of D1:
+The following is an example of the full pinning.json file:
 
 ```javascript
 {
@@ -130,7 +130,7 @@ appropriately termed multi-repository delegations).
 
 ### Feature: Terminating Pinning Delegations
 
-Normal delegations can be backtracking (default) or terminating. This delegation feature is documented in [the Diplomat paper](https://www.usenix.org/conference/nsdi16/technical-sessions/presentation/kuppusamy).
+Normal delegations can be backtracking (default) or terminating. This delegation feature is documented in [the Diplomat paper](https://www.usenix.org/conference/nsdi16/technical-sessions/presentation/kuppusamy) and in [TUF code](https://github.com/theupdateframework/tuf/blob/5e2d177f4dd213a13ee3f27f01f0f782cf544afa/tuf/repository_tool.py#L2121-L2130).
 The same concept can be applicable to pinned delegations. If a portion of the
 targets namespace is assigned to a particular root/repository, and that
 repository does not specify a particular target in that namespace, TUF could
@@ -147,9 +147,9 @@ such delegations, pinned delegations can profit from the same logic.
 
 ### Feature: Unix-Style Target Filename Pattern Matching (Wildcards)
 
-A normal delegation in TUF 1.0 features target filename matching either by
-filename prefix or by Unix-style filename pattern matching. The same option
-will be made available for pinning.
+A normal (targets) delegation in TUF 1.0 features target filename matching either by
+filename prefix or by Unix-style filename pattern matching. The same option is
+made available for pinning.
 
 ## Pinned Metadata
 Pinned metadata lives in a specific default directory, sharing the same layout as a "normal" repo but nested within a prefix namespace, e.g.
@@ -221,7 +221,7 @@ See Abstract.
 # Security Analysis
 
 In effect, this TAP allows users (and only users) to directly choose the root
-of trust for parts of the targets namespaces. Each root continues to be treated
+of trust for parts of the targets namespace. Each root continues to be treated
 as it was previously, with TUF performing full validation per that root's
 metadata.
 
@@ -256,4 +256,3 @@ This document has been placed in the public domain.
 It is worth mentioning that Notary has a pinning implementation currently.
 Although this proposal differs and has slightly different goals, the Notary
 format should be compatible with this through a simple transformation.
-
