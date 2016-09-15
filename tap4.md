@@ -1,7 +1,7 @@
 * TAP: 4
 * Title: Trust Pinning
 * Version: 1
-* Last-Modified: 14-Sep-2016
+* Last-Modified: 15-Sep-2016
 * Author: Evan Cordell, Jake Moshenko, Justin Cappos, Vladimir Diaz, Sebastien Awwad, Trishank Karthik Kuppusamy
 * Status: Draft
 * Content-Type: text/markdown
@@ -24,16 +24,17 @@ role and its delegates), the proposed pinning feature can be thought of as
 repository- or root-level delegation.
 
 As a helpful side-effect, the proposed pinning feature also addresses the
-problem of private metadata. In the current TUF spec, there is no way to hide
-all information about the existence of other metadata in the system. This is a
-problem in a multi-tenant scenario where knowledge of meta-metadata could be
-sensitive (e.g. timing of creating a target, names of targets, etc).
+problem of [how to keep certain metadata private](#hiding). In the current TUF
+spec, there is no way to hide all information about the existence of other
+metadata in the system. This is a problem in a multi-tenant scenario where
+knowledge of meta-metadata could be sensitive (e.g. timing of creating a
+target, names of targets, etc).
 
 # Specification
 
 We introduce a new, required, client-side, top-level metadata file,
 `pinned.json`, which permits users to pin root files and associate them with
-a particular namespace prefix (or glob/pattern). If an entry matches the
+a particular namespace prefix (or path/filename pattern). If an entry matches the
 current package, the pinned root must be used. If it does not match, there is a
 fallback to the global root.
 
@@ -48,7 +49,9 @@ for an example:
 Because the pinning mechanism uses roots, the "pinned" keys may be rotated
 according to the standard root rotation scheme. In that sense, you are pinning
 the root of a tree of keys which can grow over time, rather than pinning a set
-of keys that must never change.
+of keys that must never change. If it is instead desirable that the pinned keys
+not change except by direct client action to pin new keys, [hard pinning is an
+option](#hard-pinning).
 
 ## Pin File
 
@@ -64,19 +67,19 @@ organization's `pinned.json`").
 
 The value of the "repositories" key in D1 is a dictionary D2. Every key in D2 specifies a shortname for a repository (e.g., "django"). Every value in D2 is a dictionary D3 with at least one key: "metadata_directory" which contains the previous and current metadata for this repository. D3 may also contain the "url" key, which specifies the complete URL needs to resolve metadata and targets.
 
-The value of the "delegations" key in D1 is a list L1. Every member in L1 is a dictionary D4 with at least two keys: "paths" which specifies a target path, and "repositories" which specifies a list L2. L2 contains one or more keys, or repository shortnames, from D2. D4 may also contain the "terminating" key, which is a Boolean attribute indicating whether or not this delegation terminates backtracking in the absence of the required number of signatures for a matching target.
+The value of the "delegations" key in D1 is a list L1. Every member in L1 is a dictionary D4 with at least two keys: "paths" which specifies a list of target paths of patterns, and "repositories" which specifies a list L2. L2 contains one or more keys, or repository shortnames, from D2. D4 may also contain the "terminating" key, which is a Boolean attribute indicating whether or not this [delegation terminates backtracking](#feature-terminating-pinning-delegations).
 
-The following is an example of D1:
+The following is an example of the full pinning.json file:
 
 ```javascript
 {
   "repositories": {
-    "django": {
-      // metadata would be at https://repository.djangoproject.com/metadata/
-      // targets would be at  https://repository.djangoproject.com/targets/
+    "Django": {
+      // metadata might be at https://repository.djangoproject.com/metadata/
+      // targets might be at  https://repository.djangoproject.com/targets/
       "url": "https://repository.djangoproject.com/",
-      // previous metadata on disk would be in metadata/previous/django
-      // current metadata on disk would be in metadata/current/django
+      // previous metadata on disk would be in metadata/previous/django/
+      // current metadata on disk would be in metadata/current/django/
       "metadata_directory": "django"
     },
     "PyPI": {
@@ -84,56 +87,56 @@ The following is an example of D1:
       "metadata_directory": "pypi"
     },
     "Flask": {
-      "url": "https://flask.pocoo.org/",
+      // excluding url means that the metadata is hard-pinned and will not
+      // be updated without user intervention
       "metadata_directory": "flask.pocoo.org"
     }
   },
   "delegations": [
     {
-      "paths": "*django*",
+      "paths": ["django/*"],
       "repositories": ["django"],
-      // if the "terminating" Boolean attribute is missing, its default value is false
+      // if missing, the "terminating" attribute is set to its default, false
       terminating: true
     },
     {
-      "paths": "*flask*",
-      "repositories": ["Flask", "PyPI"]
+      "paths": ["flask/*"],
+      "repositories": ["Flask", "PyPI"] // Flask and PyPI repositories must agree 
     },
     {
-      "paths": "**",
+      "paths": ["*"],
       "repositories": ["PyPI"]
     }
   ]
 }
 ```
 
-In this example:
+### Interpreting delegations
 
-1. The client would trust only the "django" repository to sign any "*django*" package. If this repository does not provide the metadata, neither the "Flask" nor "PyPI" repository would be consulted.
-2. The client requires both the "Flask" and "PyPI" repositories to provide exactly the same metadata (e.g., hashes, length, custom attributes) about any "*flask*" package, despite different roots of trust. If one provides metadata, but not the other, or if both provide inconsistent metadata, then an error must be reported. Otherwise, if both do not provide metadata about the desired package, then the next delegation would be consulted.
-3. For any "*flask*" package (if and only if both the "Flask" and "PyPI" repositories do not provide metadata about the desired "*flask*" package), or any other package, the "PyPI" repository would be the final consultation. (Note that, in this example, the "*flask*" package would still be missing.)
+Every delegation in [the list L1](#fields-for-each-pinning-specification) shall be interpreted as follows. If the desired target matches the "paths" attribute, then download and verify metadata from every repository specified in the "repositories" attribute. Ensure that the targets metadata about the target matches across repositories (i.e., all repositories must provide the same hashes, length, and custom attributes), and return metadata about the target. If all repositories in the current delegation have not signed any metadata about the target, then take one of the following two actions. If the ["terminating" attribute](#feature-terminating-pinning-delegations) is true, report that there is no metadata about the target. Otherwise, proceed to similarly interpret the next delegation.
+
+For the example pinned.json above, the result is this:
+
+1. The client would trust only the "django" repository to sign any target with repository filepath matching `"django/*"`. That is, that portion of the target namespace is pinned to the "Django" repository. Further, because the "terminating" attribute of the pinning is set to `true`, if the "Django" repository does not provide a specific target, we will not continue through the list of pinnings to try to find any other pinning relevant to this target. For example, suppose we are interested in target `"django/django-1.7.3.tar.gz"`. Because this filepath matches the `"django/*"` pattern, whether or not it is found in the "django" repository, we will consult no further repositories because this pinning is terminating; neither the "Flask" nor "PyPI" repositories will be consulted for anything matching `"django/*"`.
+2. Because the second pinning in this list (`"flask/*"` -> [Flask + PyPI]) lists two repositories, the client will trust metadata for packages matching the `"flask/*"` pattern only if the same metadata (hashes, length, custom attributes) is provided by metadata from both repositories. If one provides metadata, but not the other, or if both provide inconsistent metadata, then an error must be reported. If neither provides metadata on a sought-after target matching the pattern, then, because this pinning does not have "terminating" set to true, the next pinning ("*" -> PyPI) will finally be consulted.
 
 ## Delegation Features Applicable to Trust Pinning
 
 The assignment of portions of the targets namespace to distinct
 roots/repositories is similar to a normal, targets delegation. As such, it can
-also profit from targets delegation features like non-backtracking (a.k.a.
-terminating or cutting) delegations or multi-role delegations (here, more
+also profit from targets delegation features like terminating (a.k.a.
+cutting or non-backtracking) delegations or multi-role delegations (here, more
 appropriately termed multi-repository delegations).
 
-### Feature: Backtracking Pinning Delegations
+### Feature: Terminating Pinning Delegations
 
-Normal delegations can be backtracking (default) or terminating. This delegation feature is documented in [the Diplomat paper](https://www.usenix.org/conference/nsdi16/technical-sessions/presentation/kuppusamy).
+Normal delegations can be backtracking (default) or terminating. This delegation feature is documented in [the Diplomat paper](https://www.usenix.org/conference/nsdi16/technical-sessions/presentation/kuppusamy) and in [TUF code](https://github.com/theupdateframework/tuf/blob/5e2d177f4dd213a13ee3f27f01f0f782cf544afa/tuf/repository_tool.py#L2121-L2130).
 The same concept can be applicable to pinned delegations. If a portion of the
 targets namespace is assigned to a particular root/repository, and that
 repository does not specify a particular target in that namespace, TUF could
 choose either to proceed through the list of pinnings to the next pinning whose
-assigned namespace matches that target (i.e. TUF could backtrack) or not; it
-would seem that the naturally expected behavior from a namespace assignment
-would be *not* to backtrack.
+assigned namespace matches that target (i.e. TUF could backtrack) or not. The [Interpreting Delegations section](#interpreting-delegations) plays this out step by step.
 
-As such, pinnings (i.e. repository delegations) should by default not
-backtrack; however, it should probably remain an option to allow backtracking.
 
 ### Feature: Multi-Repository Pinning Delegations
 
@@ -144,13 +147,9 @@ such delegations, pinned delegations can profit from the same logic.
 
 ### Feature: Unix-Style Target Filename Pattern Matching (Wildcards)
 
-A normal delegation in TUF 1.0 features target filename matching either by
-filename prefix or by Unix-style filename pattern matching. The same option
-will be made available for pinning.
-
-### Interpretating delegations
-
-Every delegation in [the list L1](#fields-for-each-pinning-specification) shall be interpreted as follows. If the desired target matches the "paths" attribute, then download and verify metadata from every repository specified in the "repositories" attribute. Ensure that the targets metadata about the target matches across repositories (i.e., all repositories must provide the same hashes, length, and custom attributes), and return metadata about the target. If all repositories in the current delegation have not signed any metadata about the target, then take one of the following two actions. If the "terminating" attribute is true, report that there is no metadata about the target. Otherwise, proceed to similarly interpret the next delegation.
+A normal (targets) delegation in TUF 1.0 features target filename matching either by
+filename prefix or by Unix-style filename pattern matching. The same option is
+made available for pinning.
 
 ## Pinned Metadata
 Pinned metadata lives in a specific default directory, sharing the same layout as a "normal" repo but nested within a prefix namespace, e.g.
@@ -188,18 +187,18 @@ private roles is granted by sending the metadata to the appropriate users
 and timestamp can be found is added to the `pinned.json` file in the case of
 private roles.
 
-## Hard Pinning		
-		
-Hard pinning, in which a specific set of non-changing keys are used, can be		
-accomplished by creating the a pinned metadata repository and not specifying a		
-url. Without a url, nothing can convince a client to use different keys. This		
-may be useful for priming a box for a one-time initial pull (with the		
-assumption that it will be killed rather than updated directly).		
- 		
+## Hard Pinning
+
+Hard pinning, in which a specific set of non-changing keys are used, can be
+accomplished by creating the a pinned metadata repository and not specifying a
+url. Without a url, nothing can convince a client to use different keys. This
+may be useful for priming a box for a one-time initial pull (with the
+assumption that it will be killed rather than updated directly).
+
 The result of pinning a namespace without specifying a url is that, for that
 namespace, top level metadata (role files) cannot be changed by a repository:
-the user would have to explicitly pin new metadata.		
- 
+the user would have to explicitly pin new metadata.
+
 ## Repository structure
 
 With this pinning structure it makes sense to structure namespaces and/or
@@ -222,7 +221,7 @@ See Abstract.
 # Security Analysis
 
 In effect, this TAP allows users (and only users) to directly choose the root
-of trust for parts of the targets namespaces. Each root continues to be treated
+of trust for parts of the targets namespace. Each root continues to be treated
 as it was previously, with TUF performing full validation per that root's
 metadata.
 
@@ -257,4 +256,3 @@ This document has been placed in the public domain.
 It is worth mentioning that Notary has a pinning implementation currently.
 Although this proposal differs and has slightly different goals, the Notary
 format should be compatible with this through a simple transformation.
-
