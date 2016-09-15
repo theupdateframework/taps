@@ -48,7 +48,9 @@ for an example:
 Because the pinning mechanism uses roots, the "pinned" keys may be rotated
 according to the standard root rotation scheme. In that sense, you are pinning
 the root of a tree of keys which can grow over time, rather than pinning a set
-of keys that must never change.
+of keys that must never change. If it is instead desirable that the pinned keys
+not change except by direct client action to pin new keys, [hard pinning is an
+option](#hard-pinning).
 
 ## Pin File
 
@@ -149,7 +151,7 @@ A normal delegation in TUF 1.0 features target filename matching either by
 filename prefix or by Unix-style filename pattern matching. The same option
 will be made available for pinning.
 
-### Interpretating delegations
+### Interpreting delegations
 
 Every delegation in [the list L1](#fields-for-each-pinning-specification) shall be interpreted as follows. If the desired target matches the "paths" attribute, then download and verify metadata from every repository specified in the "repositories" attribute. Ensure that the targets metadata about the target matches across repositories (i.e., all repositories must provide the same hashes, length, and custom attributes), and return metadata about the target. If all repositories in the current delegation have not signed any metadata about the target, then take one of the following two actions. If the "terminating" attribute is true, report that there is no metadata about the target. Otherwise, proceed to similarly interpret the next delegation.
 
@@ -189,18 +191,18 @@ private roles is granted by sending the metadata to the appropriate users
 and timestamp can be found is added to the `pinned.json` file in the case of
 private roles.
 
-## Hard Pinning		
-		
-Hard pinning, in which a specific set of non-changing keys are used, can be		
-accomplished by creating the a pinned metadata repository and not specifying a		
-url. Without a url, nothing can convince a client to use different keys. This		
-may be useful for priming a box for a one-time initial pull (with the		
-assumption that it will be killed rather than updated directly).		
- 		
+## Hard Pinning
+
+Hard pinning, in which a specific set of non-changing keys are used, can be
+accomplished by creating the a pinned metadata repository and not specifying a
+url. Without a url, nothing can convince a client to use different keys. This
+may be useful for priming a box for a one-time initial pull (with the
+assumption that it will be killed rather than updated directly).
+
 The result of pinning a namespace without specifying a url is that, for that
 namespace, top level metadata (role files) cannot be changed by a repository:
-the user would have to explicitly pin new metadata.		
- 
+the user would have to explicitly pin new metadata.
+
 ## Repository structure
 
 With this pinning structure it makes sense to structure namespaces and/or
