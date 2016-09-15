@@ -135,7 +135,7 @@ The same concept can be applicable to pinned delegations. If a portion of the
 targets namespace is assigned to a particular root/repository, and that
 repository does not specify a particular target in that namespace, TUF could
 choose either to proceed through the list of pinnings to the next pinning whose
-assigned namespace matches that target (i.e. TUF could backtrack) or not. [Interpreting delegations](#intepreting-delegations) below runs through how this plays out.
+assigned namespace matches that target (i.e. TUF could backtrack) or not. [Interpreting delegations](#interpreting-delegations) below runs through how this plays out.
 
 
 ### Feature: Multi-Repository Pinning Delegations
