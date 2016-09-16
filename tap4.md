@@ -97,7 +97,7 @@ The following is an example of the full pinning.json file:
       "paths": ["django/*"],
       "repositories": ["django"],
       // if missing, the "terminating" attribute is set to its default, false
-      terminating: true
+      "terminating": true
     },
     {
       "paths": ["flask/*"],
