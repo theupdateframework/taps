@@ -78,8 +78,8 @@ The following is an example of the full pinning.json file:
       // metadata might be at https://repository.djangoproject.com/metadata/
       // targets might be at  https://repository.djangoproject.com/targets/
       "url": "https://repository.djangoproject.com/",
-      // previous metadata on disk would be in metadata/previous/django/
-      // current metadata on disk would be in metadata/current/django/
+      // client stores previous metadata in metadata/django/previous/
+      // client stores current metadata in metadata/django/current/
       "metadata_directory": "django"
     },
     "PyPI": {
@@ -97,7 +97,7 @@ The following is an example of the full pinning.json file:
       "paths": ["django/*"],
       "repositories": ["django"],
       // if missing, the "terminating" attribute is set to its default, false
-      terminating: true
+      "terminating": true
     },
     {
       "paths": ["flask/*"],
