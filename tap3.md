@@ -2,86 +2,168 @@
 * Title: Multi-role delegations
 * Version: 1
 * Last-Modified: 16-Sep-2016
-* Author: Evan Cordell, Jake Moshenko, Justin Cappos, Vladimir Diaz, Sebastien Awwad, Trishank Karthik Kuppusamy
+* Author: Evan Cordell, Jake Moshenko, Justin Cappos, Vladimir Diaz, Sebastien
+          Awwad, Trishank Karthik Kuppusamy
 * Status: Draft
 * Content-Type: <text/markdown>
 * Created: 16-Sep-2016
 
 # Abstract
 
-A short (~200 word) description of the technical issue being addressed.
+(We want multiple roles, instead of only one role, to be able to sign off on
+the same set of targets.)
 
 #Specification
 
-The technical specification should describe the syntax and semantics of any new feature. The specification should be detailed enough to allow competing, interoperable implementations for at least the current major TUF platforms (TUF, Notary, go-tuf).
+(Before we discuss the new format, let us see analyze the limitations of the
+previous format.)
+
+## The previous format
 
 ```Javascript
 {
-  'signatures': [
+  "signatures": [
     {
-      "keyid": "...",
-      "method": "...",
-      "sig": "..."
-    },
-    ...
+      "keyid": KEYID,
+      "method": METHOD,
+      "sig": SIGNATURE
+    }
   ],
-  'signed': {
-    '_type': 'Targets',
-    'version': positive,
-    'expires': '2018-01-01T12:00:00.000000000-04:00',
-    'targets': {
-      "filename": {
-        "hashes": {
-          "function": "digest"
-        },
-        "length": positive
+  "signed": {
+    "_type": "Targets",
+    "version": VERSION,
+    "expires": EXPIRES,
+    "targets": TARGETS,
+    "delegations": {
+      "keys": {
+        KEYID: KEY
       },
-      ...
+      "roles": [
+        "paths": [PATHPATTERN],
+        "name": ROLENAME,
+        "keyids": [KEYID],
+        "threshold": THRESHOLD,
+        "terminating": BOOLEAN
+      ]
+    }
+  }
+}
+```
+
+Please see [the previous version of specification](link) for more details.
+
+### Limitations of the previous format
+
+(TODO: A few words on the limitations of the previous format.
+Basically, it does not let us achieve our goal in the [Abstract](#abstract).)
+
+## The current format
+
+```Javascript
+{
+  "signatures": [
+    {
+      "keyid": KEYID,
+      "method": METHOD,
+      "sig": SIGNATURE
+    }
+  ],
+  "signed": {
+    "_type": "Targets",
+    "version": VERSION,
+    "expires": EXPIRES,
+    "targets": TARGETS,
+    "keys": {
+      KEYID: KEY
     },
-    'keys': {
-      "keyid": {
-        "keytype": "...",
-        "keyval": "..."
-      },
-      ...
-    },
-    'roles': {
-      "rolename": {
-        "keyids": ["keyid", ...],
-        "threshold": positive
-      },
-      ...
+    "roles": {
+      MASKNAME: {
+        "name": ROLENAME,
+        "keyids": [KEYID],
+        "threshold": THRESHOLD
+      }
     },
     "delegations": [
       {
-        "paths": ["path", ...],
-        "roles": ["rolename", ...]
-      },
-      ...
+        "paths": [PATHPATTERN],
+        "roles": [MASKNAME],
+        "terminating": BOOLEAN
+      }
     ]
   }
 }
 ```
 
+### Improvements over the previous format
+
+There are three important differences from the previous format.
+
+First, the "keys" attribute has been removed from the "roles" attribute, so
+that it is a high-level attribute on its own.
+This allows the separation of keys from delegations.
+
+Second, like the "keys" attribute, the "roles" attribute is also a high-level
+attribute on its own.
+Using different 'mask' names (MASKNAME, which has the same format as ROLENAME),
+the same role can be associated with a different threshold and/or set of
+keys.
+For example:
+
+```Javascript
+...
+  "roles": {
+    "R1": {
+      "name": "F1",
+      "keyids": ["K1", "K2", "K3"],
+      "threshold": 2
+    },
+    "R2": {
+      "name": "F1",
+      "keyids": ["K1", "K3"],
+      "threshold": 1
+    },
+  }
+...
+```
+
+Third, the "delegations" attribute is now a list.
+Every member of this list is a dictionary with the "path", "roles", and
+"terminating" attributes.
+The "roles" attribute specifies a list of role mask names.
+Delegations are searched in order of appearance in this list.
+If a desired target matches a target path pattern in the "paths" attribute,
+then all roles in the "roles" attribute must provide exactly the same targets
+metadata (i.e., hashes and lengths) about the desired target.
+If a role does not provide the required metadata, or provides mismatching
+metadata, then the search is stopped, and an error is reported.
+Otherwise, if none of the roles provide metadata about the desired target, then
+the rest of the delegations are searched if the "terminating" attribute is not
+true.
+
 # Motivation
 
-The motivation is critical for TAPs that want to change TUF. It should clearly explain why the existing framework specification is inadequate to address the problem that the TAP solves.  TAP submissions without sufficient motivation may be rejected outright.
+(CoreOS wants multiple roles to be able to sign off on the same targets.
+For example, both release-engineering and quality-assurance roles must sign.)
 
 #Rationale
 
-The rationale fleshes out the specification by describing what motivated the design and why particular design decisions were made. It should describe alternate designs that were considered and related work, e.g. how the feature is supported in other frameworks. The rationale should provide evidence of consensus within the community and discuss important objections or concerns raised during discussion.
+(Briefly discuss why we didn't get carried away with abstraction astronauts.
+Redundancy of information in metadata not a concern, because compression
+removes redundancy, and there is an upper limit on metadata file sizes.)
 
 # Security Analysis
 
-The TAP should show, in as simple as possible a manner, why the proposal would not detract from existing security guarantees. (In other words, the proposal should either maintain or add to existing security.) This need not entail a mathematical proof. For example, it may suffice to provide a case-by-case analysis of key compromise over all foreseeable roles. To take another example, if a change is made to delegation, it must preserve existing delegation semantics (unless the TAP makes a good argument for breaking the semantics).
+(Compare the previous and new preorder DFS algorithms.
+Briefly argue why the meaning of the previous algorithm is preserved in the new
+one.)
 
 # Backwards Compatibility
 
-All TAPs that introduce backwards incompatibilities must include a section describing these incompatibilities and their severity.  The TAP must explain how the author proposes to deal with these incompatibilities. TAP submissions without a sufficient backwards compatibility treatise may be rejected outright.
+(A few words on why the new format breaks backwards compatibility.)
 
 # Augmented Reference Implementation
 
-The augmented reference implementation must be completed before any TAP is given status "Final", but it need not be completed before the TAP is accepted. While there is merit to the approach of reaching consensus on the specification and rationale before writing code, the principle of "rough consensus and running code" is still useful when it comes to resolving many discussions of API details. The final implementation must include test code and documentation appropriate for the TUF reference.
+(Sebastien knows this best.)
 
 # Copyright
 
