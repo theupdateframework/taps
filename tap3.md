@@ -77,8 +77,8 @@ Basically, it does not let us achieve our goal in the [Abstract](#abstract).)
       KEYID: KEY
     },
     "roles": {
-      MASKNAME: {
-        "name": ROLENAME,
+      ROLENAME: {
+        "filename": PATHPATTERN,
         "keyids": [KEYID],
         "threshold": THRESHOLD
       }
@@ -86,7 +86,7 @@ Basically, it does not let us achieve our goal in the [Abstract](#abstract).)
     "delegations": [
       {
         "paths": [PATHPATTERN],
-        "roles": [MASKNAME],
+        "roles": [ROLENAME],
         "terminating": BOOLEAN
       }
     ]
@@ -104,21 +104,20 @@ This allows the separation of keys from delegations.
 
 Second, like the "keys" attribute, the "roles" attribute is also a high-level
 attribute on its own.
-Using different 'mask' names (MASKNAME, which has the same format as ROLENAME),
-the same role can be associated with a different threshold and/or set of
-keys.
+Different roles may share the same filename (e.g., "F1.json"), but use a
+different threshold and/or set of keys.
 For example:
 
 ```Javascript
 ...
   "roles": {
     "R1": {
-      "name": "F1",
+      "filename": "F1",
       "keyids": ["K1", "K2", "K3"],
       "threshold": 2
     },
     "R2": {
-      "name": "F1",
+      "filename": "F1",
       "keyids": ["K1", "K3"],
       "threshold": 1
     },
