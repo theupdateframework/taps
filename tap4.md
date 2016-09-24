@@ -141,10 +141,10 @@ assigned namespace matches that target (i.e. TUF could backtrack) or not. The [I
 
 ### Feature: Multi-Repository Pinning Delegations
 
-Absent pinning, multi-role delegations are a form of delegation that assigns
-restricted paths of the targets namespace not to one child role but to a
-combination of roles. (TODO: Link to Multi-Role Delegation TAP). Just as with
-such delegations, pinned delegations can profit from the same logic.
+Absent pinning, [multi-role delegations](tap3.md) are a form of delegation
+that assigns restricted paths of the targets namespace not to one child
+role but to a combination of roles. Just as with such delegations, pinned
+delegations can profit from the same logic.
 
 ### Feature: Unix-Style Target Filename Pattern Matching (Wildcards)
 
