@@ -5,6 +5,7 @@
 * Author: Evan Cordell, Jake Moshenko, Justin Cappos, Vladimir Diaz, Sebastien Awwad, Trishank Karthik Kuppusamy
 * Status: Draft
 * Content-Type: text/markdown
+* Requires: [TAP 5](tap5.md)
 * Created: 09-Sep-2016
 * Post-History: 09-Sep-2016
 
