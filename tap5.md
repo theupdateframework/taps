@@ -12,6 +12,8 @@
 
 (We want to pin the URLs of top-level roles in the root metadata.)
 
+![An example of URL pinning in the root metadata](tap5-1.jpg)
+
 #Specification
 
 1. Root role no longer listed in snapshot metadata. Root metadata is
