@@ -93,7 +93,8 @@ Basically, it does not let us achieve our goal in the [Abstract](#abstract).)
 
 ### Improvements over the previous format
 
-(Let us pin URLs to top-level roles.)
+(Lets us "reuse" existing metadata files instead of maintaining
+them separately using separate keys.)
 
 # Motivation
 
