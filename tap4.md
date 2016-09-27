@@ -1,7 +1,7 @@
 * TAP: 4
 * Title: Trust Pinning
 * Version: 1
-* Last-Modified: 15-Sep-2016
+* Last-Modified: 27-Sep-2016
 * Author: Evan Cordell, Jake Moshenko, Justin Cappos, Vladimir Diaz, Sebastien Awwad, Trishank Karthik Kuppusamy
 * Status: Draft
 * Content-Type: text/markdown
@@ -11,14 +11,14 @@
 
 # Abstract
 
-This is a proposal of a design for pinning trusted keys, which would allow
-clients to root their trust at a namespace (or lower) delegated set of keys
-instead of the repository root.
+This is a proposal of a design for managing multiple repositories and for pinning trusted keys. This design supports mapping portions of the targets namespace to particular remote repositories. It also allows clients to root their trust to delegated sets of keys instead of the repository root. The latter is done through the creation of local stub repositories, with metadata generated to link to a remote repository, but with fixed expectations on the keys used to sign for particular roles.
 
-An example use case: a client trusts Django's published public keys to have
-signed off on Django, but the client does not trust PyPI to remain
-uncompromised (and possibly convince the client of different public keys for
-Django).
+Fundamentally, pinning allows clients to connect to multiple distinct repositories and explicitly trust a given repository for a given target/package namespace. For example, if a user wishes to trust a remote repository set up at https://repository.djangoproject.com/ to serve any django packages, but trust a remote repository at https://warehouse.python.org/ for any other python packages, that is possibly through use of pinned.json.
+
+Through the use of local, stub repositories, we can also pin keys that we expect to sign particular metadata on a remote repository. An example use case for this: a client trusts Django's published public keys to
+sign off on Django, but the client does not trust PyPI to remain
+uncompromised (and possibly try to convince the client of different public keys for
+Django). To provide for this case, the client executes a command to produce a stub repository locally, with its configuration in file pinned.json, and new top-level repository metadata that prevents trust in any delegated roles that don't match the client's pinned keys.
 
 Because of its similarity to normal delegations (delegations from the targets
 role and its delegates), the proposed pinning feature can be thought of as
@@ -37,7 +37,7 @@ We introduce a new, required, client-side, top-level metadata file,
 `pinned.json`, which permits users to pin root files and associate them with
 a particular namespace prefix (or path/filename pattern). If an entry matches the
 current package, the pinned root must be used. If it does not match, there is a
-fallback to the global root.
+fallback to next pinning, the last of which shoudl be the global root.
 
 This constructs two (or more) trust paths for target files, and allows the user
 to pick between them. Clients that trust the global root (e.g. PyPI) will trust
@@ -64,33 +64,39 @@ organization's `pinned.json`").
 
 ### Fields for each pinning specification
 
-```pinned.json``` contains a dictionary D1. D1 contains two keys, "repositories" and "delegations".
+`pinned.json` contains a dictionary D1. D1 contains two keys, "repositories" and "delegations".
 
-The value of the "repositories" key in D1 is a dictionary D2. Every key in D2 specifies a shortname for a repository (e.g., "django"). Every value in D2 is a dictionary D3 with at least one key: "metadata_directory" which contains the previous and current metadata for this repository. D3 may also contain the "url" key, which specifies the complete URL needs to resolve metadata and targets.
+The value of the "repositories" key in D1 is a dictionary D2. Every key in D2 specifies a shortname for a repository (e.g., "django"). Every value in D2 is a dictionary D3 with three keys:
+* `"metadata_urls"` provides url prefixes for directories on mirrors from which metadata can be retrieved.
+* `"targets_urls"` provides url prefixes for directories on mirrors from which target files can be retrieved (images / packages / etc.).
+* `"local_metadata_directory"` indicates a directory containing the previous and current metadata for this repository. For example, if this is "foo", then client current metadata will be stored at `.../metadata/foo/current`, and previous metadata at `.../metadata/foo/previous`.
 
-The value of the "delegations" key in D1 is a list L1. Every member in L1 is a dictionary D4 with at least two keys: "paths" which specifies a list of target paths of patterns, and "repositories" which specifies a list L2. L2 contains one or more keys, or repository shortnames, from D2. D4 may also contain the "terminating" key, which is a Boolean attribute indicating whether or not this [delegation terminates backtracking](#feature-terminating-pinning-delegations).
+The value of the "delegations" key in D1 is a list L1. Every member in L1 is a dictionary D4 with at least two keys:
+* `"paths"` specifies a list of target paths of patterns.
+* `"repositories"` specifies a list L2. L2 contains one or more keys, or repository shortnames, from D2.
+* Optionally, D4 may also contain the `"terminating"` key, which is a Boolean attribute indicating whether or not this [delegation terminates backtracking](#feature-terminating-pinning-delegations).
 
-The following is an example of the full pinning.json file:
+The following is an example of the full pinning.json file featuring three categories of pinnings:
 
 ```javascript
 {
   "repositories": {
+    "PyPI": {
+      "metadata_urls": ["https://pypi.python.org/metadata/"],
+      "targets_urls": ["https://pypi.python.org/pypi/"],
+      "local_metadata_directory": "pypi"
+    },
     "Django": {
-      // metadata might be at https://repository.djangoproject.com/metadata/
-      // targets might be at  https://repository.djangoproject.com/targets/
-      "url": "https://repository.djangoproject.com/",
+      "metadata_url": ["https://repository.djangoproject.com/metadata/"],
+      "targets_url": ["https://pypi.python.org/pypi/"],
       // client stores previous metadata in metadata/django/previous/
       // client stores current metadata in metadata/django/current/
-      "metadata_directory": "django"
+      "local_metadata_directory": "django"
     },
-    "PyPI": {
-      "url": "https://pypi.python.org/repository/",
-      "metadata_directory": "pypi"
-    },
-    "Flask": {
-      // excluding url means that the metadata is hard-pinned and will not
-      // be updated without user intervention
-      "metadata_directory": "flask.pocoo.org"
+    "Flask_stub": {
+      "metadata_url": ["file:///var/stubrepositories/flask/"],
+      "targets_url": ["https://pypi.python.org/pypi/"],
+      "local_metadata_directory": "flask_stub"
     }
   },
   "delegations": [
@@ -114,7 +120,7 @@ The following is an example of the full pinning.json file:
 
 ### Interpreting delegations
 
-Every delegation in [the list L1](#fields-for-each-pinning-specification) shall be interpreted as follows. If the desired target matches the "paths" attribute, then download and verify metadata from every repository specified in the "repositories" attribute. Ensure that the targets metadata about the target matches across repositories (i.e., all repositories must provide the same hashes, length, and custom attributes), and return metadata about the target. If all repositories in the current delegation have not signed any metadata about the target, then take one of the following two actions. If the ["terminating" attribute](#feature-terminating-pinning-delegations) is true, report that there is no metadata about the target. Otherwise, proceed to similarly interpret the next delegation.
+Every delegation in [the list L1](#fields-for-each-pinning-specification) shall be interpreted as follows. If the desired target matches the `"paths"` attribute, then download and verify metadata from every repository specified in the `"repositories"` attribute. Ensure that the targets metadata about the target matches across repositories (i.e., all repositories must provide the same hashes and length - custom metadata is exempted from this requirement), and return metadata about the target. If all repositories in the current delegation have not signed any metadata about the target, then take one of the following two actions. If the ["terminating" attribute](#feature-terminating-pinning-delegations) is true, report that there is no metadata about the target. Otherwise, proceed to similarly interpret the next delegation.
 
 For the example pinned.json above, the result is this:
 
@@ -145,6 +151,7 @@ Absent pinning, [multi-role delegations](tap3.md) are a form of delegation
 that assigns restricted paths of the targets namespace not to one child
 role but to a combination of roles. Just as with such delegations, pinned
 delegations can profit from the same logic.
+Consequently, the repositories entry in each delegation is a list that can contain multiple repositories, each of which must yield the same target info (hash, file size) in order for a downloaded target to be validated against that info.
 
 ### Feature: Unix-Style Target Filename Pattern Matching (Wildcards)
 
@@ -157,16 +164,18 @@ Pinned metadata lives in a specific default directory, sharing the same layout a
 
 ```
 metadata
-└── previous/django // use the name from "metadata_directory"
-    ├── root.json
-    ├── snapshot.json
-    ├── targets.json
-    └── timestamp.json
-└── previous/flask.pocoo.org
-└── previous/pypi
-└── current/django
-└── current/flask.pocoo.org
-└── current/pypi
+└── pinned.json
+└── django
+    └── previous // use the name from "metadata_directory"
+        ├── root.json
+        ├── snapshot.json
+        ├── targets.json
+        └── timestamp.json
+    └── current
+└── flask_stub/previous
+└── flask_stub/current
+└── pypi/previous
+└── pypi/current
 ```
 
 This can be changed with the `location` field of the `pinned.json` file, which
