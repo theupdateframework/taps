@@ -1,7 +1,7 @@
 * TAP: 4
 * Title: Trust Pinning
 * Version: 1
-* Last-Modified: 27-Sep-2016
+* Last-Modified: 28-Sep-2016
 * Author: Evan Cordell, Jake Moshenko, Justin Cappos, Vladimir Diaz, Sebastien Awwad, Trishank Karthik Kuppusamy
 * Status: Draft
 * Content-Type: text/markdown
@@ -11,19 +11,28 @@
 
 # Abstract
 
-This is a proposal of a design for managing multiple repositories and for pinning trusted keys. This design supports mapping portions of the targets namespace to particular remote repositories. It also allows clients to root their trust to delegated sets of keys instead of the repository root. The latter is done through the creation of local stub repositories, with metadata generated to link to a remote repository, but with fixed expectations on the keys used to sign for particular roles.
+This is a proposal of a design to allow clients to map portions of the target namespace to particular repository roots, whether remote or locally generated.
 
-Fundamentally, pinning allows clients to connect to multiple distinct repositories and explicitly trust a given repository for a given target/package namespace. For example, if a user wishes to trust a remote repository set up at https://repository.djangoproject.com/ to serve any django packages, but trust a remote repository at https://warehouse.python.org/ for any other python packages, that is possibly through use of pinned.json.
+There are two core features that result:
+* (1) connecting to multiple repositories (i.e. pinning portions of the targets namespace to particular remote repositories)
+* (2) allowing clients to root their trust to delegated sets of keys instead of the repository root (i.e. pinning portions of the targets namespace to trusted keys).
 
-Through the use of local, stub repositories, we can also pin keys that we expect to sign particular metadata on a remote repository. An example use case for this: a client trusts Django's published public keys to
-sign off on Django, but the client does not trust PyPI to remain
-uncompromised (and possibly try to convince the client of different public keys for
-Django). To provide for this case, the client executes a command to produce a stub repository locally, with its configuration in file pinned.json, and new top-level repository metadata that prevents trust in any delegated roles that don't match the client's pinned keys.
+Both features require the addition of a pinned.json, specified below, to client metadata. For purpose (2), [TAP 5](tap5.md) is also required. 
 
 Because of its similarity to normal delegations (delegations from the targets
 role and its delegates), the proposed pinning feature can be thought of as
 repository- or root-level delegation.
 
+## Feature (1): Repository Pinning
+Pinning allows clients to connect to multiple distinct repositories and explicitly trust a given repository for a given target/package namespace. For example, if a user wishes to trust a remote repository set up at https://repository.djangoproject.com/ to serve any django packages, but trust a remote repository at https://warehouse.python.org/ for any other python packages, that is possible through use of pinned.json.
+
+## Feature (2): Key Pinning
+Through the use of an entry in pinned.json, a local, stub root.json file, and in combination with [TAP 5](tap5.md)'s allowance for root.json to point directly to other repositories for role files, we can also pin keys that we expect to sign particular metadata on a remote repository. A client can root their trust of a repository lower in the hierarchy of roles, with metadata generated to link to a remote repository, but with fixed expectations on the keys used to sign for particular roles. An example use case for this: a client trusts Django's published public keys to
+sign off on Django packages, but the client does not trust PyPI to remain
+uncompromised (and not try to convince the client of different public keys for
+Django). To provide for this exceptional case, the client executes a command to produce a stub root.json locally, with its configuration in file pinned.json, and new top-level repository metadata that prevents trust in any delegated roles that don't match the client's pinned keys. (Alternatively, the Django project can distribute to users a pinned.json file or entry and an additional root.json.)
+
+## Feature (3): Private Metadata
 As a helpful side-effect, the proposed pinning feature also addresses the
 problem of [how to keep certain metadata private](#hiding). In the current TUF
 spec, there is no way to hide all information about the existence of other
@@ -31,18 +40,21 @@ metadata in the system. This is a problem in a multi-tenant scenario where
 knowledge of meta-metadata could be sensitive (e.g. timing of creating a
 target, names of targets, etc).
 
+
+
+
+
+
 # Specification
 
 We introduce a new, required, client-side, top-level metadata file,
 `pinned.json`, which permits users to pin root files and associate them with
-a particular namespace prefix (or path/filename pattern). If an entry matches the
-current package, the pinned root must be used. If it does not match, there is a
-fallback to next pinning, the last of which shoudl be the global root.
+a particular namespace prefix (or path/filename pattern). This file comes into play when a client requests targets. Based on which filepath pattern entries in pinned.json match the target, pinned.json will direct the request to the appropriate repository root. Similar to behavior for a typical targets delegation, TUF proceeds through the list of pinned entries in the listed order.
 
 This constructs two (or more) trust paths for target files, and allows the user
-to pick between them. Clients that trust the global root (e.g. PyPI) will trust
+to pick between them. Clients that trust the global root exclusively (e.g. PyPI) will trust
 all packages served by it, and those that wish to root trust with a namespace
-owner (e.g. Django project) can pin to those keys. See the following diagram
+owner (e.g. Django project) can pin targets within a `django/*` namespace to those keys. See the following diagram
 for an example:
 
 ![An example of different roots of trust](tap4-1.png)
