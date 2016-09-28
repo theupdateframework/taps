@@ -15,7 +15,7 @@ This is a proposal of a design to allow clients to map portions of the target na
 
 There are two core features that result:
 * (1) connecting to multiple repositories (i.e. pinning portions of the targets namespace to particular remote repositories)
-* (2) allowing clients to root their trust to delegated sets of keys instead of the repository root (i.e. pinning portions of the targets namespace to trusted keys).
+* (2) allowing clients to root their trust to delegated sets of keys within a repository instead of the repository root (i.e. pinning portions of the targets namespace to trusted keys).
 
 Both features require the addition of a pinned.json, specified below, to client metadata. For purpose (2), [TAP 5](tap5.md) is also required. 
 
@@ -51,7 +51,7 @@ We introduce a new, required, client-side, top-level metadata file,
 `pinned.json`, which permits users to pin root files and associate them with
 a particular namespace prefix (or path/filename pattern). This file comes into play when a client requests targets. Based on which filepath pattern entries in pinned.json match the target, pinned.json will direct the request to the appropriate repository root. Similar to behavior for a typical targets delegation, TUF proceeds through the list of pinned entries in the listed order.
 
-This constructs two (or more) trust paths for target files, and allows the user
+This constructs multiple trust paths for target files, and allows the user
 to pick between them. Clients that trust the global root exclusively (e.g. PyPI) will trust
 all packages served by it, and those that wish to root trust with a namespace
 owner (e.g. Django project) can pin targets within a `django/*` namespace to those keys. See the following diagram
@@ -89,6 +89,7 @@ The value of the "delegations" key in D1 is a list L1. Every member in L1 is a d
 * Optionally, D4 may also contain the `"terminating"` key, which is a Boolean attribute indicating whether or not this [delegation terminates backtracking](#feature-terminating-pinning-delegations).
 
 The following is an example of the full pinning.json file featuring three categories of pinnings:
+(TODO: Explain each of the three categories somewhere.)
 
 ```javascript
 {
@@ -106,7 +107,7 @@ The following is an example of the full pinning.json file featuring three catego
       "local_metadata_directory": "django"
     },
     "Flask_stub": {
-      "metadata_url": ["file:///var/stubrepositories/flask/"],
+      "metadata_url": ["file:///var/custom_pinned_roots/flask_stub/"],
       "targets_url": ["https://pypi.python.org/pypi/"],
       "local_metadata_directory": "flask_stub"
     }
@@ -120,7 +121,7 @@ The following is an example of the full pinning.json file featuring three catego
     },
     {
       "paths": ["flask/*"],
-      "repositories": ["Flask", "PyPI"] // Flask and PyPI repositories must agree 
+      "repositories": ["Flask_stub", "PyPI"] // Flask and PyPI repositories must agree
     },
     {
       "paths": ["*"],
@@ -191,7 +192,7 @@ metadata
 ```
 
 This can be changed with the `location` field of the `pinned.json` file, which
-may be useful if e.g. sharing a network drive.
+may be useful if e.g. sharing a network drive. ((TODO: What is this?))
 
 Complex ACLs can be enforced and/or bootstrapped by sending a user an
 appropriately generated `pinned.json`, noting that any metadata endpoint (root
