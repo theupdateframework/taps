@@ -1,7 +1,7 @@
 * TAP: 4
 * Title: Trust Pinning
 * Version: 1
-* Last-Modified: 28-Sep-2016
+* Last-Modified: 30-Sep-2016
 * Author: Evan Cordell, Jake Moshenko, Justin Cappos, Vladimir Diaz, Sebastien Awwad, Trishank Karthik Kuppusamy
 * Status: Draft
 * Content-Type: text/markdown
