@@ -40,10 +40,13 @@ metadata in the system. This is a problem in a multi-tenant scenario where
 knowledge of meta-metadata could be sensitive (e.g. timing of creating a
 target, names of targets, etc).
 
+# Motivation
 
+See Abstract.
 
+# Rationale
 
-
+See Abstract.
 
 # Specification
 
@@ -232,14 +235,6 @@ locally and signing.
 Because a delegation is also a target file, a global root can delegate to
 target files of other repos. This allows a simple way to provide both global
 and namespaced target files.
-
-# Motivation
-
-See Abstract.
-
-# Rationale
-
-See Abstract.
 
 # Security Analysis
 
