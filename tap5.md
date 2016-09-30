@@ -16,8 +16,16 @@ This is particularly useful for [TAP 4](tap4.md), as it allows for [one of the m
 
 The proposal also makes two other modifications, listed below, primarily as a defensive measure to reduce the impact of implementation mistakes.
 
-
 ![An example of URL pinning in the root metadata](tap5-1.jpg)
+
+# Motivation
+
+(To support [trust pinning](tap4.md) without requiring users or developers
+to maintain their own repositories.)
+
+#Rationale
+
+(See [trust pinning](tap4.md).)
 
 #Specification
 
@@ -74,15 +82,6 @@ Basically, it does not let us achieve our goal in the [Abstract](#abstract).)
 
 (Lets us "reuse" existing metadata files instead of maintaining
 them separately using separate keys.) (?)
-
-# Motivation
-
-(To support [trust pinning](tap4.md) without requiring users or developers
-to maintain their own repositories.)
-
-#Rationale
-
-(See [trust pinning](tap4.md).)
 
 # Security Analysis
 
