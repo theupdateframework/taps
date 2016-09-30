@@ -30,7 +30,7 @@ Pinning allows clients to connect to multiple distinct repositories and explicit
 Through the use of an entry in pinned.json, a local, stub root.json file, and in combination with [TAP 5](tap5.md)'s allowance for root.json to point directly to other repositories for role files, we can also pin keys that we expect to sign particular metadata on a remote repository. A client can root their trust of a repository lower in the hierarchy of roles, with metadata generated to link to a remote repository, but with fixed expectations on the keys used to sign for particular roles. An example use case for this: a client trusts Django's published public keys to
 sign off on Django packages, but the client does not trust PyPI to remain
 uncompromised (and not try to convince the client of different public keys for
-Django). To provide for this exceptional case, the client executes a command to produce a stub root.json locally, with its configuration in file pinned.json, and new top-level repository metadata that prevents trust in any delegated roles that don't match the client's pinned keys. (Alternatively, the Django project can distribute to users a pinned.json file or entry and an additional root.json.)
+Django). To provide for this exceptional case, the client executes a command to produce a stub root.json locally, with its configuration in file pinned.json, and new root metadata that prevents trust in any delegated roles that don't match the client's pinned keys. (Alternatively, the Django project can distribute to users a pinned.json file or entry and an additional root.json.)
 
 ## Feature (3): Private Metadata
 As a helpful side-effect, the proposed pinning feature also addresses the
