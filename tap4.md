@@ -97,34 +97,27 @@ The following is an example of the full pinning.json file featuring three catego
 ```javascript
 {
   "repositories": {
-    "PyPI": {
-      "metadata_urls": ["https://pypi.python.org/metadata/"],
-      "targets_urls": ["https://pypi.python.org/pypi/"],
-      "local_metadata_directory": "pypi"
-    },
-    "Django": {
-      "metadata_url": ["https://repository.djangoproject.com/metadata/"],
-      "targets_url": ["https://pypi.python.org/pypi/"],
-      // client stores previous metadata in metadata/django/previous/
-      // client stores current metadata in metadata/django/current/
-      "local_metadata_directory": "django"
-    },
-    "Flask_stub": {
-      "metadata_url": ["file:///var/custom_pinned_roots/flask_stub/"],
-      "targets_url": ["https://pypi.python.org/pypi/"],
-      "local_metadata_directory": "flask_stub"
-    }
+    "PyPI": { "mirrors": ["https://pypi.python.org/"] },
+    "Django": { "mirrors": ["https://pypi.python.org/"] },
+    "Flask": { "mirrors": ["https://pypi.python.org/"] },
+    "NumPy": { "mirrors": ["https://repository.numpy.org/"] }
   },
   "delegations": [
     {
       "paths": ["django/*"],
-      "repositories": ["django"],
+      "repositories": ["Django"],
       // if missing, the "terminating" attribute is set to its default, false
-      "terminating": true
+      "terminating": true // no later delegations can provide target info for django/* targets
     },
     {
       "paths": ["flask/*"],
-      "repositories": ["Flask_stub", "PyPI"] // Flask and PyPI repositories must agree
+      "repositories": ["Flask"]
+      "terminating": true
+    },
+    {
+      "paths": ["numpy/*"],
+      "repositories": ["NumPy", "PyPI"] // NumPy and PyPI repositories must agree
+      "terminating": true
     },
     {
       "paths": ["*"],
@@ -141,7 +134,12 @@ Every delegation in [the list L1](#fields-for-each-pinning-specification) shall 
 For the example pinned.json above, the result is this:
 
 1. The client would trust only the "django" repository to sign any target with repository filepath matching `"django/*"`. That is, that portion of the target namespace is pinned to the "Django" repository. Further, because the "terminating" attribute of the pinning is set to `true`, if the "Django" repository does not provide a specific target, we will not continue through the list of pinnings to try to find any other pinning relevant to this target. For example, suppose we are interested in target `"django/django-1.7.3.tar.gz"`. Because this filepath matches the `"django/*"` pattern, whether or not it is found in the "django" repository, we will consult no further repositories because this pinning is terminating; neither the "Flask" nor "PyPI" repositories will be consulted for anything matching `"django/*"`.
-2. Because the second pinning in this list (`"flask/*"` -> [Flask + PyPI]) lists two repositories, the client will trust metadata for packages matching the `"flask/*"` pattern only if the same metadata (hashes, length, custom attributes) is provided by metadata from both repositories. If one provides metadata, but not the other, or if both provide inconsistent metadata, then an error must be reported. If neither provides metadata on a sought-after target matching the pattern, then, because this pinning does not have "terminating" set to true, the next pinning ("*" -> PyPI) will finally be consulted.
+2. Because the NumPy pinning in this list (`"numpy/*"` -> [NumPy + PyPI]) lists two repositories, the client will trust metadata for packages matching the `"numpy/*"` pattern only if the same metadata (hashes, length, custom attributes) is provided by metadata from both repositories. If one provides metadata, but not the other, or if both provide inconsistent metadata, then an error must be reported. If neither provides metadata on a sought-after target matching the pattern, then, because this pinning has "terminating" set to true, no further pinning (in particular, "`*`" -> PyPI) will be consulted.
+
+TODO: Add note on TAP 5 here. Thus far, the significance of the django and flask pinnings is not apparent, as the key point, that the root.json files for each of them specifies a custom URL (which is part of TAP 5) is not indicated here.
+
+*Note that while the numpy pinning as illustrated here would operate as intended, in the absence of TAP 5, the django and flask pinnings here do not actually do anything, because they point to the PyPI repository. TAP 5 allows their client-side root.json files to specify a custom URL and root their targets role tree at a different role, which allows them to pin keys for delegated roles regardless of PyPI's root.json and targets.json configuration.*
+
 
 ## Delegation Features Applicable to Trust Pinning
 
