@@ -13,6 +13,17 @@
 (We want multiple roles, instead of only one role, to be able to sign off on
 the same set of targets.)
 
+# Motivation
+
+(CoreOS wants multiple roles to be able to sign off on the same targets.
+For example, both release-engineering and quality-assurance roles must sign.)
+
+#Rationale
+
+(Briefly discuss why we didn't get carried away with abstraction astronauts.
+Redundancy of information in metadata not a concern, because compression
+removes redundancy, and there is an upper limit on metadata file sizes.)
+
 #Specification
 
 (Before we discuss the new format, let us see analyze the limitations of the
@@ -138,17 +149,6 @@ metadata, then the search is stopped, and an error is reported.
 Otherwise, if none of the roles provide metadata about the desired target, then
 the rest of the delegations are searched if the "terminating" attribute is not
 true.
-
-# Motivation
-
-(CoreOS wants multiple roles to be able to sign off on the same targets.
-For example, both release-engineering and quality-assurance roles must sign.)
-
-#Rationale
-
-(Briefly discuss why we didn't get carried away with abstraction astronauts.
-Redundancy of information in metadata not a concern, because compression
-removes redundancy, and there is an upper limit on metadata file sizes.)
 
 # Security Analysis
 
