@@ -81,10 +81,7 @@ organization's `pinned.json`").
 
 `pinned.json` contains a dictionary D1. D1 contains two keys, "repositories" and "delegations".
 
-The value of the "repositories" key in D1 is a dictionary D2. Every key in D2 specifies a shortname for a repository (e.g., "django"). Every value in D2 is a dictionary D3 with three keys:
-* `"metadata_urls"` provides url prefixes for directories on mirrors from which metadata can be retrieved.
-* `"targets_urls"` provides url prefixes for directories on mirrors from which target files can be retrieved (images / packages / etc.).
-* `"local_metadata_directory"` indicates a directory containing the previous and current metadata for this repository. For example, if this is "foo", then client current metadata will be stored at `.../metadata/foo/current`, and previous metadata at `.../metadata/foo/previous`.
+The value of the "repositories" key in D1 is a dictionary D2. D2 entries have keys that define a repository name (which also determines the local metadata directory to be used on the client to contain metadata for this repository), and values that are dictionaries D3 containing the configuration for that repository. Expected in D3 is key "mirrors" and value set to a list of URL strings that are the URLs for the mirrors for that repository.
 
 The value of the "delegations" key in D1 is a list L1. Every member in L1 is a dictionary D4 with at least two keys:
 * `"paths"` specifies a list of target paths of patterns.
@@ -133,8 +130,9 @@ Every delegation in [the list L1](#fields-for-each-pinning-specification) shall 
 
 For the example pinned.json above, the result is this:
 
-1. The client would trust only the "django" repository to sign any target with repository filepath matching `"django/*"`. That is, that portion of the target namespace is pinned to the "Django" repository. Further, because the "terminating" attribute of the pinning is set to `true`, if the "Django" repository does not provide a specific target, we will not continue through the list of pinnings to try to find any other pinning relevant to this target. For example, suppose we are interested in target `"django/django-1.7.3.tar.gz"`. Because this filepath matches the `"django/*"` pattern, whether or not it is found in the "django" repository, we will consult no further repositories because this pinning is terminating; neither the "Flask" nor "PyPI" repositories will be consulted for anything matching `"django/*"`.
-2. Because the NumPy pinning in this list (`"numpy/*"` -> [NumPy + PyPI]) lists two repositories, the client will trust metadata for packages matching the `"numpy/*"` pattern only if the same metadata (hashes, length, custom attributes) is provided by metadata from both repositories. If one provides metadata, but not the other, or if both provide inconsistent metadata, then an error must be reported. If neither provides metadata on a sought-after target matching the pattern, then, because this pinning has "terminating" set to true, no further pinning (in particular, "`*`" -> PyPI) will be consulted.
+1. There is expected to be a current/ and previous/ metadata directory on the client for each repository name listed in the client's pinned.json file, and, at a minimum, root.json must exist in the current/ directory for each. See [the Pinned Metadata section below](#pinned-metadata) for the file strcture for this example.
+2. The client would trust only the "django" repository to sign any target with repository filepath matching `"django/*"`. That is, that portion of the target namespace is pinned to the "Django" repository. Further, because the "terminating" attribute of the pinning is set to `true`, if the "Django" repository does not provide a specific target, we will not continue through the list of pinnings to try to find any other pinning relevant to this target. For example, suppose we are interested in target `"django/django-1.7.3.tar.gz"`. Because this filepath matches the `"django/*"` pattern, whether or not it is found in the "django" repository, we will consult no further repositories because this pinning is terminating; neither the "Flask" nor "PyPI" repositories will be consulted for anything matching `"django/*"`.
+3. Because the NumPy pinning in this list (`"numpy/*"` -> [NumPy + PyPI]) lists two repositories, the client will trust metadata for packages matching the `"numpy/*"` pattern only if the same metadata (hashes, length, custom attributes) is provided by metadata from both repositories. If one provides metadata, but not the other, or if both provide inconsistent metadata, then an error must be reported. If neither provides metadata on a sought-after target matching the pattern, then, because this pinning has "terminating" set to true, no further pinning (in particular, "`*`" -> PyPI) will be consulted.
 
 TODO: Add note on TAP 5 here. Thus far, the significance of the django and flask pinnings is not apparent, as the key point, that the root.json files for each of them specifies a custom URL (which is part of TAP 5) is not indicated here.
 
@@ -179,17 +177,17 @@ Pinned metadata lives in a specific default directory, sharing the same layout a
 ```
 metadata
 └── pinned.json
-└── django
-    └── previous // use the name from "metadata_directory"
-        ├── root.json
+└── django   // repository name
+    └── current
+        ├── root.json     // <--- minimum requirement
         ├── snapshot.json
         ├── targets.json
         └── timestamp.json
-    └── current
-└── flask_stub/previous
+    └── previous
 └── flask_stub/current
-└── pypi/previous
+└── flask_stub/previous
 └── pypi/current
+└── pypi/previous
 ```
 
 This can be changed with the `location` field of the `pinned.json` file, which
