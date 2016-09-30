@@ -31,10 +31,12 @@ to maintain their own repositories.)
 
 1. Root metadata will optionally contain URLs for any top-level role. If the URLs field is not specified, then that the role file is expected to appear as usual in the repository's metadata directory. If the URLs field is an empty list, that indicates that the role file must never be updated.
 
-2. Root role no longer listed in snapshot metadata. Root metadata is
+2. The targets role in root.json optionally contains a field that sets the root of the targets delegation tree to a role name other than "targets" (which is the default). This is of use for [pinning](tap4.md) and similar arrangements.
+
+3. Root role no longer listed in snapshot metadata. Root metadata is
 downloaded first, before time stamp, every time repo is pulled.
 
-3. Store targets metadata files in separate directory from {timestamp,
+4. Store targets metadata files in separate directory from {timestamp,
 snapshot, root} metadata files on both client and server.
 
 
@@ -58,8 +60,14 @@ snapshot, root} metadata files on both client and server.
     },
     "roles": {
       ROLE: {
-        "URLs": [], // This new, optional line is the only change to root.json.
-        "keyids": [KEYID],
+        "URLs": [...], // This line is new and optional.
+        "keyids": [KEYID, ...],
+        "threshold": THRESHOLD
+      }
+      "targets": {
+        "root_target_role": "targets", // This line is new and optional (default "targets")
+        "URLs": [...], // This line is new and optional.
+        "keyids": [KEYID, ...],
         "threshold": THRESHOLD
       }
     }
