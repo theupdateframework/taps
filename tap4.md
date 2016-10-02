@@ -34,7 +34,7 @@ targets from the public repository.
 In order to improve compromise-resilience, a client may require multiple
 repositories with different root keys to sign the same targets metadata.
 
-## Use case 3: restricting trust to a subset of targets
+## Use case 3: restricting trust in a repository to a subset of its targets
 
 Finally, a client may also wish to restrict its trust to a subset of targets
 available on a repository.
@@ -43,7 +43,13 @@ Django project instead of all available projects.
 
 # Rationale
 
-See Abstract.
+The current design for TAP 4 was arrived at after considering different design
+choices.
+
+For example, one design choice was to use [multi-role delegations](tap3.md).
+Multi-role delegations can be used to improve compromise-resilience, but it does
+not easily allow the hiding of sensitive metadata and targets, or restricting
+trust in a repository to a subset of its targets.
 
 # Specification
 
