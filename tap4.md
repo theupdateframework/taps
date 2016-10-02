@@ -172,7 +172,7 @@ Each repository targets subdirectory would use the repository name.
 
 The following directory layout would apply to the example trust pinning file:
 
--```
+```
  -metadata
  -└── pinned.json       // the trust pinning file
  -└── Django            // repository name
@@ -193,7 +193,7 @@ The following directory layout would apply to the example trust pinning file:
  -└── Flask
  -└── NumPy
  -└── PyPI
- -```
+```
 
 ## Metadata and targets layout on repositories
 
@@ -220,7 +220,7 @@ subdirectory.
 The following directory layout may apply to the PyPI repository from the example
 trust pinning file:
 
--```
+```
  -metadata
  -└── root.json
  -└── timestamp.json
@@ -235,7 +235,7 @@ trust pinning file:
  -└── Django/latest.tar.gz    // signed by the Django delegated targets role
  -└── Flask/latest.tar.gz
  -└── Numpy/latest.tar.gz
- -```
+```
 
 Metadata and target files may be stored on the repository using [consistent
 snapshots](https://github.com/theupdateframework/tuf/blob/5d2c8fdc7658a9f7648c38b0c79c0aa09d234fe2/docs/tuf-spec.txt).
