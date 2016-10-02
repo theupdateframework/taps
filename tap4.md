@@ -54,87 +54,99 @@ trust in a repository to a subset of its targets.
 # Specification
 
 We introduce a new, required, client-side, top-level metadata file,
-`pinned.json`, which permits users to pin root files and associate them with a
-particular namespace prefix (or path/filename pattern).
-This file comes into play when a client requests targets.
-Based on which filepath pattern entries in pinned.json match the target,
-pinned.json will direct the request to the appropriate repository root.
-Similar to behavior for a typical targets delegation, TUF proceeds through the
-list of pinned entries in the listed order.
+`pinned.json`, which permits clients to associate different repositories with
+different targets.
+This file is also known as the _trust pinning file_, and comes into play when a
+client requests targets.
 
-This constructs multiple trust paths for target files, and allows the user to
-pick between them. Clients that trust the global root exclusively (e.g. PyPI)
-will trust all packages served by it, and those that wish to root trust with a
-namespace owner (e.g. Django project) can pin targets within a `django/*`
-namespace to those keys.
+Using a scheme similar to targets delegations within a repository, different
+targets may be delegated to different repositories in this file.
+These delegations are also known as _repository delegations_.
 
-Because the pinning mechanism uses roots, the "pinned" keys may be rotated
-according to the standard root rotation scheme.
-In that sense, you are pinning the root of a tree of keys which can grow over
-time, rather than pinning a set of keys that must never change.
-If it is instead desirable that the pinned keys not change except by direct
-client action to pin new keys, [hard pinning is an option](#hard-pinning).
+Each repository may be associated with a different
+[root metadata file](tap5.md).
+Each root metadata file specifies how the metadata files of the top-level roles
+are to be verified.
+For example, the root keys in a root metadata files may correspond to the root
+keys distributed by: (1) the remote repository, or (2) a private repository.
+For more details, please see
+[this section](#updating-metadata-and-target-files).
 
-## Pin File
+## Trust pinning file
 
-`pinned.json` maps a prefix to a location where the pinned root can be found
-and an optional url for updating it.
-This file is not available from a TUF repository.
-It is either constructed by explicit actions from the client (e.g.  "pin this
-role's keys") or by an out-of-band bootstrap (e.g. "here's our organization's
-`pinned.json`").
+The trust pinning file maps targets to repositories.
+This file is not available from a repository.
+It is either constructed by explicit actions from the client, or distributed by
+an out-of-band bootstrap process.
 
-### Fields for each pinning specification
-
-`pinned.json` contains a dictionary D1.
+The trust pinning file contains a dictionary D1.
 D1 contains two keys, "repositories" and "delegations".
 
 The value of the "repositories" key in D1 is a dictionary D2.
-D2 entries have keys that define a repository name (which also determines the
-local metadata directory to be used on the client to contain metadata for this
-repository), and values that are dictionaries D3 containing the configuration
-for that repository.
-Expected in D3 is key "mirrors" and value set to a list of URL strings that are
-the URLs for the mirrors for that repository.
+Each key in D2 is a _repository name_, and its value is a list of URLS.
+The repository name also corresponds to the name of the directory where metadata
+files would be cached on the client.
+The list of URLs specifies _mirrors_ where clients may download metadata and
+target files.
+Metadata and target files would be updated following the steps detailed in
+[this section](#updating-metadata-and-target-files).
 
 The value of the "delegations" key in D1 is a list L1.
-Every member in L1 is a dictionary D4 with at least two keys:
+Every member in L1 is a dictionary D3 with at least two keys:
 
-* `"paths"` specifies a list of target paths of patterns.
-* `"repositories"` specifies a list L2.
-  L2 contains one or more keys, or repository shortnames, from D2.
-* Optionally, D4 may also contain the `"terminating"` key, which is a Boolean
-attribute indicating whether or not this [delegation terminates
-backtracking](#feature-terminating-pinning-delegations).
+* "paths" specifies a list of target paths of patterns.
+* "repositories" specifies a list of one or more repository names from D2.
+* Optionally, "terminating" is a Boolean attribute indicating whether or not
+  this delegation terminates
+  [backtracking](#interpreting-the-trust-pinning-file).
 
-The following is an example of the full pinning.json file featuring three
-categories of pinnings: (TODO: Explain each of the three categories somewhere.)
+The following is an example of a trust pinning file:
 
 ```javascript
 {
+  // Each repository may use a different root metadata file.
+  // Each root metadata file may specify how metadata files for top-level roles
+  // are to be updated.
+  // Please see TAP 5 for more details.
   "repositories": {
-    "PyPI": {"mirrors": ["https://pypi.python.org/"]},
-    "Django": {"mirrors": ["https://pypi.python.org/"]},
-    "Flask": {"mirrors": ["https://pypi.python.org/"]},
-    "NumPy": {"mirrors": ["https://repository.numpy.org/"]}
+    // In this example, the "Django" root metadata file specifies the timestamp
+    // and snapshot keys used by PyPI.
+    // However, the targets key corresponds to the Django project on PyPI, and
+    // the root metadata file on disk shall never be updated.
+    "Django": ["https://pypi.python.org/"],
+    // In this example, the "Flask" root metadata file specifies the timestamp
+    // and snapshot keys used by PyPI.
+    // However, the targets key corresponds to the Flask project on PyPI, and
+    // the root metadata file on disk shall be updated from the Flask repository
+    // instead of PyPI.
+    "Flask":  ["https://pypi.python.org/"],
+    // In this example, all metadata files would be downloaded from the NumPy
+    // repository.
+    "NumPy":  ["https://repository.numpy.org/"],
+    // In this example, all metadata files would be downloaded from the PyPI
+    // repository.
+    "PyPI":   ["https://pypi.python.org/"]
   },
   "delegations": [
     {
-      "paths": ["django/*"],
+      "paths": ["*django*"],
       "repositories": ["Django"],
-      // if missing, the "terminating" attribute is set to its default, false
-      // no later delegations can provide target info for django/* targets
+      // If missing, the "terminating" attribute is assumed to be false.
+      // Therefore, if this delegation has not signed for a *django* target,
+      // the following delegation will be consulted.
+    },
+    {
+      "paths": ["*flask*"],
+      "repositories": ["Flask"],
+      // If this delegation has not signed for a *flask* target, the following
+      // delegations will _not_ be consulted.
       "terminating": true
     },
     {
-      "paths": ["flask/*"],
-      "repositories": ["Flask"]
-      "terminating": true
-    },
-    {
-      "paths": ["numpy/*"],
-       // both NumPy and PyPI repositories must agree about the targets metadata
-      "repositories": ["NumPy", "PyPI"]
+      "paths": ["*numpy*"],
+       // Both the NumPy and PyPI repositories must sign the same targets
+       // metadata (i.e., length and hashes).
+      "repositories": ["NumPy", "PyPI"],
       "terminating": true
     },
     {
@@ -145,10 +157,15 @@ categories of pinnings: (TODO: Explain each of the three categories somewhere.)
 }
 ```
 
-### Interpreting delegations
+## Metadata and targets layout on repositories and clients
 
-Every delegation in [the list L1](#fields-for-each-pinning-specification) shall
-be interpreted as follows.
+## Updating metadata and target files
+
+More details in TAP 5, but give the big picture here.
+
+## Interpreting the trust pinning file
+
+Every delegation in the list L1 shall be interpreted as follows.
 If the desired target matches the `"paths"` attribute, then download and verify
 metadata from every repository specified in the `"repositories"` attribute.
 Ensure that the targets metadata about the target matches across repositories
@@ -157,8 +174,8 @@ Ensure that the targets metadata about the target matches across repositories
 target.
 If all repositories in the current delegation have not signed any metadata
 about the target, then take one of the following two actions.
-If the ["terminating" attribute](#feature-terminating-pinning-delegations) is
-true, report that there is no metadata about the target.
+If the "terminating" attribute is true, report that there is no metadata about
+the target.
 Otherwise, proceed to similarly interpret the next delegation.
 
 For the example pinned.json above, the result is this:
@@ -190,17 +207,9 @@ For the example pinned.json above, the result is this:
    "terminating" set to true, no further pinning (in particular, "`*`" -> PyPI)
    will be consulted.
 
-TODO: Add note on TAP 5 here. Thus far, the significance of the django and
-flask pinnings is not apparent, as the key point, that the root.json files for
-each of them specifies a custom URL (which is part of TAP 5) is not indicated
-here.
+## Examples
 
-*Note that while the numpy pinning as illustrated here would operate as
-intended, in the absence of TAP 5, the django and flask pinnings here do not
-actually do anything, because they point to the PyPI repository. TAP 5 allows
-their client-side root.json files to specify a custom URL and root their
-targets role tree at a different role, which allows them to pin keys for
-delegated roles regardless of PyPI's root.json and targets.json configuration.*
+Discuss the three use cases here.
 
 # Security Analysis
 
