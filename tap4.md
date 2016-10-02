@@ -12,9 +12,9 @@
 
 # Abstract
 
-TAP 4 allows clients to: (1) delegate targets to one or more repositories,
-and / or (2) search for targets on a repository beginning from a delegated
-targets role instead of the top-level targets role.
+TAP 4 allows clients to use a _trust pinning file_ to: (1) delegate targets to
+one or more repositories, and / or (2) search for targets on a repository
+beginning from a delegated targets role instead of the top-level targets role.
 
 # Motivation
 
@@ -70,7 +70,7 @@ are to be verified.
 For example, the root keys in a root metadata files may correspond to the root
 keys distributed by: (1) the remote repository, or (2) a private repository.
 For more details, please see
-[this section](#updating-metadata-and-target-files).
+[this section](#downloading-metadata-and-target-files).
 
 ## Trust pinning file
 
@@ -89,7 +89,7 @@ files would be cached on the client.
 The list of URLs specifies _mirrors_ where clients may download metadata and
 target files.
 Metadata and target files would be updated following the steps detailed in
-[this section](#updating-metadata-and-target-files).
+[this section](#downloading-metadata-and-target-files).
 
 The value of the "delegations" key in D1 is a list L1.
 Every member in L1 is a dictionary D3 with at least two keys:
@@ -157,9 +157,92 @@ The following is an example of a trust pinning file:
 }
 ```
 
-## Metadata and targets layout on repositories and clients
+## Metadata and targets layout on clients
 
-## Updating metadata and target files
+On a client, all metadata files would be stored under the "metadata" directory.
+This directory would contain the trust pinning file, as well as a subdirectory
+for every repository specified in the trust pinning file.
+Each repository metadata subdirectory would use the repository name.
+In turn, it would contain two subdirectories: "previous" for the previous set of
+metadata files, and "current" for the current set of metadata files.
+
+All targets files would be stored under the "targets" directory.
+This directory would contain a subdirectory for every repository.
+Each repository targets subdirectory would use the repository name.
+
+The following directory layout would apply to the example trust pinning file:
+
+-```
+ -metadata
+ -└── pinned.json       // the trust pinning file
+ -└── Django            // repository name
+ -    └── current
+ -        ├── root.json // minimum requirement; see TAP 5 for details
+ -        ├── snapshot.json		
+ -        ├── targets.json		
+ -        └── timestamp.json		
+ -    └── previous		
+ -└── Flask/current
+ -└── Flask/previous
+ -└── NumPy/current
+ -└── NumPy/previous
+ -└── PyPI/current
+ -└── PyPI/previous
+ -targets
+ -└── Django            // repository name
+ -└── Flask
+ -└── NumPy
+ -└── PyPI
+ -```
+
+## Metadata and targets layout on repositories
+
+On a repository, all metadata files would be stored under the "metadata"
+directory.
+This directory would contain at least four files, one for each top-level role:
+root.json, timestamp.json, snapshot.json, and targets.json.
+This directory may also contain a "delegations" subdirectory.
+This subdirectory would contain only the metadata files for all delegated
+targets roles.
+Separating the metadata files for the top-level roles from all delegated
+targets roles prevents a delegated targets role from accidentally overwriting
+the metadata file for a top-level role.
+
+All targets files would be stored under the "targets" directory.
+All targets signed by the top-level targets role would fall under this
+directory.
+This directory would contain a subdirectory for every delegated targets role.
+Each delegated targets role subdirectory would use the name of the delegated
+targets role.
+All targets signed by the delegated targets role would fall under this
+subdirectory.
+
+The following directory layout may apply to the PyPI repository from the example
+trust pinning file:
+
+-```
+ -metadata
+ -└── root.json
+ -└── timestamp.json
+ -└── snapshot.json
+ -└── targets.json            // signed by the top-level targets role
+ -    └── delegations
+ -        ├── Django.json     // signed by the Django delegated targets role
+ -        ├── Flask.json
+ -        ├── NumPy.json
+ -targets
+ -└── latest.tar.gz           // signed by the top-level targets role
+ -└── Django/latest.tar.gz    // signed by the Django delegated targets role
+ -└── Flask/latest.tar.gz
+ -└── Numpy/latest.tar.gz
+ -```
+
+Metadata and target files may be stored on the repository using [consistent
+snapshots](https://github.com/theupdateframework/tuf/blob/5d2c8fdc7658a9f7648c38b0c79c0aa09d234fe2/docs/tuf-spec.txt).
+A client must download all files, and rename them on its local storage, using
+rules pertaining to a consistent snapshot.
+
+## Downloading metadata and target files
 
 More details in TAP 5, but give the big picture here.
 
