@@ -1,7 +1,7 @@
 * TAP: 4
 * Title: Trust Pinning
 * Version: 1
-* Last-Modified: 30-Sep-2016
+* Last-Modified: 02-Oct-2016
 * Author: Evan Cordell, Jake Moshenko, Justin Cappos, Vladimir Diaz, Sebastien
           Awwad, Trishank Karthik Kuppusamy
 * Status: Draft
@@ -12,64 +12,34 @@
 
 # Abstract
 
-This is a proposal of a design to allow clients to map portions of the target
-namespace to particular repository roots, whether remote or locally generated.
-
-There are two core features that result:
-1. connecting to multiple repositories (i.e. pinning portions of the targets
-   namespace to particular remote repositories)
-2. allowing clients to root their trust to delegated sets of keys within a
-   repository instead of the repository root (i.e. pinning portions of the
-   targets namespace to trusted keys).
-
-Both features require the addition of a pinned.json, specified below, to client
-metadata. For purpose (2), [TAP 5](tap5.md) is also required. 
-
-Because of its similarity to normal delegations (delegations from the targets
-role and its delegates), the proposed pinning feature can be thought of as
-repository- or root-level delegation.
-
-## Feature (1): Repository Pinning
-
-Pinning allows clients to connect to multiple distinct repositories and
-explicitly trust a given repository for a given target/package namespace.
-For example, if a user wishes to trust a remote repository set up at
-https://repository.djangoproject.com/ to serve any django packages, but trust a
-remote repository at https://warehouse.python.org/ for any other python
-packages, that is possible through use of pinned.json.
-
-## Feature (2): Key Pinning
-
-Through the use of an entry in pinned.json, a local, stub root.json file, and
-in combination with [TAP 5](tap5.md)'s allowance for root.json to point
-directly to other repositories for role files, we can also pin keys that we
-expect to sign particular metadata on a remote repository.
-A client can root their trust of a repository lower in the hierarchy of roles,
-with metadata generated to link to a remote repository, but with fixed
-expectations on the keys used to sign for particular roles.
-An example use case for this: a client trusts Django's published public keys to
-sign off on Django packages, but the client does not trust PyPI to remain
-uncompromised (and not try to convince the client of different public keys for
-Django).
-To provide for this exceptional case, the client executes a command to produce
-a stub root.json locally, with its configuration in file pinned.json, and new
-root metadata that prevents trust in any delegated roles that don't match the
-client's pinned keys.
-(Alternatively, the Django project can distribute to users a pinned.json file
- or entry and an additional root.json.)
-
-## Feature (3): Private Metadata
-
-As a helpful side-effect, the proposed pinning feature also addresses the
-problem of [how to keep certain metadata private](#hiding).
-In the current TUF spec, there is no way to hide all information about the
-existence of other metadata in the system.
-This is a problem in a multi-tenant scenario where knowledge of meta-metadata
-could be sensitive (e.g. timing of creating a target, names of targets, etc).
+TAP 4 allows clients to: (1) delegate targets to one or more repositories,
+and / or (2) search for targets on a repository beginning from a delegated
+targets role instead of the top-level targets role.
 
 # Motivation
 
-See Abstract.
+TAP 4 has been motivated by the following three uses cases.
+
+## Use case 1: hiding sensitive metadata and targets
+
+Clients may wish to search for different targets over different repositories.
+For example, a client may wish to search for some targets from a private
+company repository, and all other targets from a public community
+repository.
+Using a private repository allows the client to hide sensitive metadata and
+targets from the public repository.
+
+## Use case 2: improving compromise-resilience
+
+In order to improve compromise-resilience, a client may require multiple
+repositories with different root keys to sign the same targets metadata.
+
+## Use case 3: restricting trust to a subset of targets
+
+Finally, a client may also wish to restrict its trust to a subset of targets
+available on a repository.
+For example, a client may trust PyPI to provide information only about the
+Django project instead of all available projects.
 
 # Rationale
 
@@ -91,9 +61,6 @@ pick between them. Clients that trust the global root exclusively (e.g. PyPI)
 will trust all packages served by it, and those that wish to root trust with a
 namespace owner (e.g. Django project) can pin targets within a `django/*`
 namespace to those keys.
-See the following diagram for an example:
-
-![An example of different roots of trust](tap4-1.png)
 
 Because the pinning mechanism uses roots, the "pinned" keys may be rotated
 according to the standard root rotation scheme.
@@ -140,17 +107,18 @@ categories of pinnings: (TODO: Explain each of the three categories somewhere.)
 ```javascript
 {
   "repositories": {
-    "PyPI": { "mirrors": ["https://pypi.python.org/"] },
-    "Django": { "mirrors": ["https://pypi.python.org/"] },
-    "Flask": { "mirrors": ["https://pypi.python.org/"] },
-    "NumPy": { "mirrors": ["https://repository.numpy.org/"] }
+    "PyPI": {"mirrors": ["https://pypi.python.org/"]},
+    "Django": {"mirrors": ["https://pypi.python.org/"]},
+    "Flask": {"mirrors": ["https://pypi.python.org/"]},
+    "NumPy": {"mirrors": ["https://repository.numpy.org/"]}
   },
   "delegations": [
     {
       "paths": ["django/*"],
       "repositories": ["Django"],
       // if missing, the "terminating" attribute is set to its default, false
-      "terminating": true // no later delegations can provide target info for django/* targets
+      // no later delegations can provide target info for django/* targets
+      "terminating": true
     },
     {
       "paths": ["flask/*"],
@@ -159,7 +127,8 @@ categories of pinnings: (TODO: Explain each of the three categories somewhere.)
     },
     {
       "paths": ["numpy/*"],
-      "repositories": ["NumPy", "PyPI"] // NumPy and PyPI repositories must agree
+       // both NumPy and PyPI repositories must agree about the targets metadata
+      "repositories": ["NumPy", "PyPI"]
       "terminating": true
     },
     {
@@ -295,7 +264,7 @@ Complex ACLs can be enforced and/or bootstrapped by sending a user an
 appropriately generated `pinned.json`, noting that any metadata endpoint (root
 repo, or any pinned repo) can have its own access control mechanism.
 
-## Hiding 
+## Hiding
 
 A private package can be omitted from the primary hierarchy entirely, having
 its own `snapshot` and `target` files separate from those provided with `root`.
