@@ -1,33 +1,43 @@
 * TAP: 5
-* Title: URL pinning in the root metadata
+* Title: Role pinning in the root metadata
 * Version: 1
-* Last-Modified: 25-Sep-2016
-* Author: Justin Cappos, Sebastien Awwad, Vladimir Diaz,
-          Trishank Karthik Kuppusamy
+* Last-Modified: 03-Oct-2016
+* Author: Justin Cappos, Sebastien Awwad, Vladimir Diaz, Trishank Karthik
+          Kuppusamy
 * Status: Draft
 * Content-Type: <text/markdown>
 * Created: 24-Sep-2016
 
 # Abstract
 
-This proposal will modify root.json to include optional URLs for every role.
-This allows for particular role files to be accessed from different locations /
-repositories from the rest of the metadata files in a repository.
-
-This is particularly useful for [TAP 4](tap4.md), as it allows for [one of the major TAP 4 features, key pinning](tap4.md#feature-2-key-pinning).
-
-The proposal also makes two other modifications, listed below, primarily as a defensive measure to reduce the impact of implementation mistakes.
-
-![An example of URL pinning in the root metadata](tap5-1.jpg)
+TAP 5 allows clients to use the root metadata file to : (1) specify whether and
+from where a root metadata file should be updated, and / or (2) to restrict
+trust in a repository to a delegated targets role instead of the top-level
+targets role.
 
 # Motivation
 
-(To support [trust pinning](tap4.md) without requiring users or developers
-to maintain their own repositories.)
+TAP 5 has been motivated by the following use case from [TAP 4](tap4.md).
+
+## Use case 1: restricting trust in a repository to a subset of its targets
+
+A client may also wish to restrict its trust to a subset of targets available on
+a repository.
+For example, a client may trust PyPI to provide information only about the
+Django project, instead of all available projects.
 
 #Rationale
 
-(See [trust pinning](tap4.md).)
+The current design for TAP 5 was arrived at after considering different design
+choices.
+
+One such design choice was to specify a URL which would be used to update the
+metadata file for every top-level role.
+However, this design was deemed to be unnecessarily complex, because to support
+the use case from TAP 4, only two features are needed: (1) the ability to
+override whether a root metadata file should be updated at all, and where it
+should be updated from, and (2) the ability to specify whether the top-level or
+a delegated targets role is the search root for targets.
 
 #Specification
 
@@ -68,7 +78,6 @@ snapshot, root} metadata files on both client and server.
       }
       "targets": {
         "root_target_role": "targets", // This line is new and optional (default "targets")
-        "URLs": [...], // This line is new and optional.
         "keyids": [KEYID, ...],
         "threshold": THRESHOLD
       }
@@ -86,7 +95,7 @@ In the absence of this feature, client-created pinnings via [TAP 4](tap4.md) are
 (TODO: A few words on the limitations of the previous format.
 Basically, it does not let us achieve our goal in the [Abstract](#abstract).)
 
-```URL``` MUST be either an empty list or a list of valid URL strings.
+`URL` MUST be either an empty list or a list of valid URL strings.
 
 ### Improvements over the previous format
 
