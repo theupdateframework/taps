@@ -67,8 +67,7 @@ Each repository may be associated with a different
 top-level roles are to be verified.
 For example, the root keys in a root metadata files may correspond to the root
 keys distributed by: (1) the remote repository, or (2) a private repository.
-For more details, please see
-[this section](#downloading-metadata-and-target-files).
+For more details, please see [TAP 5](tap5.md).
 
 ## Trust pinning file
 
