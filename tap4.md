@@ -22,15 +22,16 @@ TAP 4 has been motivated by the following three use cases.
 
 ## Use case 1: hiding sensitive metadata and targets
 
-Clients may wish to hide sensitive metadata and
-targets from a public repository, and so will use a private repository for these files.  
-Therefore, clients may need to search for different targets over different repositories, including both a private
-company repository, and a public community repository.
+Clients may wish to hide sensitive metadata and targets from a public
+repository, and so will use a private repository for these files.
+Therefore, clients may need to search for different targets over different
+repositories, including both a private company repository, and a public
+community repository.
 
 ## Use case 2: improving compromise-resilience
 
-To improve compromise-resilience, a client may require 
-signatures from multiple repositories with different root keys for the same targets metadata.
+To improve compromise-resilience, a client may require signatures from multiple
+repositories with different root keys for the same targets metadata.
 
 ## Use case 3: restricting trust in a repository to a subset of its targets
 
@@ -45,9 +46,9 @@ The current design for TAP 4 was arrived at after considering different design
 choices.
 
 One such design choice was to use [multi-role delegations](tap3.md), which
-can improve compromise-resilience. But, it does
-not easily allow for the hiding of sensitive metadata and targets, or restricting
-trust in a repository to a subset of its targets.
+can improve compromise-resilience. But, it does not easily allow for the hiding
+of sensitive metadata and targets, or restricting trust in a repository to a
+subset of its targets.
 
 # Specification
 
@@ -62,8 +63,8 @@ targets may be delegated to different repositories in this file.
 These delegations are also known as _repository delegations_.
 
 Each repository may be associated with a different
-[root metadata file](tap5.md), which specifies how the metadata files of the top-level roles
-are to be verified.
+[root metadata file](tap5.md), which specifies how the metadata files of the
+top-level roles are to be verified.
 For example, the root keys in a root metadata files may correspond to the root
 keys distributed by: (1) the remote repository, or (2) a private repository.
 For more details, please see
@@ -163,8 +164,8 @@ across repositories, a repository would organize the files as follows.
 All metadata files would be stored under the "metadata" directory.
 This directory would contain at least four files, one for each top-level role:
 root.json, timestamp.json, snapshot.json, and targets.json.
-This directory may also contain a "delegations" subdirectory, which would hold only the metadata files for all delegated
-targets roles.
+This directory may also contain a "delegations" subdirectory, which would hold
+only the metadata files for all delegated targets roles.
 Separating the metadata files for the top-level roles from all delegated
 targets roles prevents a delegated targets role from accidentally overwriting
 the metadata file for a top-level role.
@@ -268,9 +269,10 @@ a subset of targets available on a repository, then the client should consider
 the specified delegated targets role as the "top-level" targets role instead.
 In this case, the client should be careful in mapping the entries of the
 snapshot metadata file.
-For example, if the client restricts its trust only to the Django project, then the version number of the "top-level"
-targets role on the client should correspond to the Django project instead of
-the actual top-level targets role on PyPI.
+For example, if the client restricts its trust only to the Django project, then
+the version number of the "top-level" targets role on the client should
+correspond to the Django project instead of the actual top-level targets role
+on PyPI.
 Please see [TAP 5](tap5.md) for more details.
 
 Fifth, the client would use the list of mirrors specified in the trust pinning

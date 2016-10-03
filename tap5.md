@@ -10,7 +10,9 @@
 
 # Abstract
 
-This proposal will modify root.json to include optional URLs for every role. This allows for particular role files to be accessed from different locations / repositories from the rest of the metadata files in a repository.
+This proposal will modify root.json to include optional URLs for every role.
+This allows for particular role files to be accessed from different locations /
+repositories from the rest of the metadata files in a repository.
 
 This is particularly useful for [TAP 4](tap4.md), as it allows for [one of the major TAP 4 features, key pinning](tap4.md#feature-2-key-pinning).
 
