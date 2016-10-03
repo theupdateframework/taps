@@ -79,11 +79,12 @@ This file is not available from a repository.
 It is either constructed by explicit actions from the client, or distributed by
 an out-of-band bootstrap process.
 
-The trust pinning file contains a dictionary D1.
-D1 contains two keys, "repositories" and "delegations".
+The trust pinning file contains a dictionary.
+This dictionary contains two keys, "repositories" and "delegations".
 
-The value of the "repositories" key in D1 is a dictionary D2.
-Each key in D2 is a _repository name_, and its value is a list of URLS.
+The value of the "repositories" key is another dictionary.
+Each key in this dictionary is a _repository name_, and its value is a list of
+URLS.
 The repository name also corresponds to the name of the directory where metadata
 files would be cached on the client.
 The list of URLs specifies _mirrors_ where clients may download metadata and
@@ -91,8 +92,8 @@ target files.
 Metadata and target files would be updated following the steps detailed in
 [this section](#downloading-metadata-and-target-files).
 
-The value of the "delegations" key in D1 is a list L1.
-Every member in L1 is a dictionary D3 with at least two keys:
+The value of the "delegations" key is a list.
+Every member in this list is a dictionary with at least two keys:
 
 * "paths" specifies a list of target paths of patterns.
 * "repositories" specifies a list of one or more repository names from D2.
