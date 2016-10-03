@@ -336,7 +336,7 @@ Note that removing the root metadata file from the snapshot metadata does not
 remove existing security guarantees.
 This is because: (1) mix-and-match attacks are executed by specifying an
 inconsistent set of targets metadata files, which does not include the root
-metadata file, and (2) the client always attempts to updates the root metadata
+metadata file, and (2) the client always attempts to update the root metadata
 file.
 
 # Backwards Compatibility
