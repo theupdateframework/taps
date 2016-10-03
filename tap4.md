@@ -293,13 +293,9 @@ If the targets metadata matches across repositories, return this metadata.
 Otherwise, report the mismatch to the user.
 If all repositories in the current delegation have not signed any metadata
 about the target, then take one of the following two actions.
-If the "terminating" attribute is true, report that there is no metadata about
-the target.
+If the "terminating" attribute is set to true, report that there is no metadata
+about the target.
 Otherwise, proceed to similarly interpret the next delegation.
-
-## Examples
-
-Discuss the three use cases here.
 
 # Security Analysis
 
@@ -338,12 +334,15 @@ not an optional file.
 
 # Augmented Reference Implementation
 
+[Sebastien is working on this.]
+
 # Copyright
 
 This document has been placed in the public domain.
 
 # Acknowledgements
 
-It is worth mentioning that Notary has a pinning implementation currently.
-Although this proposal differs and has slightly different goals, the Notary
-format should be compatible with this through a simple transformation.
+It is worth mentioning that Notary has a pinning implementation.
+Although this proposal differs from that implementation and has slightly
+different goals, the Notary format should be compatible with this through a
+simple transformation.
