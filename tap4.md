@@ -319,15 +319,13 @@ denial-of-service attacks.
 
 # Backwards Compatibility
 
-In principle, the functionality can be backwards compatible. If no pinning is
-employed, things should function exactly as before, and pinning occurs at the
-client side, being completely transparent to a TUF repository.
+This specification is not backwards-compatible because it requires:
 
-On the client side, based on the planned implementation, the pinned.json
-metadata file is required (though by default it should simply "delegate" the
-full namespace to the existing repository's root.json), and so client
-metadata must be updated slightly to support this feature, as pinned.json is
-not an optional file.
+1. Repositories and clients to adopt the root metadata file from [TAP 5](tap5.md).
+2. A repository to use a [specific filesystem layout](#metadata-and-targets-layout-on-repositories).
+3. A client to use a trust pinning file.
+4. A client to use a [specific filesystem layout](#metadata-and-targets-layout-on-clients).
+5. A client to [download metadata and target files from a repository in a specific manner](#downloading-metadata-and-target-files).
 
 # Augmented Reference Implementation
 
@@ -341,5 +339,5 @@ This document has been placed in the public domain.
 
 It is worth mentioning that Notary has a pinning implementation.
 Although this proposal differs from that implementation and has slightly
-different goals, the Notary format should be compatible with this through a
-simple transformation.
+different goals, the Notary format should be compatible with this specification
+via a simple transformation.
