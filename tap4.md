@@ -18,37 +18,35 @@ beginning from a delegated targets role instead of the top-level targets role.
 
 # Motivation
 
-TAP 4 has been motivated by the following three uses cases.
+TAP 4 has been motivated by the following three use cases.
 
 ## Use case 1: hiding sensitive metadata and targets
 
-Clients may wish to search for different targets over different repositories.
-For example, a client may wish to search for some targets from a private
-company repository, and all other targets from a public community
-repository.
-Using a private repository allows the client to hide sensitive metadata and
-targets from the public repository.
+Clients may wish to hide sensitive metadata and
+targets from a public repository, and so will use a private repository for these files.  
+Therefore, clients may need to search for different targets over different repositories, including both a private
+company repository, and a public community repository.
 
 ## Use case 2: improving compromise-resilience
 
-In order to improve compromise-resilience, a client may require multiple
-repositories with different root keys to sign the same targets metadata.
+To improve compromise-resilience, a client may require 
+signatures from multiple repositories with different root keys for the same targets metadata.
 
 ## Use case 3: restricting trust in a repository to a subset of its targets
 
 Finally, a client may also wish to restrict its trust to a subset of targets
 available on a repository.
 For example, a client may trust PyPI to provide information only about the
-Django project instead of all available projects.
+Django project, instead of all available projects.
 
 # Rationale
 
 The current design for TAP 4 was arrived at after considering different design
 choices.
 
-For example, one design choice was to use [multi-role delegations](tap3.md).
-Multi-role delegations can be used to improve compromise-resilience, but it does
-not easily allow the hiding of sensitive metadata and targets, or restricting
+One such design choice was to use [multi-role delegations](tap3.md), which
+can improve compromise-resilience. But, it does
+not easily allow for the hiding of sensitive metadata and targets, or restricting
 trust in a repository to a subset of its targets.
 
 # Specification
@@ -64,8 +62,7 @@ targets may be delegated to different repositories in this file.
 These delegations are also known as _repository delegations_.
 
 Each repository may be associated with a different
-[root metadata file](tap5.md).
-Each root metadata file specifies how the metadata files of the top-level roles
+[root metadata file](tap5.md), which specifies how the metadata files of the top-level roles
 are to be verified.
 For example, the root keys in a root metadata files may correspond to the root
 keys distributed by: (1) the remote repository, or (2) a private repository.
@@ -79,17 +76,17 @@ This file is not available from a repository.
 It is either constructed by the user, or distributed by an out-of-band
 bootstrap process.
 
-The trust pinning file contains a dictionary.
-This dictionary contains two keys, "repositories" and "delegations".
+The trust pinning file contains a dictionary
+that holds two keys, "repositories" and "delegations."
 
 The value of the "repositories" key is another dictionary.
 Each key in this dictionary is a _repository name_, and its value is a list of
-URLS.
+URLs.
 The repository name also corresponds to the name of the directory where metadata
 files would be cached on the client.
 The list of URLs specifies _mirrors_ where clients may download metadata and
 target files.
-Metadata and target files would be updated following the steps detailed in
+These files would be updated following the steps detailed in
 [this section](#downloading-metadata-and-target-files).
 
 The value of the "delegations" key is a list.
@@ -166,8 +163,7 @@ across repositories, a repository would organize the files as follows.
 All metadata files would be stored under the "metadata" directory.
 This directory would contain at least four files, one for each top-level role:
 root.json, timestamp.json, snapshot.json, and targets.json.
-This directory may also contain a "delegations" subdirectory.
-This subdirectory would contain only the metadata files for all delegated
+This directory may also contain a "delegations" subdirectory, which would hold only the metadata files for all delegated
 targets roles.
 Separating the metadata files for the top-level roles from all delegated
 targets roles prevents a delegated targets role from accidentally overwriting
@@ -217,12 +213,12 @@ This directory would contain the trust pinning file, as well as a subdirectory
 for every repository specified in the trust pinning file.
 Each repository metadata subdirectory would use the repository name.
 In turn, it would contain two subdirectories: "previous" for the previous set of
-metadata files, and "current" for the current set of metadata files.
+metadata files, and "current" for the current set.
 
 All targets files would be stored under the "targets" directory.
 Targets downloaded from any repository would be written to this directory.
 
-The following directory layout would apply to the example trust pinning file:
+The following directory layout would apply to the trust pinning file example:
 
 ```
 -metadata
@@ -248,19 +244,15 @@ The following directory layout would apply to the example trust pinning file:
 
 A client would perform the following five steps while searching for a target
 from a repository.
-When downloading a metadata or target file from a repository, the client would
-try contacting every known mirror until the file is found.
-If the file is not found on all mirrors, the search is aborted, and the client
-reports to the user that the file is missing.
 
 First, the client loads the previous copy of the root metadata file.
-If the root metadata file specifies that it should not be updated, then the
-client would not update this file.
+If this file specifies that it should not be updated, then the
+client would not update it.
 Otherwise, if the root metadata files specifies a custom list of mirrors from
 which it should be updated, then the client would use those mirrors to update
 this file.
 Otherwise, the client would use the list of mirrors specified in the trust
-pinning file to update this file.
+pinning file.
 Please see [TAP 5](tap5.md) for more details.
 
 Second, the client would use the list of mirrors specified in the trust pinning
@@ -276,8 +268,7 @@ a subset of targets available on a repository, then the client should consider
 the specified delegated targets role as the "top-level" targets role instead.
 In this case, the client should be careful in mapping the entries of the
 snapshot metadata file.
-For example, if the client restricts its trust to the Django project instead of
-the top-level targets role on PyPI, then version number of the "top-level"
+For example, if the client restricts its trust only to the Django project, then the version number of the "top-level"
 targets role on the client should correspond to the Django project instead of
 the actual top-level targets role on PyPI.
 Please see [TAP 5](tap5.md) for more details.
@@ -285,14 +276,19 @@ Please see [TAP 5](tap5.md) for more details.
 Fifth, the client would use the list of mirrors specified in the trust pinning
 file to download all target files.
 
+When downloading a metadata or target file from a repository, the client would
+try contacting every known mirror until the file is found.
+If the file is not found on all mirrors, the search is aborted, and the client
+reports that the file missing to the user.
+
 ## Interpreting the trust pinning file
 
 Every repository delegation in the trust pinning file shall be interpreted as
 follows.
 If a desired target matches the "paths" attribute, then download and verify
 metadata from every repository specified in the "repositories" attribute.
-Ensure that the targets metadata, specifically length and hashes, about the
-target matches across repositories.
+Ensure that the targets metadata, specifically length and hashes about the
+target, matches across repositories.
 Custom targets metadata is exempted from this requirement.
 If the targets metadata matches across repositories, return this metadata.
 Otherwise, report the mismatch to the user.
