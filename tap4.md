@@ -76,8 +76,8 @@ For more details, please see
 
 The trust pinning file maps targets to repositories.
 This file is not available from a repository.
-It is either constructed by explicit actions from the client, or distributed by
-an out-of-band bootstrap process.
+It is either constructed by the user, or distributed by an out-of-band
+bootstrap process.
 
 The trust pinning file contains a dictionary.
 This dictionary contains two keys, "repositories" and "delegations".
@@ -160,8 +160,10 @@ The following is an example of a trust pinning file:
 
 ## Metadata and targets layout on repositories
 
-On a repository, all metadata files would be stored under the "metadata"
-directory.
+In order for clients to download metadata and target files in a uniform way
+across repositories, a repository would organize the files as follows.
+
+All metadata files would be stored under the "metadata" directory.
 This directory would contain at least four files, one for each top-level role:
 root.json, timestamp.json, snapshot.json, and targets.json.
 This directory may also contain a "delegations" subdirectory.
