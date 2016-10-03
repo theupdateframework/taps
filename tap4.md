@@ -96,7 +96,7 @@ The value of the "delegations" key is a list.
 Every member in this list is a dictionary with at least two keys:
 
 * "paths" specifies a list of target paths of patterns.
-* "repositories" specifies a list of one or more repository names from D2.
+* "repositories" specifies a list of one or more repository names.
 * Optionally, "terminating" is a Boolean attribute indicating whether or not
   this delegation terminates
   [backtracking](#interpreting-the-trust-pinning-file).
