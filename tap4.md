@@ -299,26 +299,23 @@ Otherwise, proceed to similarly interpret the next delegation.
 
 # Security Analysis
 
-In effect, this TAP allows users (and only users) to directly choose the root
-of trust for parts of the targets namespace. Each root continues to be treated
-as it was previously, with TUF performing full validation per that root's
-metadata.
+This TAP allows users to choose different repositories for different targets.
+It also allows users to control how the root and targets metadata files for a
+repository are updated.
+However, it does not change the way TUF verifies metadata for a repository.
+Each repository continues to be treated as it was previously, with TUF
+performing full validation of the repository metadata.
 
-The proposed pinning feature provides users the ability to constrain the
-effects on them of metadata changes at the repository. As such, it creates two
-behavioral risks for users:
+When using a trust pinning file, users should be aware of the following
+issues:
 
-- Orphaned pinnings, in effect, may occur, where metadata is pinned and then
-  fails to be updated, falling out of sync with keys in real use. Project
-  managers may trust their own security and distrust repository security,
-  promoting pinning to users for their own projects. Smaller groups, however,
-  may be less likely to follow up on updating metadata when that is
-  appropriate, often having more constrained means and broader interests than
-  repository metadata. To provide a url for updating pinned metadata is
-  essentially to run one's own TUF server.
-- Complexity / subtlety for users and maintainers of having multiple
-repositories. (TODO: Elaborate.)
-- TODO: Poll for other concerns.
+- If the user controls how the root and targets metadata files for a repository
+are updated, then the user should follow key revocation and replacement on the
+repository in order to avoid accidental denial-of-service attacks.
+- If multiple repositories sign the same targets, then the repositories should
+coordinate to sign the same targets metadata in order to also avoid accidental
+denial-of-service attacks.
+- *TODO: Poll for other concerns from stakeholders.*
 
 # Backwards Compatibility
 
