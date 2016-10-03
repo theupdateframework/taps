@@ -282,47 +282,20 @@ file to download all target files.
 
 ## Interpreting the trust pinning file
 
-Every delegation in the list L1 shall be interpreted as follows.
-If the desired target matches the `"paths"` attribute, then download and verify
-metadata from every repository specified in the `"repositories"` attribute.
-Ensure that the targets metadata about the target matches across repositories
-(i.e., all repositories must provide the same hashes and length - custom
- metadata is exempted from this requirement), and return metadata about the
-target.
+Every repository delegation in the trust pinning file shall be interpreted as
+follows.
+If a desired target matches the "paths" attribute, then download and verify
+metadata from every repository specified in the "repositories" attribute.
+Ensure that the targets metadata, specifically length and hashes, about the
+target matches across repositories.
+Custom targets metadata is exempted from this requirement.
+If the targets metadata matches across repositories, return this metadata.
+Otherwise, report the mismatch to the user.
 If all repositories in the current delegation have not signed any metadata
 about the target, then take one of the following two actions.
 If the "terminating" attribute is true, report that there is no metadata about
 the target.
 Otherwise, proceed to similarly interpret the next delegation.
-
-For the example pinned.json above, the result is this:
-
-1. There is expected to be a current/ and previous/ metadata directory on the
-   client for each repository name listed in the client's pinned.json file,
-   and, at a minimum, root.json must exist in the current/ directory for each.
-   See [the Pinned Metadata section below](#pinned-metadata) for the file
-   strcture for this example.
-2. The client would trust only the "django" repository to sign any target with
-   repository filepath matching `"django/*"`. That is, that portion of the
-   target namespace is pinned to the "Django" repository. Further, because the
-   "terminating" attribute of the pinning is set to `true`, if the "Django"
-   repository does not provide a specific target, we will not continue through
-   the list of pinnings to try to find any other pinning relevant to this
-   target. For example, suppose we are interested in target
-   `"django/django-1.7.3.tar.gz"`. Because this filepath matches the
-   `"django/*"` pattern, whether or not it is found in the "django" repository,
-   we will consult no further repositories because this pinning is terminating;
-   neither the "Flask" nor "PyPI" repositories will be consulted for anything
-   matching `"django/*"`.
-3. Because the NumPy pinning in this list (`"numpy/*"` -> [NumPy + PyPI]) lists
-   two repositories, the client will trust metadata for packages matching the
-   `"numpy/*"` pattern only if the same metadata (hashes, length, custom
-       attributes) is provided by metadata from both repositories. If one
-   provides metadata, but not the other, or if both provide inconsistent
-   metadata, then an error must be reported. If neither provides metadata on a
-   sought-after target matching the pattern, then, because this pinning has
-   "terminating" set to true, no further pinning (in particular, "`*`" -> PyPI)
-   will be consulted.
 
 ## Examples
 
