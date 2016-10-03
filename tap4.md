@@ -176,13 +176,9 @@ It is up to the repository to enforce that every delegated targets role uses a
 unique name.
 
 All targets files would be stored under the "targets" directory.
-All targets signed by the top-level targets role would fall under this
-directory.
-This directory would contain a subdirectory for every delegated targets role.
-Each delegated targets role subdirectory would use the name of the delegated
-targets role.
-All targets signed by the delegated targets role would fall under this
-subdirectory.
+Any targets role could potentially write to any file under this directory.
+It is up to the repository to enforce access control on which targets roles are
+allowed to write which targets files.
 
 Following [TAP 5](tap5.md), the snapshot metadata file would no longer list the
 root metadata file, but it would continue to list the top-level and all
@@ -207,10 +203,6 @@ trust pinning file:
 -        ├── Flask.json
 -        ├── NumPy.json
 -targets
--└── latest.tar.gz           // signed by the top-level targets role
--└── Django/latest.tar.gz    // signed by the Django delegated targets role
--└── Flask/latest.tar.gz
--└── Numpy/latest.tar.gz
 ```
 
 Metadata and target files may be stored on the repository using [consistent
@@ -228,8 +220,7 @@ In turn, it would contain two subdirectories: "previous" for the previous set of
 metadata files, and "current" for the current set of metadata files.
 
 All targets files would be stored under the "targets" directory.
-This directory would contain a subdirectory for every repository.
-Each repository targets subdirectory would use the repository name.
+Targets downloaded from any repository would be written to this directory.
 
 The following directory layout would apply to the example trust pinning file:
 
@@ -251,10 +242,6 @@ The following directory layout would apply to the example trust pinning file:
 -└── PyPI/current
 -└── PyPI/previous
 -targets
--└── Django            // repository name;
--└── Flask             // see the layout of targets on the repository
--└── NumPy
--└── PyPI
 ```
 
 ## Downloading metadata and target files
