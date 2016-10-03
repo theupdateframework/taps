@@ -157,45 +157,6 @@ The following is an example of a trust pinning file:
 }
 ```
 
-## Metadata and targets layout on clients
-
-On a client, all metadata files would be stored under the "metadata" directory.
-This directory would contain the trust pinning file, as well as a subdirectory
-for every repository specified in the trust pinning file.
-Each repository metadata subdirectory would use the repository name.
-In turn, it would contain two subdirectories: "previous" for the previous set of
-metadata files, and "current" for the current set of metadata files.
-
-All targets files would be stored under the "targets" directory.
-This directory would contain a subdirectory for every repository.
-Each repository targets subdirectory would use the repository name.
-
-The following directory layout would apply to the example trust pinning file:
-
-```
- -metadata
- -└── pinned.json       // the trust pinning file
- -└── Django            // repository name
- -    └── current
- -        ├── root.json // minimum requirement; see TAP 5 for details
- -        └── timestamp.json
- -        ├── snapshot.json		
- -        ├── targets.json
- -        └── ...       // see the layout of delegations on the repository
- -    └── previous		
- -└── Flask/current
- -└── Flask/previous
- -└── NumPy/current
- -└── NumPy/previous
- -└── PyPI/current
- -└── PyPI/previous
- -targets
- -└── Django            // repository name;
- -└── Flask             // see the layout of targets on the repository
- -└── NumPy
- -└── PyPI
-```
-
 ## Metadata and targets layout on repositories
 
 On a repository, all metadata files would be stored under the "metadata"
@@ -220,30 +181,78 @@ targets role.
 All targets signed by the delegated targets role would fall under this
 subdirectory.
 
+Following [TAP 5](tap5.md), the snapshot metadata file would no longer list the
+root metadata file, but it would continue to list the top-level and all
+delegated targets metadata files.
+The file names of targets metadata files shall not specify their directories.
+In other words, they would be listed as if they were located in the same
+directory.
+When populating the dictionary of file names to version numbers, the repository
+shall add the delegated targets roles followed by the top-level targets role.
+
 The following directory layout may apply to the PyPI repository from the example
 trust pinning file:
 
 ```
- -metadata
- -└── root.json
- -└── timestamp.json
- -└── snapshot.json
- -└── targets.json            // signed by the top-level targets role
- -    └── delegations
- -        ├── Django.json     // signed by the Django delegated targets role
- -        ├── Flask.json
- -        ├── NumPy.json
- -targets
- -└── latest.tar.gz           // signed by the top-level targets role
- -└── Django/latest.tar.gz    // signed by the Django delegated targets role
- -└── Flask/latest.tar.gz
- -└── Numpy/latest.tar.gz
+-metadata
+-└── root.json
+-└── timestamp.json
+-└── snapshot.json
+-└── targets.json            // signed by the top-level targets role
+-    └── delegations
+-        ├── Django.json     // signed by the Django delegated targets role
+-        ├── Flask.json
+-        ├── NumPy.json
+-targets
+-└── latest.tar.gz           // signed by the top-level targets role
+-└── Django/latest.tar.gz    // signed by the Django delegated targets role
+-└── Flask/latest.tar.gz
+-└── Numpy/latest.tar.gz
 ```
 
 Metadata and target files may be stored on the repository using [consistent
 snapshots](https://github.com/theupdateframework/tuf/blob/5d2c8fdc7658a9f7648c38b0c79c0aa09d234fe2/docs/tuf-spec.txt).
 A client must download all files, and rename them on its local storage, using
 rules pertaining to a consistent snapshot.
+
+## Metadata and targets layout on clients
+
+On a client, all metadata files would be stored under the "metadata" directory.
+This directory would contain the trust pinning file, as well as a subdirectory
+for every repository specified in the trust pinning file.
+Each repository metadata subdirectory would use the repository name.
+In turn, it would contain two subdirectories: "previous" for the previous set of
+metadata files, and "current" for the current set of metadata files.
+
+All targets files would be stored under the "targets" directory.
+This directory would contain a subdirectory for every repository.
+Each repository targets subdirectory would use the repository name.
+
+The following directory layout would apply to the example trust pinning file:
+
+```
+-metadata
+-└── pinned.json       // the trust pinning file
+-└── Django            // repository name
+-    └── current
+-        ├── root.json // minimum requirement; see TAP 5 for details
+-        └── timestamp.json
+-        ├── snapshot.json
+-        ├── targets.json
+-        └── ...       // see the layout of delegations on the repository
+-    └── previous
+-└── Flask/current
+-└── Flask/previous
+-└── NumPy/current
+-└── NumPy/previous
+-└── PyPI/current
+-└── PyPI/previous
+-targets
+-└── Django            // repository name;
+-└── Flask             // see the layout of targets on the repository
+-└── NumPy
+-└── PyPI
+```
 
 ## Downloading metadata and target files
 
@@ -275,6 +284,12 @@ file to update all targets metadata files.
 If the root metadata file specifies that the client should restrict its trust to
 a subset of targets available on a repository, then the client should consider
 the specified delegated targets role as the "top-level" targets role instead.
+In this case, the client should be careful in mapping the entries of the
+snapshot metadata file.
+For example, if the client restricts its trust to the Django project instead of
+the top-level targets role on PyPI, then version number of the "top-level"
+targets role on the client should correspond to the Django project instead of
+the actual top-level targets role on PyPI.
 Please see [TAP 5](tap5.md) for more details.
 
 Fifth, the client would use the list of mirrors specified in the trust pinning
@@ -317,13 +332,20 @@ coordinate to sign the same targets metadata in order to also avoid accidental
 denial-of-service attacks.
 - *TODO: Poll for other concerns from stakeholders.*
 
+Note that removing the root metadata file from the snapshot metadata does not
+remove existing security guarantees.
+This is because: (1) mix-and-match attacks are executed by specifying an
+inconsistent set of targets metadata files, which does not include the root
+metadata file, and (2) the client always attempts to updates the root metadata
+file.
+
 # Backwards Compatibility
 
 This specification is not backwards-compatible because it requires:
 
 1. Repositories and clients to adopt the root metadata file from [TAP 5](tap5.md).
 2. A repository to use a [specific filesystem layout](#metadata-and-targets-layout-on-repositories).
-3. A client to use a trust pinning file.
+3. A client to use a [trust pinning file](#trust-pinning-file).
 4. A client to use a [specific filesystem layout](#metadata-and-targets-layout-on-clients).
 5. A client to [download metadata and target files from a repository in a specific manner](#downloading-metadata-and-target-files).
 
