@@ -178,9 +178,10 @@ The following directory layout would apply to the example trust pinning file:
  -└── Django            // repository name
  -    └── current
  -        ├── root.json // minimum requirement; see TAP 5 for details
+ -        └── timestamp.json
  -        ├── snapshot.json		
- -        ├── targets.json		
- -        └── timestamp.json		
+ -        ├── targets.json
+ -        └── ...       // see the layout of delegations on the repository
  -    └── previous		
  -└── Flask/current
  -└── Flask/previous
@@ -189,8 +190,8 @@ The following directory layout would apply to the example trust pinning file:
  -└── PyPI/current
  -└── PyPI/previous
  -targets
- -└── Django            // repository name
- -└── Flask
+ -└── Django            // repository name;
+ -└── Flask             // see the layout of targets on the repository
  -└── NumPy
  -└── PyPI
 ```
@@ -207,6 +208,8 @@ targets roles.
 Separating the metadata files for the top-level roles from all delegated
 targets roles prevents a delegated targets role from accidentally overwriting
 the metadata file for a top-level role.
+It is up to the repository to enforce that every delegated targets role uses a
+unique name.
 
 All targets files would be stored under the "targets" directory.
 All targets signed by the top-level targets role would fall under this
@@ -244,7 +247,38 @@ rules pertaining to a consistent snapshot.
 
 ## Downloading metadata and target files
 
-More details in TAP 5, but give the big picture here.
+A client would perform the following five steps while searching for a target
+from a repository.
+When downloading a metadata or target file from a repository, the client would
+try contacting every known mirror until the file is found.
+If the file is not found on all mirrors, the search is aborted, and the client
+reports to the user that the file is missing.
+
+First, the client loads the previous copy of the root metadata file.
+If the root metadata file specifies that it should not be updated, then the
+client would not update this file.
+Otherwise, if the root metadata files specifies a custom list of mirrors from
+which it should be updated, then the client would use those mirrors to update
+this file.
+Otherwise, the client would use the list of mirrors specified in the trust
+pinning file to update this file.
+Please see [TAP 5](tap5.md) for more details.
+
+Second, the client would use the list of mirrors specified in the trust pinning
+file to update the timestamp metadata file.
+
+Third, the client would use the list of mirrors specified in the trust pinning
+file to update the snapshot metadata file.
+
+Fourth, the client would use the list of mirrors specified in the trust pinning
+file to update all targets metadata files.
+If the root metadata file specifies that the client should restrict its trust to
+a subset of targets available on a repository, then the client should consider
+the specified delegated targets role as the "top-level" targets role instead.
+Please see [TAP 5](tap5.md) for more details.
+
+Fifth, the client would use the list of mirrors specified in the trust pinning
+file to download all target files.
 
 ## Interpreting the trust pinning file
 
