@@ -31,24 +31,31 @@ community repository.
 ## Use case 2: improving compromise-resilience
 
 To improve compromise-resilience, a client may require signatures from multiple
-repositories with different root keys for the same targets metadata.
+repositories with different root keys for the same targets metadata. We will
+refer to this required consensus as multi-repository delegation.
 
-## Use case 3: restricting trust in a repository to a subset of its targets
+## Use case 3: restricting trust in a repository to a subset of targets
 
-Finally, a client may also wish to restrict its trust to a subset of targets
-available on a repository.
+A client may also wish to restrict its trust of a repository to a
+subset of the targets available on a repository.
 For example, a client may trust PyPI to provide information only about the
-Django project, instead of all available projects.
+Django project, instead of all available projects, and trust a distinct
+private repository root for the Flask project. In other words, the targets
+namespace can be subdivided such that portions of the namespace are assigned
+to different repositories or groups of repositories.
+
+## Use case 4: restricting trust in a repository to fixed keys
+
+In combination with [TAP 5](tap5.md), a client can create a local root file
+that fixes or pins the keys expected from another repository. This would
+constraining the client's trust of the repository such that in order to be
+trusted, target information from that repository would have to employ certain
+keys for certain roles.
 
 # Rationale
 
-The current design for TAP 4 was arrived at after considering different design
-choices.
+TUF would benefit from the ability to handle the above use cases, requested by TUF adopters. The selected design allows a great deal of flexibility and only slightly increases the code base.
 
-One such design choice was to use [multi-role delegations](tap3.md), which
-can improve compromise-resilience. But, it does not easily allow for the hiding
-of sensitive metadata and targets, or restricting trust in a repository to a
-subset of its targets.
 
 # Specification
 
@@ -62,10 +69,12 @@ Using a scheme similar to targets delegations within a repository, different
 targets may be delegated to different repositories in this file.
 These delegations are also known as _repository delegations_.
 
-Each repository may be associated with a different
-[root metadata file](tap5.md), which specifies how the metadata files of the
+The client will keep full metadata for each repository in a corresponding
+directory. By also employing TAP 5, a 
+A client may associate each repository with a different
+root metadata file, which specifies how the metadata files of the
 top-level roles are to be verified.
-For example, the root keys in a root metadata files may correspond to the root
+For example, the root keys in a root metadata file may correspond to the root
 keys distributed by: (1) the remote repository, or (2) a private repository.
 For more details, please see [TAP 5](tap5.md).
 
@@ -73,8 +82,8 @@ For more details, please see [TAP 5](tap5.md).
 
 The trust pinning file maps targets to repositories.
 This file is not available from a repository.
-It is either constructed by the user, or distributed by an out-of-band
-bootstrap process.
+It is either constructed by the user (through commands to the TUF client), or
+distributed by an out-of-band bootstrap process.
 
 The trust pinning file contains a dictionary
 that holds two keys, "repositories" and "delegations."
@@ -82,8 +91,8 @@ that holds two keys, "repositories" and "delegations."
 The value of the "repositories" key is another dictionary.
 Each key in this dictionary is a _repository name_, and its value is a list of
 URLs.
-The repository name also corresponds to the name of the directory where metadata
-files would be cached on the client.
+The repository name also corresponds to the name of the directory on the client
+where metadata files would be cached.
 The list of URLs specifies _mirrors_ where clients may download metadata and
 target files.
 These files would be updated following the steps detailed in
@@ -171,15 +180,13 @@ the metadata file for a top-level role.
 It is up to the repository to enforce that every delegated targets role uses a
 unique name.
 
-All targets files would be stored under the "targets" directory.
-Any targets role could potentially write to any file under this directory.
-It is up to the repository to enforce access control on which targets roles are
-allowed to write which targets files.
+All targets files would be stored under the "targets" directory. Beyond this,
+the repository may organize target files into any hierarchy it requires.
 
-Following [TAP 5](tap5.md), the snapshot metadata file would no longer list the
+Following [TAP 5](tap5.md), the snapshot metadata file no longer lists the
 root metadata file, but it would continue to list the top-level and all
 delegated targets metadata files.
-The file names of targets metadata files shall not specify their directories.
+The file names of targets _metadata_ files shall not specify their directories.
 In other words, they would be listed as if they were located in the same
 directory.
 When populating the dictionary of file names to version numbers, the repository
@@ -286,7 +293,8 @@ reports that the file missing to the user.
 
 Every repository delegation in the trust pinning file shall be interpreted as
 follows.
-If a desired target matches the "paths" attribute, then download and verify
+Proceeding down the list of delegations in order, if a desired target matches
+the "paths" attribute, then download and verify
 metadata from every repository specified in the "repositories" attribute.
 Ensure that the targets metadata, specifically length and hashes about the
 target, matches across repositories.
@@ -302,8 +310,8 @@ Otherwise, proceed to similarly interpret the next delegation.
 # Security Analysis
 
 This TAP allows users to choose different repositories for different targets.
-It also allows users to control how the root and targets metadata files for a
-repository are updated.
+Paired with TAP 5, it also allows users to control how the root and targets
+metadata files for a repository are updated.
 However, it does not change the way TUF verifies metadata for a repository.
 Each repository continues to be treated as it was previously, with TUF
 performing full validation of the repository metadata.
@@ -311,7 +319,7 @@ performing full validation of the repository metadata.
 When using a trust pinning file, users should be aware of the following
 issues:
 
-- If the user controls how the root and targets metadata files for a repository
+- If (via [TAP 5](tap5.md)), the user controls how the root and targets metadata files for a repository
 are updated, then the user should follow key revocation and replacement on the
 repository in order to avoid accidental denial-of-service attacks.
 - If multiple repositories sign the same targets, then the repositories should
@@ -330,7 +338,7 @@ file.
 
 This specification is not backwards-compatible because it requires:
 
-1. Repositories and clients to adopt the root metadata file from [TAP 5](tap5.md).
+1. Clients to support the additional optional fields in the root metadata file from [TAP 5](tap5.md).
 2. A repository to use a [specific filesystem layout](#metadata-and-targets-layout-on-repositories).
 3. A client to use a [trust pinning file](#trust-pinning-file).
 4. A client to use a [specific filesystem layout](#metadata-and-targets-layout-on-clients).
