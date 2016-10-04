@@ -41,66 +41,135 @@ a delegated targets role is the search root for targets.
 
 #Specification
 
-1. Root metadata will optionally contain URLs for any top-level role. If the URLs field is not specified, then that the role file is expected to appear as usual in the repository's metadata directory. If the URLs field is an empty list, that indicates that the role file must never be updated.
+We propose the following two extensions to the root metadata file:
 
-2. The targets role in root.json optionally contains a field that sets the root of the targets delegation tree to a role name other than "targets" (which is the default). This is of use for [pinning](tap4.md) and similar arrangements.
+1. The root role can use the new "mirrors" attribute to specify a list of
+mirrors where it can be updated from instead of the mirrors specified in the
+[trust pinning file](tap4.md). If this list is empty, then it means that the
+root metadata file shall not be updated at all. The root metadata file would be
+downloaded from each mirror using the order specified in the list until it is
+found.
 
-3. Root role no longer listed in snapshot metadata. Root metadata is
-downloaded first, before time stamp, every time repo is pulled.
+2. The targets role can use the new "search_from" attribute to specify a
+delegated targets role as the search root for targets instead of the top-level
+targets role. If this attribute is not specified, then it is assumed that the
+top-level targets role is the search root. Otherwise, if the name of a delegated
+targets role is specified, then it will be the search root instead.
 
-4. Store targets metadata files in separate directory from {timestamp,
-snapshot, root} metadata files on both client and server.
+## The new root metadata file format
 
-
-## root.json format, with additional line
+The following is an example of what the new root metadata file format looks
+like:
 
 ```Javascript
 {
   "signatures": [
     {
-      "keyid": KEYID,
+      "keyid":  KEYID,
       "method": METHOD,
-      "sig": SIGNATURE
+      "sig":    SIGNATURE
     }
   ],
   "signed": {
-    "_type": "Root",
-    "version": VERSION,
-    "expires": EXPIRES,
-    "keys": {
-      KEYID: KEY
-    },
+    "_type":    "Root",
+    "version":  VERSION,
+    "expires":  EXPIRES,
+    "keys":     {KEYID: KEY},
     "roles": {
-      ROLE: {
-        "URLs": [...], // This line is new and optional.
-        "keyids": [KEYID, ...],
-        "threshold": THRESHOLD
-      }
+      "root": {
+        "mirrors":    [...],            // This line is new and optional.
+        "keyids":     [KEYID, ...],
+        "threshold":  THRESHOLD
+      },
       "targets": {
-        "root_target_role": "targets", // This line is new and optional (default "targets")
-        "keyids": [KEYID, ...],
-        "threshold": THRESHOLD
-      }
+        "search_from":  "targets",      // This line is new and optional.
+        "keyids":       [KEYID, ...],
+        "threshold":    THRESHOLD
+      },
+      "timestamp": {...},               // No changes.
+      "snapshot": {...}                 // No changes.
     }
   }
 }
 ```
 
-The [previous version of the specification is available here](https://github.com/theupdateframework/tuf/blob/f57a0bb1a95579094a0324d4153f812a262d15e3/docs/tuf-spec.0.9.txt) for more details.
+The reader may compare the new file format to the [previous version](https://github.com/theupdateframework/tuf/blob/f57a0bb1a95579094a0324d4153f812a262d15e3/docs/tuf-spec.0.9.txt).
 
-### Limitations of the previous format
+### Example 1: Do not update the root metadata file
 
-In the absence of this feature, client-created pinnings via [TAP 4](tap4.md) are unable to specify keys for a particular role while still linking to the remote repository. (TODO: Expand)
+The following example illustrates how to specify that the root metadata file
+shall not be updated:
 
-(TODO: A few words on the limitations of the previous format.
-Basically, it does not let us achieve our goal in the [Abstract](#abstract).)
+```Javascript
+{
+  "signed": {
+    "roles": {
+      "root": {
+        "mirrors": [], // Do NOT update this root metadata file!
+        ...
+      },
+      ...
+    },
+    ...
+  },
+  ...
+}
+```
 
-`URL` MUST be either an empty list or a list of valid URL strings.
+### Example 2: Update the root metadata file from different mirrors than in the trust pinning file
 
-### Improvements over the previous format
+The following example illustrates how to specify that the root metadata file
+shall be updated using a different list of mirrors than that specified in the
+[trust pinning file](tap4.md):
 
-(Lets us "reuse" existing metadata files instead of maintaining
-them separately using separate keys.) (?)
+```Javascript
+{
+  "signed": {
+    "roles": {
+      "root": {
+        // Update the root metadata file using *these* mirrors instead!
+        "mirrors": ["http://example.com"],
+        ...
+      },
+      ...
+    },
+    ...
+  },
+  ...
+}
+```
+
+### Example 3: Search targets from a delegated targets role instead of the top-level targets role
+
+The following example illustrates how to specify that targets should be searched
+from a delegated targets role instead of the top-level targets role:
+
+```Javascript
+{
+  "signed": {
+    "roles": {
+      "targets": {
+        // Search targets from this delegated targets role instead of the
+        // top-level targets role!
+        "search_from": "Django",
+        ...
+      },
+      ...
+    },
+    ...
+  },
+  ...
+}
+```
+
+## Changes to the snapshot metadata file and how metadata files are downloaded
+
+Since clients may download other metadata files from a repository but not its
+root metadata file, the snapshot metadata file shall no longer list metadata
+about the root metadata file.
+This also means that there are differences to how metadata files are downloaded
+from a repository.
+Please see [TAP 4](tap4.md) for more details.
 
 # Security Analysis
 
