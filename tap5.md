@@ -56,6 +56,9 @@ targets role. If this attribute is not specified, then it is assumed that the
 top-level targets role is the search root. Otherwise, if the name of a delegated
 targets role is specified, then it will be the search root instead.
 
+Together, these extensions allow users to specify essentially different keys
+for the root and targets role of a repository.
+
 ## The new root metadata file format
 
 The following is an example of what the new root metadata file format looks
@@ -173,18 +176,37 @@ Please see [TAP 4](tap4.md) for more details.
 
 # Security Analysis
 
-(Briefly argue why this does not break existing security guarantees, or
-introduce new security problems.)
+Note that removing the root metadata file from the snapshot metadata does not
+remove existing security guarantees.
+This is because: (1) mix-and-match attacks are executed by specifying an
+inconsistent set of targets metadata files, which does not include the root
+metadata file, and (2) the client always attempts to update the root metadata
+file (if required).
+
+Searching for targets from a delegated targets role instead of the top-level
+targets role also does not introduce security problems, as long as the root
+metadata file has distributed the correct keys for the delegated targets role.
+In fact, this may even improve compromise-resilience, because if the root
+metadata file on disk is not updated at all, or it is updated using different
+root keys than the original repository, the keys for the delegated targets role
+would not be incorrectly revoked and replaced with malicious keys, even if the
+original repository has been compromised.
+
+Users must be careful in tracking and specifying the correct keys for the
+timestamp, snapshot, and delegated targets role keys of the original repository
+in order to avoid accidental denial-of-service attacks.
 
 # Backwards Compatibility
 
-1. The root.json specification is backwards-compatible in that clients and supporting this proposal can still interpret root.json files produced in ignorance of TAP 5, as the new field is optional.
-
-3. The change to where metadata files are stored (separating top-level roles and delegated roles) is not backwards-compatible.
+This specification is technically backwards-compatible with clients that do not
+recognize TAP 5, because it does not change the semantics of the previous root
+metadata file format.
+However, this specification is useful only in conjunction with [TAP 4](tap4.md),
+and since TAP 4 is backwards-incompatible, then so is TAP 5.
 
 # Augmented Reference Implementation
 
-(Vlad and/or Sebastien are working on this.)
+[@sebastienawwad is working on this.]
 
 # Copyright
 
