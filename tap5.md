@@ -10,7 +10,7 @@
 
 # Abstract
 
-TAP 5 allows clients to use the root metadata file to : (1) specify whether and
+TAP 5 allows clients to use the root metadata file to: (1) specify whether and
 from where a root metadata file should be updated, and / or (2) to restrict
 trust in a repository to a delegated targets role instead of the top-level
 targets role.
@@ -24,19 +24,19 @@ TAP 5 has been motivated by the following use case from [TAP 4](tap4.md).
 A client may also wish to restrict its trust to a subset of targets available on
 a repository.
 For example, a client may trust PyPI to provide information only about the
-Django project, instead of all available projects.
+Django project, but not about other available projects.
 
 #Rationale
 
 The current design for TAP 5 was arrived at after considering different design
 choices.
 
-One such design choice was to specify a URL which would be used to update the
+One such design choice was to specify a URL that would be used to update the
 metadata file for every top-level role.
-However, this design was deemed to be unnecessarily complex, because to support
-the use case from TAP 4, only two features are needed: (1) the ability to
-override whether a root metadata file should be updated at all, and where it
-should be updated from, and (2) the ability to specify whether the top-level or
+However, this design was deemed to be unnecessarily complex, since only two features are needed to support
+the use case from TAP 4: (1) the ability to
+override whether a root metadata file should be updated at all, and, if so, where it
+should be updated from; and, (2) the ability to specify whether the top-level or
 a delegated targets role is the search root for targets.
 
 #Specification
@@ -44,14 +44,14 @@ a delegated targets role is the search root for targets.
 We propose the following two extensions to the root metadata file:
 
 1. The root role can use the new "mirrors" attribute to specify a list of
-mirrors where it can be updated from instead of the mirrors specified in the
+mirrors from which it can be updated, in place of the mirrors specified in the
 [trust pinning file](tap4.md). If this list is empty, then it means that the
-root metadata file shall not be updated at all. The root metadata file would be
-downloaded from each mirror using the order specified in the list until it is
+root metadata file shall not be updated at all. Instead, the root metadata file would be
+downloaded from each mirror, using the order specified in the list until it is
 found.
 
 2. The targets role can use the new "search_from" attribute to specify a
-delegated targets role as the search root for targets instead of the top-level
+delegated targets role as the search root for targets, instead of the top-level
 targets role. If this attribute is not specified, then it is assumed that the
 top-level targets role is the search root. Otherwise, if the name of a delegated
 targets role is specified, then it will be the search root instead.
@@ -122,7 +122,7 @@ shall not be updated:
 ### Example 2: Update the root metadata file from different mirrors than in the trust pinning file
 
 The following example illustrates how to specify that the root metadata file
-shall be updated using a different list of mirrors than that specified in the
+shall be updated using a different list of mirrors than those specified in the
 [trust pinning file](tap4.md):
 
 ```Javascript
@@ -170,14 +170,14 @@ from a delegated targets role instead of the top-level targets role:
 Since clients may download other metadata files from a repository but not its
 root metadata file, the snapshot metadata file shall no longer list metadata
 about the root metadata file.
-This also means that there are differences to how metadata files are downloaded
-from a repository.
+This also means that the method for downloading metadata files
+from a repository will also be different.
 Please see [TAP 4](tap4.md) for more details.
 
 # Security Analysis
 
 Note that removing the root metadata file from the snapshot metadata does not
-remove existing security guarantees.
+change existing security guarantees.
 This is because: (1) mix-and-match attacks are executed by specifying an
 inconsistent set of targets metadata files, which does not include the root
 metadata file, and (2) the client always attempts to update the root metadata
@@ -186,10 +186,10 @@ file (if required).
 Searching for targets from a delegated targets role instead of the top-level
 targets role also does not introduce security problems, as long as the root
 metadata file has distributed the correct keys for the delegated targets role.
-In fact, this may even improve compromise-resilience, because if the root
-metadata file on disk is not updated at all, or it is updated using different
+In fact, this may even improve compromise-resilience. If the root
+metadata file on disk is not updated at all, or is updated using different
 root keys than the original repository, the keys for the delegated targets role
-would not be incorrectly revoked and replaced with malicious keys, even if the
+can not be incorrectly revoked and replaced with malicious keys, even if the
 original repository has been compromised.
 
 Users must be careful in tracking and specifying the correct keys for the
