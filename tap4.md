@@ -12,37 +12,25 @@
 
 # Abstract
 
-TAP 4 allows clients to use a _trust pinning file_ to: (1) delegate targets to
-one or more repositories, and / or (2) search for targets on a repository
-beginning from a delegated targets role instead of the top-level targets role.
+TAP 4 allows clients to use a _trust pinning file_ to delegate targets to one
+or more repositories.
 
 # Motivation
 
-TAP 4 has been motivated by the following three use cases.
+TAP 4 has been motivated by the following two use cases.
 
 ## Use case 1: hiding sensitive metadata and targets
 
 Clients may wish to hide sensitive metadata and targets from a public
 repository, and so will use a private repository for these files.
-Therefore, clients may need to search for different targets over different
-repositories, including both a private company repository, and a public
-community repository.
+Therefore, clients may need to search for some targets from the private
+repository, and all other targets from the public repository.
 
 ## Use case 2: improving compromise-resilience
 
 To improve compromise-resilience, a client may require signatures from multiple
-repositories with different root keys for the same targets metadata. We will
-refer to this required consensus as multi-repository delegation.
-
-## Use case 3: restricting trust in a repository to a delegated targets role instead of the top-level targets role
-
-A  user may also wish to restrict her trust in a repository to a delegated
-targets role instead of the top-level targets role.
-For example, a client may trust trust only the Django delegated targets role
-on the PyPI repository.
-Using [TAP 5](tap5.md), the user can create a custom root metadata file that
-uses a delegated targets role (e.g., Django), instead of top-level
-targets role, as the search root for targets.
+repositories with different root keys for the same targets metadata.
+We will refer to this required consensus as _multi-repository delegation_.
 
 # Rationale
 
@@ -64,12 +52,6 @@ targets may be delegated to different repositories in this file.
 These delegations are also known as _repository delegations_.
 
 A client will keep full metadata for each repository in a separate directory.
-Using [TAP 5](tap5.md), a client may associate each repository with a different
-root metadata file, which may associate some top-level roles with different
-keys than used by the original repository.
-For example, the root keys in a root metadata file may correspond to the root
-keys distributed by: (1) the remote repository, or (2) a private repository.
-For more details, please see [TAP 5](tap5.md).
 
 ## Trust pinning file
 
@@ -94,7 +76,8 @@ These files would be updated following the steps detailed in
 The value of the "delegations" key is a list.
 Every member in this list is a dictionary with at least two keys:
 
-* "paths" specifies a list of target paths of patterns.
+* "paths" specifies a list of target paths of patterns. A desired target must
+match a pattern in this list for this delegation to be consulted.
 * "repositories" specifies a list of one or more repository names.
 * Optionally, "terminating" is a Boolean attribute indicating whether or not
   this delegation terminates
@@ -129,28 +112,34 @@ The following is an example of a trust pinning file:
   },
   "delegations": [
     {
-      "paths": ["*django*"],
+      // First, delegate any target matching *Django* to the Django repository.
+      "paths":        ["*django*"],
       "repositories": ["Django"],
       // If missing, the "terminating" attribute is assumed to be false.
       // Therefore, if this delegation has not signed for a *django* target,
       // the following delegation will be consulted.
     },
     {
-      "paths": ["*flask*"],
+      // Second, delegate any target matching *flask* to only the Flask
+      // repository.
+      "paths":        ["*flask*"],
       "repositories": ["Flask"],
       // If this delegation has not signed for a *flask* target, the following
       // delegations will _not_ be consulted.
       "terminating": true
     },
     {
-      "paths": ["*numpy*"],
+      // Third, delegate any target matching *numpy* only to _both_ the NumPy
+      // and PyPI repositories.
+      "paths":        ["*numpy*"],
        // Both the NumPy and PyPI repositories must sign the same targets
        // metadata (i.e., length and hashes).
       "repositories": ["NumPy", "PyPI"],
       "terminating": true
     },
     {
-      "paths": ["*"],
+      // Delegate all other targets to PyPI.
+      "paths":        ["*"],
       "repositories": ["PyPI"]
     }
   ]
@@ -173,17 +162,9 @@ the metadata file for a top-level role.
 It is up to the repository to enforce that every delegated targets role uses a
 unique name.
 
-All targets files would be stored under the "targets" directory. Beyond this,
-the repository may organize target files into any hierarchy it requires.
-
-Following [TAP 5](tap5.md), the snapshot metadata file no longer lists the
-root metadata file, but it would continue to list the top-level and all
-delegated targets metadata files.
-The file names of targets _metadata_ files shall not specify their directories.
-In other words, they would be listed as if they were located in the same
-directory.
-When populating the dictionary of file names to version numbers, the repository
-shall add the delegated targets roles followed by the top-level targets role.
+All targets files would be stored under the "targets" directory.
+Beyond this, the repository may organize target files into any hierarchy it
+requires.
 
 The following directory layout may apply to the PyPI repository from the example
 trust pinning file:
@@ -245,43 +226,35 @@ The following directory layout would apply to the trust pinning file example:
 A client would perform the following five steps while searching for a target
 from a repository.
 
-First, the client loads the previous copy of the root metadata file.
-If this file specifies that it should not be updated, then the
-client would not update it.
-Otherwise, if the root metadata files specifies a custom list of mirrors from
-which it should be updated, then the client would use those mirrors to update
+First, the client loads the previous copy of the [root metadata file](tap5.md).
+If this file specifies that it should not be updated, then the client would not
+update it.
+Otherwise, if the root metadata files specifies a custom list of URLs from
+which it should be updated, then the client would use those URLs to update
 this file.
 Otherwise, the client would use the list of mirrors specified in the trust
 pinning file.
-Please see [TAP 5](tap5.md) for more details.
 
-Second, the client would use the list of mirrors specified in the trust pinning
-file to update the timestamp metadata file.
+Second, the client would use similar steps to update the timestamp metadata
+file.
 
-Third, the client would use the list of mirrors specified in the trust pinning
-file to update the snapshot metadata file.
+Third, the client would use similar steps to update the snapshot metadata file.
 
-Fourth, the client would use the list of mirrors specified in the trust pinning
-file to update all targets metadata files.
-If the root metadata file specifies that the client should restrict its trust to
-a delegated targets role instead of the top-level targets role, then the client
-should consider the specified delegated targets role as the "top-level" targets
-role instead.
-In this case, the client should be careful in mapping the entries of the
-snapshot metadata file.
-For example, if the client restricts its trust only to the Django project, then
-the version number of the "top-level" targets role on the client should
-correspond to the Django project instead of the actual top-level targets role
-on PyPI.
-Please see [TAP 5](tap5.md) for more details.
+Fourth, the client would use similar steps to update all targets metadata files.
+If the root metadata file specifies a custom URL for top-level targets role, the
+client should be careful in Interpreting the entries of the snapshot metadata
+file.
+For example, if the URL for the targets role in the root metadata file is "https://pypi.python.org/metadata/delegations/Django.json", then its version
+number would correspond to the entry for "Django.json" instead of "targets.json"
+(for the original top-level targets role) in the snapshot metadata.
 
-Fifth, the client would use the list of mirrors specified in the trust pinning
-file to download all target files.
+Fifth, the client would use only the list of mirrors specified in the trust
+pinning file to download all target files.
 
 When downloading a metadata or target file from a repository, the client would
-try contacting every known mirror until the file is found.
-If the file is not found on all mirrors, the search is aborted, and the client
-reports that the file missing to the user.
+try contacting every known mirror / URL until the file is found.
+If the file is not found on all mirrors / URLs, the search is aborted, and the
+client reports to the user that the file is missing.
 
 ## Interpreting the trust pinning file
 
@@ -304,8 +277,6 @@ Otherwise, proceed to similarly interpret the next delegation.
 # Security Analysis
 
 This TAP allows users to choose different repositories for different targets.
-In conjunction with [TAP 5](tap5.md), it also allows users to control how the
-root and targets metadata files for a repository are updated.
 However, it does not change the way TUF verifies metadata for a repository.
 Each repository continues to be treated as it was previously, with TUF
 performing full validation of the repository metadata.
@@ -313,27 +284,15 @@ performing full validation of the repository metadata.
 When using a trust pinning file, users should be aware of the following
 issues:
 
-- If the user uses [TAP 5](tap5.md) controls how the root and targets metadata
-files for a repository are updated, then the user should follow key revocation
-and replacement on the repository in order to avoid accidental denial-of-service
-attacks.
 - If multiple repositories sign the same targets, then the repositories should
 coordinate to sign the same targets metadata in order to also avoid accidental
 denial-of-service attacks.
-- *TODO: Poll for other concerns from stakeholders.*
-
-Note that removing the root metadata file from the snapshot metadata does not
-remove existing security guarantees.
-This is because: (1) mix-and-match attacks are executed by specifying an
-inconsistent set of targets metadata files, which does not include the root
-metadata file, and (2) the client always attempts to update the root metadata
-file.
 
 # Backwards Compatibility
 
 This specification is not backwards-compatible because it requires:
 
-1. Clients to support the additional, optional fields in the [root metadata file](tap5.md).
+1. Clients to support additional, optional fields in the [root metadata file](tap5.md).
 2. A repository to use a [specific filesystem layout](#metadata-and-targets-layout-on-repositories).
 3. A client to use a [trust pinning file](#trust-pinning-file).
 4. A client to use a [specific filesystem layout](#metadata-and-targets-layout-on-clients).
@@ -341,7 +300,7 @@ This specification is not backwards-compatible because it requires:
 
 # Augmented Reference Implementation
 
-[Sebastien](https://github.com/sebastienawwad) is working on this.
+[TODO: Point to a branch containing implementation of TAP 4.]
 
 # Copyright
 

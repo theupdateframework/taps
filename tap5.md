@@ -15,17 +15,23 @@ to verify and update the top-level roles of a repository.
 
 # Motivation
 
-TAP 5 has been motivated by the following use case from [TAP 4](tap4.md).
+TAP 5 has been motivated by the following use cases.
 
 ## Use case 1: restricting trust in a repository to a delegated targets role instead of the top-level targets role
 
-A  user may also wish to restrict her trust in a repository to a delegated
-targets role instead of the top-level targets role.
+A  user may wish to restrict her trust in a repository to a delegated targets
+role instead of the top-level targets role.
 For example, a client may trust trust only the Django delegated targets role
 on the PyPI repository.
 Using this TAP, the user can create a custom root metadata file that specifies
 that the keys and URL of the top-level targets role respectively are instead
 the keys and URL of the Django delegated targets role respectively.
+
+## Use case 2: pinning keys of top-level roles
+
+A user may also wish to pin top-level roles to certain keys, and never update
+them, or update them by her own means instead of relying on the original
+repository.
 
 #Rationale
 
@@ -165,6 +171,15 @@ to verify Django targets on the PyPI repository:
 
 Since clients may not download the root metadata file on a repository, the
 snapshot metadata file shall no longer list the root metadata file.
+However, it shall continue to list the top-level and all
+delegated targets metadata files.
+The file names of targets _metadata_ files shall not specify their directories.
+In other words, they would be listed as if they were located in the same
+directory.
+When populating the dictionary of file names to version numbers, the repository
+shall first add the delegated targets roles, followed by the top-level targets
+role.
+
 This implies that the method for downloading metadata files from a repository
 will be slightly different.
 Please see [TAP 4](tap4.md#downloading-metadata-and-target-files) for more
@@ -205,7 +220,7 @@ and since TAP 4 is backwards-incompatible, then so is TAP 5.
 
 # Augmented Reference Implementation
 
-[Sebastien](https://github.com/sebastienawwad) is working on this.
+[TODO: Point to a branch containing implementation of TAP 5.]
 
 # Copyright
 
