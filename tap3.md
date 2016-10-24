@@ -1,33 +1,38 @@
 * TAP: 3
 * Title: Multi-role delegations
 * Version: 1
-* Last-Modified: 16-Sep-2016
-* Author: Evan Cordell, Jake Moshenko, Justin Cappos, Vladimir Diaz, Sebastien
-          Awwad, Trishank Karthik Kuppusamy
+* Last-Modified: 24-Oct-2016
+* Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
+          Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Draft
 * Content-Type: <text/markdown>
 * Created: 16-Sep-2016
 
 # Abstract
 
-(We want multiple roles, instead of only one role, to be able to sign off on
-the same set of targets.)
+This TAP allows targets to be delegated to multiple roles, instead of just a
+single role, on a repository.
 
 # Motivation
 
-(CoreOS wants multiple roles to be able to sign off on the same targets.
-For example, both release-engineering and quality-assurance roles must sign.)
+Sometimes, it is desirable to delegate targets to multiple roles in order to
+increase compromise-resilience.
+For example, a project may require both its release engineering and quality
+assurance roles to sign its targets, so that the compromise of either one of
+these roles is insufficient to execute arbitrary software attacks.
 
 #Rationale
 
-(Briefly discuss why we didn't get carried away with abstraction astronauts.
-Redundancy of information in metadata not a concern, because compression
-removes redundancy, and there is an upper limit on metadata file sizes.)
+The design underlying this TAP has been chosen to permit an easy understanding
+for the human reader.
+It has not been designed to remove redundancy (such as repeated specifications
+of public keys, role names, or target path patterns).
+Note that this is not a concern in practice, because TUF allows metadata files
+to be compressed, and also specifies an upper bound on their length.
 
 #Specification
 
-(Before we discuss the new format, let us see analyze the limitations of the
-previous format.)
+The following is the [previous format for a targets metadata file](https://github.com/theupdateframework/tuf/blob/f57a0bb1a95579094a0324d4153f812a262d15e3/docs/tuf-spec.0.9.txt):
 
 ## The previous format
 
@@ -44,16 +49,30 @@ previous format.)
     "_type": "Targets",
     "version": VERSION,
     "expires": EXPIRES,
-    "targets": TARGETS,
+    "targets": {
+      TARGET: {
+        "length": LENGTH,
+        "hashes": HASHES,
+        // Optional dictionary specifying other metadata about the target.
+        "custom": CUSTOM
+      },
+    },
     "delegations": {
+      // Maps a public key to its key ID (e.g., SHA-256 of the public key.)
       "keys": {
         KEYID: KEY
       },
+      // Specifies delegations in descending order of priority.
       "roles": [
+        // Specifies the paths delegated to the following _role_.
         "paths": [PATHPATTERN],
+        // Specifies the name of the _role_ delegated the preceeding paths.
         "name": ROLENAME,
+        // Specifies the keys used to sign this role metadata.
         "keyids": [KEYID],
+        // Specifies the threshold # of keys required to sign the metadata.
         "threshold": THRESHOLD,
+        // Specifies whether this delegation is terminating.
         "terminating": BOOLEAN
       ]
     }
@@ -61,14 +80,14 @@ previous format.)
 }
 ```
 
-Please see [the previous version of specification](link) for more details.
-
 ### Limitations of the previous format
 
-(TODO: A few words on the limitations of the previous format.
-Basically, it does not let us achieve our goal in the [Abstract](#abstract).)
+Note that, unfortunately, this format does not allow a list of targets to be
+delegated to more than one role.
 
 ## The current format
+
+The following is the proposed format for a targets metadata file:
 
 ```Javascript
 {
@@ -83,27 +102,45 @@ Basically, it does not let us achieve our goal in the [Abstract](#abstract).)
     "_type": "Targets",
     "version": VERSION,
     "expires": EXPIRES,
-    "targets": TARGETS,
-    "keys": {
-      KEYID: KEY
+    "targets": {
+      TARGET: {
+        "length": LENGTH,
+        "hashes": HASHES,
+        "custom": CUSTOM
+      }
     },
+    "keys": {
+      KEYID: KEY  
+    },
+    // Specifies the keys used by every role.
     "roles": {
+      // A unique name for every role.
       ROLENAME: {
+        // Optional. Allows different roles to be mapped to the same file.
         "filename": PATHPATTERN,
+        // Specifies the keys used to sign this role metadata.
         "keyids": [KEYID],
+        // Specifies the threshold # of keys required to sign the metadata.
         "threshold": THRESHOLD
       }
     },
+    // Specifies delegations in descending order of priority.
     "delegations": [
       {
+        // Specifies the paths delegated to the following _roles_.
         "paths": [PATHPATTERN],
+        // Specifies the names of _roles_ delegated the preceeding paths.
+        // This list may specify a single role.
         "roles": [ROLENAME],
+        // Specifies whether this delegation is terminating.
         "terminating": BOOLEAN
       }
     ]
   }
 }
 ```
+
+Note that no list of keys, paths, or roles is permitted to be empty.
 
 ### Improvements over the previous format
 
@@ -115,35 +152,43 @@ This allows the separation of keys from delegations.
 
 Second, like the "keys" attribute, the "roles" attribute is also a high-level
 attribute on its own.
+The "roles" attribute now specifies only the keys used by a role, and
+(optionally) the metadata filename corresponding to the role.
+If the filename is not specified, then it is assumed to be located at
+"<ROLENAME>.json".
 Different roles may share the same filename (e.g., "F1.json"), but use a
-different threshold and/or set of keys.
+different threshold and/or list of keys.
 For example:
 
 ```Javascript
 ...
   "roles": {
     "R1": {
-      "filename": "F1",
+      "filename": "F1.json",
       "keyids": ["K1", "K2", "K3"],
       "threshold": 2
     },
     "R2": {
-      "filename": "F1",
-      "keyids": ["K1", "K3"],
+      "filename": "F1.json",
+      "keyids": ["K4", "K5"],
       "threshold": 1
     },
   }
 ...
 ```
 
-Third, the "delegations" attribute is now a list.
-Every member of this list is a dictionary with the "path", "roles", and
-"terminating" attributes.
-The "roles" attribute specifies a list of role mask names.
-Delegations are searched in order of appearance in this list.
+Third, the new "delegations" attribute is a list that specifies delegations
+in descending order of priority.
+A delegation maps a list of target path patterns to a list of roles.
+
+### Resolving delegations
+
+Delegations are searched in descending order of priority.
 If a desired target matches a target path pattern in the "paths" attribute,
-then all roles in the "roles" attribute must provide exactly the same targets
-metadata (i.e., hashes and lengths) about the desired target.
+then all roles in the "roles" attribute must provide exactly the same required
+targets metadata --- hashes and lengths --- about the desired target.
+(However, note that they may provide different "custom" metadata from each other
+about the same target.)
 If a role does not provide the required metadata, or provides mismatching
 metadata, then the search is stopped, and an error is reported.
 Otherwise, if none of the roles provide metadata about the desired target, then
@@ -152,17 +197,24 @@ true.
 
 # Security Analysis
 
-(Compare the previous and new preorder DFS algorithms.
-Briefly argue why the meaning of the previous algorithm is preserved in the new
-one.)
+We argue that this TAP does not change previous security guarantees, because it
+uses the same preorder depth-first search algorithm as before in resolving
+delegations.
+The only difference between the previous and new search algorithm is that if
+multiple roles are delegated a target, then all of these roles must specify the
+same required targets metadata (i.e., length and hashes) about the target.
 
 # Backwards Compatibility
 
-(A few words on why the new format breaks backwards compatibility.)
+This TAP is incompatible with previous implementations of TUF because the format
+of the targets metadata file has been changed in a backwards-incompatible
+manner.
+However, note that it should take relatively little effort to adapt an existing
+implementation to recognize the new format.
 
 # Augmented Reference Implementation
 
-(Sebastien knows this best.)
+[TODO: Point to a branch containing implementation of TAP 3.]
 
 # Copyright
 

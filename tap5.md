@@ -2,8 +2,8 @@
 * Title: Key and URL pinning in the root metadata
 * Version: 1
 * Last-Modified: 05-Oct-2016
-* Author: Justin Cappos, Sebastien Awwad, Vladimir Diaz, Trishank Karthik
-          Kuppusamy
+* Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
+          Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Draft
 * Content-Type: <text/markdown>
 * Created: 24-Sep-2016
