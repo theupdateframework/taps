@@ -155,7 +155,7 @@ The "roles" attribute now specifies only the keys used by a role, and
 (optionally) the metadata filename corresponding to the role.
 If the filename is not specified, then it is assumed to be located at
 "<ROLENAME>.json".
-Different roles may share the same filename (e.g., "F1.json"), but will use a
+Different roles may share the same filename (e.g., "F1.json"), but may use a
 different threshold and/or list of keys.
 For example:
 
@@ -186,8 +186,8 @@ Delegations are searched in descending order of priority.
 If a desired target matches a target path pattern in the "paths" attribute,
 then all roles in the "roles" attribute must provide exactly the same required
 targets metadata --- hashes and lengths --- about the desired target.
-(Note, however, that though the data is the same, they may provide different "custom" metadata from each other
-about the same target.)
+(Note, however, that although the hashes and length must be the same, they may
+provide different "custom" metadata from each other about the same target.)
 If a role does not provide the required metadata, or provides mismatching
 metadata, then the search is stopped, and an error is reported.
 Otherwise, if none of the roles provide metadata about the desired target, then
