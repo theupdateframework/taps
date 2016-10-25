@@ -1,7 +1,7 @@
 * TAP: 3
 * Title: Multi-role delegations
 * Version: 1
-* Last-Modified: 24-Oct-2016
+* Last-Modified: 25-Oct-2016
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Draft
@@ -15,8 +15,8 @@ instead of just a single role.
 
 # Motivation
 
-It is desirable at times to delegate targets to multiple roles in order to
-increase compromise-resilience.
+It is desirable at times to delegate targets to a combination of roles in order
+to increase compromise-resilience.
 For example, a project may require both its release engineering and quality
 assurance roles to sign its targets, so that the compromise of either one of
 these roles is insufficient to execute arbitrary software attacks.
@@ -27,9 +27,11 @@ The design underlying this TAP has been chosen to make it easier for the human
 reader to understand.
 It has not been designed to remove redundancies, such as repeated specifications
 of public keys, role names, or target path patterns.
-Note that redundancies are not a concern in practice, because TUF allows
-metadata files to be compressed, and also specifies an upper bound on their
-length.
+Note that these redundancies, if any, should not pose a major concern in
+practice on metadata file sizes.
+Nevertheless, in order to limit how large a metadata file can be, TUF already
+allows metadata files to be compressed, and imposes an upper bound on their
+length (which remains unchanged in our reference implementation).
 
 #Specification
 
@@ -83,8 +85,8 @@ The following is the [previous format for a targets metadata file](https://githu
 
 ### Limitations of the previous format
 
-The previous format prevents a list of targets from being
-delegated to more than one role.
+The previous format prevents a list of targets from being delegated to a
+combination of roles.
 
 ## The current format
 
@@ -141,15 +143,18 @@ The following is the proposed format for a targets metadata file:
 }
 ```
 
-Note that no list of keys, paths, or roles is permitted to be empty.
+Note that no list of keys, paths, or roles should be empty.
+An implementation is free to reject a targets metadata file containing such an
+empty list.
 
 ### Improvements over the previous format
 
 There are three important differences from the previous format.
 
-First, the "keys" attribute has been removed from the "roles" attribute, and is
-now a high-level attribute on its own.
-This allows the separation of keys from delegations.
+First, the "keys" attribute has been removed from the "delegations" attribute,
+and is now a high-level attribute on its own.
+This allows keys to be specified separately from delegations of paths to roles,
+which permits an easier understanding of delegations.
 
 Second, like the "keys" attribute, the "roles" attribute also becomes a
 high-level attribute on its own.
@@ -159,17 +164,19 @@ If the filename is not specified, then it is assumed to be located at
 "<ROLENAME>.json".
 Different roles may share the same filename (e.g., "F1.json"), but may use a
 different threshold and/or list of keys.
-For example:
+Returning to the example from the [motivation](#motivation), a project may
+require the release engineering and quality assurance roles to use different
+keys, but use the same targets metadata file in order to simplify deployment:
 
 ```Javascript
 ...
   "roles": {
-    "R1": {
+    "release-engineering": {
       "filename": "F1.json",
       "keyids": ["K1", "K2", "K3"],
       "threshold": 2
     },
-    "R2": {
+    "quality-assurance": {
       "filename": "F1.json",
       "keyids": ["K4", "K5"],
       "threshold": 1
