@@ -10,8 +10,8 @@
 
 # Abstract
 
-This TAP allows targets to be delegated to multiple roles on a repository, instead of just a
-single role.
+This TAP allows targets to be delegated to multiple roles on a repository,
+instead of just a single role.
 
 # Motivation
 
@@ -23,11 +23,13 @@ these roles is insufficient to execute arbitrary software attacks.
 
 #Rationale
 
-The design underlying this TAP has been chosen to make it easier for the human reader to nderstand.
+The design underlying this TAP has been chosen to make it easier for the human
+reader to understand.
 It has not been designed to remove redundancies, such as repeated specifications
 of public keys, role names, or target path patterns.
-Note that redundancies are not a concern in practice, because TUF allows metadata files
-to be compressed, and also specifies an upper bound on their length.
+Note that redundancies are not a concern in practice, because TUF allows
+metadata files to be compressed, and also specifies an upper bound on their
+length.
 
 #Specification
 
@@ -145,12 +147,12 @@ Note that no list of keys, paths, or roles is permitted to be empty.
 
 There are three important differences from the previous format.
 
-First, the "keys" attribute has been removed from the "roles" attribute, and is now
- a high-level attribute on its own.
+First, the "keys" attribute has been removed from the "roles" attribute, and is
+now a high-level attribute on its own.
 This allows the separation of keys from delegations.
 
-Second, like the "keys" attribute, the "roles" attribute also becomes a high-level
-attribute on its own.
+Second, like the "keys" attribute, the "roles" attribute also becomes a
+high-level attribute on its own.
 The "roles" attribute now specifies only the keys used by a role, and
 (optionally) the metadata filename corresponding to the role.
 If the filename is not specified, then it is assumed to be located at
@@ -191,8 +193,8 @@ provide different "custom" metadata from each other about the same target.)
 If a role does not provide the required metadata, or provides mismatching
 metadata, then the search is stopped, and an error is reported.
 Otherwise, if none of the roles provide metadata about the desired target, then
-the rest of the delegations will be searched if the "terminating" attribute is not
-true.
+the rest of the delegations will be searched if the "terminating" attribute is
+not true.
 
 # Security Analysis
 
@@ -200,8 +202,9 @@ We argue that this TAP does not change previous security guarantees, because it
 uses the same preorder depth-first search algorithm as before in resolving
 delegations.
 The only difference between the previous and new search algorithm is that, if
-multiple roles are delegated the same target, then all of these roles must specify the
-same required targets metadata (i.e., length and hashes) about that target.
+multiple roles are delegated the same target, then all of these roles must
+specify the same required targets metadata (i.e., length and hashes) about that
+target.
 
 # Backwards Compatibility
 
