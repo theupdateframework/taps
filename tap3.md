@@ -10,8 +10,8 @@
 
 # Abstract
 
-This TAP allows targets to be delegated to multiple roles on a repository,
-instead of just a single role.
+This TAP allows targets to be delegated to a combination of roles on a
+repository, instead of just a single role.
 
 # Motivation
 
@@ -120,7 +120,7 @@ The following is the proposed format for a targets metadata file:
       // A unique name for every role.
       ROLENAME: {
         // Optional. Allows different roles to be mapped to the same file.
-        "filename": PATHPATTERN,
+        "filename": FILENAME,
         // Specifies the keys used to sign this role metadata.
         "keyids": [KEYID],
         // Specifies the threshold # of keys required to sign the metadata.
