@@ -1,19 +1,21 @@
 * TAP: 4
-* Title: Trust Pinning
+* Title: Repository Assignments
 * Version: 1
-* Last-Modified: 04-Oct-2016
+* Last-Modified: 02-Nov-2016
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Draft
 * Content-Type: text/markdown
 * Requires: [TAP 5](tap5.md)
 * Created: 09-Sep-2016
-* Post-History: 09-Sep-2016
 
 # Abstract
 
-TAP 4 allows clients to use a _trust pinning file_ to delegate targets to one
-or more repositories.
+TAP 4 allows users to _assign_ targets to repositories in a manner similar to
+how targets can be delegated to roles.
+This means that: (1) targets may be found on one of many repositories, each with
+a different root of trust, and (2) many repositories may be required to sign
+targets.
 
 # Motivation
 
@@ -28,40 +30,39 @@ repository, and all other targets from the public repository.
 
 ## Use case 2: improving compromise-resilience
 
-To improve compromise-resilience, a client may require signatures from multiple
-repositories with different root keys for the same targets metadata.
-We will refer to this required consensus as _multi-repository delegation_.
+To improve compromise-resilience, a client may require multiple repositories,
+each with a different root of trust, to sign targets.
+This is done so that the compromise of a single repository is insufficient to
+execute arbitrary software attacks.
 
 # Rationale
 
-TUF would benefit from the ability to handle the above use cases, requested by
-TUF adopters.
-The selected design allows a great deal of flexibility, and only slightly
-increases the code base.
+TUF would benefit greatly from the ability to handle the above use cases,
+requested by its adopters.
+This TAP does not change existing security guarantees, allows a great deal of
+flexibility, and should require only modest effort for support from an existing
+implementation.
 
 # Specification
 
-We introduce a new, required, client-side, top-level metadata file,
-`pinned.json`, which permits clients to associate different repositories with
-different targets.
-This file is also known as the _trust pinning file_, and comes into play when a
-client requests targets.
+We introduce a mandatory top-level metadata file called `assignments.json`.
+This file is also known as the _repository assignments file_, and comes into
+play when a client requests targets.
 
-Using a scheme similar to targets delegations within a repository, different
-targets may be delegated to different repositories in this file.
-These delegations are also known as _repository delegations_.
+Using a scheme similar to targets delegations within a repository, targets may
+be assigned to one or more repositories in this file.
 
-A client will keep full metadata for each repository in a separate directory.
+A client will keep all metadata for each repository in a separate directory.
 
-## Trust pinning file
+## The repository assignments file
 
-The trust pinning file maps targets to repositories.
+The repository assignments file maps targets to repositories.
 This file is not available from a repository.
 It is either constructed by the user using the TUF command-line tools, or
 distributed by an out-of-band bootstrap process.
 
-The trust pinning file contains a dictionary
-that holds two keys, "repositories" and "delegations."
+The repository assignments file contains a dictionary
+that holds two keys, "repositories" and "assignments."
 
 The value of the "repositories" key is another dictionary.
 Each key in this dictionary is a _repository name_, and its value is a list of
@@ -73,72 +74,40 @@ target files.
 These files would be updated following the steps detailed in
 [this section](#downloading-metadata-and-target-files).
 
-The value of the "delegations" key is a list.
+The value of the "assignments" key is a list.
 Every member in this list is a dictionary with at least two keys:
 
 * "paths" specifies a list of target paths of patterns. A desired target must
-match a pattern in this list for this delegation to be consulted.
+match a pattern in this list for this assignment to be consulted.
 * "repositories" specifies a list of one or more repository names.
 * Optionally, "terminating" is a Boolean attribute indicating whether or not
-  this delegation terminates
-  [backtracking](#interpreting-the-trust-pinning-file).
+  this assignment terminates
+  [backtracking](#interpreting-the-repository-assignments-file).
 
-The following is an example of a trust pinning file:
+The following is an example of a repository assignments file:
 
 ```javascript
 {
-  // Each repository may use a different root metadata file.
-  // Each root metadata file may specify how metadata files for top-level roles
-  // are to be updated.
-  // Please see TAP 5 for more details.
+  // For each repository, specify a list of mirrors where files may be
+  // downloaded.
   "repositories": {
-    // In this example, the "Django" root metadata file specifies the timestamp
-    // and snapshot keys used by PyPI.
-    // However, the targets key corresponds to the Django project on PyPI, and
-    // the root metadata file on disk shall never be updated.
-    "Django": ["https://pypi.python.org/"],
-    // In this example, the "Flask" root metadata file specifies the timestamp
-    // and snapshot keys used by PyPI.
-    // However, the targets key corresponds to the Flask project on PyPI, and
-    // the root metadata file on disk shall be updated from the Flask repository
-    // instead of PyPI.
-    "Flask":  ["https://pypi.python.org/"],
-    // In this example, all metadata files would be downloaded from the NumPy
-    // repository.
-    "NumPy":  ["https://repository.numpy.org/"],
-    // In this example, all metadata files would be downloaded from the PyPI
-    // repository.
+    "Django": ["https://djangoproject.com/"],
     "PyPI":   ["https://pypi.python.org/"]
   },
-  "delegations": [
+  // For each set of targets, specify a list of repositories where files may be
+  // downloaded.
+  "assignments": [
     {
-      // First, delegate any target matching *Django* to the Django repository.
+      // Assign any target matching *Django* to both Django and PyPI.
       "paths":        ["*django*"],
-      "repositories": ["Django"],
+      "repositories": ["Django", "PyPI"],
       // If missing, the "terminating" attribute is assumed to be false.
-      // Therefore, if this delegation has not signed for a *django* target,
-      // the following delegation will be consulted.
+      "terminating":  false,
+      // Therefore, if this assignment has not signed for a *django* target,
+      // the following assignment will be consulted.
     },
     {
-      // Second, delegate any target matching *flask* to only the Flask
-      // repository.
-      "paths":        ["*flask*"],
-      "repositories": ["Flask"],
-      // If this delegation has not signed for a *flask* target, the following
-      // delegations will _not_ be consulted.
-      "terminating": true
-    },
-    {
-      // Third, delegate any target matching *numpy* only to _both_ the NumPy
-      // and PyPI repositories.
-      "paths":        ["*numpy*"],
-       // Both the NumPy and PyPI repositories must sign the same targets
-       // metadata (i.e., length and hashes).
-      "repositories": ["NumPy", "PyPI"],
-      "terminating": true
-    },
-    {
-      // Delegate all other targets to PyPI.
+      // Assign all other targets only to PyPI.
       "paths":        ["*"],
       "repositories": ["PyPI"]
     }
@@ -167,7 +136,7 @@ Beyond this, the repository may organize target files into any hierarchy it
 requires.
 
 The following directory layout may apply to the PyPI repository from the example
-trust pinning file:
+repository assignments file:
 
 ```
 -metadata
@@ -182,16 +151,11 @@ trust pinning file:
 -targets
 ```
 
-Metadata and target files may be stored on the repository using [consistent
-snapshots](https://github.com/theupdateframework/tuf/blob/5d2c8fdc7658a9f7648c38b0c79c0aa09d234fe2/docs/tuf-spec.txt).
-A client must download all files, and rename them on its local storage, using
-rules pertaining to a consistent snapshot.
-
 ## Metadata and targets layout on clients
 
 On a client, all metadata files would be stored under the "metadata" directory.
-This directory would contain the trust pinning file, as well as a subdirectory
-for every repository specified in the trust pinning file.
+This directory would contain the repository assignments file, as well as a
+subdirectory for every repository specified in the repository assignments file.
 Each repository metadata subdirectory would use the repository name.
 In turn, it would contain two subdirectories: "previous" for the previous set of
 metadata files, and "current" for the current set.
@@ -199,23 +163,20 @@ metadata files, and "current" for the current set.
 All targets files would be stored under the "targets" directory.
 Targets downloaded from any repository would be written to this directory.
 
-The following directory layout would apply to the trust pinning file example:
+The following directory layout would apply to the repository assignments file
+example:
 
 ```
 -metadata
--└── pinned.json       // the trust pinning file
--└── Django            // repository name
+-└── assignments.json     // the repository assignments file
+-└── Django             // repository name
 -    └── current
--        ├── root.json // minimum requirement; see TAP 5 for details
+-        ├── root.json  // minimum requirement
 -        └── timestamp.json
 -        ├── snapshot.json
 -        ├── targets.json
--        └── ...       // see the layout of delegations on the repository
+-        └── ...        // see layout of targets delegations on repository
 -    └── previous
--└── Flask/current
--└── Flask/previous
--└── NumPy/current
--└── NumPy/previous
 -└── PyPI/current
 -└── PyPI/previous
 -targets
@@ -223,24 +184,22 @@ The following directory layout would apply to the trust pinning file example:
 
 ## Downloading metadata and target files
 
-A client would perform the following five steps while searching for a target
-from a repository.
+A client would perform the following five steps while searching for a target on
+a repository.
 
-First, the client loads the previous copy of the [root metadata file](tap5.md).
+First, the client loads the previous copy of the root metadata file.
 If this file specifies that it should not be updated, then the client would not
 update it.
 Otherwise, if the root metadata files specifies a custom list of URLs from
-which it should be updated, then the client would use those URLs to update
-this file.
-Otherwise, the client would use the list of mirrors specified in the trust
-pinning file.
+which it should be updated, then the client uses those URLs to update this file.
+Otherwise, the client uses the list of mirrors specified in the repository
+assignments file.
 
-Second, the client would use similar steps to update the timestamp metadata
-file.
+Second, the client uses similar steps to update the timestamp metadata file.
 
-Third, the client would use similar steps to update the snapshot metadata file.
+Third, the client uses similar steps to update the snapshot metadata file.
 
-Fourth, the client would use similar steps to update all targets metadata files.
+Fourth, the client uses similar steps to update all targets metadata files.
 If the root metadata file specifies a custom URL for top-level targets role, the
 client should be careful in Interpreting the entries of the snapshot metadata
 file.
@@ -248,45 +207,43 @@ For example, if the URL for the targets role in the root metadata file is "https
 number would correspond to the entry for "Django.json" instead of "targets.json"
 (for the original top-level targets role) in the snapshot metadata.
 
-Fifth, the client would use only the list of mirrors specified in the trust
-pinning file to download all target files.
+Fifth, the client uses only the list of mirrors specified in the repository
+assignments file to download all target files.
 
 When downloading a metadata or target file from a repository, the client would
 try contacting every known mirror / URL until the file is found.
 If the file is not found on all mirrors / URLs, the search is aborted, and the
 client reports to the user that the file is missing.
 
-## Interpreting the trust pinning file
+## Interpreting the repository assignments file
 
-Every repository delegation in the trust pinning file shall be interpreted as
+Every assignment in the repository assignments file shall be interpreted as
 follows.
-Proceeding down the list of delegations in order, if a desired target matches
-the "paths" attribute, then download and verify
-metadata from every repository specified in the "repositories" attribute.
+Proceeding down the list of assignments in order, if a desired target matches
+the "paths" attribute, then download and verify metadata from every repository
+specified in the "repositories" attribute.
 Ensure that the targets metadata, specifically length and hashes about the
 target, matches across repositories.
 Custom targets metadata is exempted from this requirement.
 If the targets metadata matches across repositories, return this metadata.
 Otherwise, report the mismatch to the user.
-If all repositories in the current delegation have not signed any metadata
+If all repositories in the current assignment have not signed any metadata
 about the target, then take one of the following two actions.
 If the "terminating" attribute is set to true, report that there is no metadata
 about the target.
-Otherwise, proceed to similarly interpret the next delegation.
+Otherwise, proceed to similarly interpret the next assignment.
 
 # Security Analysis
 
-This TAP allows users to choose different repositories for different targets.
-However, it does not change the way TUF verifies metadata for a repository.
+This TAP allows users to assign targets to one or more repositories.
+However, it does not change the way TUF verifies metadata for any one
+repository.
 Each repository continues to be treated as it was previously, with TUF
-performing full validation of the repository metadata.
+performing the necessary verification of the repository metadata.
 
-When using a trust pinning file, users should be aware of the following
-issues:
-
-- If multiple repositories sign the same targets, then the repositories should
-coordinate to sign the same targets metadata in order to also avoid accidental
-denial-of-service attacks.
+In order to avoid accidental denial-of-service attacks when multiple
+repositories sign the same targets, these repositories should coordinate to sign
+the same targets metadata.
 
 # Backwards Compatibility
 
@@ -294,7 +251,7 @@ This specification is not backwards-compatible because it requires:
 
 1. Clients to support additional, optional fields in the [root metadata file](tap5.md).
 2. A repository to use a [specific filesystem layout](#metadata-and-targets-layout-on-repositories).
-3. A client to use a [trust pinning file](#trust-pinning-file).
+3. A client to use a [repository assignments file](#repository-assignments-file).
 4. A client to use a [specific filesystem layout](#metadata-and-targets-layout-on-clients).
 5. A client to [download metadata and target files from a repository in a specific manner](#downloading-metadata-and-target-files).
 
@@ -305,10 +262,3 @@ This specification is not backwards-compatible because it requires:
 # Copyright
 
 This document has been placed in the public domain.
-
-# Acknowledgements
-
-It is worth mentioning that Notary has a pinning implementation.
-Although this proposal differs from that implementation and has slightly
-different goals, the Notary format should be compatible with this specification
-via a simple transformation.
