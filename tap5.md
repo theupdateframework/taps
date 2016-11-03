@@ -1,7 +1,7 @@
 * TAP: 5
-* Title: Key and URL pinning in the root metadata
+* Title: Setting URLs for roles in the root metadata file
 * Version: 1
-* Last-Modified: 05-Oct-2016
+* Last-Modified: 02-Nov-2016
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Draft
@@ -10,153 +10,124 @@
 
 # Abstract
 
-TAP 5 allows users to use the root metadata file to pin the keys and URLs used
-to verify and update the top-level roles of a repository.
+TAP 5 allows each top-level role in the root metadata file to be optionally
+associated with a list of URLs.
+This enables a user to associate a remote repository with a different root of
+trust, even if the user does not control this repository.
 
 # Motivation
 
-TAP 5 has been motivated by the following use cases.
+TAP 5 has been motivated by the following use case.
 
-## Use case 1: restricting trust in a repository to a delegated targets role instead of the top-level targets role
+## Use case 1: restricting trust in a community repository to a single project
 
-A  user may wish to restrict her trust in a repository to a delegated targets
-role instead of the top-level targets role.
-For example, a client may trust trust only the Django delegated targets role
-on the PyPI repository.
-Using this TAP, the user can create a custom root metadata file that specifies
-that the keys and URL of the top-level targets role respectively are instead
-the keys and URL of the Django delegated targets role respectively.
+Suppose that the Django software project uses the PyPI community repository to
+distribute its software packages, because doing so is more cost-effective than
+hosting and maintaining its own repository.
+Furthermore, suppose that there is group of enterprise users who trust PyPI only
+to install Django packages.
+These users must depend on PyPI administrators to
+[delegate]((http://isis.poly.edu/~jcappos/papers/kuppusamy_nsdi_16.pdf))
+all Django packages to the correct public keys belonging to the project.
+Unfortunately, if the PyPI administrator keys have been compromised, then
+attackers can replace this delegation, and deceive these unsuspecting users into
+installing malware.
 
-## Use case 2: pinning keys of top-level roles
-
-A user may also wish to pin top-level roles to certain keys, and never update
-them, or update them by her own means instead of relying on the original
-repository.
+These users can solve the problem, if they are somehow able to _fix_, only for
+themselves, the root of trust on PyPI, such that: (1) PyPI is trusted to provide
+only metadata about the Django project, and (2) PyPI cannot change the public
+keys used to verify this metadata.
 
 #Rationale
 
-The current design for TAP 5 was arrived at after considering different design
-choices.
-
-One such minimal design choice was to pin only the keys and URLs for the root
-and targets roles, as this would suffice to meet the use case outlined earlier.
-However, this design choice was rejected because it is not general enough to
-capture other uses cases.
+We introduce this TAP because, without it, the users who wished to implement
+this use case would be forced implement undesirable solutions, such as requiring
+the Django project to maintain its own repository.
+It would be desirable for such users to use a more practical solution that
+allows them to fix the root of trust on PyPI as described above.
 
 #Specification
 
-We propose the following extension to the root metadata file:
-
-1. Each top-level role can use the new "URLs" attribute to specify a list of
-URLs from which it can be updated, in place of the mirrors specified in the
-[trust pinning file](tap4.md). If this list is empty, then it means that the
-root metadata file shall not be updated at all. Otherwise, the root metadata
-file would be downloaded from each URL, using the order specified in the list
-until it is found.
+In order to support this use case, we propose the following simple extension to
+the root metadata file format.
 
 ## The new root metadata file format
 
-The following is an example of what the new root metadata file format looks
-like:
+Each top-level role can use the new "URLs" attribute to specify a list of
+URLs from which it can be updated, in place of the mirrors specified in the
+[repository assignments file](tap4.md).
+If this list is empty, then it means that the root metadata file shall not be
+updated at all.
+Otherwise, the root metadata file would be downloaded from each URL, using the
+order specified in this list, until it is found.
 
 ```Javascript
 {
+  "signed": {
+    "roles": {
+      ROLE: {
+        // NOTE: This is the only adjustment to the file format.
+        // For information about all other fields, please see the previous
+        // version of the specification.
+        // NEW: Now, instead of the list of mirrors specified in the repository
+        // assignments file (TAP 4), a TUF client would use this list of URLs to
+        // download the metadata file for this fole.
+        // This list may be empty.
+        "URLs":       [...],
+        "keyids":     [KEYID],
+        "threshold":  THRESHOLD
+      },
+    },
+    "expires":  EXPIRES,
+    "keys":     {
+      KEYID: KEY
+    },
+    "version":  VERSION,
+    "_type":    "Root"
+  },
   "signatures": [
     {
       "keyid":  KEYID,
       "method": METHOD,
       "sig":    SIGNATURE
     }
-  ],
-  "signed": {
-    "_type":    "Root",
-    "version":  VERSION,
-    "expires":  EXPIRES,
-    "keys":     {KEYID: KEY},
-    "roles": {
-      ROLE: {
-        "URLs":       [...],            // This line is new and optional.
-        "keyids":     [KEYID, ...],
-        "threshold":  THRESHOLD
-      },
-    }
-  }
+  ]
 }
 ```
 
-The reader may compare the new file format to the [previous version](https://github.com/theupdateframework/tuf/blob/f57a0bb1a95579094a0324d4153f812a262d15e3/docs/tuf-spec.0.9.txt).
+## Example: restricting trust in a community repository to a single project
 
-### Example 1: do not update the root metadata file
-
-The following example illustrates how to specify that _only_ the root metadata
-file shall not be updated:
+Returning to our running example, the following root metadata file illustrates
+how our group of enterprise users may fix, only for themselves, the root of
+trust on PyPI, such that: (1) PyPI is trusted to provide only metadata about the
+Django project, and (2) PyPI cannot change the public keys used to verify this
+metadata:
 
 ```Javascript
 {
   "signed": {
     "roles": {
+      // Use a privately controlled root role instead of the one on PyPI.
       "root": {
-        "keyids": [...],  // Pin the root role to these keys.
-        "URLs":   []      // And do NOT update this root metadata file!
-        ...
-      },
-      ...
-    },
-    ...
-  },
-  ...
-}
-```
-
-### Example 2: update the root metadata file from different URLs than in the trust pinning file
-
-The following example illustrates how to specify that _only_ the root metadata
-file shall be updated using a different list of URLs than the list of mirrors
-specified in the [trust pinning file](tap4.md):
-
-```Javascript
-{
-  "signed": {
-    "roles": {
-      "root": {
-         // Pin the root role to these keys.
+         // Fix the root role to keys controlled by the group of enterprise
+         // users instead of PyPI administrators.
         "keyids": [...],
-        // And update this root metadata file using *these* URLs instead.
-        "URLs": ["http://example.com/root.json"]
+        // And update the root metadata file from a privately controlled server.
+        "URLs": ["http://example.com/metadata/root.json"],
         ...
       },
-      ...
-    },
-    ...
-  },
-  ...
-}
-```
-
-### Example 3: restricting trust in a repository to a delegated targets role instead of the top-level targets role
-
-The following example illustrates how the Django project can pin the keys used
-to verify Django targets on the PyPI repository:
-
-```Javascript
-{
-  "signed": {
-    "roles": {
-      "root": {
-         // Pin the root role to Django-administered instead of
-         // PyPI-administered root keys.
-        "keyids": [...],
-        // And update this root metadata file from Django instead.
-        "URLs": ["https://www.djangoproject.com/metadata/root.json"]
-        ...
-      },
-      // However, reuse the Django delegation already on PyPI.
+      // Use the timestamp role on PyPI.
+      "timestamp": {...},
+      // Use the snapshot role on PyPI.
+      "snapshot": {...},
+      // Instead of using the top-level targets role on PyPI, which delegates to
+      // other projects besides Django...
       "targets": {
-        // Pin the targets role to Django-administered keys.
+        // ...use only the delegated targets role belonging to Django on PyPI.
+        "URLs": ["https://pypi.python.org/metadata/delegations/Django.json"],
+        // Fix the targets role to correct keys known to belong to Django.
+        // All of this prevents PyPI from being able to change this delegation.
        "keyids": [...],
-        // And point the targets role to the Django delegation on PyPI.
-        "URLs": ["https://pypi.python.org/metadata/delegations/Django.json"]
-        // This prevents PyPI from being able to change the delegation keys.
         ...
       },
       ...
@@ -166,47 +137,55 @@ to verify Django targets on the PyPI repository:
   ...
 }
 ```
+
+In this example, note that root metadata file is updated from a server
+controlled by the group of enterprise users, so that PyPI administrators are
+unable to change this root of trust.
+This means that their TUF clients would not download the root metadata file from
+PyPI.
+Similarly, their TUF clients would also not download any targets metadata file
+from PyPI, except for the delegated targets metadata files belonging to Django.
 
 ## Changes to the snapshot metadata file and how metadata files are downloaded
 
-Since clients may not download the root metadata file on a repository, the
+Since clients may not download the root metadata file from a repository, the
 snapshot metadata file shall no longer list the root metadata file.
-However, it shall continue to list the top-level and all
-delegated targets metadata files.
-The file names of targets _metadata_ files shall not specify their directories.
-In other words, they would be listed as if they were located in the same
-directory.
+However, it shall continue to list the top-level and all delegated targets
+metadata files.
+
+Furthermore, in order to prevent a delegated targets role from accidentally
+overwriting the metadata file for a top-level role, the file names of targets
+_metadata_ files are not allowed to contain directories.
+In other words, they would be listed as if they were located in [the same directory](tap4.md#metadata-and-targets-layout-on-repositories).
 When populating the dictionary of file names to version numbers, the repository
-shall first add the delegated targets roles, followed by the top-level targets
+shall first add all delegated targets roles, followed by the top-level targets
 role.
 
-This implies that the method for downloading metadata files from a repository
-will be slightly different.
-Please see [TAP 4](tap4.md#downloading-metadata-and-target-files) for more
-details.
+The process for downloading metadata files from a repository is described
+[elsewhere](tap4.md#downloading-metadata-and-target-files).
 
 # Security Analysis
 
-Note that removing the root metadata file from the snapshot metadata does not
-change existing security guarantees.
+Removing the root metadata file from the snapshot metadata does not change
+existing security guarantees.
 This is because: (1) mix-and-match attacks are executed by specifying an
 inconsistent set of targets metadata files, which does not include the root
 metadata file, and (2) a client always attempts to update the root metadata
 file (unless instructed otherwise).
 
-Searching for targets from a delegated targets role instead of the top-level
-targets role also does not introduce security problems, as long as the root
-metadata file has distributed the correct keys for the delegated targets role.
+Searching for targets from a delegated targets role (such as the Django project
+on PyPI) instead of the top-level targets role also does not introduce security
+problems, as long as the root metadata file has distributed the correct keys for
+the delegated targets role.
 In fact, this may even improve compromise-resilience.
 If the root metadata file on disk is not updated at all, or is updated using
 different root keys than used by the original repository, the keys for the
 delegated targets role cannot be incorrectly revoked and replaced with malicious
 keys, even if the original repository has been compromised.
 
-If custom root keys are used instead of the root keys of the original
-repository, then users must be careful in tracking and specifying the correct
-keys for roles on the original repository in order to avoid accidental
-denial-of-service attacks.
+If users fix the keys used to verify a top-level role on a remote repository,
+then they must be careful in tracking and specifying the correct keys for these
+roles in order to avoid accidental denial-of-service attacks.
 If the original repository revokes and replaces these keys, then these keys
 should also be updated accordingly in the custom root metadata file.
 
@@ -215,8 +194,6 @@ should also be updated accordingly in the custom root metadata file.
 This specification is technically backwards-compatible with clients that do not
 recognize TAP 5, because it does not change the semantics of the previous root
 metadata file format.
-However, this specification is useful only in conjunction with [TAP 4](tap4.md),
-and since TAP 4 is backwards-incompatible, then so is TAP 5.
 
 # Augmented Reference Implementation
 

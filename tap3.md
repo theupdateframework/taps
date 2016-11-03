@@ -17,7 +17,7 @@ to delegations in TUF.
 
 # Motivation
 
-TAP 3 has been motivated by the following use cases.
+TAP 3 has been motivated by the following use case.
 
 ## Use case 1: requiring a combination of roles to sign the same targets
 
@@ -52,10 +52,16 @@ roles must sign the same metadata about the target.
 
 #Specification
 
-In order to support this use, we propose the following simple adjustment to the
-targets metadata file format.
+In order to support this use case, we propose the following simple adjustment to
+the targets metadata file format.
 
 ## The new targets metadata file format
+
+The only adjustment to the targets metadata file format is that a delegation
+may specify mutiple role names instead of a single one.
+As we argue in the [security analysis](#security-analysis), this allows us to
+support the AND relation in delegations without breaking existing security
+guarantees.
 
 ```Javascript
 {
@@ -100,12 +106,6 @@ targets metadata file format.
   ]
 }
 ```
-
-The only adjustment to the targets metadata file format is that a delegation
-may specify mutiple role names instead of a single one.
-As we argue in the [security analysis](#security-analysis), this allows us to
-support the AND relation in delegations without breaking existing security
-guarantees.
 
 ## Resolving delegations
 
