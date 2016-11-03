@@ -1,7 +1,7 @@
 * TAP: 5
 * Title: Setting URLs for roles in the root metadata file
 * Version: 1
-* Last-Modified: 02-Nov-2016
+* Last-Modified: 03-Nov-2016
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Draft
@@ -146,7 +146,7 @@ PyPI.
 Similarly, their TUF clients would also not download any targets metadata file
 from PyPI, except for the delegated targets metadata files belonging to Django.
 
-## Changes to the snapshot metadata file and how metadata files are downloaded
+## Changes to the snapshot metadata file
 
 Since clients may not download the root metadata file from a repository, the
 snapshot metadata file shall no longer list the root metadata file.
@@ -160,9 +160,6 @@ In other words, they would be listed as if they were located in [the same direct
 When populating the dictionary of file names to version numbers, the repository
 shall first add all delegated targets roles, followed by the top-level targets
 role.
-
-The process for downloading metadata files from a repository is described
-[elsewhere](tap4.md#downloading-metadata-and-target-files).
 
 # Security Analysis
 
@@ -191,9 +188,13 @@ should also be updated accordingly in the custom root metadata file.
 
 # Backwards Compatibility
 
-This specification is technically backwards-compatible with clients that do not
-recognize TAP 5, because it does not change the semantics of the previous root
-metadata file format.
+This specification is not backwards-compatible with clients that do not
+recognize TAP 5, because the changes to the root and snapshot
+metadata file has
+[implications](tap4.md#downloading-metadata-and-target-files)
+on how metadata files are downloaded.
+However, note that it should take very little effort to incorporate these
+changes with an existing implementation.
 
 # Augmented Reference Implementation
 
