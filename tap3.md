@@ -1,7 +1,7 @@
 * TAP: 3
 * Title: Multi-role delegations
 * Version: 1
-* Last-Modified: 02-Nov-2016
+* Last-Modified: 03-Nov-2016
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Draft
@@ -117,9 +117,8 @@ specification is in how every delegation is processed.
 If a desired target matches a target path pattern in the "paths" attribute,
 then all roles in the "names" attribute must provide exactly the same required
 targets metadata (i.e., hashes and lengths) about the desired target.
-However, note that although the hashes and length must be the same, these roles
-may nevertheless provide different "custom" metadata from each other about the
-same target.
+However, note that these roles may nevertheless provide different "custom"
+metadata from each other about the same target.
 
 If a role does not provide the required metadata, or provides mismatching
 metadata, then the search is stopped, and an error is reported.
