@@ -214,9 +214,9 @@ client reports to the user that the file is missing.
 ## Interpreting the map file
 
 Every mapping in the map file shall be interpreted as follows.
-Proceeding down the list of mappings in order, if a desired target matches
-the "paths" attribute, then download and verify metadata from every repository
-specified in the "repositories" attribute.
+Proceeding down the list of mappings in order, if a desired target matches a
+targets path pattern in the "paths" attribute, then download and verify metadata
+from every repository specified in the "repositories" attribute.
 Ensure that the targets metadata, specifically length and hashes about the
 target, matches across repositories.
 Custom targets metadata is exempted from this requirement.
