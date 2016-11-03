@@ -70,18 +70,25 @@ guarantees.
       "roles": [
         {
           // NOTE: This is the only adjustment to the file format.
+          // OLD: Previously, we specified the name, keyids, and threshold of a
+          // single role allowed to sign the following targets.
+          // "name": "ROLENAME"
+          // "keyids": [KEYID],
+          // "threshold": THRESHOLD,
+          // NEW: Now, we can specify the names of multiple roles, each of which
+          // is associated with its own keys and a threshold number of keys.
+          // All of these roles must sign the same metadata (i.e., length and
+          // hashes) about the following targets.
+          // Each role continues to use a filename based on its rolename.
+          "names": {
+            ROLENAME: {
+              "keyids": [KEYID],
+              "threshold": THRESHOLD
+            }
+          },
           // For information about all other fields, please see the previous
           // version of the specification.
-          // OLD: Previously, we specified the name of a single role allowed to
-          // sign these targets.
-          // "name": ROLENAME,
-          // NEW: Now, we can specify the names of many roles, all of whom must
-          // sign the same metadata (i.e., length and hashes) about these
-          // targets.
-          "names": [ROLENAME],
           "paths": [PATHPATTERN],
-          "keyids": [KEYID],
-          "threshold": THRESHOLD,
           "terminating": BOOLEAN
         }
       ],
