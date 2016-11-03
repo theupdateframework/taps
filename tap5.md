@@ -55,7 +55,7 @@ the root metadata file format.
 
 Each top-level role can use the new "URLs" attribute to specify a list of
 URLs from which it can be updated, in place of the mirrors specified in the
-[repository assignments file](tap4.md).
+[map file](tap4.md).
 If this list is empty, then it means that the root metadata file shall not be
 updated at all.
 Otherwise, the root metadata file would be downloaded from each URL, using the
@@ -69,10 +69,9 @@ order specified in this list, until it is found.
         // NOTE: This is the only adjustment to the file format.
         // For information about all other fields, please see the previous
         // version of the specification.
-        // NEW: Now, instead of the list of mirrors specified in the repository
-        // assignments file (TAP 4), a TUF client would use this list of URLs to
-        // download the metadata file for this fole.
-        // This list may be empty.
+        // NEW: Now, instead of the list of mirrors specified in the map file, a
+        // TUF client would use this list of URLs to download the metadata file
+        // for this role. This list may be empty.
         "URLs":       [...],
         "keyids":     [KEYID],
         "threshold":  THRESHOLD
