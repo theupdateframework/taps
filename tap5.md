@@ -41,8 +41,8 @@ keys used to verify this metadata.
 #Rationale
 
 We introduce this TAP because, without it, the users who wished to implement
-this use case would be forced implement undesirable solutions, such as requiring
-the Django project to maintain its own repository.
+this use case would be forced to implement undesirable solutions, such as
+requiring the Django project to maintain its own repository.
 It would be desirable for such users to use a more practical solution that
 allows them to fix the root of trust on PyPI as described above.
 
@@ -80,7 +80,7 @@ order specified in this list, until it is found.
     },
     "expires":  EXPIRES,
     "keys":     {
-      KEYID: KEY
+      KEYID:    KEY
     },
     "version":  VERSION,
     "_type":    "Root"

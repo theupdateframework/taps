@@ -1,5 +1,5 @@
-* TAP: 4
-* Title: Repository Assignments
+  * TAP: 4
+* Title: The map file
 * Version: 1
 * Last-Modified: 02-Nov-2016
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
@@ -11,11 +11,11 @@
 
 # Abstract
 
-TAP 4 allows users to _assign_ targets to repositories in a manner similar to
-how targets can be delegated to roles.
-This means that: (1) targets may be found on one of many repositories, each with
-a different root of trust, and (2) many repositories may be required to sign
-targets.
+TAP 4 allows users to _map_ targets to repositories in a manner similar to how
+targets can be delegated to roles.
+This allows users to say that: (1) a target may be found on one of many
+repositories, each with a different root of trust, and / or (2) many
+repositories may be required to sign the target.
 
 # Motivation
 
@@ -45,24 +45,23 @@ implementation.
 
 # Specification
 
-We introduce a mandatory top-level metadata file called `assignments.json`.
-This file is also known as the _repository assignments file_, and comes into
-play when a client requests targets.
+We introduce a mandatory top-level metadata file called `map.json`.
+This _map file_ comes into play when a client requests targets.
 
 Using a scheme similar to targets delegations within a repository, targets may
-be assigned to one or more repositories in this file.
+be mapped to one or more repositories in this file.
 
 A client will keep all metadata for each repository in a separate directory.
 
-## The repository assignments file
+## The map file
 
-The repository assignments file maps targets to repositories.
+The map file maps targets to repositories.
 This file is not available from a repository.
 It is either constructed by the user using the TUF command-line tools, or
 distributed by an out-of-band bootstrap process.
 
-The repository assignments file contains a dictionary
-that holds two keys, "repositories" and "assignments."
+The map file contains a dictionary that holds two keys, "repositories" and
+"mapping."
 
 The value of the "repositories" key is another dictionary.
 Each key in this dictionary is a _repository name_, and its value is a list of
@@ -74,17 +73,16 @@ target files.
 These files would be updated following the steps detailed in
 [this section](#downloading-metadata-and-target-files).
 
-The value of the "assignments" key is a list.
+The value of the "mapping" key is a list.
 Every member in this list is a dictionary with at least two keys:
 
 * "paths" specifies a list of target paths of patterns. A desired target must
-match a pattern in this list for this assignment to be consulted.
+match a pattern in this list for this mapping to be consulted.
 * "repositories" specifies a list of one or more repository names.
 * Optionally, "terminating" is a Boolean attribute indicating whether or not
-  this assignment terminates
-  [backtracking](#interpreting-the-repository-assignments-file).
+  this mapping terminates [backtracking](#interpreting-the-map-file).
 
-The following is an example of a repository assignments file:
+The following is an example of a map file:
 
 ```javascript
 {
@@ -96,15 +94,15 @@ The following is an example of a repository assignments file:
   },
   // For each set of targets, specify a list of repositories where files may be
   // downloaded.
-  "assignments": [
+  "mapping": [
     {
       // Assign any target matching *Django* to both Django and PyPI.
       "paths":        ["*django*"],
       "repositories": ["Django", "PyPI"],
       // If missing, the "terminating" attribute is assumed to be false.
       "terminating":  false,
-      // Therefore, if this assignment has not signed for a *django* target,
-      // the following assignment will be consulted.
+      // Therefore, if this mapping has not signed for a *django* target,
+      // the following mapping will be consulted.
     },
     {
       // Assign all other targets only to PyPI.
@@ -136,7 +134,7 @@ Beyond this, the repository may organize target files into any hierarchy it
 requires.
 
 The following directory layout may apply to the PyPI repository from the example
-repository assignments file:
+map file:
 
 ```
 -metadata
@@ -154,8 +152,8 @@ repository assignments file:
 ## Metadata and targets layout on clients
 
 On a client, all metadata files would be stored under the "metadata" directory.
-This directory would contain the repository assignments file, as well as a
-subdirectory for every repository specified in the repository assignments file.
+This directory would contain the map file, as well as a subdirectory for every
+repository specified in the map file.
 Each repository metadata subdirectory would use the repository name.
 In turn, it would contain two subdirectories: "previous" for the previous set of
 metadata files, and "current" for the current set.
@@ -163,12 +161,11 @@ metadata files, and "current" for the current set.
 All targets files would be stored under the "targets" directory.
 Targets downloaded from any repository would be written to this directory.
 
-The following directory layout would apply to the repository assignments file
-example:
+The following directory layout would apply to the example map file:
 
 ```
 -metadata
--└── assignments.json     // the repository assignments file
+-└── map.json           // the map file
 -└── Django             // repository name
 -    └── current
 -        ├── root.json  // minimum requirement
@@ -192,8 +189,7 @@ If this file specifies that it should not be updated, then the client would not
 update it.
 Otherwise, if the root metadata files specifies a custom list of URLs from
 which it should be updated, then the client uses those URLs to update this file.
-Otherwise, the client uses the list of mirrors specified in the repository
-assignments file.
+Otherwise, the client uses the list of mirrors specified in the map file.
 
 Second, the client uses similar steps to update the timestamp metadata file.
 
@@ -207,19 +203,18 @@ For example, if the URL for the targets role in the root metadata file is "https
 number would correspond to the entry for "Django.json" instead of "targets.json"
 (for the original top-level targets role) in the snapshot metadata.
 
-Fifth, the client uses only the list of mirrors specified in the repository
-assignments file to download all target files.
+Fifth, the client uses only the list of mirrors specified in the map file to
+download all target files.
 
 When downloading a metadata or target file from a repository, the client would
 try contacting every known mirror / URL until the file is found.
 If the file is not found on all mirrors / URLs, the search is aborted, and the
 client reports to the user that the file is missing.
 
-## Interpreting the repository assignments file
+## Interpreting the map file
 
-Every assignment in the repository assignments file shall be interpreted as
-follows.
-Proceeding down the list of assignments in order, if a desired target matches
+Every mapping in the map file shall be interpreted as follows.
+Proceeding down the list of mappings in order, if a desired target matches
 the "paths" attribute, then download and verify metadata from every repository
 specified in the "repositories" attribute.
 Ensure that the targets metadata, specifically length and hashes about the
@@ -227,11 +222,11 @@ target, matches across repositories.
 Custom targets metadata is exempted from this requirement.
 If the targets metadata matches across repositories, return this metadata.
 Otherwise, report the mismatch to the user.
-If all repositories in the current assignment have not signed any metadata
+If all repositories in the current mapping have not signed any metadata
 about the target, then take one of the following two actions.
 If the "terminating" attribute is set to true, report that there is no metadata
 about the target.
-Otherwise, proceed to similarly interpret the next assignment.
+Otherwise, proceed to similarly interpret the next mapping.
 
 # Security Analysis
 
@@ -251,7 +246,7 @@ This specification is not backwards-compatible because it requires:
 
 1. Clients to support additional, optional fields in the [root metadata file](tap5.md).
 2. A repository to use a [specific filesystem layout](#metadata-and-targets-layout-on-repositories).
-3. A client to use a [repository assignments file](#repository-assignments-file).
+3. A client to use a [map file](#map-file).
 4. A client to use a [specific filesystem layout](#metadata-and-targets-layout-on-clients).
 5. A client to [download metadata and target files from a repository in a specific manner](#downloading-metadata-and-target-files).
 
