@@ -189,7 +189,7 @@ The following directory layout would apply to the example map file:
 A TUF client would perform the following five steps while searching for a target
 on a repository.
 
-First, the client loads the previous copy of the [root metadata file](tap5.md).
+First, the client loads the latest downloaded [root metadata file](tap5.md).
 If this file specifies that it should not be updated, then the client would not
 update it.
 Otherwise, if the root metadata files specifies a custom list of URLs from
