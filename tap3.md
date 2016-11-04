@@ -11,7 +11,7 @@
 # Abstract
 
 This TAP allows a target to be delegated to a combination of roles on a
-repository, all of whom must sign the same metadata about the target.
+repository, all of whom must sign the same hashes and length of the target.
 This is done by adding [the AND relation](https://en.wikipedia.org/wiki/Logical_conjunction)
 to delegations in TUF.
 
@@ -25,8 +25,7 @@ In some cases, it is desirable to delegate targets to a combination of roles in
 order to increase compromise-resilience.
 For example, a project may require both its release engineering and quality
 assurance roles to sign its targets.
-Both roles are then required to sign the same metadata (i.e., length and hashes)
-about the targets.
+Both roles are then required to sign the same hashes and length of the targets.
 This is done so that, assuming that both roles use different sets of keys, the
 compromise of either one of these roles is insufficient to execute arbitrary
 software attacks.
@@ -48,7 +47,7 @@ Effectively, this allows TUF to support [the OR relation](https://en.wikipedia.o
 The problem is that TUF presently does not have a mechanism to support the AND
 relation in delegations.
 In other words, it is currently not possible to specify that a combination of
-roles must sign the same metadata about the target.
+roles must sign the same hashes and length of the target.
 
 #Specification
 
@@ -77,8 +76,8 @@ guarantees.
           // "threshold": THRESHOLD,
           // NEW: Now, we can specify the names of multiple roles, each of which
           // is associated with its own keys and a threshold number of keys.
-          // All of these roles must sign the same metadata (i.e., length and
-          // hashes) about the following targets.
+          // All of these roles must sign the same hashes and length of the
+          // following targets.
           // Each role continues to use a filename based on its rolename.
           "names": {
             ROLENAME: {
@@ -119,14 +118,16 @@ guarantees.
 
 ## Resolving delegations
 
-As in the [previous version](https://github.com/theupdateframework/tuf/blob/70fc8dce367cf09563915afa40cffee524f5b12b/docs/tuf-spec.txt) of the specification, delegations continue to be searched in
-descending order of priority.
+As in the
+[previous version](https://github.com/theupdateframework/tuf/blob/70fc8dce367cf09563915afa40cffee524f5b12b/docs/tuf-spec.txt#L766-L776)
+of the specification, delegations continue to be searched in descending order of
+priority.
 
 The only difference between the previous and current version of the
 specification is in how every delegation is processed.
 If a desired target matches a target path pattern in the "paths" attribute,
-then all roles in the "names" attribute must provide exactly the same required
-targets metadata (i.e., hashes and lengths) about the desired target.
+then all roles in the "names" attribute must provide exactly the same hashes and
+length of the desired target.
 However, note that these roles may nevertheless provide different "custom"
 metadata from each other about the same target.
 
@@ -142,8 +143,8 @@ We argue that this TAP does not change existing security guarantees, because it
 uses essentially the same preorder depth-first search algorithm as before in
 resolving delegations.
 The only difference between the previous and new search algorithm is that, in
-any single delegation, all specified roles must provide the same required
-metadata (i.e., length and hashes) about that target.
+any single delegation, all specified roles must provide the same hashes and
+length of that target.
 This does not interfere with how prioritized and / or terminating delegations
 are used to support the OR relation.
 
