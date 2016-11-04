@@ -251,7 +251,7 @@ This specification is not backwards-compatible because it requires:
 
 1. TUF clients to support additional, optional fields in the [root metadata file](tap5.md).
 2. A repository to use a [specific filesystem layout](#metadata-and-targets-layout-on-repositories).
-3. A client to use a [map file](#map-file).
+3. A client to use a [map file](#the-map-file).
 4. A client to use a [specific filesystem layout](#metadata-and-targets-layout-on-clients).
 5. A client to [download metadata and target files from a repository in a specific manner](#downloading-metadata-and-target-files).
 
