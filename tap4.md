@@ -83,7 +83,7 @@ Every member in this list is a dictionary with at least two keys:
 * "paths" specifies a list of target paths of patterns. A desired target must
 match a pattern in this list for this mapping to be consulted.
 * "repositories" specifies a list of one or more repository names.
-* Optionally, "terminating" is a Boolean attribute indicating whether or not
+* "terminating" is a Boolean attribute indicating whether or not
   this mapping terminates [backtracking](#interpreting-the-map-file).
 
 The following is an example of a map file:
@@ -100,16 +100,16 @@ The following is an example of a map file:
   // downloaded.
   "mapping": [
     {
-      // Assign any target matching *Django* to both Django and PyPI.
+      // Map any target matching *Django* to both Django and PyPI.
       "paths":        ["*django*"],
       "repositories": ["Django", "PyPI"],
-      // If missing, the "terminating" attribute is assumed to be false.
+      // In this case, the "terminating" attribute is set to false.
       "terminating":  false,
       // Therefore, if this mapping has not signed for a *django* target,
       // the following mapping will be consulted.
     },
     {
-      // Assign all other targets only to PyPI.
+      // Map all other targets only to PyPI.
       "paths":        ["*"],
       "repositories": ["PyPI"]
     }
@@ -235,7 +235,7 @@ Otherwise, proceed to similarly interpret the next mapping.
 
 # Security Analysis
 
-This TAP allows users to assign targets to one or more repositories.
+This TAP allows users to map targets to one or more repositories.
 However, it does not change the way TUF verifies metadata for any one
 repository.
 Each repository continues to be treated as it was previously, with TUF

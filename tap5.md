@@ -162,12 +162,20 @@ role.
 
 # Security Analysis
 
-Removing the root metadata file from the snapshot metadata does not change
-existing security guarantees.
+Removing the root metadata file from the snapshot metadata does not
+significantly change existing security guarantees.
 This is because: (1) mix-and-match attacks are executed by specifying an
 inconsistent set of targets metadata files, which does not include the root
 metadata file, and (2) a client always attempts to update the root metadata
 file (unless instructed otherwise).
+One difference is that the downloaded root metadata file may not necessarily be
+the latest one available.
+Previously, unless the snapshot role was compromised, the repository must make
+available the root metadata file with exactly the version number published in
+the snapshot metadata.
+Now, an attacker may withhold the latest available root metadata file, but the
+attacker can never execute replay attacks, because version numbers are always
+compared.
 
 Searching for targets from a delegated targets role (such as the Django project
 on PyPI) instead of the top-level targets role also does not introduce security
