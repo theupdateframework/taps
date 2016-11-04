@@ -23,15 +23,18 @@ TAP 4 has been motivated by the following two use cases.
 
 ## Use case 1: hiding sensitive metadata and targets
 
-Clients may wish to hide sensitive metadata and targets from a public
-repository, and so will use a private repository for these files.
-Therefore, clients may need to search for some targets from the private
-repository, and all other targets from the public repository.
+Users may not wish to upload some metadata and targets to a public repository,
+because doing so may reveal some sensitive / proprietary information.
+Therefire, these users may use a private repository to host these sensitive
+metadata and targets, and hide them from public view.
+In order to use both the private and public repositories, TUF clients need to be
+somehow informed to search for some targets on the private repository, and all
+other targets on the public repository.
 
 ## Use case 2: improving compromise-resilience
 
-To improve compromise-resilience, a client may require multiple repositories,
-each with a different root of trust, to sign targets.
+To improve compromise-resilience, a user may require multiple repositories, each
+with a different root of trust, to sign targets.
 This is done so that the compromise of a single repository is insufficient to
 execute arbitrary software attacks.
 
@@ -46,12 +49,13 @@ implementation.
 # Specification
 
 We introduce a mandatory top-level metadata file called `map.json`.
-This _map file_ comes into play when a client requests targets.
+This _map file_ comes into play when a TUF client requests targets.
 
 Using a scheme similar to targets delegations within a repository, targets may
 be mapped to one or more repositories in this file.
 
 A client will keep all metadata for each repository in a separate directory.
+Where these directories are kept is up to the client.
 
 ## The map file
 
@@ -66,9 +70,9 @@ The map file contains a dictionary that holds two keys, "repositories" and
 The value of the "repositories" key is another dictionary.
 Each key in this dictionary is a _repository name_, and its value is a list of
 URLs.
-The repository name also corresponds to the name of the directory on the client
-where metadata files would be cached.
-The list of URLs specifies _mirrors_ where clients may download metadata and
+The repository name also corresponds to the name of the directory on the TUF
+client where metadata files would be cached.
+The list of URLs specifies _mirrors_ where TUF clients may download metadata and
 target files.
 These files would be updated following the steps detailed in
 [this section](#downloading-metadata-and-target-files).
@@ -115,7 +119,7 @@ The following is an example of a map file:
 
 ## Metadata and targets layout on repositories
 
-In order for clients to download metadata and target files in a uniform way
+In order for TUF clients to download metadata and target files in a uniform way
 across repositories, a repository would organize the files as follows.
 
 All metadata files would be stored under the "metadata" directory.
@@ -151,7 +155,8 @@ map file:
 
 ## Metadata and targets layout on clients
 
-On a client, all metadata files would be stored under the "metadata" directory.
+On a TUF client, all metadata files would be stored under the "metadata"
+directory.
 This directory would contain the map file, as well as a subdirectory for every
 repository specified in the map file.
 Each repository metadata subdirectory would use the repository name.
@@ -181,8 +186,8 @@ The following directory layout would apply to the example map file:
 
 ## Downloading metadata and target files
 
-A client would perform the following five steps while searching for a target on
-a repository.
+A TUF client would perform the following five steps while searching for a target
+on a repository.
 
 First, the client loads the previous copy of the root metadata file.
 If this file specifies that it should not be updated, then the client would not
@@ -244,7 +249,7 @@ the same targets metadata.
 
 This specification is not backwards-compatible because it requires:
 
-1. Clients to support additional, optional fields in the [root metadata file](tap5.md).
+1. TUF clients to support additional, optional fields in the [root metadata file](tap5.md).
 2. A repository to use a [specific filesystem layout](#metadata-and-targets-layout-on-repositories).
 3. A client to use a [map file](#map-file).
 4. A client to use a [specific filesystem layout](#metadata-and-targets-layout-on-clients).
