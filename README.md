@@ -1,4 +1,4 @@
-# TUF Augmentation Proposals:
+# TUF Augmentation Proposals (TAPs)
 
 * [TAP 1: TAP Purpose and Guidelines](https://github.com/theupdateframework/taps/blob/master/tap1.md)
 * [TAP 2: TAP template](https://github.com/theupdateframework/taps/blob/master/tap2.md)
