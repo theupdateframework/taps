@@ -56,10 +56,10 @@ the root metadata file format.
 Each top-level role can use the new "URLs" attribute to specify a list of
 URLs from which it can be updated, in place of the mirrors specified in the
 [map file](tap4.md).
-If this list is empty, then it means that the root metadata file shall not be
-updated at all.
-Otherwise, the root metadata file would be downloaded from each URL, using the
-order specified in this list, until it is found.
+If this list is empty, then it means that the metadata file for the top-level
+role shall not be updated at all.
+Otherwise, the metadata file for this role would be downloaded from each URL,
+using the order specified in this list, until it is found.
 
 ```Javascript
 {
@@ -144,6 +144,8 @@ This means that their TUF clients would not download the root metadata file from
 PyPI.
 Similarly, their TUF clients would also not download any targets metadata file
 from PyPI, except for the delegated targets metadata files belonging to Django.
+However, the timestamp and snapshot metadata files would be downloaded from
+PyPI.
 
 ## Changes to the snapshot metadata file
 
