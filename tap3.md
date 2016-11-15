@@ -139,7 +139,9 @@ sign its targets:
             // The quality assurance role must sign using at least 2 of these 3
             // keys.
             "quality-assurance": {
-              "keyids": ["93ec2c3dec7cc08922179320ccd8c346234bf7f21705268b93e990d5273a2a3b", "f2d5020d08aea06a0a9192eb6a4f549e17032ebefa1aa9ac167c1e3e727930d6", "fce9cf1cc86b0945d6a042f334026f31ed8e4ee1510218f198e8d3f191d15309"],
+              "keyids": ["93ec2c3dec7cc08922179320ccd8c346234bf7f21705268b93e990d5273a2a3b",
+              "f2d5020d08aea06a0a9192eb6a4f549e17032ebefa1aa9ac167c1e3e727930d6",
+              "fce9cf1cc86b0945d6a042f334026f31ed8e4ee1510218f198e8d3f191d15309"],
               "threshold": 2
             }
           },
