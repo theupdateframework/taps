@@ -58,21 +58,31 @@ the targets metadata file format.
 
 In the
 [previous version](https://github.com/theupdateframework/tuf/blob/70fc8dce367cf09563915afa40cffee524f5b12b/docs/tuf-spec.txt#L766-L776)
-of the specification, each delegation could specify only a single role to sign
+of the specification, each delegation could specify only a _single_ role to sign
 the given set of targets.
 
-```Javascript
+<pre>
 {
   "signed": {
     "delegations": {
       "roles": [
+        // This is the first delegation to a <b>single</b> role.
         {
           // Previously, we specified the name, keyids, and threshold of a
           // single role allowed to sign the following targets.
           // Each role uses a filename based on its rolename.
-          "name": ROLENAME,
-          "keyids": [KEYID],
-          "threshold": THRESHOLD,
+          <b>"name"</b>: <b>ROLENAME-1</b>,
+          "keyids": [KEYID-1],
+          "threshold": THRESHOLD-1,
+          ...
+        },
+        // This is the second delegation to a <b>single</b> role.
+        // Note that this delegation is separate from the first one.
+        // The first delegation may override this delegation.
+        {
+          <b>"name"</b>: <b>ROLENAME-2</b>,
+          "keyids": [KEYID-2],
+          "threshold": THRESHOLD-2,
           ...
         }
       ],
@@ -80,21 +90,20 @@ the given set of targets.
     },
     ...
 }
-```
+</pre>
 
 ## The new targets metadata file format
 
-Using the new targets metadata file format, a delegation may specify mutiple
+Using the new targets metadata file format, a delegation may specify _multiple_
 role names instead of a single one.
-As we argue in the [security analysis](#security-analysis), this allows us to
-support the AND relation in delegations without breaking existing security
-guarantees.
 
-```Javascript
+<pre>
 {
   "signed": {
     "delegations": {
       "roles": [
+        // This is the first delegation, which requires <b>two</b> roles to sign
+        // off on the same targets.
         {
           // NOTE: This is the only adjustment to the file format.
           // Now, we can specify the names of multiple roles, each of which is
@@ -102,11 +111,15 @@ guarantees.
           // All of these roles must sign the same hashes and length of the
           // following targets.
           // Each role continues to use a filename based on its rolename.
-          "names": {
-            ROLENAME: {
-              "keyids": [KEYID],
-              "threshold": THRESHOLD
-            }
+          <b>"names"</b>: <b>{</b>
+            <b>ROLENAME-1</b>: <b>{</b>
+              "keyids": [KEYID-1],
+              "threshold": THRESHOLD-1
+            <b>}</b>,
+            <b>ROLENAME-2</b>: <b>{</b>
+              "keyids": [KEYID-2],
+              "threshold": THRESHOLD-2
+            <b>}</b>
           },
           ...
         }
@@ -115,9 +128,13 @@ guarantees.
     },
     ...
 }
-```
+</pre>
 
-## Example: requiring a combination of roles to sign the same targets
+As we argue in the [security analysis](#security-analysis), this allows us to
+support the AND relation in delegations without breaking existing security
+guarantees.
+
+### Example: requiring a combination of roles to sign the same targets
 
 Returning to use case 1, the following targets metadata file illustrates how a
 project may require both its release engineering and quality assurance roles to
@@ -133,15 +150,18 @@ sign its targets:
           "names": {
             // The release engineering role must sign using this key.
             "release-engineering": {
-              "keyids": ["1a2b4110927d4cba257262f614896179ff85ca1f1353a41b5224ac474ca71cb4"],
+              "keyids": [
+                "1a2b4110927d4cba257262f614896179ff85ca1f1353a41b5224ac474ca71cb4"
+              ],
               "threshold": 1
             },
-            // The quality assurance role must sign using at least 2 of these 3
-            // keys.
+            // The quality assurance role must sign using at least 2/3 of these keys.
             "quality-assurance": {
-              "keyids": ["93ec2c3dec7cc08922179320ccd8c346234bf7f21705268b93e990d5273a2a3b",
-              "f2d5020d08aea06a0a9192eb6a4f549e17032ebefa1aa9ac167c1e3e727930d6",
-              "fce9cf1cc86b0945d6a042f334026f31ed8e4ee1510218f198e8d3f191d15309"],
+              "keyids": [
+                "93ec2c3dec7cc08922179320ccd8c346234bf7f21705268b93e990d5273a2a3b",
+                "f2d5020d08aea06a0a9192eb6a4f549e17032ebefa1aa9ac167c1e3e727930d6",
+                "fce9cf1cc86b0945d6a042f334026f31ed8e4ee1510218f198e8d3f191d15309"
+              ],
               "threshold": 2
             }
           },
