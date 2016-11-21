@@ -130,9 +130,8 @@ role names instead of a single one.
           <b>}</b>
           ...
         },
-        // This is the third delegation.
         // Now, we can require <b>multiple</b> roles (in this case, two) to sign
-        // off on the same targets.
+        // off on the same targets.  They must all agree on the same target hashes.
         {
           // Both roles must sign the same hashes and length of targets.
           <b>"names"</b>: <b>{</b>
