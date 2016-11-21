@@ -4,7 +4,7 @@
 * Last-Modified: 15-Nov-2016
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
-* Status: Draft
+* Status: Accepted
 * Content-Type: <text/markdown>
 * Created: 16-Sep-2016
 
