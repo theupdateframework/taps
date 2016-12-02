@@ -74,7 +74,7 @@ the given set of targets.
           <b>"name"</b>: <b>ROLENAME-1</b>,
           "keyids": [KEYID-1],
           "threshold": THRESHOLD-1,
-          ...
+          <b>"paths": ["/foo/*.pkg"]
         },
         // This is the second delegation to a <b>single</b> role.
         // Note that this delegation is separate from the first one.
@@ -83,7 +83,7 @@ the given set of targets.
           <b>"name"</b>: <b>ROLENAME-2</b>,
           "keyids": [KEYID-2],
           "threshold": THRESHOLD-2,
-          ...
+          <b>"paths": ["/foo/bar.pkg"]
         }
         // Note that, unfortunately, there is no way to require <b>multiple</b>
         // roles to sign targets in a single delegation.
@@ -111,6 +111,7 @@ role names instead of a single one.
           // associated with its own keys and a threshold number of keys.
           // However, we can still specify the name of a single role.
           // Each role continues to use a filename based on its rolename.
+          <b>"paths": ["/foo/*.pkg"],
           <b>"names"</b>: <b>{</b>
             <b>ROLENAME-1</b>: <b>{</b>
               "keyids": [KEYID-1],
@@ -122,6 +123,7 @@ role names instead of a single one.
         // This is the second delegation to a <b>single</b> role.
         // The first delegation may still override this delegation.
         {
+          <b>"paths": ["/foo/bar.pkg"],
           <b>"names"</b>: <b>{</b>
             <b>ROLENAME-2</b>: <b>{</b>
               "keyids": [KEYID-2],
@@ -133,7 +135,8 @@ role names instead of a single one.
         // Now, we can require <b>multiple</b> roles (in this case, two) to sign
         // off on the same targets.  They must all agree on the same target hashes.
         {
-          // Both roles must sign the same hashes and length of targets.
+          // Both roles must sign the same hashes and length of the following targets.
+          <b>"paths": ["baz/*.pkg"],
           <b>"names"</b>: <b>{</b>
             <b>ROLENAME-1</b>: <b>{</b>
               "keyids": [KEYID-1],
@@ -171,6 +174,7 @@ targets:
         // This is the first delegation.
         {
           // These targets must be signed by this <b>single</b> role.
+          <b>"paths": ["/foo/*.pkg"],
           <b>"names"</b>: <b>{</b>
             // This role must sign them using all 3 of these keys.
             <b>"alice"</b>: <b>{</b>
@@ -187,6 +191,7 @@ targets:
         // This is the second delegation.
         {
           // These targets must be signed by <b>both</b> of these roles.
+          <b>"paths": ["/baz/*.pkg"],
           <b>"names"</b>: <b>{</b>
             // The release engineering role must sign using this key.
             <b>"release-engineering"</b>: <b>{</b>
