@@ -1,7 +1,7 @@
 * TAP: 4
 * Title: The map file
 * Version: 1
-* Last-Modified: 03-Nov-2016
+* Last-Modified: 02-Dec-2016
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Draft
@@ -69,11 +69,14 @@ The map file contains a dictionary that holds two keys, "repositories" and
 
 The value of the "repositories" key is another dictionary.
 Each key in this dictionary is a _repository name_, and its value is a list of
-URLs.
+domain names.
 The repository name also corresponds to the name of the directory on the TUF
 client where metadata files would be cached.
-The list of URLs specifies _mirrors_ where TUF clients may download metadata and
-target files.
+Crucially, there is where the [root metadata file](tap5.md) for a repository
+would be found.
+The list of domain names specifies _mirrors_ where TUF clients may download
+metadata and target files.
+This list should not be empty.
 These files would be updated following the steps detailed in
 [this section](#downloading-metadata-and-target-files).
 
