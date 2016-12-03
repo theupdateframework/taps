@@ -17,7 +17,7 @@ trust, even if the user does not control this repository.
 
 # Motivation
 
-TAP 5 has been motivated by the following use case.
+TAP 5 has been motivated by the following use cases.
 
 ## Use case 1: restricting trust in a community repository to a single project
 
@@ -27,7 +27,7 @@ hosting and maintaining its own repository.
 Furthermore, suppose that there is group of enterprise users who trust PyPI only
 to install Django packages.
 These users must depend on PyPI administrators to
-[delegate]((http://isis.poly.edu/~jcappos/papers/kuppusamy_nsdi_16.pdf))
+[delegate]((https://isis.poly.edu/~jcappos/papers/kuppusamy_nsdi_16.pdf))
 all Django packages to the correct public keys belonging to the project.
 Unfortunately, if the PyPI administrator keys have been compromised, then
 attackers can replace this delegation, and deceive these unsuspecting users into
@@ -38,68 +38,100 @@ themselves, the root of trust on PyPI, such that: (1) PyPI is trusted to provide
 only metadata about the Django project, and (2) PyPI cannot change the public
 keys used to verify this metadata.
 
-#Rationale
+## Use case 2: trusting a mirror only for snapshot and targets metadata
+
+Suppose that PyPI wishes to use a mirror to distribute the bandwidth cost of
+serving metadata files.
+Compared to the root and timestamp metadata files, which are small and constant
+in size for all practical purposes, the snapshot and targets metadata files
+incur a larger bandwidth cost.
+Thus, it makes sense for PyPI to offload serving the snapshot and targets
+metadata files to the mirror, but keep serving the root and timestamp metadata
+files itself.
+In this manner, it can always serve the latest versions of metadata, instead of
+depending on the mirror, which may be more easily compromised, to do so.
+Unfortunately, there is no way to implement this use case using the
+[previous specification](https://github.com/theupdateframework/tuf/blob/70fc8dce367cf09563915afa40cffee524f5b12b/docs/tuf-spec.txt#L766-L776).
+
+PyPI can solve the problem, if it is somehow able to specify that the snapshot
+and targets metadata files should be downloaded from the mirror, but that the
+root and timestamp metadata files should be downloaded from PyPI itself.
+
+# Rationale
 
 We introduce this TAP because, without it, the users who wished to implement
-this use case would be forced to implement undesirable solutions, such as
-requiring the Django project to maintain its own repository.
+these use cases would be forced to implement undesirable solutions, such as
+requiring the Django project to maintain its own repository, or forgoing the use
+of mirrors.
 It would be desirable for such users to use a more practical solution that
-allows them to fix the root of trust on PyPI as described above.
+allows them to implement the use cases described above.
 
-#Specification
+# Specification
 
-In order to support this use case, we propose the following simple extension to
-the root metadata file format.
+In order to support these use cases, we propose the following simple extension
+to the root metadata file format.
 
-## The new root metadata file format
+## The previous root metadata file format
 
-Each top-level role can use the new "URLs" attribute to specify a list of
-URLs from which it can be updated, in place of the mirrors specified in the
-[map file](tap4.md).
-If this list is empty, then it means that the metadata file for the top-level
-role shall not be updated at all.
-Otherwise, the metadata file for this role would be downloaded from each URL,
-using the order specified in this list, until it is found.
+In the
+[previous specification](https://github.com/theupdateframework/tuf/blob/70fc8dce367cf09563915afa40cffee524f5b12b/docs/tuf-spec.txt#L766-L776),
+there was no list of URLs associated with each top-level role.
+Instead, the metadata file would be downloaded from one of the mirrors listed in
+the [map file](tap4.md).
 
 ```Javascript
 {
   "signed": {
     "roles": {
       ROLE: {
-        // NOTE: This is the only adjustment to the file format.
-        // For information about all other fields, please see the previous
-        // version of the specification.
-        // NEW: Now, instead of the list of mirrors specified in the map file, a
-        // TUF client would use this list of URLs to download the metadata file
-        // for this role. This list may be empty.
-        "URLs":       [...],
+        // Previously, this metadata file would be downloaded from one of the
+        // mirrors specified in the map file (TAP 4).
         "keyids":     [KEYID],
         "threshold":  THRESHOLD
       },
     },
-    "expires":  EXPIRES,
-    "keys":     {
-      KEYID:    KEY
-    },
-    "version":  VERSION,
-    "_type":    "Root"
+    ...
   },
-  "signatures": [
-    {
-      "keyid":  KEYID,
-      "method": METHOD,
-      "sig":    SIGNATURE
-    }
-  ]
+  ...
 }
 ```
 
+## The new root metadata file format
+
+Using the new root metadata file format, each top-level role can use the new
+"URLs" attribute to specify a list of URLs from which it can be updated, in
+place of the mirrors specified in the [map file](tap4.md).
+_If this list is empty, then it means that the metadata file for the top-level
+role shall not be updated at all._
+Otherwise, the metadata file for this role would be downloaded from each URL,
+using the order specified in this list, until it is found.
+
+<pre>
+{
+  "signed": {
+    "roles": {
+      ROLE: {
+        // This is the only adjustment to the file format.
+        // Now, instead of the list of mirrors specified in the map file, a TUF
+        // client would use this list of URLs to download the metadata file for
+        // this role.
+        // If this list is empty, then it means that this metadata file should
+        // never be updated.
+        <b>"URLs":       [...],</b>
+        "keyids":     [KEYID],
+        "threshold":  THRESHOLD
+      },
+    },
+    ...
+}
+</pre>
+
 ## Example: restricting trust in a community repository to a single project
 
-Returning to our running example, the following root metadata file illustrates
-how our group of enterprise users may fix, only for themselves, the root of
-trust on PyPI, such that: (1) PyPI is trusted to provide only metadata about the
-Django project, and (2) PyPI cannot change the public keys used to verify this
+Returning to use case 1, the following root metadata file illustrates how our
+group of enterprise users may fix, only for themselves, the root of trust on
+PyPI, such that: (1) PyPI is trusted to provide only metadata about the Django
+project, and (2) PyPI cannot change the public keys used to verify this
 metadata:
 
 ```Javascript
@@ -147,6 +179,56 @@ from PyPI, except for the delegated targets metadata files belonging to Django.
 However, the timestamp and snapshot metadata files would be downloaded from
 PyPI.
 
+## Example: trusting a mirror only for snapshot and targets metadata
+
+Returning to use case 2, PyPI can now specify that the snapshot and targets
+metadata files should be downloaded from the mirror, but that the root and
+timestamp metadata files should be downloaded from PyPI itself:
+
+```Javascript
+{
+  "signed": {
+    "roles": {
+      // Use the root role controlled by PyPI.
+      "root": {
+         // Fix the role to keys controlled by PyPI administrators.
+        "keyids": [...],
+        // And update the metadata file from PyPI.
+        "URLs": ["https://pypi.python.org/metadata/root.json"],
+        ...
+      },
+      // Use the timestamp role controlled by PyPI.
+      "timestamp": {
+        // Fix the role to keys controlled by PyPI administrators.
+       "keyids": [...],
+       // And update the metadata file from PyPI.
+       "URLs": ["https://pypi.python.org/metadata/timestamp.json"],
+       ...
+      },
+      // Use the snapshot role controlled by PyPI.
+      "snapshot": {
+        // Fix the role to keys controlled by PyPI administrators.
+       "keyids": [...],
+       // But update the metadata file from the mirror.
+       "URLs": ["http://example.com/metadata/snapshot.json"],
+       ...
+      },
+      // Use the targets role controlled by PyPI.
+      "targets": {
+        // Fix the role to keys controlled by PyPI administrators.
+       "keyids": [...],
+       // But update the metadata file from the mirror.
+       "URLs": ["http://example.com/metadata/targets.json"],
+        ...
+      },
+      ...
+    },
+    ...
+  },
+  ...
+}
+```
+
 ## Changes to the snapshot metadata file
 
 Since clients may not download the root metadata file from a repository, the
@@ -163,6 +245,17 @@ shall first add all delegated targets roles, followed by the top-level targets
 role.
 
 # Security Analysis
+
+Adding a list of URLs to every top-level role in the root metadata file does not
+introduce new and significant security issues.
+This is because attackers cannot change this information without somehow
+compromising a threshold of the root keys.
+However, if they have somehow achieved this, then there are far more serious
+security attacks to worry about, such as arbitrary software attacks, rather than
+redirection to an arbitrary server.
+Such redirections are already possible without a key compromise: for example,
+the attacker could somehow compromise the DNS configuration for a repository.
+Fortunately, TUF is designed to handle such attacks.
 
 Removing the root metadata file from the snapshot metadata does not
 significantly change existing security guarantees.

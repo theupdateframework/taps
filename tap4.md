@@ -93,8 +93,9 @@ The following is an example of a map file:
 
 ```javascript
 {
-  // For each repository, specify a list of mirrors where files may be
-  // downloaded.
+  // For each repository, its key name is the directory where files, including
+  // the root metadata file, are cached, and its value is a list of mirrors, or
+  // domain names, where files may be downloaded.
   "repositories": {
     "Django": ["https://djangoproject.com/"],
     "PyPI":   ["https://pypi.python.org/"]
