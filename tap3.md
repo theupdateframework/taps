@@ -5,7 +5,7 @@
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Accepted
-* Content-Type: <text/markdown>
+* Content-Type: text/markdown
 * Created: 16-Sep-2016
 
 # Abstract
