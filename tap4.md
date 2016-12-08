@@ -256,7 +256,7 @@ performing the necessary verification of the repository metadata.
 
 In order to avoid accidental denial-of-service attacks when multiple
 repositories sign the same targets, these repositories should coordinate to sign
-the same targets metadata.
+the same targets metadata (i.e., length and hashes).
 
 # Backwards Compatibility
 
