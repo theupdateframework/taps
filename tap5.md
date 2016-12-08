@@ -76,7 +76,7 @@ to the root metadata file format.
 In the
 [previous specification](https://github.com/theupdateframework/tuf/blob/70fc8dce367cf09563915afa40cffee524f5b12b/docs/tuf-spec.txt#L766-L776),
 there was no list of URLs associated with each top-level role.
-Instead, the metadata file would be downloaded from one of the mirrors listed in
+Instead, the metadata file would be downloaded from one of the URLs listed in
 the [map file](tap4.md).
 
 ```Javascript
@@ -85,7 +85,7 @@ the [map file](tap4.md).
     "roles": {
       ROLE: {
         // Previously, this metadata file would be downloaded from one of the
-        // mirrors specified in the map file (TAP 4).
+        // URLs specified in the map file (TAP 4).
         "keyids":     [KEYID],
         "threshold":  THRESHOLD
       },
@@ -102,7 +102,7 @@ Using the new root metadata file format, each top-level role can use the new
 "URLs" attribute to specify a list of URLs from which it can be updated.
 There are three cases regarding this attribute.
 If this list is omitted, then the metadata file for this top-level role shall be
-downloaded using one of the mirrors specified in the [map file](tap4.md).
+downloaded using the list of URLs specified in the [map file](tap4.md).
 _If this list is specified, but empty, then this metadata file shall not be
 updated at all._
 Otherwise, if this list is specified, and not empty, then the metadata file
@@ -120,7 +120,7 @@ instead of a remote server.
         // This is the only adjustment to the file format.
         // Now, a top-level role may be associated with a list of URLs.
         // If this list is omitted, then this metadata file shall be downloaded
-        // using one of the mirrors specified in the map file.
+        // using the list of URLs specified in the map file.
         // If this list is specified, but empty, then it shall not be updated.
         // Otherwise, it shall be downloaded from each URL, using the order
         // specified in this list, until it is found.

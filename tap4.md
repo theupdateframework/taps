@@ -74,8 +74,8 @@ The repository name also corresponds to the name of the local directory on the
 TUF client where metadata files would be cached.
 Crucially, there is where the [root metadata file](tap5.md) for a repository
 would be found.
-The list of URLs specifies _mirrors_ where TUF clients may download metadata and
-target files.
+The list of URLs specifies where TUF clients may download metadata and target
+files.
 Each URL points to a [directory containing metadata and target files](#metadata-and-targets-layout-on-repositories).
 Each URL may be a [file URI](https://en.wikipedia.org/wiki/File_URI_scheme),
 which means that these files shall be updated from a local directory on disk
@@ -99,8 +99,8 @@ The following is an example of a map file:
 ```javascript
 {
   // For each repository, its key name is the directory where files, including
-  // the root metadata file, are cached, and its value is a list of mirrors, or
-  // domain names, where files may be downloaded.
+  // the root metadata file, are cached, and its value is a list of URLs where
+  // files may be downloaded.
   "repositories": {
     "Django": ["https://djangoproject.com/"],
     "PyPI":   ["https://pypi.python.org/"]
@@ -203,7 +203,7 @@ _If this file specifies that it should not be updated, then the client would not
 update it._
 Otherwise, if the root metadata files specifies a custom list of URLs from
 which it should be updated, then the client uses those URLs to update this file.
-Otherwise, the client uses the list of mirrors specified in the map file.
+Otherwise, the client uses the list of URLs specified in the map file.
 _If this list is empty, then it means that no metadata or target file for this
 repository shall be updated at all._
 
@@ -219,13 +219,13 @@ For example, if the URL for the targets role in the root metadata file is "https
 number would correspond to the entry for "Django.json" instead of "targets.json"
 (for the original top-level targets role) in the snapshot metadata.
 
-Fifth, the client uses only the list of mirrors specified in the map file to
+Fifth, the client uses only the list of URLs specified in the map file to
 download all target files.
 
 When downloading a metadata or target file from a repository, the client would
-try contacting every known mirror / URL until the file is found.
-If the file is not found on all mirrors / URLs, the search is aborted, and the
-client reports to the user that the file is missing.
+try contacting every known URL until the file is found.
+If the file is not found on all URLs, the search is aborted, and the client
+reports to the user that the file is missing.
 
 ## Interpreting the map file
 
