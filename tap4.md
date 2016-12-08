@@ -199,11 +199,13 @@ A TUF client would perform the following five steps while searching for a target
 on a repository.
 
 First, the client loads the latest downloaded [root metadata file](tap5.md).
-_If this file specifies that it should not be updated, then the client would not
-update it._
-Otherwise, if the root metadata files specifies a custom list of URLs from
-which it should be updated, then the client uses those URLs to update this file.
-Otherwise, the client uses the list of URLs specified in the map file.
+In the root metadata file, the root role may be associated with a list of URLs.
+_If this list is specified, but empty, then this metadata file shall not be
+updated at all._
+Otherwise, if this list is specified, and not empty, then the client uses these
+URLs to update the metadata file.
+Otherwise, if this list has been omitted from the root metadata file, then the
+client uses the list of URLs specified in the map file.
 _If this list is empty, then it means that no metadata or target file for this
 repository shall be updated at all._
 
