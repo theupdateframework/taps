@@ -99,12 +99,17 @@ the [map file](tap4.md).
 ## The new root metadata file format
 
 Using the new root metadata file format, each top-level role can use the new
-"URLs" attribute to specify a list of URLs from which it can be updated, in
-place of the mirrors specified in the [map file](tap4.md).
-_If this list is empty, then it means that the metadata file for the top-level
-role shall not be updated at all._
-Otherwise, the metadata file for this role would be downloaded from each URL,
-using the order specified in this list, until it is found.
+"URLs" attribute to specify a list of URLs from which it can be updated.
+There are three cases regarding this attribute.
+If this list is omitted, then the metadata file for this top-level role shall be
+downloaded using one of the mirrors specified in the [map file](tap4.md).
+_If this list is specified, but empty, then this metadata file shall not be
+updated at all._
+Otherwise, if this list is specified, and not empty, then the metadata file
+shall be downloaded from each URL, using the order specified in this list, until
+it is found.
+Each URL may be a file URI, which means that these files shall be updated from
+a local directory on disk instead of a remote server.
 
 <pre>
 {
@@ -112,11 +117,12 @@ using the order specified in this list, until it is found.
     "roles": {
       ROLE: {
         // This is the only adjustment to the file format.
-        // Now, instead of the list of mirrors specified in the map file, a TUF
-        // client would use this list of URLs to download the metadata file for
-        // this role.
-        // If this list is empty, then it means that this metadata file should
-        // never be updated.
+        // Now, a top-level role may be associated with a list of URLs.
+        // If this list is omitted, then this metadata file shall be downloaded
+        // using one of the mirrors specified in the map file.
+        // If this list is specified, but empty, then it shall not be updated.
+        // Otherwise, it shall be downloaded from each URL, using the order
+        // specified in this list, until it is found.
         <b>"URLs":       [...],</b>
         "keyids":     [KEYID],
         "threshold":  THRESHOLD

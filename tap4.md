@@ -69,14 +69,18 @@ The map file contains a dictionary that holds two keys, "repositories" and
 
 The value of the "repositories" key is another dictionary.
 Each key in this dictionary is a _repository name_, and its value is a list of
-domain names.
-The repository name also corresponds to the name of the directory on the TUF
-client where metadata files would be cached.
+URLs.
+The repository name also corresponds to the name of the local directory on the
+TUF client where metadata files would be cached.
 Crucially, there is where the [root metadata file](tap5.md) for a repository
 would be found.
-The list of domain names specifies _mirrors_ where TUF clients may download
-metadata and target files.
-This list should not be empty.
+The list of URLs specifies _mirrors_ where TUF clients may download metadata and
+target files.
+Each URL points to a [directory containing metadata and target files](#metadata-and-targets-layout-on-repositories).
+Each URL may be a file URI, which means that these files shall be updated from
+a local directory on disk instead of a remote server.
+_If this list is empty, then it means that no metadata or target file for this
+repository shall be updated at all._
 These files would be updated following the steps detailed in
 [this section](#downloading-metadata-and-target-files).
 
@@ -194,11 +198,13 @@ A TUF client would perform the following five steps while searching for a target
 on a repository.
 
 First, the client loads the latest downloaded [root metadata file](tap5.md).
-If this file specifies that it should not be updated, then the client would not
-update it.
+_If this file specifies that it should not be updated, then the client would not
+update it._
 Otherwise, if the root metadata files specifies a custom list of URLs from
 which it should be updated, then the client uses those URLs to update this file.
 Otherwise, the client uses the list of mirrors specified in the map file.
+_If this list is empty, then it means that no metadata or target file for this
+repository shall be updated at all._
 
 Second, the client uses similar steps to update the timestamp metadata file.
 
