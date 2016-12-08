@@ -1,7 +1,7 @@
 * TAP: 5
 * Title: Setting URLs for roles in the root metadata file
 * Version: 1
-* Last-Modified: 02-Dec-2016
+* Last-Modified: 08-Dec-2016
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Draft
@@ -108,8 +108,9 @@ updated at all._
 Otherwise, if this list is specified, and not empty, then the metadata file
 shall be downloaded from each URL, using the order specified in this list, until
 it is found.
-Each URL may be a file URI, which means that these files shall be updated from
-a local directory on disk instead of a remote server.
+Each URL may be a [file URI](https://en.wikipedia.org/wiki/File_URI_scheme),
+which means that these files shall be updated from a local directory on disk
+instead of a remote server.
 
 <pre>
 {
