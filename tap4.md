@@ -215,7 +215,7 @@ Third, the client uses similar steps to update the snapshot metadata file.
 
 Fourth, the client uses similar steps to update all targets metadata files.
 If the root metadata file specifies a custom URL for top-level targets role, the
-client should be careful in Interpreting the entries of the snapshot metadata
+client should be careful in interpreting the entries of the snapshot metadata
 file.
 For example, if the URL for the targets role in the root metadata file is "https://pypi.python.org/metadata/delegations/Django.json", then its version
 number would correspond to the entry for "Django.json" instead of "targets.json"
