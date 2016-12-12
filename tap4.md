@@ -11,8 +11,10 @@
 
 # Abstract
 
-TAP 4 allows users to _map_ targets to repositories in a manner similar to how
-targets can be delegated to roles.
+TAP 4 describes how users may specify that a certain repository should be used
+for some targets, while other repositories should be used for other targets.
+In other words, this TAP  allows users to _map_ targets to repositories in a 
+manner similar to how targets can be delegated to roles.
 This allows users to say that: (1) a target may be found on one of many
 repositories, each with a different root of trust, and / or (2) many
 repositories may be required to sign the target.
