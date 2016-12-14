@@ -1,7 +1,7 @@
 * TAP: 5
 * Title: Setting URLs for roles in the root metadata file
 * Version: 1
-* Last-Modified: 08-Dec-2016
+* Last-Modified: 14-Dec-2016
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Draft
@@ -12,8 +12,17 @@
 
 TAP 5 allows each top-level role in the root metadata file to be optionally
 associated with a list of URLs.
-This enables a user to associate a remote repository with a different root of
-trust, even if the user does not control this repository.
+This allows the implementation of at least two interesting uses cases.
+First, it enables a user to associate a remote repository with a different root
+of trust, even if the user does not control this repository.
+This allows the user to, for example, restrict trust in a community repository
+to a single project.
+Second, it enables repository administrators to use mirrors in a safe and
+limited way.
+Specifically, administrators can instruct TUF clients to always download some
+metadata files from the original repository, and others from mirrors, so that
+clients are always informed of the latest versions of metadata and, thus,
+targets.
 
 # Motivation
 
