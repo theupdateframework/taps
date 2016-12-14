@@ -13,7 +13,7 @@
 
 TAP 4 describes how users may specify that a certain repository should be used
 for some targets, while other repositories should be used for other targets.
-In other words, this TAP  allows users to _map_ targets to repositories in a 
+In other words, this TAP allows users to _map_ targets to repositories in a
 manner similar to how targets can be delegated to roles.
 This allows users to say that: (1) a target may be found on one of many
 repositories, each with a different root of trust, and / or (2) many
@@ -21,9 +21,19 @@ repositories may be required to sign the target.
 
 # Motivation
 
-TAP 4 has been motivated by the following two use cases.
+TAP 4 has been motivated by the following use cases.
 
-## Use case 1: hiding sensitive metadata and targets
+## Use case 1: obtaining different targets from different repositories
+
+It is desirable to use the same TUF library to download and verify different
+targets hosted on different repositories.
+For example, a user may wish to download Python packages from PyPI, and Ruby
+packages from RubyGems.
+There are significant advantages in using the same instance of TUF to manage
+metadata across different repositories, including benefiting from security
+updates, and performance enhancements.
+
+## Use case 2: hiding sensitive metadata and targets
 
 Users may not wish to upload some metadata and targets to a public repository,
 because doing so may reveal some sensitive / proprietary information.
@@ -32,11 +42,17 @@ metadata and targets, and hide them from public view.
 In order to use both the private and public repositories, TUF clients need to be
 somehow informed to search for some targets on the private repository, and all
 other targets on the public repository.
+Note that the same mechanism used to implement the previous use case can also be
+readily used to implement this use case.
 
-## Use case 2: improving compromise-resilience
+## Use case 3: improving compromise-resilience
 
 To improve compromise-resilience, a user may require multiple repositories, each
 with a different root of trust, to sign targets.
+The effect is similar to the AND relation used in
+[multi-role delegations](tap3.md).
+The difference is that multiple repositories, instead of multiple roles, must
+sign the same hashes and length of desired targets.
 This is done so that the compromise of a single repository is insufficient to
 execute arbitrary software attacks.
 
