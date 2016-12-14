@@ -25,19 +25,19 @@ TAP 4 has been motivated by the following use cases.
 
 ## Use case 1: obtaining different targets from different repositories
 
-It is desirable to use the same TUF library to download and verify different
-targets hosted on different repositories.
-For example, a user may wish to download Python packages from PyPI, and Ruby
-packages from RubyGems.
+It is desirable to use the same instance of TUF to download and verify different
+targets hosted on different repositories (for example, Python packages from
+PyPI, and Ruby packages from RubyGems).
 There are significant advantages in using the same instance of TUF to manage
 metadata across different repositories, including benefiting from security
 updates, and performance enhancements.
 
 ## Use case 2: hiding sensitive metadata and targets
 
-Users may not wish to upload some metadata and targets to a public repository,
-because doing so may reveal some sensitive / proprietary information.
-Therefire, these users may use a private repository to host these sensitive
+Enterprise users may not wish to upload some metadata and targets to a public
+repository, because doing so may reveal some sensitive / proprietary
+information.
+Therefore, these users may use a private repository to host these sensitive
 metadata and targets, and hide them from public view.
 In order to use both the private and public repositories, TUF clients need to be
 somehow informed to search for some targets on the private repository, and all
@@ -51,10 +51,15 @@ To improve compromise-resilience, a user may require multiple repositories, each
 with a different root of trust, to sign targets.
 The effect is similar to the AND relation used in
 [multi-role delegations](tap3.md).
-The difference is that multiple repositories, instead of multiple roles, must
-sign the same hashes and length of desired targets.
-This is done so that the compromise of a single repository is insufficient to
-execute arbitrary software attacks.
+However, in multi-role delegations, multiple roles would share the _same_ root
+of trust, even though they must sign the same hashes and length of targets.
+The problem is that, if attackers have compromised a common ancestor of these
+multiple roles (e.g., the targets or root role), then the security guarantees of
+using multi-role delegations are lost.
+The difference in this use case is that multiple roles with _different_
+roots of trust must sign the same hashes and length of desired targets.
+This is done so that the compromise of even the root role of a single repository
+is still insufficient to execute arbitrary software attacks.
 
 # Rationale
 
