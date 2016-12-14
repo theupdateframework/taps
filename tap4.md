@@ -218,39 +218,54 @@ The following directory layout would apply to the example map file:
 
 ## Downloading metadata and target files
 
-A TUF client would perform the following five steps while searching for a target
+A TUF client would perform the following six steps while searching for a target
 on a repository.
 
-First, the client loads the latest downloaded [root metadata file](tap5.md).
-In the root metadata file, the root role may be associated with a list of URLs.
-_If this list is specified, but empty, then this metadata file shall not be
-updated at all._
-Otherwise, if this list is specified, and not empty, then the client uses these
-URLs to update the metadata file.
-Otherwise, if this list has been omitted from the root metadata file, then the
-client uses the list of URLs specified in the map file.
-_If this list is empty, then it means that no metadata or target file for this
-repository shall be updated at all._
+First, the client loads the latest downloaded [root metadata file](tap5.md), and
+ensures that: (1) that it has been signed by a threshold of keys, and (2) it has
+not expired.
+Next, the client tries to update the root metadata file.
+Let M denote the list of URLs associated with this repository in the map file,
+and R denote the list of URLs associated with this top-level role (in this case,
+the root role) in the root metadata file.
+There are four cases:
+
+1. If R is empty, then this metadata file shall not be updated.
+2. If R is not empty, then this metadata file shall be downloaded in order from
+each URL in R until it is found. If the file could not be found or verified
+using all URLs, then report that it is missing.
+3. If R has been omitted, and M is empty, then this metadata file shall not be
+updated.
+4. If R has been omitted, and M is not empty, then this metadata file shall be
+downloaded in order from each URL in M until it is found. If the file could not
+be found or verified using all URLs, then report that it is missing.
 
 Second, the client uses similar steps to update the timestamp metadata file.
 
 Third, the client uses similar steps to update the snapshot metadata file.
 
-Fourth, the client uses similar steps to update all targets metadata files.
-If the root metadata file specifies a custom URL for top-level targets role, the
-client should be careful in interpreting the entries of the snapshot metadata
+Fourth, the client uses similar steps to update the top-level targets metadata
 file.
-For example, if the URL for the targets role in the root metadata file is "https://pypi.python.org/metadata/delegations/Django.json", then its version
-number would correspond to the entry for "Django.json" instead of "targets.json"
-(for the original top-level targets role) in the snapshot metadata.
+If R is not empty, then the client should be careful in interpreting the entries
+of the snapshot metadata file.
+Suppose that R is
+["https://pypi.python.org/metadata/delegations/Django.json", "http://example.com/path/to/foo.json"].
+First, the client would look up the version number for "Django.json", instead of
+"targets.json" (for the original top-level targets role), in the
+snapshot metadata.
+Then, the client would try to find the desired target using the "Django.json"
+role.
+If the target could not be found or verified, then the client would try to find
+the target using the "foo.json" role, being careful to first look up the version
+number for "foo.json" in the snapshot metadata.
 
-Fifth, the client uses only the list of URLs specified in the map file to
-download all target files.
+Fifth, the client uses only M to update delegated targets metadata files.
+Each file is downloaded in order from each URL in M until it is found.
+If the file could not be found or verified using all URLs, then report that it
+is missing.
 
-When downloading a metadata or target file from a repository, the client would
-try contacting every known URL until the file is found.
-If the file is not found on all URLs, the search is aborted, and the client
-reports to the user that the file is missing.
+Sixth, the client uses a step similar to the previous step to download all
+target files.
 
 ## Interpreting the map file
 
