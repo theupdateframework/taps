@@ -219,24 +219,26 @@ targets:
 }
 </pre>
 
-## Resolving delegations
+## Resolving multi-role delegations
 
 As in the previous version of the specification, delegations continue to be
-searched in descending order of priority.
+searched in descending order of priority.  The only difference between the
+previous and current version of the specification is in how every delegation
+is processed.
 
-The only difference between the previous and current version of the
-specification is in how every delegation is processed.
 If a desired target matches a target path pattern in the "paths" attribute,
-then all roles in the "names" attribute must provide exactly the same hashes and
-length of the desired target.
-However, note that these roles may nevertheless provide different "custom"
-metadata from each other about the same target.
+then all roles in the "names" attribute must provide exactly the same hashes
+and length of the desired target.  However, note that these roles may
+nevertheless provide different "custom" metadata from each other about the
+same target.
 
-If a role does not provide the required metadata, or provides mismatching
-metadata, then the search is stopped, and an error is reported.
-Otherwise, if none of the roles provide metadata about the desired target, then
-the rest of the delegations will be searched if the "terminating" attribute is
-not true.
+While resolving a multi-role delegation, the outcome of a search varies
+depending on how the "terminating" attribute is set.  If none of the roles
+provide metadata about the desired target, then the rest of the delegations
+will be searched (given that the "terminating" attribute is False).  If a
+role does not provide the required metadata, or provides mismatching metadata,
+the search is stopped and an error is reported to the client (given that the
+"terminating" attribute is True).
 
 # Security Analysis
 
