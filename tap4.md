@@ -147,6 +147,9 @@ The following is an example of a map file:
       // the following mapping will be consulted.
     },
     {
+      // Some paths need not have a URL.  Then those paths will not be updated.
+      ...
+    {
       // Map all other targets only to PyPI.
       "paths":        ["*"],
       "repositories": ["PyPI"]
