@@ -103,9 +103,6 @@ would be found.
 The list of URLs specifies where TUF clients may download metadata and target
 files.
 Each URL points to a [directory containing metadata and target files](#metadata-and-targets-layout-on-repositories).
-Each URL may be a [file URI](https://en.wikipedia.org/wiki/File_URI_scheme),
-which means that these files shall be updated from a local directory on disk
-instead of a remote server.
 _If this list is empty, then it means that no metadata or target file for this
 repository shall be updated at all._
 These files would be updated following the steps detailed in
