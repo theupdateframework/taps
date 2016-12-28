@@ -101,11 +101,14 @@ The repository name also corresponds to the name of the local directory on the
 TUF client where metadata files would be cached.
 Crucially, there is where the [root metadata file](tap5.md) for a repository
 would be found.
-The list of URLs specifies where TUF clients may download metadata and target
-files.
+
+There is also a list of URLs that indicates where to retrieve files from or, 
+if omitted, states that files should not be updated.  If present the list of 
+URLs specifies where TUF clients may download metadata and target files.
 Each URL points to a [directory containing metadata and target files](#metadata-and-targets-layout-on-repositories).
-_If this list is empty, then it means that no metadata or target file for this
-repository shall be updated at all._
+_If this list is empty, then it means that the metadata for the 
+repository will not be updated and that only the files currently on disk
+will be used._
 These files would be updated following the steps detailed in
 [this section](#downloading-metadata-and-target-files).
 
@@ -232,11 +235,13 @@ on a repository.
 
 First, the client loads the latest downloaded [root metadata file](tap5.md), and
 ensures that: (1) that it has been signed by a threshold of keys, and (2) it has
-not expired.    
+not expired.   Recall that the URL field may either contain the location to 
+update the files, or may be empty to say that the repository metadata should not
+be updated.  We will now explicitly explain the procedure for doing this.
 Next, the client tries to update the root metadata file.
 Let M denote the list of URLs associated with this repository in the map file,
 and R denote the list of URLs associated with this top-level role (in this case,
-the root role) in the root metadata file.
+the root role) in the root metadata file.   
 There are four cases:
 
 1. If R is empty, then this metadata file shall not be updated.
