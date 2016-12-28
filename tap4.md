@@ -17,8 +17,10 @@ In other words, this TAP allows users to _map_ target names to repositories in a
 manner similar to how targets with specific names can be delegated to different roles.
 This allows users to say that a target with a specific type of name (such as 
 django\* or \*.tar.gz) may be found on a specific repository.  Each repository
-has its own root of trust (root role, etc) so a compromise of one repository
-does not impact other repositories.
+has its own root of trust (root role, etc.) so a compromise of one repository
+does not impact other repositories.  This TAP also discusses how the AND relation can
+be extended to multiple repositories to have multiple different repositories with 
+separate roots of trust need to sign off on the same target before installation.
 
 # Motivation
 
@@ -26,9 +28,10 @@ TAP 4 has been motivated by the following use cases.
 
 ## Use case 1: obtaining different targets from different repositories
 
-It is desirable to use the same instance of TUF to download and verify different
-targets hosted on different repositories (for example, Python packages from
-PyPI, and Ruby packages from RubyGems).
+Itmay be desirable to use the same instance of TUF to download and verify different
+targets hosted on different repositories (for example, some Python packages from
+their maintainers, while getting other Python packages from PyPI).  In this way,
+one can securely get all Python packages regardless of where they are hosted.
 There are significant advantages in using the same instance of TUF to manage
 metadata across different repositories, including benefiting from security
 updates, and performance enhancements.
