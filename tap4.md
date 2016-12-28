@@ -93,7 +93,8 @@ and is only modified by a user who is trusted to configure the TUF instance.
 The map file contains a dictionary that holds two keys, "repositories" and
 "mapping."
 
-The value of the "repositories" key is another dictionary.
+The value of the "repositories" key is another dictionary that lists the URLs
+for a set of repositories.
 Each key in this dictionary is a _repository name_, and its value is a list of
 URLs.
 The repository name also corresponds to the name of the local directory on the
@@ -108,7 +109,8 @@ repository shall be updated at all._
 These files would be updated following the steps detailed in
 [this section](#downloading-metadata-and-target-files).
 
-The value of the "mapping" key is a list.
+The value of the "mapping" key is a priority-ordered list that maps paths (i.e., 
+target names) to the specific repositories.
 Every member in this list is a dictionary with at least two keys:
 
 * "paths" specifies a list of target paths of patterns. A desired target must
@@ -132,6 +134,10 @@ The following is an example of a map file:
   // downloaded.
   "mapping": [
     {
+      // Much like target delegation, the order of these entries indicates
+      // the priority of the delegation.  The entries listed first will be
+      // considered first.
+      
       // Map any target matching *Django* to both Django and PyPI.
       "paths":        ["*django*"],
       "repositories": ["Django", "PyPI"],
@@ -165,7 +171,7 @@ the metadata file for a top-level role.
 It is up to the repository to enforce that every delegated targets role uses a
 unique name.
 
-All targets files would be stored under the "targets" directory.
+All targets files would be stored under the "targets" directory.   
 Beyond this, the repository may organize target files into any hierarchy it
 requires.
 
