@@ -46,20 +46,18 @@ metadata and targets, and hide them from public view.
 In order to use both the private and public repositories, TUF clients need to be
 somehow informed to search for some targets on the private repository, and all
 other targets on the public repository.
-Note that the same mechanism used to implement the previous use case can also be
-readily used to implement this use case.
 
 ## Use case 3: improving compromise-resilience
 
-To improve compromise-resilience, a user may require multiple repositories, each
+To improve compromise-resilience, a user wish to have multiple repositories, each
 with a different root of trust, to sign targets.
 The effect is similar to the AND relation used in
 [multi-role delegations](tap3.md).
 However, in multi-role delegations, multiple roles would share the _same_ root
 of trust, even though they must sign the same hashes and length of targets.
 The problem is that, if attackers have compromised a common ancestor of these
-multiple roles (e.g., the targets or root role), then the security guarantees of
-using multi-role delegations are lost.
+multiple roles (e.g., the top-level targets role or root role), then the security 
+benefits of using multi-role delegations are lost.
 The difference in this use case is that multiple roles with _different_
 roots of trust must sign the same hashes and length of desired targets.
 This is done so that the compromise of even the root role of a single repository
@@ -87,9 +85,10 @@ Where these directories are kept is up to the client.
 ## The map file
 
 The map file maps targets to repositories.
-This file is not available from a repository.
-It is either constructed by the user using the TUF command-line tools, or
-distributed by an out-of-band bootstrap process.
+This file is not intended to be automatically available / refreshed from a repository.
+The map file is either constructed by the user using the TUF command-line tools, or
+distributed by an out-of-band bootstrap process.  The file is kept on the client
+and is only modified by a user who is trusted to configure the TUF instance.
 
 The map file contains a dictionary that holds two keys, "repositories" and
 "mapping."
