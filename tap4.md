@@ -229,7 +229,7 @@ on a repository.
 
 First, the client loads the latest downloaded [root metadata file](tap5.md), and
 ensures that: (1) that it has been signed by a threshold of keys, and (2) it has
-not expired.
+not expired.    
 Next, the client tries to update the root metadata file.
 Let M denote the list of URLs associated with this repository in the map file,
 and R denote the list of URLs associated with this top-level role (in this case,
