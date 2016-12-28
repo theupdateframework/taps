@@ -13,11 +13,12 @@
 
 TAP 4 describes how users may specify that a certain repository should be used
 for some targets, while other repositories should be used for other targets.
-In other words, this TAP allows users to _map_ targets to repositories in a
-manner similar to how targets can be delegated to roles.
-This allows users to say that: (1) a target may be found on one of many
-repositories, each with a different root of trust, and / or (2) many
-repositories may be required to sign the target.
+In other words, this TAP allows users to _map_ target names to repositories in a
+manner similar to how targets with specific names can be delegated to different roles.
+This allows users to say that a target with a specific type of name (such as 
+django\* or \*.tar.gz) may be found on a specific repository.  Each repository
+has its own root of trust (root role, etc) so a compromise of one repository
+does not impact other repositories.
 
 # Motivation
 
