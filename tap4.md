@@ -13,11 +13,14 @@
 
 TAP 4 describes how users may specify that a certain repository should be used
 for some targets, while other repositories should be used for other targets.
-In other words, this TAP allows users to _map_ targets to repositories in a
-manner similar to how targets can be delegated to roles.
-This allows users to say that: (1) a target may be found on one of many
-repositories, each with a different root of trust, and / or (2) many
-repositories may be required to sign the target.
+In other words, this TAP allows users to _map_ target names to repositories in a
+manner similar to how targets with specific names can be delegated to different roles.
+This allows users to say that a target with a specific type of name (such as 
+django\* or \*.tar.gz) may be found on a specific repository.  Each repository
+has its own root of trust (root role, etc.) so a compromise of one repository
+does not impact other repositories.  This TAP also discusses how the AND relation can
+be extended to multiple repositories to have multiple different repositories with 
+separate roots of trust need to sign off on the same target before installation.
 
 # Motivation
 
@@ -25,9 +28,10 @@ TAP 4 has been motivated by the following use cases.
 
 ## Use case 1: obtaining different targets from different repositories
 
-It is desirable to use the same instance of TUF to download and verify different
-targets hosted on different repositories (for example, Python packages from
-PyPI, and Ruby packages from RubyGems).
+Itmay be desirable to use the same instance of TUF to download and verify different
+targets hosted on different repositories (for example, some Python packages from
+their maintainers, while getting other Python packages from PyPI).  In this way,
+one can securely get all Python packages regardless of where they are hosted.
 There are significant advantages in using the same instance of TUF to manage
 metadata across different repositories, including benefiting from security
 updates, and performance enhancements.
@@ -42,20 +46,18 @@ metadata and targets, and hide them from public view.
 In order to use both the private and public repositories, TUF clients need to be
 somehow informed to search for some targets on the private repository, and all
 other targets on the public repository.
-Note that the same mechanism used to implement the previous use case can also be
-readily used to implement this use case.
 
 ## Use case 3: improving compromise-resilience
 
-To improve compromise-resilience, a user may require multiple repositories, each
+To improve compromise-resilience, a user wish to have multiple repositories, each
 with a different root of trust, to sign targets.
 The effect is similar to the AND relation used in
 [multi-role delegations](tap3.md).
 However, in multi-role delegations, multiple roles would share the _same_ root
 of trust, even though they must sign the same hashes and length of targets.
 The problem is that, if attackers have compromised a common ancestor of these
-multiple roles (e.g., the targets or root role), then the security guarantees of
-using multi-role delegations are lost.
+multiple roles (e.g., the top-level targets role or root role), then the security 
+benefits of using multi-role delegations are lost.
 The difference in this use case is that multiple roles with _different_
 roots of trust must sign the same hashes and length of desired targets.
 This is done so that the compromise of even the root role of a single repository
@@ -83,32 +85,35 @@ Where these directories are kept is up to the client.
 ## The map file
 
 The map file maps targets to repositories.
-This file is not available from a repository.
-It is either constructed by the user using the TUF command-line tools, or
-distributed by an out-of-band bootstrap process.
+This file is not intended to be automatically available / refreshed from a repository.
+The map file is either constructed by the user using the TUF command-line tools, or
+distributed by an out-of-band bootstrap process.  The file is kept on the client
+and is only modified by a user who is trusted to configure the TUF instance.
 
 The map file contains a dictionary that holds two keys, "repositories" and
 "mapping."
 
-The value of the "repositories" key is another dictionary.
+The value of the "repositories" key is another dictionary that lists the URLs
+for a set of repositories.
 Each key in this dictionary is a _repository name_, and its value is a list of
 URLs.
 The repository name also corresponds to the name of the local directory on the
 TUF client where metadata files would be cached.
 Crucially, there is where the [root metadata file](tap5.md) for a repository
 would be found.
-The list of URLs specifies where TUF clients may download metadata and target
-files.
+
+There is also a list of URLs that indicates where to retrieve files from or, 
+if omitted, states that files should not be updated.  If present the list of 
+URLs specifies where TUF clients may download metadata and target files.
 Each URL points to a [directory containing metadata and target files](#metadata-and-targets-layout-on-repositories).
-Each URL may be a [file URI](https://en.wikipedia.org/wiki/File_URI_scheme),
-which means that these files shall be updated from a local directory on disk
-instead of a remote server.
-_If this list is empty, then it means that no metadata or target file for this
-repository shall be updated at all._
+_If this list is empty, then it means that the metadata for the 
+repository will not be updated and that only the files currently on disk
+will be used._
 These files would be updated following the steps detailed in
 [this section](#downloading-metadata-and-target-files).
 
-The value of the "mapping" key is a list.
+The value of the "mapping" key is a priority-ordered list that maps paths (i.e., 
+target names) to the specific repositories.
 Every member in this list is a dictionary with at least two keys:
 
 * "paths" specifies a list of target paths of patterns. A desired target must
@@ -132,6 +137,10 @@ The following is an example of a map file:
   // downloaded.
   "mapping": [
     {
+      // Much like target delegation, the order of these entries indicates
+      // the priority of the delegation.  The entries listed first will be
+      // considered first.
+      
       // Map any target matching *Django* to both Django and PyPI.
       "paths":        ["*django*"],
       "repositories": ["Django", "PyPI"],
@@ -140,6 +149,9 @@ The following is an example of a map file:
       // Therefore, if this mapping has not signed for a *django* target,
       // the following mapping will be consulted.
     },
+    {
+      // Some paths need not have a URL.  Then those paths will not be updated.
+      ...
     {
       // Map all other targets only to PyPI.
       "paths":        ["*"],
@@ -165,7 +177,7 @@ the metadata file for a top-level role.
 It is up to the repository to enforce that every delegated targets role uses a
 unique name.
 
-All targets files would be stored under the "targets" directory.
+All targets files would be stored under the "targets" directory.   
 Beyond this, the repository may organize target files into any hierarchy it
 requires.
 
@@ -223,11 +235,13 @@ on a repository.
 
 First, the client loads the latest downloaded [root metadata file](tap5.md), and
 ensures that: (1) that it has been signed by a threshold of keys, and (2) it has
-not expired.
+not expired.   Recall that the URL field may either contain the location to 
+update the files, or may be empty to say that the repository metadata should not
+be updated.  We will now explicitly explain the procedure for doing this.
 Next, the client tries to update the root metadata file.
 Let M denote the list of URLs associated with this repository in the map file,
 and R denote the list of URLs associated with this top-level role (in this case,
-the root role) in the root metadata file.
+the root role) in the root metadata file.   
 There are four cases:
 
 1. If R is empty, then this metadata file shall not be updated.
