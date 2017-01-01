@@ -34,37 +34,40 @@ It may be desirable to use the same instance of TUF to download and verify
 different targets hosted on different repositories (for example, some Python
 packages from their maintainers, while getting other Python packages from PyPI).
 In this way, one can securely get all Python packages regardless of where they
-are hosted.
-There are significant advantages in using the same instance of TUF to manage
-metadata across different repositories, including benefiting from security
-updates, and performance enhancements.
+are hosted.  This ensures that the user need not use a different client tool 
+instance (e.g., copy of ```pip```) for each repository.
 
 ## Use case 2: hiding sensitive metadata and targets
 
-Enterprise users may not wish to upload some metadata and targets to a public
-repository, because doing so may reveal some sensitive / proprietary
-information.
+Extending the previous example, enterprise users may not wish to upload some 
+metadata and targets to a public repository, because doing so may reveal 
+some sensitive / proprietary information.
 Therefore, these users may use a private repository to host these sensitive
-metadata and targets, and hide them from public view.
+metadata and targets, and hide them from public view, while still having
+other files hosted in the public repository.
 In order to use both the private and public repositories, TUF clients need to be
 somehow informed to search for some targets on the private repository, and all
 other targets on the public repository.
 
-## Use case 3: improving compromise-resilience
+## Use case 3: improving compromise-resilience given multiple repositories
 
 To improve compromise-resilience, a user may wish to have multiple repositories,
-each with a different root of trust, to sign targets.
+each with a different root of trust, to sign targets.  This would ensure that
+both repository A and repository B would need to trust a target file before it
+would be installed.
 The effect is similar to the AND relation used in
-[multi-role delegations](tap3.md).
-However, in multi-role delegations, multiple roles would share the _same_ root
-of trust, even though they must sign the same hashes and length of targets.
-The problem is that, if attackers have compromised a common ancestor of these
-multiple roles (e.g., the top-level targets role or root role), then the
-security benefits of using multi-role delegations are lost.
-The difference in this use case is that multiple roles with _different_
-roots of trust must sign the same hashes and length of desired targets.
-This is done so that the compromise of even the root role of a single repository
-is still insufficient to execute arbitrary software attacks.
+[multi-role delegations](tap3.md).  Note that if there are multiple repositories
+with disjoint roots of trust, it was already possible to do something similar.
+One could have one repository download and use a multi-role delegation to the 
+other repository's target.  Thus, if repository A downloaded the targets metadata
+from repository B, and used a multi-role delegation for the targets metadata, this
+achieved a similar effect.  If repository B is compromised, the users are not
+impacted because repository A's multi-role delegation will prevent use of repository B's
+malicious targets files.  However, if repository A's root role or its top level targets 
+role were compromised, all users can be given malicious targets files even if repository
+B is not compromised.  We wish to remedy this case by delegating from the map file
+so that if either of the two repositories is compromised, the users are not at risk.
+
 
 # Rationale
 
