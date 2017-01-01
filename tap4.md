@@ -17,7 +17,7 @@ In other words, this TAP allows users to _map_ target names to repositories in a
 manner similar to how targets with specific names can be delegated to different
 roles.
 This allows users to say that a target with a specific type of name (such
-as ```django\*``` or ```\*.tar.gz```) may be found on a specific repository.
+as ```django*``` or ```*.tar.gz```) may be found on a specific repository.
 Each repository has its own root of trust (root role, etc.) so a compromise of
 one repository does not impact other repositories.
 This TAP also discusses how the AND relation can be extended to multiple
