@@ -73,9 +73,8 @@ so that if either of the two repositories is compromised, the users are not at r
 
 TUF would benefit greatly from the ability to handle the above use cases,
 requested by its adopters.
-This TAP does not change existing security guarantees, allows a great deal of
-flexibility, and should require only modest effort for support from an existing
-implementation.
+This TAP does not reduce existing security guarantees, allows greater flexibility, 
+and should require only modest effort to support from an existing implementation.
 
 # Specification
 
