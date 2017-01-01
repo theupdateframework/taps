@@ -1,7 +1,7 @@
 * TAP: 5
 * Title: Setting URLs for roles in the root metadata file
 * Version: 1
-* Last-Modified: 14-Dec-2016
+* Last-Modified: 29-Dec-2016
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Draft
@@ -85,16 +85,12 @@ to the root metadata file format.
 In the
 [previous specification](https://github.com/theupdateframework/tuf/blob/70fc8dce367cf09563915afa40cffee524f5b12b/docs/tuf-spec.txt#L766-L776),
 there was no list of URLs associated with each top-level role.
-Instead, the metadata file would be downloaded from one of the URLs listed in
-the [map file](tap4.md).
 
 ```Javascript
 {
   "signed": {
     "roles": {
       ROLE: {
-        // Previously, this metadata file would be downloaded from one of the
-        // URLs specified in the map file (TAP 4).
         "keyids":     [KEYID],
         "threshold":  THRESHOLD
       },
@@ -110,16 +106,11 @@ the [map file](tap4.md).
 Using the new root metadata file format, each top-level role can use the new
 "URLs" attribute to specify a list of URLs from which it can be updated.
 There are three cases regarding this attribute.
-If this list is omitted, then the metadata file for this top-level role shall be
-downloaded using the list of URLs specified in the [map file](tap4.md).
 _If this list is specified, but empty, then this metadata file shall not be
 updated at all._
 Otherwise, if this list is specified, and not empty, then the metadata file
 shall be downloaded from each URL, using the order specified in this list, until
 it is found.
-Each URL may be a [file URI](https://en.wikipedia.org/wiki/File_URI_scheme),
-which means that these files shall be updated from a local directory on disk
-instead of a remote server.
 
 <pre>
 {
@@ -128,8 +119,6 @@ instead of a remote server.
       ROLE: {
         // This is the only adjustment to the file format.
         // Now, a top-level role may be associated with a list of URLs.
-        // If this list is omitted, then this metadata file shall be downloaded
-        // using the list of URLs specified in the map file.
         // If this list is specified, but empty, then it shall not be updated.
         // Otherwise, it shall be downloaded from each URL, using the order
         // specified in this list, until it is found.
@@ -248,17 +237,71 @@ timestamp metadata files should be downloaded from PyPI itself:
 ## Changes to the snapshot metadata file
 
 Since clients may not download the root metadata file from a repository, the
-snapshot metadata file shall no longer list the root metadata file.
+snapshot metadata file need no longer list the root metadata file.
+(However, for [backwards compatibility](#backwards-compatibility), it should
+continue to list the root metadata file.)
 However, it shall continue to list the top-level and all delegated targets
 metadata files.
 
-Furthermore, in order to prevent a delegated targets role from accidentally
-overwriting the metadata file for a top-level role, the file names of targets
-_metadata_ files are not allowed to contain directories.
-In other words, they would be listed as if they were located in [the same directory](tap4.md#metadata-and-targets-layout-on-repositories).
-When populating the dictionary of file names to version numbers, the repository
-shall first add all delegated targets roles, followed by the top-level targets
-role.
+## Downloading metadata and target files
+
+A TUF client would perform the following six steps while searching for a target
+on a repository.
+
+First, the client loads the latest downloaded [root metadata file](tap5.md), and
+ensures that: (1) that it has been signed by a threshold of keys, and (2) it has
+not expired.
+(If it has not been signed by a threshold of keys, then the client should abort,
+and report this error.
+If it has expired, then the client should try to update the root metadata file.)
+Recall that the URL field may either contain the location to update the files,
+or may be empty to say that the repository metadata should not be updated.
+We will now explicitly explain the procedure for doing this.
+The client tries to update the root metadata file.
+Let M denote a non-empty list of URLs already known to be associated with this
+repository.
+For example, M could be the list of URLS associated with the repository in the
+[map file](tap4.md).
+Let R denote the list of URLs associated with this top-level role (in this case,
+the root role) in the root metadata file.
+There are four cases:
+
+1. If R is empty, then this metadata file shall not be updated.
+2. If R is not empty, then this metadata file shall be downloaded in order from
+each URL in R until it is found. If the file could not be found or verified
+using all URLs, then report that it is missing.
+3. If R has been omitted, and M is empty, then this metadata file shall not be
+updated.
+4. If R has been omitted, and M is not empty, then this metadata file shall be
+downloaded in order from each URL in M until it is found. If the file could not
+be found or verified using all URLs, then report that it is missing.
+
+Second, the client uses similar steps to update the timestamp metadata file.
+
+Third, the client uses similar steps to update the snapshot metadata file.
+
+Fourth, the client uses similar steps to update the top-level targets metadata
+file.
+If R is not empty, then the client should be careful in interpreting the entries
+of the snapshot metadata file.
+Suppose that R is
+["https://pypi.python.org/metadata/targets/Django.json", "http://example.com/metadata/path/to/foo.json"].
+First, the client would look up the version number for "targets/Django.json",
+instead of "targets.json" (for the original top-level targets role), in the
+snapshot metadata.
+Then, the client would try to find the desired target using the
+"targets/Django.json" role.
+If the target could not be found or verified, then the client would try to find
+the target using the "path/to/foo.json" role, being careful to first look up the
+version number of the "path/to/foo.json" role in the snapshot metadata.
+
+Fifth, the client uses only M to update delegated targets metadata files.
+Each file is downloaded in order from each URL in M until it is found.
+If the file could not be found or verified using all URLs, then report that it
+is missing.
+
+Sixth, the client uses a step similar to the previous step to download all
+target files.
 
 # Security Analysis
 
@@ -306,13 +349,11 @@ should also be updated accordingly in the custom root metadata file.
 
 # Backwards Compatibility
 
-This specification is not backwards-compatible with clients that do not
-recognize TAP 5, because the changes to the root and snapshot
-metadata file has
-[implications](tap4.md#downloading-metadata-and-target-files)
-on how metadata files are downloaded.
-However, note that it should take very little effort to incorporate these
-changes with an existing implementation.
+This specification is backwards-compatible with older clients that do not
+recognize TAP 5, because they need not be aware of the optional list of URLs
+associated with each top-level role.
+Furthermore, if the snapshot metadata file continues to list the root metadata
+file, then backwards-compatibility continues to be maintained.
 
 # Augmented Reference Implementation
 
