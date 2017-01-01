@@ -194,16 +194,15 @@ the same targets metadata (i.e., length and hashes).
 
 # Backwards Compatibility
 
-This specification is backwards-compatible, because older clients need not be
-modified in order to recognize a map file.
+This specification is backwards-compatible, however older clients will not utilize the map file
+and so will ignore this TAP.
 Older clients may continue to use a single repository.
 New clients need to add relatively little code to interpret the map file.
 New clients simply need to be careful to store the metadata for each repository
 separately from other repositories (e.g., by using a different directory for
 each repository).
 
-An existing repository needs not change how it already stores metadata and
-targets using the TUF specification prior to this TAP.
+An repository need not change in any way to support this TAP.
 
 # Augmented Reference Implementation
 
