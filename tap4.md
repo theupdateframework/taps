@@ -178,7 +178,7 @@ If all repositories in the current mapping have not signed any metadata
 about the target, then take one of the following two actions.
 If the "terminating" attribute is set to true, report that there is no metadata
 about the target.
-Otherwise, proceed to similarly interpret the next mapping.
+Otherwise, proceed to similarly interpret the next mapping.  
 
 # Security Analysis
 
