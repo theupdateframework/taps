@@ -12,7 +12,7 @@
 # Abstract
 
 TAP 4 describes how users may specify that a certain repository should be used
-for some targets, while other repositories should be used for other targets.
+for some targets, while other repositories are to be used for other targets.
 In other words, this TAP allows users to _map_ target names to repositories in a
 manner similar to how targets with specific names can be delegated to different
 roles.
@@ -20,9 +20,9 @@ This allows users to say that a target with a specific type of name (such
 as ```django*``` or ```*.tar.gz```) may be found on a specific repository.
 Each repository has its own root of trust (root role, etc.) so a compromise of
 one repository does not impact other repositories.
-This TAP also discusses how the AND relation can be extended to multiple
-repositories to have multiple different repositories with separate roots of
-trust need to sign off on the same target before installation.
+This TAP also discusses how multiple repositories with separate roots of trust
+can be required to sign off on the same target, effectively creating an AND
+relation.
 
 # Motivation
 
@@ -31,50 +31,55 @@ TAP 4 has been motivated by the following use cases.
 ## Use case 1: obtaining different targets from different repositories
 
 It may be desirable to use the same instance of TUF to download and verify
-different targets hosted on different repositories (for example, some Python
-packages from their maintainers, while getting other Python packages from PyPI).
+different targets hosted on different repositories (for example, getting some
+Python packages from their maintainers, and other Python packages from PyPI).
 In this way, one can securely get all Python packages regardless of where they
-are hosted.  This ensures that the user need not use a different client tool 
+are hosted.  This ensures that the user need not use a different client tool
 instance (e.g., copy of ```pip```) for each repository.
 
 ## Use case 2: hiding sensitive metadata and targets
 
-Extending the previous example, enterprise users may not wish to upload some 
-metadata and targets to a public repository, because doing so may reveal 
+Extending the previous example, enterprise users may not wish to upload some
+metadata and targets to a public repository, because doing so may reveal
 some sensitive / proprietary information.
 Therefore, these users may use a private repository to host these sensitive
 metadata and targets, and hide them from public view, while still having
 other files hosted in the public repository.
 In order to use both the private and public repositories, TUF clients need to be
-somehow informed to search for some targets on the private repository, and all
+informed how to search for some targets on the private repository, and all
 other targets on the public repository.
 
 ## Use case 3: improving compromise-resilience given multiple repositories
 
 To improve compromise-resilience, a user may wish to have multiple repositories,
-each with a different root of trust, to sign targets.  This would ensure that
-both repository A and repository B would need to trust a target file before it
-would be installed.
+each with a different root of trust, sign targets.
+This would ensure that both repository A and repository B must trust a target
+file before it can be installed.
 The effect is similar to the AND relation used in
-[multi-role delegations](tap3.md).  Note that if there are multiple repositories
-with disjoint roots of trust, it was already possible to do something similar.
-One could have one repository download and use a multi-role delegation to the 
-other repository's target.  Thus, if repository A downloaded the targets metadata
-from repository B, and used a multi-role delegation for the targets metadata, this
-achieved a similar effect.  If repository B is compromised, the users are not
-impacted because repository A's multi-role delegation will prevent use of repository B's
-malicious targets files.  However, if repository A's root role or its top level targets 
-role were compromised, all users can be given malicious targets files even if repository
-B is not compromised.  We wish to remedy this case by delegating from the map file
-so that if either of the two repositories is compromised, the users are not at risk.
-
+[multi-role delegations](tap3.md).
+Note that if there are multiple repositories with disjointed roots of trust, it
+is already possible to do something similar.
+One could have one repository download and use a multi-role delegation to the
+other repository's target.
+Thus, if repository A downloaded the targets metadata from repository B, and
+used a multi-role delegation for the targets metadata, this achieves a similar
+effect.
+If repository B is compromised, the users are not impacted because repository
+A's multi-role delegation will prevent the use of repository B's malicious
+targets files.
+However, if repository A's root role or its top level targets role were to be
+compromised, all users can be given malicious targets files, even if repository
+B is not compromised.
+We wish to remedy this case by delegating from the map file so that if either of
+the two repositories is compromised, the users are not at risk.
 
 # Rationale
 
-TUF would benefit greatly from the ability to handle the above use cases,
+TUF would benefit greatly from the ability to handle the above use cases, as
 requested by its adopters.
-This TAP does not reduce existing security guarantees, allows greater flexibility, 
-and should require only modest effort to support from an existing implementation.
+This TAP allows greater flexibility with no reduction of security guarantees,
+and should require only modest effort to support from an existing
+implementation.
 
 # Specification
 
@@ -82,10 +87,10 @@ We introduce a mandatory top-level metadata file called `map.json`.
 This _map file_ comes into play when a TUF client requests targets.
 
 Using a scheme similar to targets delegations within a repository, targets may
-be mapped to one or more repositories in this file.
+be mapped to one or more repository in this file.
 
-A client will keep all metadata for each repository in a separate directory.
-Where these directories are kept is up to the client.
+A client will keep all metadata for each repository in a separate directory of
+the client's choice.
 
 ## The map file
 
@@ -107,16 +112,17 @@ URLs.
 The repository name also corresponds to the name of the local directory on the
 TUF client where metadata files would be cached.
 Crucially, there is where the [root metadata file](tap5.md) for a repository
-would be found.
+is located.
 
-There is also a list of URLs that indicates where to retrieve files from.
-This list of URLs should not be omitted or empty, because it specifies where TUF
-clients may download metadata and target files.
+There is also a list of URLs that indicates from where files are to be
+retrieved.
+This list of URLs should not be omitted or be left empty, because it specifies
+where TUF clients may download metadata and target files.
 Each URL points to a root directory containing metadata and target files.
 
 The value of the "mapping" key is a priority-ordered list that maps paths (i.e.,
 target names) to the specific repositories.
-Every member in this list is a dictionary with at least two keys:
+Every entry in this list is a dictionary with at least two keys:
 
 * "paths" specifies a list of target paths of patterns. A desired target must
 match a pattern in this list for this mapping to be consulted.
@@ -163,22 +169,32 @@ The following is an example of a map file:
 }
 ```
 
-## Interpreting the map file
+## Searching for targets using the map file
 
-Every mapping in the map file shall be interpreted as follows.
-Proceeding down the list of mappings in order, if a desired target matches a
-targets path pattern in the "paths" attribute, then download and verify metadata
-from every repository specified in the "repositories" attribute.
-Ensure that the targets metadata, specifically length and hashes about the
-target, matches across repositories.
-Custom targets metadata is exempted from this requirement.
-If the targets metadata matches across repositories, return this metadata.
-Otherwise, report the mismatch to the user.
-If all repositories in the current mapping have not signed any metadata
-about the target, then take one of the following two actions.
-If the "terminating" attribute is set to true, report that there is no metadata
-about the target.
-Otherwise, proceed to similarly interpret the next mapping.  
+In order to use the map file to search for targets on repositories, a TUF client
+should perform the following steps:
+
+1. Look at the first entry in the list of mappings.
+
+2. If a desired target matches a targets path pattern in the "paths" attribute,
+then download and verify metadata from every repository specified in the
+"repositories" attribute.
+
+3. Ensure that the targets metadata, specifically length and hashes about the
+target, match across all repositories. Custom targets metadata are exempted from
+this requirement.
+
+4. If the targets metadata is a match across repositories, return this metadata.
+
+5. Otherwise, if the targets metadata do not match across repositories, or if
+none of the repositories signed metadata about the desired target, then take one
+of the following actions.
+
+5.1. If the "terminating" attribute is set to true, either report that the
+repositories do not agree on the target, or that none of them have signed for
+the target.
+
+5.2. Otherwise, process the next mapping following the steps above.
 
 # Security Analysis
 
@@ -189,20 +205,21 @@ Each repository continues to be treated as it was previously, with TUF
 performing the necessary verification of the repository metadata.
 
 In order to avoid accidental denial-of-service attacks when multiple
-repositories sign the same targets, these repositories should coordinate to sign
-the same targets metadata (i.e., length and hashes).
+repositories sign the same targets, these repositories should coordinate to be
+sure they are signing the same targets metadata (i.e., length and hashes).
 
 # Backwards Compatibility
 
-This specification is backwards-compatible, however older clients will not utilize the map file
-and so will ignore this TAP.
+This specification is backwards-compatible, however older clients will not
+utilize the map file and so will ignore this TAP.
 Older clients may continue to use a single repository.
 New clients need to add relatively little code to interpret the map file.
-New clients simply need to be careful to store the metadata for each repository
-separately from other repositories (e.g., by using a different directory for
-each repository).
+However, they must be careful to store the metadata for each repository
+separately from others (e.g., by using a different directory for each
+repository).
 
-An repository need not change in any way to support this TAP.
+An existing repository that used the TUF specification prior to this TAP does
+not need to change how it already stores metadata and targets.
 
 # Augmented Reference Implementation
 
