@@ -286,14 +286,17 @@ If R is not empty, then the client should be careful in interpreting the entries
 of the snapshot metadata file.
 Suppose that R is
 ["https://pypi.python.org/metadata/targets/Django.json", "http://example.com/metadata/path/to/foo.json"].
-First, the client would look up the version number for "targets/Django.json",
-instead of "targets.json" (for the original top-level targets role), in the
-snapshot metadata.
-Then, the client would try to find the desired target using the
+If the the top-level targets metadata file is available from the first URL, then
+the client would look up the version number for "targets/Django.json", instead
+of "targets.json" (for the original top-level targets role), in the snapshot
+metadata.
+After that, the client would try to find the desired target using the
 "targets/Django.json" role.
-If the target could not be found or verified, then the client would try to find
-the target using the "path/to/foo.json" role, being careful to first look up the
-version number of the "path/to/foo.json" role in the snapshot metadata.
+Otherwise, if the top-level targets metadata file could not be found or verified
+using the first URL, but it is available from the second URL, then the client
+would try to find the target using the "path/to/foo.json" role, being careful to
+first look up the version number of the "path/to/foo.json" role in the snapshot
+metadata.
 
 Fifth, the client uses only M to update delegated targets metadata files.
 Each file is downloaded in order from each URL in M until it is found.
