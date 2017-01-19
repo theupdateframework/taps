@@ -37,6 +37,7 @@ would be added to the "signed" section of metadata.
 ```javascript
 {
 "_type" : ROLENAME,
+"spec_version" : "1.0", // the new field
 "version" : VERSION,
 "expires" : EXPIRES,
 "keys" : {
