@@ -131,7 +131,7 @@ set in the configuration file.
 The command to execute the conformance testing tool is:
 
 ```Bash
-$ python updater.py --config tmp/tuf_conformance_tester.yml
+$ python updater.py --config tmp/.tuf-tester.yml
 ```
 
 Here is an example command for the Python updater:
