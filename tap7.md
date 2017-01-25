@@ -124,21 +124,14 @@ defined in this TAP to mean that a slow retrieval error has occurred).
 
 # Specification
 
-`root.json` exists in `tmp/metadata`, which is stored there by the
+`root.json` exists in --metadata `tmp/metadata`, which is stored there by the
 conformance tester.  The root file is generated according to the restrictions
 set in the configuration file.
 
 The command to execute the conformance testing tool is:
 
 ```Bash
-$ python updater.py --config tmp/.tuf-tester.yml
-```
-
-Here is an example command for the Python updater:
-
-```Bash
-$ python conformance_tester.py --updater "python updater.py --repo
-http://localhost:8001 --metadata tmp/metadata --targets tmp/targets foo.tgz"
+$ python conformance-tester.py --config tmp/.tuf-tester.yml
 ```
 
 The conformance tester returns `0` if the implementation complies with the
@@ -148,7 +141,7 @@ conformance_tester.py returns a non-zero return code to signal a failure.
 Optionally, a list of the conformance tests that the updater failed is printed
 or logged.
 
-An example of a `.tuf-tester.yml` configuration file:
+An example of a `.tuf-tester.yml` configuration file for a Python updater:
 
 ```
 command: "python test-updater.py foo.tgz --repo http://localhost:8001 --metadata tmp/metadata --targets tmp/targets"
