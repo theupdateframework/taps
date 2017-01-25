@@ -20,7 +20,7 @@ and blocking known updater attacks, these unit tests only work with the
 reference implementation.  Conformance testing should instead work across
 different languages and platforms.  In other words, the specification should
 endorse an official tool, compatible with any implementation, and cover how an
-implementation can be set up for conformance testing with the tool.
+implementation can be set up for conformance testing.
 
 # Motivation
 
@@ -48,13 +48,13 @@ testing with the official tool.
 
 Developers of an implementation who wish to undergo conformance testing are
 required to provide a program, or script, that accepts a specific set of
-command-line arguments and can perform an update.  A fixed set of arguments are
-needed so that compliance testing is consistent across different programs.  The
-compliance tester also requires a minimum number of arguments so that it can
-thoroughly cover all potential outcomes that it wishes to test.  It should be
-noted, however, that this program does not necessarily have to be the updater
-used in production, only that it should function as defined in this TAP for
-compliance testing only.
+command-line arguments.  The program should be able perform a secure update.  A
+fixed set of arguments are needed so that compliance testing is consistent
+across different programs.  The compliance tester also requires a minimum
+number of arguments so that it can thoroughly cover all potential outcomes that
+it wishes to test.  It should be noted, however, that this program does not
+necessarily have to be the updater used in production, only that it should
+function as defined in this TAP for compliance testing only.
 
 The program itself accepts a command-line argument that indicates the target
 file to download when the program initiates an update, the location of a TUF
