@@ -73,7 +73,7 @@ $ python test-updater.py foo.tgz --repo http://localhost:8001 --metadata tmp/met
 ```
 
 In turn, the conformance tester executes this command when it runs its suite of
-compliance tests, which will consist testing for things like validating the
+compliance tests, which will consist of testing for things like validating the
 metadata downloaded by the updater and verifying that the following attacks are
 blocked:
 
@@ -84,10 +84,10 @@ rollback (9) slow retrieval, (10) key compromise.
 ```
 
 While testing, the compliance tester will inspect the state of the downloaded
-metadata and examine the return codes of the updater when attacks on the updater
-are present, which are later defined in the `Specification`` section of this
-TAP.  The compliance tester is in control of the repository specified on the
-command-line.
+metadata and examine the return codes of the program when attacks on the
+updater are present, which are defined later in the `Specification`` section of
+this TAP.  The compliance tester is in control of the repository specified on
+the command-line.
 
 As for running the compliance-tester, the compliance-tester tool accepts a
 single command-line option that points to the location of a configuration file:
@@ -96,14 +96,13 @@ single command-line option that points to the location of a configuration file:
 $ python compliance-tester.py --config tmp/.tuf-tester.yml
 ```
 
-The configuration file includes the update command that it should execute to
-run the updater, and other restrictions such as the cryptography key types
-supported by the updater, the number of root keys, thresholds, etc.  Why is a
-configuration file needed?  There are restrictions set by different
-implementation that, although they abide by the specification, are not shared
-across all implementations of the specification.  For example, the Go
-implementation might only support ECDSA keys, whereas another might support
-Ed25519 and RSA keys.
+The configuration file includes the command that it should execute to run the
+updater, and other restrictions such as the cryptography key types supported by
+the updater, the number of root keys, thresholds, etc.  Why is a configuration
+file needed?  There are restrictions set by different implementation that,
+although they abide by the specification, are not shared across all
+implementations of the specification.  For example, the Go implementation might
+only support ECDSA keys, whereas another might support Ed25519 and RSA keys.
 
 Before beginning compliance testing, the compliance testing tool will generate
 a `root.json` according to the restrictions set in `.tuf-tester.yml`, save it
@@ -117,37 +116,39 @@ by the specification [TODO: at least this is my conclusion, but I am open to
 feedback].  As brief examples: the tool can start the update program and feed
 it the correct metadata and target file when the requests are made.  It will
 inspect the local metadata directory to ensure that the correct metadata was
-downloaded, they are signed properly, and that the update program succeeds with
-a return code of `0`.  The tool can test the program for detection of a
+downloaded, that they are signed properly, and that the update program succeeds
+with a return code of `0`.  The tool can test the program for detection of a
 slow retrieval attack by starting a server that provides data at a slow rate,
 and confirming that the program returns a code of `5` (a return code of `5` is
-defined in this TAP to mean a slow retrieval error occurred).
+defined in this TAP to mean that a slow retrieval error has occurred).
 
 # Specification
 
-`root.json` exists in "tmp/metadata", which is saved there by the
+`root.json` exists in "tmp/metadata", which is stored there by the
 compliance tester.  The root file is generated according to the restrictions
 set in the configuration file.
 
-Command to execute the compliance testing tool:
+The command to execute the compliance testing tool is:
 
 ```Bash
 $ python updater.py --config tmp/tuf_compliance_tester.yml
 ```
 
-Example command for the Python updater:
+Here is an example command for the Python updater:
 
 ```Bash
 $ python compliance_tester.py --updater "python updater.py --repo
 http://localhost:8001 --metadata tmp/metadata --targets tmp/targets foo.tgz"
 ```
 
-Return 0 if the implementation complies with the specification.
+The compliance tester returns `0` if the implementation complies with the
+specification.
 
-compliance_tester.py returns an non-zero return code for failure.  Optionally,
-a list of the compliance tests that the updater failed is printed or logged.
+compliance_tester.py returns a non-zero return code to signal a failure.
+Optionally, a list of the compliance tests that the updater failed is printed
+or logged.
 
-The `.tuf-tester.yml` configuration file:
+An example of a `.tuf-tester.yml` configuration file:
 
 ```
 command: "python test-updater.py foo.tgz --repo http://localhost:8001 --metadata tmp/metadata --targets tmp/targets"
@@ -157,7 +158,7 @@ root-threshold: 2
 ...
 ```
 
-Returns codes are defined for different outcomes:
+And return codes are defined for different outcomes:
 [TODO: These return codes are not yet finalized]
 
 ```
