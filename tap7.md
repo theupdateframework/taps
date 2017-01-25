@@ -49,12 +49,12 @@ testing with the official tool.
 Developers of an implementation who wish to undergo conformance testing are
 required to provide a program, or script, that accepts a specific set of
 command-line arguments.  The program should be able perform a secure update.  A
-fixed set of arguments are needed so that compliance testing is consistent
-across different programs.  The compliance tester also requires a minimum
+fixed set of arguments are needed so that conformance testing is consistent
+across different programs.  The conformance tester also requires a minimum
 number of arguments so that it can thoroughly cover all potential outcomes that
 it wishes to test.  It should be noted, however, that this program does not
 necessarily have to be the updater used in production, only that it should
-function as defined in this TAP for compliance testing only.
+function as defined in this TAP for conformance testing only.
 
 The program itself accepts a command-line argument that indicates the target
 file to download when the program initiates an update, the location of a TUF
@@ -73,7 +73,7 @@ $ python test-updater.py foo.tgz --repo http://localhost:8001 --metadata tmp/met
 ```
 
 In turn, the conformance tester executes this command when it runs its suite of
-compliance tests, which will consist of testing for things like validating the
+conformance tests, which will consist of testing for things like validating the
 metadata downloaded by the updater and verifying that the following attacks are
 blocked:
 
@@ -83,28 +83,28 @@ fast-forward (5) indefinite freeze (6) malicious mirrors (7) mix-and-match (8)
 rollback (9) slow retrieval, (10) key compromise.
 ```
 
-While testing, the compliance tester will inspect the state of the downloaded
+While testing, the conformance tester will inspect the state of the downloaded
 metadata and examine the return codes of the program when attacks on the
 updater are present, which are defined later in the `Specification` section of
-this TAP.  The compliance tester is in control of the repository specified on
+this TAP.  The conformance tester is in control of the repository specified on
 the command-line.
 
-As for running the compliance-tester, the compliance-tester tool accepts a
+As for running the conformance-tester, the conformance-tester tool accepts a
 single command-line option that points to the location of a configuration file:
 
 ```Bash
-$ python compliance-tester.py --config tmp/.tuf-tester.yml
+$ python conformance-tester.py --config tmp/.tuf-tester.yml
 ```
 
 The configuration file includes the command that it should execute to run the
 updater, and other restrictions such as the cryptography key types supported by
 the updater, the number of root keys, thresholds, etc.  Why is a configuration
-file needed?  There are restrictions set by different implementation that,
+file needed?  There are restrictions set by different implementations that,
 although they abide by the specification, are not shared across all
 implementations of the specification.  For example, the Go implementation might
 only support ECDSA keys, whereas another might support Ed25519 and RSA keys.
 
-Before beginning compliance testing, the compliance testing tool will generate
+Before beginning conformance testing, the conformance testing tool will generate
 a `root.json` according to the restrictions set in `.tuf-tester.yml`, save it
 to --metadata tmp/metadata, populate and start a TUF repository, and execute
 the update command.  The updater should load tmp/metadata/root.json, refresh
@@ -125,27 +125,27 @@ defined in this TAP to mean that a slow retrieval error has occurred).
 # Specification
 
 `root.json` exists in `tmp/metadata`, which is stored there by the
-compliance tester.  The root file is generated according to the restrictions
+conformance tester.  The root file is generated according to the restrictions
 set in the configuration file.
 
-The command to execute the compliance testing tool is:
+The command to execute the conformance testing tool is:
 
 ```Bash
-$ python updater.py --config tmp/tuf_compliance_tester.yml
+$ python updater.py --config tmp/tuf_conformance_tester.yml
 ```
 
 Here is an example command for the Python updater:
 
 ```Bash
-$ python compliance_tester.py --updater "python updater.py --repo
+$ python conformance_tester.py --updater "python updater.py --repo
 http://localhost:8001 --metadata tmp/metadata --targets tmp/targets foo.tgz"
 ```
 
-The compliance tester returns `0` if the implementation complies with the
+The conformance tester returns `0` if the implementation complies with the
 specification.
 
-compliance_tester.py returns a non-zero return code to signal a failure.
-Optionally, a list of the compliance tests that the updater failed is printed
+conformance_tester.py returns a non-zero return code to signal a failure.
+Optionally, a list of the conformance tests that the updater failed is printed
 or logged.
 
 An example of a `.tuf-tester.yml` configuration file:
