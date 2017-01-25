@@ -85,7 +85,7 @@ rollback (9) slow retrieval, (10) key compromise.
 
 While testing, the compliance tester will inspect the state of the downloaded
 metadata and examine the return codes of the program when attacks on the
-updater are present, which are defined later in the `Specification`` section of
+updater are present, which are defined later in the `Specification` section of
 this TAP.  The compliance tester is in control of the repository specified on
 the command-line.
 
@@ -124,7 +124,7 @@ defined in this TAP to mean that a slow retrieval error has occurred).
 
 # Specification
 
-`root.json` exists in "tmp/metadata", which is stored there by the
+`root.json` exists in `tmp/metadata`, which is stored there by the
 compliance tester.  The root file is generated according to the restrictions
 set in the configuration file.
 
