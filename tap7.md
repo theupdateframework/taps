@@ -144,7 +144,7 @@ $ python conformance-tester.py --config tmp/.tuf-tester.yml
 The conformance tester returns `0` if the implementation complies with the
 specification.
 
-conformance_tester.py returns a non-zero return code to signal a failure.
+conformance-tester.py returns a non-zero return code to signal a failure.
 Optionally, a list of the conformance tests that the updater failed is printed
 or logged.
 
