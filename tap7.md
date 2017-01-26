@@ -48,13 +48,13 @@ testing with the official tool.
 
 Developers of an implementation who wish to undergo conformance testing are
 required to provide a program, or script, that accepts a specific set of
-command-line arguments.  The program should be able perform a secure update.  A
-fixed set of arguments are needed so that conformance testing is consistent
+command-line arguments.  The program should be able to perform a secure update.
+A fixed set of arguments are needed so that conformance testing is consistent
 across different programs.  The conformance tester also requires a minimum
 number of arguments so that it can thoroughly cover all potential outcomes that
 it wishes to test.  It should be noted, however, that this program does not
 necessarily have to be the updater used in production, only that it should
-function as defined in this TAP for conformance testing only.
+function as defined in this TAP for conformance testing.
 
 The program itself accepts a command-line argument that indicates the target
 file to download when the program initiates an update, the location of a TUF
@@ -78,9 +78,16 @@ metadata downloaded by the updater and verifying that the following attacks are
 blocked:
 
 ```
-(1) Arbitrary installation (2) endless data (3) extraneous dependencies (4)
-fast-forward (5) indefinite freeze (6) malicious mirrors (7) mix-and-match (8)
-rollback (9) slow retrieval, (10) key compromise.
+(1) Arbitrary installation
+(2) endless data
+(3) extraneous dependencies
+(4) fast-forward
+(5) indefinite freeze
+(6) malicious mirrors
+(7) mix-and-match
+(8) rollback
+(9) slow retrieval
+(10) key compromise.
 ```
 
 While testing, the conformance tester will inspect the state of the downloaded
@@ -89,7 +96,7 @@ updater are present, which are defined later in the `Specification` section of
 this TAP.  The conformance tester is in control of the repository specified on
 the command-line.
 
-As for running the conformance-tester, the conformance-tester tool accepts a
+As for running conformance testing, the conformance tester accepts a
 single command-line option that points to the location of a configuration file:
 
 ```Bash
@@ -104,11 +111,11 @@ although they abide by the specification, are not shared across all
 implementations of the specification.  For example, the Go implementation might
 only support ECDSA keys, whereas another might support Ed25519 and RSA keys.
 
-Before beginning conformance testing, the conformance testing tool will generate
-a `root.json` according to the restrictions set in `.tuf-tester.yml`, save it
-to --metadata tmp/metadata, populate and start a TUF repository, and execute
-the update command.  The updater should load tmp/metadata/root.json, refresh
-metadata accordingly, and fetch the target file.
+Before beginning conformance testing, the conformance testing tool will
+generate a `root.json` according to the restrictions set in `.tuf-tester.yml`,
+save it to --metadata tmp/metadata, populate and start a TUF repository, and
+execute the update command.  The updater should load tmp/metadata/root.json,
+refresh metadata accordingly, and fetch the target file.
 
 The update procedure of the program, which is to refresh metadadata and
 download a single target file, is sufficient to cover all the requirements set
@@ -169,8 +176,8 @@ return code      result
 
 # Security Analysis
 
-This TAP does not detract from existing security guarantees because it does
-not propose architectual changes to the specification.
+This TAP does not detract from existing security guarantees because it does not
+propose architectual changes to the specification.
 
 # Backwards Compatibility
 
