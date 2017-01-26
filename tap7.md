@@ -186,8 +186,10 @@ This TAP does not introduce any backwards incompatibilities.
 
 # Augmented Reference Implementation
 
-[TODO: Point to a branch containing the official tool for conformance testing,
-and a client set up for conformance testing.]
+
+A git branch containing the official tool for conformance testing and a client
+set up for conformance testing:
+https://github.com/theupdateframework/tuf/tree/tap7/tuf/scripts/conformance_tester
 
 # Copyright
 
