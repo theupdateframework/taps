@@ -69,7 +69,7 @@ $ command foo.tgz http://localhost:8001 tmp/metadata tmp/targets
 A Python example:
 
 ```Bash
-$ python test-updater.py foo.tgz --repo http://localhost:8001 --metadata tmp/metadata --targets tmp/targets
+$ python test_updater.py --file foo.tgz --repo http://localhost:8001 --metadata tmp/metadata --targets tmp/targets
 ```
 
 In turn, the conformance tester executes this command when it runs its suite of
@@ -100,7 +100,7 @@ As for running conformance testing, the conformance tester accepts a
 single command-line option that points to the location of a configuration file:
 
 ```Bash
-$ python conformance-tester.py --config tmp/.tuf-tester.yml
+$ python conformance_tester.py --config tmp/.tuf-tester.yml
 ```
 
 The configuration file includes the command that it should execute to run the
@@ -138,20 +138,21 @@ set in the configuration file.
 The command to execute the conformance testing tool is:
 
 ```Bash
-$ python conformance-tester.py --config tmp/.tuf-tester.yml
+$ python conformance_tester.py --config tmp/.tuf-tester.yml
 ```
 
 The conformance tester returns `0` if the implementation complies with the
 specification.
 
-conformance-tester.py returns a non-zero return code to signal a failure.
+conformance_tester.py returns a non-zero return code to signal a failure.
 Optionally, a list of the conformance tests that the updater failed is printed
 or logged.
 
 An example of a `.tuf-tester.yml` configuration file for a Python updater:
 
 ```
-command: "python test-updater.py foo.tgz --repo http://localhost:8001 --metadata tmp/metadata --targets tmp/targets"
+command: "python test_updater.py --file foo.tgz
+  --repo http://localhost:8001 --metadata tmp/metadata --targets tmp/targets"
 keytype: ed25519, ecdsa
 number-of-root-keys: 3
 root-threshold: 2
