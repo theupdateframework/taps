@@ -41,7 +41,7 @@ and weaknesses listed in [section
 1.5.2](https://github.com/theupdateframework/tuf/blob/6fde6222c9c6abf905ef4a56cf56fe35c4a85e14/docs/tuf-spec.txt#L124-L181)
 (Goals for specific attacks to protect against) of the specification.
 
-An implementatation can be said to be TUF-compliant if it passes conformance
+An implementation can be said to be TUF-compliant if it passes conformance
 testing with the official tool.
 
 # Rationale
