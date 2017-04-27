@@ -50,7 +50,7 @@ testing with the official tool.
 Developers of an implementation who wish to undergo conformance testing are
 required to provide a program, or script, that accepts a specific set of
 command-line arguments.  The program should be able to perform a secure update.
-A fixed set of arguments are needed so that conformance testing is consistent
+A fixed set of arguments is needed so that conformance testing is consistent
 across different programs.  The conformance tester also requires a minimum
 number of arguments so that it can thoroughly cover all potential outcomes that
 it wishes to test.  It should be noted, however, that this program does not
