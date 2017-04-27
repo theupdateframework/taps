@@ -33,12 +33,13 @@ conformant.  However, the client would still need to be tested for the expected
 behavior when the generated metadata is updated.  In the second case, the
 implementation is said to be conformant depending on how thoroughly the unit
 tests are reproduced in X.  There are bound to be inconsistencies between both
-sets of unit tests, so a single tool is preferable.  A single tool for
-conformance testing can avoid issues with interoperability, duplicate work,
-ensuring update behavior as intended by the designers of the framework, and
-most importantly it can certify that an updater is secure against the attacks
-and weaknesses listed in [section
-1.5.2](https://github.com/theupdateframework/tuf/blob/6fde6222c9c6abf905ef4a56cf56fe35c4a85e14/docs/tuf-spec.txt#L124-L181)
+sets of unit tests, and improvements in TUF testing or changes to TUF would
+result in a need for implemeters to add test code in parallel, so a single tool
+is preferable.  A single tool for conformance testing can avoid issues with
+interoperability, duplicate work, ensuring update behavior as intended by the
+designers of the framework, and most importantly it can certify that an updater
+is secure against the attacks and weaknesses listed in
+[section 1.5.2](https://github.com/theupdateframework/tuf/blob/6fde6222c9c6abf905ef4a56cf56fe35c4a85e14/docs/tuf-spec.txt#L124-L181)
 (Goals for specific attacks to protect against) of the specification.
 
 An implementation can be said to be TUF-compliant if it passes conformance
