@@ -57,12 +57,12 @@ it wishes to test.  It should be noted, however, that this program does not
 necessarily have to be the updater used in production, only that it should
 function as defined in this TAP for conformance testing.
 
-The program itself accepts a command-line argument that indicates the target
-file to download when the program initiates an update, the location of a TUF
-repository that satisfies requests for metadata and targets, and where
-downloaded metadata files and the target file are saved when the program
-initiates an update.  Specifically, the implementation needs to accept
-arguments as follows:
+An implementation to be tested will need to accept a command-line argument that
+indicates the target file to download when the program initiates an update,
+the location of a TUF repository that satisfies requests for metadata and
+targets, and where downloaded metadata files and the target file are saved
+when the program initiates an update.  Specifically, the implementation
+needs to accept arguments as follows:
 
 ```Bash
 $ command foo.tgz http://localhost:8001 tmp/metadata tmp/targets
