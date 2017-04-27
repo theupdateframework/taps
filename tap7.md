@@ -12,7 +12,7 @@
 [Conformance testing](https://en.wikipedia.org/wiki/Conformance_testing) can
 determine whether an implementation meets the requirements set by a
 specification.  A tool that helps developers and users test that an
-implementation bahaves according to the TUF specification does not presently
+implementation behaves according to the TUF specification does not presently
 exist.  Although the reference implementation contains [unit
 tests](https://github.com/theupdateframework/tuf/tree/6fde6222c9c6abf905ef4a56cf56fe35c4a85e14/tests)
 that verify correct behavior, such as updating metadata in the expected order
