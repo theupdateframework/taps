@@ -160,8 +160,8 @@ number-of-root-keys: 3
 root-threshold: 2
 ...
 ```
-
-And return codes are defined for different outcomes:
+The updater is expected to generate the following return codes in the following
+situations:
 [TODO: These return codes are not yet finalized]
 
 ```
