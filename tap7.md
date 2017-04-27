@@ -133,9 +133,9 @@ defined in this TAP to mean that a slow retrieval error has occurred).
 
 # Specification
 
-`root.json` exists in --metadata `tmp/metadata`, which is stored there by the
-conformance tester.  The root file is generated according to the restrictions
-set in the configuration file.
+The conformance tester stores `root.json` in the metadata directory indicated
+on the command line (e.g., `tmp/metadata` above).  The root file is generated
+according to the restrictions set in the configuration file.
 
 The command to execute the conformance testing tool is:
 
