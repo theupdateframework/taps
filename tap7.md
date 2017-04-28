@@ -166,10 +166,18 @@ or logged.
 An example of a `.tuf-tester.yml` configuration file for a Python updater:
 
 ```
-command: "python test_updater.py --file foo.tgz
+# The command that the conformance tester executes to verify compliant_updater.py's
+# conformity with the specification.
+command: "python compliant_updater.py --file foo.tgz
   --repo http://localhost:8001 --metadata tmp/metadata --targets tmp/targets"
+
+# compliant_updater.py supports the following keytypes.
 keytype: ed25519, ecdsa
+
+# compliant_updater.py expects the Root file to be signed by a max of 3 different keys.
 number-of-root-keys: 3
+
+# Minimally, the Root file MUST be signed by at least 2/3 Root keys.
 root-threshold: 2
 ...
 ```
