@@ -43,7 +43,7 @@ is secure against the attacks and weaknesses listed in
 (Goals for specific attacks to protect against) of the specification.
 
 An implementation can be said to be TUF-compliant if it passes conformance
-testing with the official tool.
+testing with the official tool, which can be used by anyone.
 
 # Rationale
 
