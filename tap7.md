@@ -104,11 +104,12 @@ blocked:
 (10) key compromise.
 ```
 
-While testing, the conformance tester will inspect the state of the downloaded
-metadata and examine the return codes of the program when attacks on the
-updater are present, which are defined later in the `Specification` section of
-this TAP.  The conformance tester is in control of the repository specified on
-the command-line.
+While testing, the conformance tester verifies that the expected metadata
+and update files are downloaded, and examine the return codes of the program
+when attacks on the updater are present, which are defined later in the
+`Specification` section of this TAP.  Note that the conformance tester is in
+control of the repository specified on the command-line, and so it  can test
+for various conditions and input metadata.
 
 As for running conformance testing, the conformance tester accepts a
 single command-line option that points to the location of a configuration file:
