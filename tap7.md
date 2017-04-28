@@ -203,10 +203,11 @@ return code      result
 A developer wants to verify that his Python implementation is compliant with
 the specification.  He can begin by creating a script that accepts input
 metadata and, when certain attacks are present, exits with the return codes
-defined in this TAP.  The script is simply an interface, or wrapper, to the
+defined in this TAP.  The script can simply be an interface, or wrapper, to the
 actual implementation, which in production raises exceptions when an error
-occurs. Furthermore, the implementation uses an entirely different command-line
-interface from the one used by the script.
+occurs. Furthermore, the implementation might use a different command-line
+interface from the one used by the script.  The developer's script
+can look something like [this](https://github.com/theupdateframework/tuf/blob/tap7/tuf/scripts/conformance_tester/compliant_updater.py)
 
 A user can run the developer's script, `compliant_updater.py`, to initiate a
 normal update (e.g., to download the foo.tgz package).  In this case, the
@@ -215,7 +216,11 @@ information, downloads the requested foo.tgz file, and exit with a return code
 of 0.
 
 ```Bash
-$ python compliant_updater.py --file foo.tgz --repo http://localhost:8001 --metadata /tmp/metadata --targets /tmp/targets
+$ python compliant_updater.py
+  --file foo.tgz
+  --repo http://localhost:8001
+  --metadata /tmp/metadata
+  --targets /tmp/targets
 
 $ echo $?
 0
@@ -239,7 +244,11 @@ complete the update:
 
 
 ```Bash
-$ python compliant_updater.py --file foo.tgz --repo http://localhost:8001 --metadata /tmp/metadata --targets /tmp/targets
+$ python compliant_updater.py
+  --file foo.tgz
+  --repo http://localhost:8001
+  --metadata /tmp/metadata --targets /tmp/targets
+
 Error: Download was too slow. Average speed: 0.0 bytes per second.
 
 $ echo $?
@@ -254,12 +263,36 @@ top-level metadata and the foo.tgz were unsuccessfully saved to the
 Now, suppose that the Python implementation had the following restrictions:
 
 ```
-(1) metadata is encoded in DER (rather than JSON).
+(1) metadata is encoded in DER (rather than JSON)
 (2) only Ed25519 keys are used and listed in metadata
-(3) the Root file must be signed by 2/3 keys
+(3) the Root file must be signed by 1/2 keys
 ```
 
 
+Items 2-3 can be configured with the conformance tool, via its configuration
+file.  The .tuf-tester.yml would be edited to list:
+
+```
+command: "python compliant_updater.py --file foo.tgz
+  --repo http://localhost:8001 --metadata tmp/metadata --targets tmp/targets"
+
+keytype: ed25519
+number-of-root-keys: 2
+root-threshold: 1
+```
+
+Next, the conformance tool would ...
+
+
+
+
+Summary of steps followed to test a compliant updater for conformance:
+
+(1) provide interface to updater that accepts metadata and exits with return
+codes
+(2) configure conformance tool to abide by adopter's restrictions
+(3) convert JSON metadata to encoding used by adopter, if necessary
+(4) run conformance tool and confirm all tests pass.
 
 # Security Analysis
 
