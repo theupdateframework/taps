@@ -47,15 +47,27 @@ testing with the official tool.
 
 # Rationale
 
-Developers of an implementation who wish to undergo conformance testing are
-required to provide a program, or script, that accepts a specific set of
-command-line arguments.  The program should be able to perform a secure update.
-A fixed set of arguments is needed so that conformance testing is consistent
-across different programs.  The conformance tester also requires a minimum
-number of arguments so that it can thoroughly cover all potential outcomes that
-it wishes to test.  It should be noted, however, that this program does not
-necessarily have to be the updater used in production, only that it should
-function as defined in this TAP for conformance testing.
+Developers need a straightforward and convenient way of verifying whether an
+implementation conforms to the specification.  One solution is to define, and
+ideally automate, the expected outcome of an update request given different sets
+of input metadata.  If an implementation is given the Root file and instructed to
+download a particular package, does it correctly download the required top-level
+metadata and the requested package?  Does it do so while still preventing the attacks
+listed in the specification?  Consequently, an implementation of the framework
+would need some way of accepting given metadata and indicating when it has detected a
+particular attack.
+
+This TAP prescribes that an implementation, or a wrapper script for it, accept a
+set of command-line arguments, which are defined here, and exit with return codes
+under certain conditions (e.g., to signal that a Freeze attack was detected).  A
+fixed set of arguments is needed so that conformance testing is consistent across
+different languages.  In turn, the conformance tester will execute the implementation
+with different sets of metadata and verify its exit codes for numerous outcomes.  The
+conformance tester also requires a minimum number of arguments so that it can
+thoroughly cover all potential outcomes that it wishes to test.  It should be noted,
+however, that the implmentation does not necessarily have to be the updater used in
+production, only that it should function as defined in this TAP for conformance
+testing.
 
 An implementation to be tested will need to accept a command-line argument that
 indicates the target file to download when the program initiates an update,
