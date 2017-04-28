@@ -288,11 +288,13 @@ Next, the conformance tool would ...
 
 Summary of steps followed to test a compliant updater for conformance:
 
+```
 (1) provide interface to updater that accepts metadata and exits with return
 codes
 (2) configure conformance tool to abide by adopter's restrictions
 (3) convert JSON metadata to encoding used by adopter, if necessary
 (4) run conformance tool and confirm all tests pass.
+```
 
 # Security Analysis
 
