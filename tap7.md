@@ -253,10 +253,11 @@ top-level metadata and the foo.tgz were unsuccessfully saved to the
 
 Now, suppose that the Python implementation had the following restrictions:
 
+```
 (1) metadata is encoded in DER (rather than JSON).
 (2) only Ed25519 keys are used and listed in metadata
 (3) the Root file must be signed by 2/3 keys
-
+```
 
 
 
