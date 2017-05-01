@@ -275,15 +275,16 @@ Now, suppose that the Python implementation had the following restrictions:
 ```
 (1) metadata is encoded in DER (rather than JSON)
 (2) only Ed25519 keys are used and listed in metadata
-(3) the Root file must be signed by 1/2 keys
+(3) the Root file must be signed by 1 out of 2 keys (i.e., threshold of 1)
 ```
 
-
-Items 2-3 can be configured with the conformance tool, via its configuration
-file.  The .tuf-tester.yml would be edited to list:
+Items 2 & 3, of the list above, can be configured with the conformance tool via
+its `.tuf-tester.yml` configuration file.  The configuration file can be edited
+by the developer to list:
 
 ```
-command: "python compliant_updater.py --file foo.tgz
+command: "python compliant_updater.py
+  --file foo.tgz
   --repo http://localhost:8001
   --metadata tmp/metadata
   --targets tmp/targets"
@@ -293,19 +294,44 @@ number-of-root-keys: 2
 root-threshold: 1
 ```
 
-Next, the conformance tool would ...
+Next, since the developer's setup uses DER metadata (rather than JSON), the
+conformance tool would have to incorporate metadata that the developer's script
+and Python implementation can handle.  For this task, the developer
+would need to provide the conformance tool a path to a program that converts
+JSON to DER metadata.  In this way, prior to calling the developer's  script and
+initiating an update, the conformance tool can call the external program to
+convert JSON metadata into DER format.
 
+The command, and its output, that a user can run to test the developer's Python
+implementation for conformance would resemble the following:
 
+```Bash
+$ python conformance_tester.py
+  --config tmp/.tuf-tester.yml
+  --convert-metadata path/to/convert-json-to-der.py
 
+normal updater: check.
+slow retrieval attack: check.
+rollback attack: check.
+key revocation: check.
+endless data attack: check.
+...
 
-Summary of steps followed to test a compliant updater for conformance:
+Congratulations! The implementation under test appears to conform with the TUF
+specification.  More detailed info on the test results was saved to
+test-results.txt
+```
+
+Lastly, a summary of the steps followed to test an updater for conformance with
+the specification is provided next.
 
 ```
-(1) provide interface to updater that accepts metadata and exits with return
-codes
-(2) configure conformance tool to abide by adopter's restrictions
-(3) convert JSON metadata to encoding used by adopter, if necessary
-(4) run conformance tool and confirm all tests pass.
+(1) provide interface to updater that accepts metadata and exits with the
+    TAP 7 return codes
+(2) configure conformance tool to abide by the adopter's repository restrictions
+(3) configure conformance tool to convert JSON metadata to the encoding used
+    by the adopter, if necessary
+(4) run conformance tool and confirm that all tests pass.
 ```
 
 # Security Analysis
