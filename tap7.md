@@ -310,17 +310,22 @@ $ python conformance_tester.py
   --config tmp/.tuf-tester.yml
   --convert-metadata path/to/convert-json-to-der.py
 
-normal updater: check.
-slow retrieval attack: check.
-rollback attack: check.
+normal update: check.
+blocked slow retrieval attack: check.
+blocked rollback attack: check.
 key revocation: check.
-endless data attack: check.
+blocked endless data attack: check.
 ...
 
 Congratulations! The implementation under test appears to conform with the TUF
 specification.  More detailed info on the test results was saved to
 test-results.txt
 ```
+
+A JSON-to-DER converter, `convert_signed_metadata_to_der()`, can be found
+[here](https://github.com/awwad/tuf/blob/36dbb7b8a800dab407fe9ab961155ef0a6d9f7c9/tuf/asn1_codec.py#L156-L352)
+Those curious as to how JSON metadata can be converted to another encoding can
+use the linked example to learn more.
 
 Lastly, a summary of the steps followed to test an updater for conformance with
 the specification is provided next.
