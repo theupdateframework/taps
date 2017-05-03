@@ -1,7 +1,7 @@
 * TAP: 7
 * Title: Conformance testing
 * Version: 1
-* Last-Modified: 25-Jan-2017
+* Last-Modified: 01-May-2017
 * Author: Vladimir Diaz, Sebastien Awwad
 * Status: Draft
 * Content-Type: text/markdown
@@ -18,9 +18,9 @@ tests](https://github.com/theupdateframework/tuf/tree/6fde6222c9c6abf905ef4a56cf
 that verify correct behavior, such as updating metadata in the expected order
 and blocking known updater attacks, these unit tests only work with the
 reference implementation.  Conformance testing should instead work across
-different languages and platforms.  In other words, the specification should
-endorse an official tool, compatible with any implementation, and cover how an
-implementation can be set up for conformance testing.
+different languages and platforms.  To achieve the preceding aim, the
+specification can endorse an official tool, compatible with any implementation,
+and cover how an implementation can be set up for conformance testing.
 
 # Motivation
 
