@@ -222,8 +222,8 @@ script can simply be an interface, or wrapper, to the developer's actual Python
 implementation, which in production raises exceptions when an error occurs.
 Furthermore, consider that the implementation might use a different
 command-line interface from the one used by the script.  The developer's
-script, which behaves according to this TAP, can be similar to
-[this](https://github.com/theupdateframework/tuf/blob/tap7/tuf/scripts/conformance_tester/compliant_updater.py).
+script, which behaves according to this TAP, can resemble 
+[this](https://github.com/theupdateframework/tuf/blob/tap7/tuf/scripts/conformance_tester/compliant_updater.py)
 compliant updater written in Python.
 
 A user can run the developer's script, `compliant_updater.py`, to initiate a
