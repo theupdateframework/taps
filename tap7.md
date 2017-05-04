@@ -112,7 +112,7 @@ blocked:
 While testing, the conformance tester verifies that the expected metadata and
 update files are downloaded, and examines the return codes of the program when
 attacks on the updater are present, which are defined later in the
-`Specification` section of this TAP.  Note that the conformance tester provides
+*Specification* section of this TAP.  Note that the conformance tester provides
 the remote files (i.e., repository files) specified on the command-line, and so
 it  can test for various conditions and input metadata.
 
@@ -181,7 +181,7 @@ An example of a `.tuf-tester.yml` configuration file for a Python updater:
 # conformity with the specification.
 command: "python compliant_updater.py
   --file foo.tgz
-  --repo http://localhost:8001
+  --remote-files tmp/remote-files
   --metadata tmp/metadata
   --targets tmp/targets"
 
@@ -191,51 +191,54 @@ keytype: ed25519, ecdsa
 # compliant_updater.py expects the Root file to be signed by a max of 3 different keys.
 number-of-root-keys: 3
 
-# Minimally, the Root file MUST be signed by at least 2/3 Root keys.
+# At a minimum, the Root file MUST be signed by at least 2 out of 3 Root keys.
 root-threshold: 2
 ...
 ```
-The updater is expected to generate the following return codes in the following
-situations:
+The updater is expected to exit with the following return codes in the
+following situations:
+
 [TODO: These return codes are not yet finalized]
 
 ```
-return code      result
+return code      outcome
 -----------      ------
 0                success
 1                unsigned metadata error
 2                unknown target error
 3                malicious target
 4                rollback error
-5                slow retrieval error
-6                endless data error
+5                endless data error
 ...
 ```
 
 ## Example
 
-Suppose a developer wants to verify that his Python implementation is compliant with
-the specification.  He can begin by creating a script that accepts input
-metadata and, when certain attacks are present, exits with the return codes
-defined in this TAP.  The script can simply be an interface, or wrapper, to the
-developer's actual Python implementation, which in production raises exceptions when
-an error occurs. Furthermore, imagine the implementation might use a different command-line
-interface from the one used by the script.  The developer's script, which behaves
-according to this TAP, can look something like [this](https://github.com/theupdateframework/tuf/blob/tap7/tuf/scripts/conformance_tester/compliant_updater.py).
+Suppose a developer is interested in adopting the framework and wants to verify
+that his Python implementation is compliant with the specification.  He can
+begin by creating a script that accepts input metadata and, when certain
+attacks are present, exits with the return codes defined in this TAP.  The
+script can simply be an interface, or wrapper, to the developer's actual Python
+implementation, which in production raises exceptions when an error occurs.
+Furthermore, consider that the implementation might use a different
+command-line interface from the one used by the script.  The developer's
+script, which behaves according to this TAP, can be similar to
+[this](https://github.com/theupdateframework/tuf/blob/tap7/tuf/scripts/conformance_tester/compliant_updater.py).
+compliant updater written in Python.
 
 A user can run the developer's script, `compliant_updater.py`, to initiate a
-normal update (e.g., to download the foo.tgz package).  In this case, the
-script refreshes top-level metadata to ensure it has the latest repository
-information, downloads the requested foo.tgz file, and exit with a return code
-of 0.  The output after running the script (and verifying its return code with
-the `echo $?` command) would look as follows:
+normal update (e.g., to download the `foo.tgz` package).  In this case, the
+script refreshes top-level metadata to ensure that it has the latest repository
+information, downloads the requested `foo.tgz` file, and exits with a return code
+of `0`.  The output after running the script (and verifying the script's return
+code with the `echo $?` command) would be as follows:
 
 ```Bash
 $ python compliant_updater.py
   --file foo.tgz
-  --repo http://localhost:8001
-  --metadata /tmp/metadata
-  --targets /tmp/targets
+  --remote-files tmp/romote-files
+  --metadata tmp/metadata
+  --targets tmp/targets
 
 $ echo $?
 0
@@ -243,39 +246,39 @@ $ echo $?
 
 Similarly, the conformance tool is able to execute the script with the same
 command-line arguments and examine the outcome.  For instance, the conformance
-tool can examine the metadata that is saved to /tmp/metadata and confirm that
-the Snapshot, Targets, and Timestamp metadata were saved to the /tmp/metadata
-directory. (And according to the Root file that was loaded from /tmp/metadata
+tool can check the metadata that is saved to tmp/metadata and confirm that the
+Snapshot, Targets, and Timestamp metadata were saved to the tmp/metadata
+directory. (And according to the Root file that was loaded from tmp/metadata
 prior to the start of the update call, and generated by the conformance tool).
-Additionally, it can compare the `foo.tgz` saved to /tmp/targets with the valid
-one provided by the server indicated with the -`-repo` command-line option.
-
+Additionally, it can compare the `foo.tgz` saved to tmp/targets with the valid
+one provided by the conformance tool via the --remote-files command-line
+option.
 
 `compliant_updater.py` can also be tested by the conformance tool against the
-known updater attacks, including the slow retrieval attack.  In the following
-execution of the script, assume the repository specified in the --repo
-command-line option provides data at a slow rate, causing clients to never
-complete the update:
+known updater attacks, including the rollback attack.  In the following
+execution of the script, assume that metadata provided by the conformance tool
+is correctly signed, but an older version of previously trusted metadata.
 
 
 ```Bash
 $ python compliant_updater.py
   --file foo.tgz
-  --repo http://localhost:8001
-  --metadata /tmp/metadata --targets /tmp/targets
+  --remote-files tmp/remote-files
+  --metadata tmp/metadata
+  --targets tmp/targets
 
-Error: Download was too slow. Average speed: 0.0 bytes per second.
+Error: Downloaded Timestamp metadata is older than the currently trusted version
 
 $ echo $?
-5
+4
 ```
 
 As before, the conformance tool is able to use this excution of the script to
-verify that the expected return code of 5 is returned, and that certain
-top-level metadata and the foo.tgz were unsuccessfully saved to the
-/tmp/metadata and /tmp/targets directories, respectively.
+verify the expected return code of `5`, and that certain top-level metadata and
+the `foo.tgz` were unsuccessfully saved to the tmp/metadata and tmp/targets
+directories, respectively.
 
-Now, suppose that the Python implementation had the following restrictions:
+Now, suppose that the Python implementation has the following restrictions:
 
 ```
 (1) metadata is encoded in DER (rather than JSON)
@@ -290,7 +293,7 @@ by the developer to list:
 ```
 command: "python compliant_updater.py
   --file foo.tgz
-  --repo http://localhost:8001
+  --remote-files tmp/remote-files
   --metadata tmp/metadata
   --targets tmp/targets"
 
@@ -299,16 +302,16 @@ number-of-root-keys: 2
 root-threshold: 1
 ```
 
-Next, since the developer's setup uses DER metadata (rather than JSON), the
-conformance tool would have to incorporate metadata that the developer's script
-and Python implementation can handle.  For this task, the developer
-would need to provide the conformance tool a path to a program that converts
-JSON to DER metadata.  In this way, prior to calling the developer's  script and
-initiating an update, the conformance tool can call the external program to
-convert JSON metadata into DER format.
+Next, since the developer's implementation uses DER metadata (rather than
+JSON), the conformance tool would have to incorporate metadata that the
+developer's script and Python implementation can handle.  For this task, the
+developer would need to provide the conformance tool with a path to a program
+that converts JSON to DER metadata.  In this way, prior to calling the
+developer's script and initiating an update, the conformance tool can call the
+external program to convert JSON metadata into DER format.
 
 The command, and its output, that a user can run to test the developer's Python
-implementation for conformance would resemble the following:
+implementation for conformance would be similar the following:
 
 ```Bash
 $ python conformance_tester.py
@@ -323,10 +326,8 @@ blocked endless data attack: check.
 ...
 
 Congratulations! The implementation under test appears to conform with the TUF
-specification.  More detailed info on the test results was saved to
+specification.  More detailed information on the test results was saved to
 test-results.txt
-
-$
 ```
 
 A JSON-to-DER converter, `convert_signed_metadata_to_der()`, can be found
