@@ -34,15 +34,15 @@ metadata is updated.  In the second case, the implementation is said to be
 conformant depending on how thoroughly the unit tests are reproduced in X.
 There are bound to be inconsistencies between both sets of unit tests, and
 improvements in TUF testing or changes to TUF would result in a need for
-implemeters to add test code in parallel, so a single tool is preferable.  A
+implementers to add test code in parallel, so a single tool is preferable.  A
 single tool for conformance testing can avoid issues with interoperability,
 duplicate work, ensuring update behavior as intended by the designers of the
 framework, and most importantly it can ensure that an updater is secure against
 the attacks and weaknesses listed in [section
 1.5.2](https://github.com/theupdateframework/tuf/blob/6fde6222c9c6abf905ef4a56cf56fe35c4a85e14/docs/tuf-spec.txt#L124-L181)
 (Goals for specific attacks to protect against) of the specification.  The
-official tool is publicly available and runnable by anyone who wishes to test
-an implementation.
+official tool should be publicly available and runnable by anyone who wishes to
+test an implementation.
 
 An implementation can be said to be TUF-compliant if it passes conformance
 testing with the official tool.
@@ -67,7 +67,7 @@ consistent across different languages.  In turn, the conformance tester will
 execute the implementation with different sets of metadata and verify its exit
 codes for numerous outcomes.  The conformance tester also requires a minimum
 number of arguments so that it can thoroughly cover all potential outcomes that
-it wishes to test.  It should be noted, however, that the implmentation does
+it wishes to test.  It should be noted, however, that the implementation does
 not necessarily have to be the updater used in production, only that it should
 function as defined in this TAP for conformance testing.
 
@@ -76,10 +76,10 @@ An implementation under test will need to accept command-line arguments that
 (2) a directory containing the metadata and targets provided to the updater,
 and (3) where requested metadata and target files are saved after a request
 is made by the updater.  Specifically, the implementation needs to accept
-these arguments as follows:
+the command-line arguments as follows:
 
 ```Bash
-$ command foo.tgz tmp/remote-metadata tmp/metadata tmp/targets
+$ command foo.tgz tmp/remote-files tmp/metadata tmp/targets
 ```
 
 A Python example:
@@ -87,7 +87,7 @@ A Python example:
 ```Bash
 $ python example_updater.py
   --file foo.tgz
-  --remote-metadata tmp/remote-metadata
+  --remote-files tmp/remote-files
   --metadata tmp/metadata
   --targets tmp/targets
 ```
@@ -106,18 +106,17 @@ blocked:
 (6) malicious mirrors
 (7) mix-and-match
 (8) rollback
-(9) slow retrieval
-(10) key compromise.
+(9) key compromise.
 ```
 
-While testing, the conformance tester verifies that the expected metadata
-and update files are downloaded, and examine the return codes of the program
-when attacks on the updater are present, which are defined later in the
-`Specification` section of this TAP.  Note that the conformance tester is in
-control of the repository specified on the command-line, and so it  can test
-for various conditions and input metadata.
+While testing, the conformance tester verifies that the expected metadata and
+update files are downloaded, and examines the return codes of the program when
+attacks on the updater are present, which are defined later in the
+`Specification` section of this TAP.  Note that the conformance tester provides
+the remote files (i.e., repository files) specified on the command-line, and so
+it  can test for various conditions and input metadata.
 
-As for running conformance testing, the conformance tester accepts a
+As for running the conformance tests, the conformance tester accepts a
 command-line option (and others, which will be covered later) that points to
 the location of a configuration file:
 
@@ -126,31 +125,34 @@ $ python conformance_tester.py
   --config tmp/.tuf-tester.yml
 ```
 
-The configuration file includes the command that it should execute to run the
-updater, and other restrictions such as the cryptography key types supported by
-the updater, the number of root keys, thresholds, etc.  Why is a configuration
-file needed?  There are restrictions set by different implementations that,
-although they abide by the specification, are not shared across all
-implementations of the specification.  For example, the Go implementation might
-only support ECDSA keys, whereas another might support Ed25519 and RSA keys.
+The configuration file includes the update command that the conformance tool
+should execute to run the updater, and other restrictions such as the
+cryptographic key types supported by the updater, the number of root keys,
+thresholds, etc.  Why is a configuration file needed?  There are restrictions
+set by different implementations that, although they abide by the
+specification, are not shared across all implementations of the specification.
+For example, the Go implementation might only support ECDSA keys, whereas
+another might support Ed25519 and RSA keys.
 
-Before beginning conformance testing, the conformance testing tool will
-generate a `root.json` according to the restrictions set in `.tuf-tester.yml`,
-save it to --metadata tmp/metadata, populate and start a TUF repository, and
-execute the update command.  The updater should load tmp/metadata/root.json,
-refresh metadata accordingly, and fetch the target file.
+Before running the conformance tests, the conformance tool generates a
+`root.json` according to the restrictions set in `.tuf-tester.yml`, saves it to
+tmp/metadata (or the path indicated by the metadata command-line option),
+populates the directory containing the remote repository files, and executes
+the update command.  The updater should load tmp/metadata/root.json (or the
+appropriate path), refreshes metadata accordingly, and lastly fetches the
+requested update file .
 
 The update procedure of the program, which is to refresh metadadata and
-download a single target file, is sufficient to cover all the requirements set
-by the specification [TODO: at least this is my conclusion, but I am open to
-feedback].  As brief examples: the tool can start the update program and feed
-it the correct metadata and target file when the requests are made.  It will
-inspect the local metadata directory to ensure that the correct metadata was
-downloaded, that they are signed properly, and that the update program succeeds
-with a return code of `0`.  The tool can test the program for detection of a
-slow retrieval attack by starting a server that provides data at a slow rate,
-and confirming that the program returns a code of `5` (a return code of `5` is
-defined in this TAP to mean that a slow retrieval error has occurred).
+download a single update file, is sufficient to cover all the requirements set
+by the specification.  As brief examples: the conformance tool can start the
+update program and feed it the correct metadata and update file when the
+requests are made.  The tool will inspect the local metadata directory to
+ensure that the correct metadata is downloaded, and that the update program
+succeeds with a return code of `0`.  The tool can test the program for
+detection of a rollback attack by providing a previously trusted version of
+metadata (and thus update files), and confirming that the program exits with a
+return code of `4` (a return code of `4` is defined in this TAP to mean that a
+rollback error has occurred).
 
 # Specification
 
