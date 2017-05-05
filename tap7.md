@@ -44,7 +44,7 @@ the attacks and weaknesses listed in [section
 official tool should be publicly available and runnable by anyone who wishes to
 test an implementation.
 
-An important step when checking if a tool is TUF-compliant if it passes conformance
+An important step when checking if a tool is TUF-compliant is if it passes conformance
 testing with the official tool.
 
 # Rationale
