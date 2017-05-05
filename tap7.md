@@ -24,7 +24,7 @@ and cover how an implementation can be set up for conformance testing.
 
 # Motivation
 
-Adopters of the framework who have written implementations have tried testing
+Adopters of TUF who have written an implementation have tried testing
 for conformance by (1) verifying that metadata generated in some language X
 matches that of the reference implementation, and/or (2) reproducing the unit
 tests of the reference implementation in language X.  In the first case, only
@@ -44,7 +44,7 @@ the attacks and weaknesses listed in [section
 official tool should be publicly available and runnable by anyone who wishes to
 test an implementation.
 
-An implementation can be said to be TUF-compliant if it passes conformance
+An important step when checking if a tool is TUF-compliant if it passes conformance
 testing with the official tool.
 
 # Rationale
