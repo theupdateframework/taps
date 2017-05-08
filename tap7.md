@@ -217,20 +217,27 @@ begin by creating a script that accepts input metadata and, when certain
 attacks are present, exits with the return codes defined in this TAP.  The
 script can simply be an interface, or wrapper, to the developer's actual Python
 implementation, which in production raises exceptions when an error occurs.
+Furthermore, consider that the implementation might use a different
+command-line interface from the one used by the script.
+
+In the example code below, the `metadata_directory` and `targets_directory`
+arguments correspond to the --metadata and --targets command-line arguments,
+respectively.  The 'target' argument is the --file update file that the
+implementation is expected to securely update.
 
 ```Python
 def update_client(target, metadata_directory, targets_directory):
 
-  # The HTTP repository that serves metadata and update files for the Python
-  # implementation client.  Not all implementations of the framework use this
-  # transport mechanism.
+  # The HTTP repository that serves metadata and update files to client.  Not
+  # all implementations of the framework use this transport mechanism serve
+  # files.
   REPOSITORY_MIRROR = http://localhost:8001
 
   # Set the local repository directory containing all of the metadata files.
   tuf.settings.repositories_directory = metadata_directory
 
   # Set the repository mirrors.  This dictionary is needed by the Updater
-  # class of updater.py.
+  # client.
   repository_mirrors = {'mirror': {'url_prefix': REPOSITORY_MIRROR,
                                   'metadata_path': 'metadata',
                                   'targets_path': 'targets'}}
@@ -239,7 +246,8 @@ def update_client(target, metadata_directory, targets_directory):
   # and the repository mirrors defined above.
   updater = tuf.client.updater.Updater('repository', repository_mirrors)
 
-  # The local destination directory to save the target files.
+  # The local destination directory to save the target files, which
+  # we get from the command line argument supplied to this wrapper script.
   destination_directory = targets_directory
 
   # Refresh the repository's top-level roles, store the target information for
@@ -247,19 +255,25 @@ def update_client(target, metadata_directory, targets_directory):
   # updated.
   updater.refresh(unsafely_update_root_if_necessary=False)
 
-  # Retrieve the target info of 'target', which contains its length, hash, etc.
+  # Retrieve the target info of the 'target' argument, which contains its
+  # length, hash, etc.
   file_targetinfo = updater.get_one_valid_targetinfo(target)
   updated_targets = updater.updated_targets([file_targetinfo], destination_directory)
 
-  # Download each of these updated targets and save them locally.
+  # Download each of these updated targets and save them to the local
+  # 'targets_directory' supplied to the script.  The conformance tool
+  # can verify the files saved to 'targets_directory'.
   updater.download_target(file_targetinfo, destination_directory)
 ```
 
-Furthermore, consider that the implementation might use a different
-command-line interface from the one used by the script.  The part of the
-developer's script, which captures the exceptions of the original updater and
-exits with the expected return codes, can resemble the following snippet of
-code:
+As shown in the code snippet above, the script sets and loads metadata
+from the --metadata path via the updater's `tuf.settings.repositories_directory`
+configuration setting.  The script also saves updated files to the
+--targets directory, which the testing tool can use for verification.
+
+The part of the developer's script, which captures the exceptions of the
+original implementation and exits with the expected return codes, can resemble
+the following snippet of code:
 
 ```Python
 
