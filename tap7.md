@@ -288,8 +288,8 @@ the following snippet of code:
       if isinstance(mirror_error, tuf.exceptions.ReplayedMetadataError):
         sys.exit(ROLLBACK_ERROR)
 
-      #elif isinstance(mirror_error, tuf.exceptions.Error):
-      #  sys.exit(ENDLESS_DATA_ERROR)
+      elif isinstance(mirror_error, tuf.exceptions.Error):
+        sys.exit(ENDLESS_DATA_ERROR)
 
       elif isinstance(mirror_error, tuf.exceptions.RepositoryError):
         sys.exit(REPOSITORY_ERROR)
@@ -408,11 +408,16 @@ specification.  More detailed information on the test results was saved to
 test-results.txt
 ```
 
-
 A JSON-to-DER converter, `convert_signed_metadata_to_der()`, can be found
 [here](https://github.com/awwad/tuf/blob/36dbb7b8a800dab407fe9ab961155ef0a6d9f7c9/tuf/asn1_codec.py#L156-L352).
 Those curious as to how JSON metadata can be converted to another encoding can
 reference the linked example to learn more.
+
+(NOTE: The code block in the link would be something we could prominently
+mention in the re-organized example section.  I am not listing here the full
+function (in the link) because it's too much and it wouldn't make much sense
+on its own.)
+
 
 It should be noted at this point that there might be implementations of the
 framework where metadata or update files are not saved to a file system on the
