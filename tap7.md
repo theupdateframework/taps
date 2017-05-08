@@ -43,7 +43,7 @@ the types of attacks and weaknesses listed in [Section
 test an implementation.
 
 Passing conformance testing with the official tool is
-an important step in checking if a tool is TUF-compliant.
+an important step in checking if an implementation is TUF-compliant.
 
 # Rationale
 
@@ -397,7 +397,7 @@ $ python conformance_tester.py
   --convert-metadata path/to/convert-json-to-der.py
 
 normal update: check.
-blocked slow retrieval attack: check.
+blocked freeze attack: check.
 blocked rollback attack: check.
 key revocation: check.
 blocked endless data attack: check.
