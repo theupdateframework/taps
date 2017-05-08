@@ -83,46 +83,12 @@ $ command foo.tgz tmp/remote-files tmp/metadata tmp/targets
 A Python example:
 
 ```Bash
-$ python example_updater.py
+$ python compliant_updater.py
   --file foo.tgz
   --remote-files tmp/remote-files
   --metadata tmp/metadata
   --targets tmp/targets
 ```
-
-```Python
-def update_client(target, metadata_directory, targets_directory):
-
-  REPOSITORY_MIRROR = http://localhost:8001
-  # Set the local repository directory containing all of the metadata files.
-  tuf.settings.repositories_directory = metadata_directory
-
-  # Set the repository mirrors.  This dictionary is needed by the Updater
-  # class of updater.py.
-  repository_mirrors = {'mirror': {'url_prefix': REPOSITORY_MIRROR,
-                                  'metadata_path': 'metadata',
-                                  'targets_path': 'targets'}}
-
-  # Create the repository object using the repository name 'repository'
-  # and the repository mirrors defined above.
-  updater = tuf.client.updater.Updater('repository', repository_mirrors)
-
-  # The local destination directory to save the target files.
-  destination_directory = targets_directory
-
-  # Refresh the repository's top-level roles, store the target information for
-  # all the targets tracked, and determine which of these targets have been
-  # updated.
-  updater.refresh(unsafely_update_root_if_necessary=False)
-
-  # Retrieve the target info of 'target', which contains its length, hash, etc.
-  file_targetinfo = updater.get_one_valid_targetinfo(target)
-  updated_targets = updater.updated_targets([file_targetinfo], destination_directory)
-
-  # Download each of these updated targets and save them locally.
-  updater.download_target(file_targetinfo, destination_directory)
-```
-
 
 In turn, the conformance tester tool executes this command when it runs its suite of
 tests, which will assess things like validation of the
@@ -251,14 +217,53 @@ begin by creating a script that accepts input metadata and, when certain
 attacks are present, exits with the return codes defined in this TAP.  The
 script can simply be an interface, or wrapper, to the developer's actual Python
 implementation, which in production raises exceptions when an error occurs.
+
+```Python
+def update_client(target, metadata_directory, targets_directory):
+
+  # The HTTP repository that serves metadata and update files for the Python
+  # implementation client.  Not all implementations of the framework use this
+  # transport mechanism.
+  REPOSITORY_MIRROR = http://localhost:8001
+
+  # Set the local repository directory containing all of the metadata files.
+  tuf.settings.repositories_directory = metadata_directory
+
+  # Set the repository mirrors.  This dictionary is needed by the Updater
+  # class of updater.py.
+  repository_mirrors = {'mirror': {'url_prefix': REPOSITORY_MIRROR,
+                                  'metadata_path': 'metadata',
+                                  'targets_path': 'targets'}}
+
+  # Create the repository object using the repository name 'repository'
+  # and the repository mirrors defined above.
+  updater = tuf.client.updater.Updater('repository', repository_mirrors)
+
+  # The local destination directory to save the target files.
+  destination_directory = targets_directory
+
+  # Refresh the repository's top-level roles, store the target information for
+  # all the targets tracked, and determine which of these targets have been
+  # updated.
+  updater.refresh(unsafely_update_root_if_necessary=False)
+
+  # Retrieve the target info of 'target', which contains its length, hash, etc.
+  file_targetinfo = updater.get_one_valid_targetinfo(target)
+  updated_targets = updater.updated_targets([file_targetinfo], destination_directory)
+
+  # Download each of these updated targets and save them locally.
+  updater.download_target(file_targetinfo, destination_directory)
+```
+
 Furthermore, consider that the implementation might use a different
-command-line interface from the one used by the script.  The developer's
-script, which behaves according to this TAP, can resemble
-the following snippet of code:
+command-line interface from the one used by the script.  The part of the
+developer's script, which captures the exceptions of the original updater and
+exits with the expected return codes, can resemble the following snippet of
+code:
 
 ```Python
 
-  # Parse the options and set the logging level.
+  # Parse the options.
   (target, repository_mirror, metadata_directory, targets_directory) = parse_options()
 
   # Return codes for compliant_updater.py.  This list is not yet finalized.
