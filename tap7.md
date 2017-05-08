@@ -42,8 +42,8 @@ the types of attacks and weaknesses listed in [Section
 1.5.2](https://github.com/theupdateframework/tuf/blob/6fde6222c9c6abf905ef4a56cf56fe35c4a85e14/docs/tuf-spec.txt#L124-L181) of the TUF Specification.  The official tool should be publicly available and useable by anyone who wishes to
 test an implementation.
 
-Passing conformance testing with the official tool is 
-an important step in checking if a tool is TUF-compliant. 
+Passing conformance testing with the official tool is
+an important step in checking if a tool is TUF-compliant.
 
 # Rationale
 
@@ -90,6 +90,40 @@ $ python example_updater.py
   --targets tmp/targets
 ```
 
+```Python
+def update_client(target, metadata_directory, targets_directory):
+
+  REPOSITORY_MIRROR = http://localhost:8001
+  # Set the local repository directory containing all of the metadata files.
+  tuf.settings.repositories_directory = metadata_directory
+
+  # Set the repository mirrors.  This dictionary is needed by the Updater
+  # class of updater.py.
+  repository_mirrors = {'mirror': {'url_prefix': REPOSITORY_MIRROR,
+                                  'metadata_path': 'metadata',
+                                  'targets_path': 'targets'}}
+
+  # Create the repository object using the repository name 'repository'
+  # and the repository mirrors defined above.
+  updater = tuf.client.updater.Updater('repository', repository_mirrors)
+
+  # The local destination directory to save the target files.
+  destination_directory = targets_directory
+
+  # Refresh the repository's top-level roles, store the target information for
+  # all the targets tracked, and determine which of these targets have been
+  # updated.
+  updater.refresh(unsafely_update_root_if_necessary=False)
+
+  # Retrieve the target info of 'target', which contains its length, hash, etc.
+  file_targetinfo = updater.get_one_valid_targetinfo(target)
+  updated_targets = updater.updated_targets([file_targetinfo], destination_directory)
+
+  # Download each of these updated targets and save them locally.
+  updater.download_target(file_targetinfo, destination_directory)
+```
+
+
 In turn, the conformance tester tool executes this command when it runs its suite of
 tests, which will assess things like validation of the
 metadata downloaded by the updater, and verification that the following attacks are
@@ -127,7 +161,7 @@ The configuration file includes the update command that the tool will
 execute to run the updater, along with restrictions, such as the
 cryptographic key types supported by the updater, the number of root keys,
 thresholds, etc.  Why is a configuration file needed?  There are restrictions
-set by different implementations that are not shared across all implementations. 
+set by different implementations that are not shared across all implementations.
 For example, the Go implementation might only support ECDSA keys, whereas
 another might support Ed25519 and RSA keys.
 
@@ -219,9 +253,56 @@ script can simply be an interface, or wrapper, to the developer's actual Python
 implementation, which in production raises exceptions when an error occurs.
 Furthermore, consider that the implementation might use a different
 command-line interface from the one used by the script.  The developer's
-script, which behaves according to this TAP, can resemble 
-[this](https://github.com/theupdateframework/tuf/blob/tap7/tuf/scripts/conformance_tester/compliant_updater.py)
-compliant updater written in Python.
+script, which behaves according to this TAP, can resemble
+the following snippet of code:
+
+```Python
+
+  # Parse the options and set the logging level.
+  (target, repository_mirror, metadata_directory, targets_directory) = parse_options()
+
+  # Return codes for compliant_updater.py.  This list is not yet finalized.
+  SUCCESS = 0
+  UNSIGNED_METADATA_ERROR = 1
+  UNKNOWN_TARGET_ERROR = 2
+  MALICIOUS_TARGET_ERROR = 3
+  ROLLBACK_ERROR = 4
+  ENDLESS_DATA_ERROR = 5
+  REPOSITORY_ERROR = 6
+  UNKNOWN_ERROR = 7
+
+  # Perform an update from 'repository_mirror' for 'target'.  The updated
+  # target is saved to 'targets_directory', and refreshed metadata to
+  # 'metadata_directory'.  Any exceptions raised are caught here, and the
+  # program ends with an appropriate return code.
+  try:
+    update_client(target, repository_mirror, metadata_directory, targets_directory)
+
+  except (tuf.exceptions.NoWorkingMirrorError) as exception:
+
+    # 'exception.mirror_errors' should only contain one (key, value) dict
+    # entry, since only a single mirror is queried.
+    for mirror_url, mirror_error in six.iteritems(exception.mirror_errors):
+      sys.stderr.write('Error: ' + str(mirror_error) + '\n')
+
+      if isinstance(mirror_error, tuf.exceptions.ReplayedMetadataError):
+        sys.exit(ROLLBACK_ERROR)
+
+      #elif isinstance(mirror_error, tuf.exceptions.Error):
+      #  sys.exit(ENDLESS_DATA_ERROR)
+
+      elif isinstance(mirror_error, tuf.exceptions.RepositoryError):
+        sys.exit(REPOSITORY_ERROR)
+
+      else:
+        sys.exit(UNKNOWN_ERROR)
+
+  # Successfully updated the target file.
+  sys.exit(SUCCESS)
+```
+
+TODO: Clean up the code snippets to include only the essential
+elements needed to get the point across.
 
 A user can run the developer's script, `compliant_updater.py`, to initiate a
 normal update (e.g., to download the `foo.tgz` package).  In this case, the
