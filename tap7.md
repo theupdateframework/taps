@@ -370,7 +370,7 @@ $ echo $?
 4
 ```
 
-As before, the conformance tool is able to use this excution of the script to
+As before, the conformance tool is able to use this execution of the script to
 verify the expected return code of `5`, and that certain top-level metadata and
 the `foo.tgz` were unsuccessfully saved to the *tmp/metadata* and *tmp/targets*
 directories, respectively.
@@ -451,7 +451,7 @@ What the conformance tool must ultimately verify are the metadata and update
 file(s) that the updater eventually trusts, and not that these files are
 "installed" in some particular manner. Additionally, the conformance tests must
 confirm the updater's ability to detect the attacks covered in the
-specification (with the exlusion of the slow retrieval attack).
+specification (with the exclusion of the slow retrieval attack).
 
 Since testing of the slow retrieval attack depends on the transport mechanism
 used by the implementation, it is up to the developer to test whether the
@@ -461,7 +461,7 @@ inserting a MITM that intercepts XMLRPC traffic between the updater and server,
 and then manipulating the rate of transfer.  Regardless of the transport
 mechanism used, developers should take care to prevent their updaters from
 being vulnerable to such attacks, which can happen before any data is
-transferred, or after the it has begun.
+transferred, or after the transfer of data has begun.
 
 Lastly, a summary of the steps followed to test an updater for conformance with
 the specification is provided next.
