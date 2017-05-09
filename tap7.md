@@ -90,13 +90,13 @@ $ python compliant_updater.py
   --targets tmp/targets
 ```
 
-In turn, the conformance tester tool executes this command when it runs its suite of
-tests, which will assess things like validation of the
-metadata downloaded by the updater, and verification that the following attacks are
-blocked:
+In turn, the conformance tester tool executes this command when it runs its
+suite of tests, which will assess things like validation of the metadata
+downloaded by the updater, and verification that the following attacks and
+weaknesses are protected against:
 
 ```
-(1) Arbitrary installation
+(1) arbitrary installation
 (2) endless data
 (3) extraneous dependencies
 (4) fast-forward
@@ -104,7 +104,7 @@ blocked:
 (6) malicious mirrors
 (7) mix-and-match
 (8) rollback
-(9) key compromise.
+(9) vulnerability to key compromises.
 ```
 
 During this process, the tester tool verifies that the expected metadata and
