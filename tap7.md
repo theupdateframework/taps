@@ -109,10 +109,12 @@ weaknesses are protected against:
 
 During this process, the tester tool verifies that the expected metadata and
 update files are downloaded, and examines the return codes of the program when
-attacks on the updater are present, as defined later in the
-*Specification* section of this TAP.  Note that the conformance tester provides
-the remote files (i.e., repository files) specified on the command-line, and so
-it  can test for various conditions and input metadata.
+attacks on the updater are present, as defined later in the *Specification*
+section of this TAP.  Note that the conformance tester generates the metadata
+and files that the implementation uses, and it can test for various conditions
+and metadata.  For instance, the tester tool can generate metadata that is
+signed by an invalid key, and it can test whether the implementation rejects
+the untrusted signature.
 
 To launch the test, the conformance tester accepts a
 command-line option (and others, which will be covered later) that points to
