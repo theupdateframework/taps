@@ -275,10 +275,10 @@ The part of the developer's script, which captures the exceptions of the
 original implementation and exits with the expected return codes, can resemble
 the following snippet of code:
 
-```Python
 
+```Python
   # Parse the options.
-  (target, repository_mirror, metadata_directory, targets_directory) = parse_options()
+  (target, metadata_directory, targets_directory) = parse_options()
 
   # Return codes for compliant_updater.py.  This list is not yet finalized.
   SUCCESS = 0
@@ -290,12 +290,12 @@ the following snippet of code:
   REPOSITORY_ERROR = 6
   UNKNOWN_ERROR = 7
 
-  # Perform an update from 'repository_mirror' for 'target'.  The updated
-  # target is saved to 'targets_directory', and refreshed metadata to
-  # 'metadata_directory'.  Any exceptions raised are caught here, and the
-  # program ends with an appropriate return code.
+  # Perform an update for 'target'.  The updated target is saved to
+  # 'targets_directory', and refreshed metadata to 'metadata_directory'.  Any
+  # exceptions raised are caught here, and the program ends with an appropriate
+  # return code.
   try:
-    update_client(target, repository_mirror, metadata_directory, targets_directory)
+    update_client(target, metadata_directory, targets_directory)
 
   except (tuf.exceptions.NoWorkingMirrorError) as exception:
 
@@ -313,15 +313,14 @@ the following snippet of code:
       elif isinstance(mirror_error, tuf.exceptions.RepositoryError):
         sys.exit(REPOSITORY_ERROR)
 
+      # catch other known error conditions here...
+
       else:
         sys.exit(UNKNOWN_ERROR)
 
   # Successfully updated the target file.
   sys.exit(SUCCESS)
 ```
-
-TODO: Clean up the code snippets to include only the essential
-elements needed to get the point across.
 
 A user can run the developer's script, `compliant_updater.py`, to initiate a
 normal update (e.g., to download the `foo.tgz` package).  In this case, the
