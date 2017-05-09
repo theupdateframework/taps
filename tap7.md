@@ -229,7 +229,7 @@ implementation is expected to securely update.
 def update_client(target, metadata_directory, targets_directory):
 
   # The HTTP repository that serves metadata and update files to client.  Not
-  # all implementations of the framework use this transport mechanism serve
+  # all implementations of the framework use this transport mechanism to serve
   # files.
   REPOSITORY_MIRROR = http://localhost:8001
 
@@ -266,10 +266,11 @@ def update_client(target, metadata_directory, targets_directory):
   updater.download_target(file_targetinfo, destination_directory)
 ```
 
-As shown in the code snippet above, the script sets and loads metadata
-from the --metadata path via the updater's `tuf.settings.repositories_directory`
-configuration setting.  The script also saves updated files to the
---targets directory, which the testing tool can use for verification.
+As shown in the code snippet above, the script loads metadata from the
+directory specified in the --metadata command-line option, and sets it via the
+implementation's `tuf.settings.repositories_directory` configuration setting.
+The script also saves updated files to the directory indicated with --targets,
+which the testing tool can use for verification.
 
 The part of the developer's script, which captures the exceptions of the
 original implementation and exits with the expected return codes, can resemble
@@ -407,7 +408,7 @@ developer's script and initiating an update, the conformance tool can call the
 external program to convert JSON metadata into DER format.
 
 The command, and its output, that a user can run to test the developer's Python
-implementation for conformance would be similar the following:
+implementation for conformance would be similar to the following:
 
 ```Bash
 $ python conformance_tester.py
