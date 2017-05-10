@@ -1,5 +1,5 @@
 * TAP: 8
-* Title: Key rotation
+* Title: Key rotation and explicit self-revocation
 * Version: 1
 * Last-Modified: 10-May-2017
 * Author: Hannes Mehnert
