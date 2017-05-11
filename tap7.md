@@ -120,7 +120,7 @@ and metadata.  For instance, the tester tool can generate metadata
 signed by an invalid key, so it can test whether the implementation will reject
 an untrusted signature.
 
-###Setting Up a TUF Implementation to Work with the Tool
+### Setting Up a TUF Implementation to Work with the Tool
 Suppose a developer is interested in adopting TUF and wants to verify
 that his Python implementation is compliant with the specification.  He can
 begin by creating a script that accepts input metadata and, when certain
