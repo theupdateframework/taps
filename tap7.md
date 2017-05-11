@@ -120,6 +120,120 @@ and metadata.  For instance, the tester tool can generate metadata
 signed by an invalid key, so it can test whether the implementation will reject
 an untrusted signature.
 
+###Setting Up a TUF Implementation to Work with the Tool
+Suppose a developer is interested in adopting TUF and wants to verify
+that his Python implementation is compliant with the specification.  He can
+begin by creating a script that accepts input metadata and, when certain
+attacks are present, exits with the return codes defined in this TAP.  The
+script can simply be an interface, or wrapper, to the developer's actual Python
+implementation, which in production raises exceptions when an error occurs.
+Furthermore, consider that the implementation might use a different
+command-line interface from the one used by the script.
+
+In the example code below, the `metadata_directory` and `targets_directory`
+arguments correspond to the --client-metadata and --client-targets command-line
+arguments, respectively.  The 'target' argument is the --file update file that the
+implementation is expected to securely update.
+
+```Python
+def update_client(target, metadata_directory, targets_directory):
+
+# The HTTP repository that serves metadata and update files to client.  Not
+# all implementations of the framework use this transport mechanism to serve
+# files.
+REPOSITORY_MIRROR = http://localhost:8001
+
+# Set the local repository directory containing all of the metadata files.
+tuf.settings.repositories_directory = metadata_directory
+
+# Set the repository mirrors.  This dictionary is needed by the Updater
+# client.
+repository_mirrors = {'mirror': {'url_prefix': REPOSITORY_MIRROR,
+                                'metadata_path': 'metadata',
+                                'targets_path': 'targets'}}
+
+# Create the repository object using the repository name 'repository'
+# and the repository mirrors defined above.
+updater = tuf.client.updater.Updater('repository', repository_mirrors)
+
+# The local destination directory to save the target files, which
+# we get from the command line argument supplied to this wrapper script.
+destination_directory = targets_directory
+
+# Refresh the repository's top-level roles, store the target information for
+# all the targets tracked, and determine which of these targets have been
+# updated.
+updater.refresh(unsafely_update_root_if_necessary=False)
+
+# Retrieve the target info of the 'target' argument, which contains its
+# length, hash, etc.
+file_targetinfo = updater.get_one_valid_targetinfo(target)
+updated_targets = updater.updated_targets([file_targetinfo], destination_directory)
+
+# Download each of these updated targets and save them to the local
+# 'targets_directory' supplied to the script.  The conformance tool
+# can verify the files saved unmodified to 'targets_directory'.
+updater.download_target(file_targetinfo, destination_directory)
+```
+
+As shown in the code snippet above, the script loads metadata from the
+directory specified in the --client-metadata command-line option, and sets it
+via the implementation's `tuf.settings.repositories_directory` configuration
+setting.  The script also saves updated files to the directory indicated with
+--client-targets, which the testing tool can use for verification.
+
+#### Exceptions
+The part of the developer's script, which captures the exceptions of the
+original implementation and exits with the expected return codes, can resemble
+the following snippet of code:
+
+
+```Python
+  # Parse the options.
+  (target, metadata_directory, targets_directory) = parse_options()
+
+  # Return codes for compliant_updater.py.  This list is not yet finalized.
+  SUCCESS = 0
+  UNSIGNED_METADATA_ERROR = 1
+  UNKNOWN_TARGET_ERROR = 2
+  MALICIOUS_TARGET_ERROR = 3
+  ROLLBACK_ERROR = 4
+  ENDLESS_DATA_ERROR = 5
+  REPOSITORY_ERROR = 6
+  UNKNOWN_ERROR = 7
+
+  # Perform an update for 'target'.  The updated target is saved unmodified to
+  # 'targets_directory', and refreshed metadata to 'metadata_directory'.  Any
+  # exceptions raised are caught here, and the program ends with an appropriate
+  # return code.
+  try:
+    update_client(target, metadata_directory, targets_directory)
+
+  except (tuf.exceptions.NoWorkingMirrorError) as exception:
+
+    # 'exception.mirror_errors' should only contain one (key, value) dict
+    # entry, since only a single mirror is queried.
+    for mirror_url, mirror_error in six.iteritems(exception.mirror_errors):
+      sys.stderr.write('Error: ' + str(mirror_error) + '\n')
+
+      if isinstance(mirror_error, tuf.exceptions.ReplayedMetadataError):
+        sys.exit(ROLLBACK_ERROR)
+
+      elif isinstance(mirror_error, tuf.exceptions.Error):
+        sys.exit(ENDLESS_DATA_ERROR)
+
+      elif isinstance(mirror_error, tuf.exceptions.RepositoryError):
+        sys.exit(REPOSITORY_ERROR)
+
+      # catch other known error conditions here...
+
+      else:
+        sys.exit(UNKNOWN_ERROR)
+
+  # Successfully updated the target file.
+  sys.exit(SUCCESS)
+```
+
 ### Configuration File
 To launch the test, the conformance tester accepts a
 command-line option (and others, which will be covered later) that point to
@@ -161,6 +275,34 @@ rollback attacks by providing a previously trusted version of
 metadata (and thus update files). and confirming that the program exits with a
 return code of `4`. As defined in this TAP, this number indicates that a
 rollback error has occurred).
+
+A user can run the developer's script, `compliant_updater.py`, to initiate a
+normal update (e.g., to download the `foo.tgz` package).  In this case, the
+script refreshes top-level metadata to ensure that it has the latest repository
+information, downloads the requested `foo.tgz` file, and exits with a return code
+of `0`.  The output after running the script (and verifying the script's return
+code with the `echo $?` command) would be as follows:
+
+```Bash
+$ python compliant_updater.py
+ --file foo.tgz
+ --repository-files tmp/repository-files
+ --client-metadata tmp/client-metadata
+ --client-targets tmp/client-targets
+
+$ echo $?
+0
+```
+
+Similarly, the conformance tool is able to execute the script with the same
+command-line arguments and examine the outcome.  For instance, the tool can
+check the metadata saved unmodified to *tmp/client-metadata* and confirm that
+the Snapshot, Targets, and Timestamp metadata were saved unmodified to the
+*tmp/client-metadata* directory, and according to the Root file loaded from
+*tmp/client-metadata* prior to the start of the update call, and generated by
+the conformance tool.  Additionally, it can compare the `foo.tgz` saved
+unmodified to *tmp/client-targets* with the valid one provided by the
+conformance tool via the --repository-files command-line option.
 
 ### Executing Conformance Testing
 The conformance tester stores `root.json` in the metadata directory indicated
@@ -217,173 +359,7 @@ return code      outcome
 ...
 ```
 
-# Sample Application Scenarios
-
-This section presents a few specific test scenarios that demonstrate how the tool
-can be  Suppose a developer is interested in adopting TUF and wants to verify
-that his Python implementation is compliant with the specification.  He can
-begin by creating a script that accepts input metadata and, when certain
-attacks are present, exits with the return codes defined in this TAP.  The
-script can simply be an interface, or wrapper, to the developer's actual Python
-implementation, which in production raises exceptions when an error occurs.
-Furthermore, consider that the implementation might use a different
-command-line interface from the one used by the script.
-
-In the example code below, the `metadata_directory` and `targets_directory`
-arguments correspond to the --client-metadata and --client-targets command-line arguments,
-respectively.  The 'target' argument is the --file update file that the
-implementation is expected to securely update.
-
-```Python
-def update_client(target, metadata_directory, targets_directory):
-
-  # The HTTP repository that serves metadata and update files to client.  Not
-  # all implementations of the framework use this transport mechanism to serve
-  # files.
-  REPOSITORY_MIRROR = http://localhost:8001
-
-  # Set the local repository directory containing all of the metadata files.
-  tuf.settings.repositories_directory = metadata_directory
-
-  # Set the repository mirrors.  This dictionary is needed by the Updater
-  # client.
-  repository_mirrors = {'mirror': {'url_prefix': REPOSITORY_MIRROR,
-                                  'metadata_path': 'metadata',
-                                  'targets_path': 'targets'}}
-
-  # Create the repository object using the repository name 'repository'
-  # and the repository mirrors defined above.
-  updater = tuf.client.updater.Updater('repository', repository_mirrors)
-
-  # The local destination directory to save the target files, which
-  # we get from the command line argument supplied to this wrapper script.
-  destination_directory = targets_directory
-
-  # Refresh the repository's top-level roles, store the target information for
-  # all the targets tracked, and determine which of these targets have been
-  # updated.
-  updater.refresh(unsafely_update_root_if_necessary=False)
-
-  # Retrieve the target info of the 'target' argument, which contains its
-  # length, hash, etc.
-  file_targetinfo = updater.get_one_valid_targetinfo(target)
-  updated_targets = updater.updated_targets([file_targetinfo], destination_directory)
-
-  # Download each of these updated targets and save them to the local
-  # 'targets_directory' supplied to the script.  The conformance tool
-  # can verify the files saved unmodified to 'targets_directory'.
-  updater.download_target(file_targetinfo, destination_directory)
-```
-
-As shown in the code snippet above, the script loads metadata from the
-directory specified in the --client-metadata command-line option, and sets it
-via the implementation's `tuf.settings.repositories_directory` configuration
-setting.  The script also saves updated files to the directory indicated with
---client-targets, which the testing tool can use for verification.
-
-The part of the developer's script, which captures the exceptions of the
-original implementation and exits with the expected return codes, can resemble
-the following snippet of code:
-
-
-```Python
-  # Parse the options.
-  (target, metadata_directory, targets_directory) = parse_options()
-
-  # Return codes for compliant_updater.py.  This list is not yet finalized.
-  SUCCESS = 0
-  UNSIGNED_METADATA_ERROR = 1
-  UNKNOWN_TARGET_ERROR = 2
-  MALICIOUS_TARGET_ERROR = 3
-  ROLLBACK_ERROR = 4
-  ENDLESS_DATA_ERROR = 5
-  REPOSITORY_ERROR = 6
-  UNKNOWN_ERROR = 7
-
-  # Perform an update for 'target'.  The updated target is saved unmodified to
-  # 'targets_directory', and refreshed metadata to 'metadata_directory'.  Any
-  # exceptions raised are caught here, and the program ends with an appropriate
-  # return code.
-  try:
-    update_client(target, metadata_directory, targets_directory)
-
-  except (tuf.exceptions.NoWorkingMirrorError) as exception:
-
-    # 'exception.mirror_errors' should only contain one (key, value) dict
-    # entry, since only a single mirror is queried.
-    for mirror_url, mirror_error in six.iteritems(exception.mirror_errors):
-      sys.stderr.write('Error: ' + str(mirror_error) + '\n')
-
-      if isinstance(mirror_error, tuf.exceptions.ReplayedMetadataError):
-        sys.exit(ROLLBACK_ERROR)
-
-      elif isinstance(mirror_error, tuf.exceptions.Error):
-        sys.exit(ENDLESS_DATA_ERROR)
-
-      elif isinstance(mirror_error, tuf.exceptions.RepositoryError):
-        sys.exit(REPOSITORY_ERROR)
-
-      # catch other known error conditions here...
-
-      else:
-        sys.exit(UNKNOWN_ERROR)
-
-  # Successfully updated the target file.
-  sys.exit(SUCCESS)
-```
-
-A user can run the developer's script, `compliant_updater.py`, to initiate a
-normal update (e.g., to download the `foo.tgz` package).  In this case, the
-script refreshes top-level metadata to ensure that it has the latest repository
-information, downloads the requested `foo.tgz` file, and exits with a return code
-of `0`.  The output after running the script (and verifying the script's return
-code with the `echo $?` command) would be as follows:
-
-```Bash
-$ python compliant_updater.py
-  --file foo.tgz
-  --repository-files tmp/repository-files
-  --client-metadata tmp/client-metadata
-  --client-targets tmp/client-targets
-
-$ echo $?
-0
-```
-
-Similarly, the conformance tool is able to execute the script with the same
-command-line arguments and examine the outcome.  For instance, the tool can
-check the metadata saved unmodified to *tmp/client-metadata* and confirm that
-the Snapshot, Targets, and Timestamp metadata were saved unmodifed to the
-*tmp/client-metadata* directory, and according to the Root file loaded from
-*tmp/client-metadata* prior to the start of the update call, and generated by
-the conformance tool.  Additionally, it can compare the `foo.tgz` saved
-unmodified to *tmp/client-targets* with the valid one provided by the
-conformance tool via the --repository-files command-line option.
-
-`compliant_updater.py` can also be tested by the conformance tool against the
-known updater attacks, including the rollback attack.  In the following
-execution of the script, assume that metadata provided by the conformance tool
-is correctly signed, but an older version of previously trusted metadata.
-
-
-```Bash
-$ python compliant_updater.py
-  --file foo.tgz
-  --repository-files tmp/repository-files
-  --client-metadata tmp/client-metadata
-  --client-targets tmp/client-targets
-
-Error: Downloaded Timestamp metadata is older than the currently trusted version
-
-$ echo $?
-4
-```
-
-As before, the conformance tool is able to use this execution of the script to
-verify the expected return code of `5`, and that certain top-level metadata and
-the `foo.tgz` were unsuccessfully saved unmodified to the *tmp/client-metadata*
-and *tmp/client-targets* directories, respectively.
-
+### Dealing with Implementation Restrictions
 Now, suppose that the Python implementation has the following restrictions:
 
 ```
@@ -474,7 +450,7 @@ being vulnerable to such attacks, which can happen before any data is
 transferred, or after the transfer of data has begun.
 
 Lastly, a summary of the steps followed to test an updater for conformance with
-the specification is provided next.
+are as follows:
 
 ```
 (1) provide interface to updater that accepts metadata and exits with the
@@ -484,6 +460,20 @@ the specification is provided next.
     by the adopter, if necessary
 (4) run conformance tool and confirm that all tests pass.
 ```
+
+# Sample Application Scenarios
+
+This section presents a few specific test scenarios that demonstrate how to use
+the tool to....
+
+### Modifying an Implementation to exit with expected return codes
+
+
+### Loading Metadata Specified on Command-Line argument
+
+
+### Proper Storage of Metadata and Update Files for Easier Verification
+
 
 # Security Analysis
 
