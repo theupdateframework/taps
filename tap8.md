@@ -2,7 +2,7 @@
 * Title: Key rotation and explicit self-revocation
 * Version: 1
 * Last-Modified: 10-May-2017
-* Author: Hannes Mehnert
+* Author: Hannes Mehnert, Justin Cappos
 * Status: Draft
 * Content-Type: text/markdown
 * Created: 10-May-2017
@@ -22,8 +22,10 @@ performed any number of times, transferring trust from Y to Z, etc.
 
 The mechanism in this TAP has an additional use case:  if a rotation
 cycle (A to B, B to A) is detected, all delegations into the cycle are
-invalid.  This also allows a developer to explicitly revoke their own
-key (by introducing a cycle).
+invalid.  Note, this is handled the same as a delegation to a missing key
+and does not invalidate the delegator's entire file.  This use of rotate
+loops allows a role to explicitly revoke their own key for all future 
+actions (by introducing a cycle).  
 
 # Motivation
 
@@ -151,10 +153,12 @@ TODO: Obviously example file formats, etc. need to be added.
 
 # Security Analysis
 
-There should be no security impact.  The usability impact will be to
+There should be no negative security impact.  The major benefits are 
+that many security-sensitive operations that required key use by 
+multiple parties, will now be much easier to do.  This will 
 provide a simple mechanism extending and shrinking projects by
-themselves without an individual with elevated privileges, but based on
-a threshold of signatures.
+themselves without an individual with elevated privileges, but based 
+on a threshold of signatures.
 
 Clients need to take care to check for 'a rotation loop' where key
 rotations point to other keys in a cycle.  This should be handled in the
