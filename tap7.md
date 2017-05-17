@@ -264,7 +264,7 @@ metadata accordingly, and fetch the requested update file.
 
 ### Update Procedure
 The update procedure of the program refreshes metadadata and
-downloads the specification.  As brief examples: the conformance tool can start the
+downloads the requested file.  As brief examples: the conformance tool can start the
 update program and feed it the correct metadata and update file when the
 requests are made.  The tool will inspect the local metadata directory to
 ensure that the correct metadata is downloaded. If the update program
@@ -274,7 +274,7 @@ The tool can then check the program for
 rollback attacks by providing a previously trusted version of
 metadata (and thus update files), and confirming that the program exits with a
 return code of `4`. As defined in this TAP, this number indicates that a
-rollback error has occurred).
+rollback error has occurred.
 
 A user can run the developer's script, `compliant_updater.py`, to initiate a
 normal update (e.g., to download the `foo.tgz` package).  In this case, the
