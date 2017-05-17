@@ -264,7 +264,7 @@ metadata accordingly, and fetch the requested update file.
 
 ### Update Procedure
 The update procedure of the program refreshes metadadata and
-downloads the specification.  As brief examples: the conformance tool can start the
+downloads the requested file.  As brief examples: the conformance tool can start the
 update program and feed it the correct metadata and update file when the
 requests are made.  The tool will inspect the local metadata directory to
 ensure that the correct metadata is downloaded. If the update program
