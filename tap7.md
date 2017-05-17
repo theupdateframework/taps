@@ -1,7 +1,7 @@
 * TAP: 7
 * Title: Conformance testing
 * Version: 1
-* Last-Modified: 01-May-2017
+* Last-Modified: 17-May-2017
 * Author: Vladimir Diaz, Sebastien Awwad
 * Status: Draft
 * Content-Type: text/markdown
@@ -460,20 +460,6 @@ updater for conformance to TUF are as follows:
     by the adopter, if necessary.
 (4) run conformance tool and confirm that all tests are passed.
 ```
-
-# Sample Application Scenarios
-
-This section presents a few test scenarios that demonstrate how to use
-the conformance testing tool to execute a few specific tasks.
-
-### Modifying an Implementation to Exit with Expected Return Codes
-
-
-### Loading Metadata Specified on a Command-Line Argument
-
-
-### Proper Storage of Metadata and Update Files for Easier Verification
-
 
 # Security Analysis
 
