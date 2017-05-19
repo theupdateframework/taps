@@ -17,10 +17,13 @@ the reference implementation contains [unit
 tests](https://github.com/theupdateframework/tuf/tree/6fde6222c9c6abf905ef4a56cf56fe35c4a85e14/tests)
 that verify correct behavior, such as updating metadata in the expected order
 and blocking known updater attacks, these unit tests only work within the
-parameters of the reference implementation.  It is important that conformance
-testing work across different languages and platforms.  To achieve this aim, this
-specification endorses a single official tool, compatible with any implementation,
-and presents guidelines for using such a tool to establish a protocol for conformance testing.
+parameters of the reference implementation, which is problematic due to the diversity
+of TUF implementations.  
+
+To achieve the goal of testing diverse TUF implementations, this specification describes the 
+design of a common testing tool for TUF compliance.  The goals are to interoperate with 
+implementations in diverse languages and environments, while having a low burden on 
+TUF implementers to the tool in their environment.
 
 # Motivation
 
