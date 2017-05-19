@@ -30,7 +30,7 @@ This is done so that, assuming that both roles use different sets of keys, the
 compromise of either one of these roles is insufficient to execute arbitrary
 software attacks.
 
-#Rationale
+# Rationale
 
 We introduce this TAP because there is no mechanism in place to support such a
 use case.
@@ -49,7 +49,7 @@ relation in delegations.
 In other words, it is currently not possible to specify that a combination of
 roles must sign the same hashes and length of the target.
 
-#Specification
+# Specification
 
 In order to support this use case, we propose the following simple adjustment to
 the targets metadata file format.
