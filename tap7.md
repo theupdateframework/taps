@@ -81,9 +81,7 @@ In order to help determine the TUF-compliance of a particular updater
 implementation, the following components are required by this TAP:
 - Updater
 - Compliance Tester
-- Wrapper: An invididual implementation will need a custom wrapper for
-the Compliance Tester to use to communicate with it. (This will need to include
-at least a few lines of Python.)
+- Wrapper
 
 The **Updater** is the program to be tested, an implementation of a TUF-compliant
 updater client, as described in
@@ -97,14 +95,15 @@ received by the Updater, which must try to validate them correctly. The Updater
 will be expected to reject untrustworthy metadata and targets and accept
 trustworthy metadata and targets.
 
-The **Wrapper** mediates communication between the Tester and Updater. In order
-for the Tester to interact with the updater implementation, a Wrapper around
-that implementation will need to support the following few functions as an
-interface to the tester. The tester will interact with the implementation by
+The **Wrapper** mediates communication between the Tester and Updater. An
+individual Updater will need a custom Wrapper written for the Tester to use to
+communicate with it. This will need to involve at least a few lines of Python.
+In order for the Tester to interact with the updater implementation, a Wrapper
+around that implementation will need to support the following few functions as
+an interface to the tester. The tester will interact with the implementation by
 calling these functions, providing as arguments metadata and/or target/image
-files. Examples will be provided in a later section of this TAP. The client
-updater implementation (or, more likely, a wrapper) will need to support the
-following calls from the tester:
+files. Examples will be provided in a later section of this TAP. The following
+functions must be written for the Wrapper:
 
 - initialize_client(already_trusted_metadata):
     Sets the client's initial state up for a future test, providing it with
