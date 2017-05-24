@@ -21,7 +21,7 @@ parameters of the reference implementation, which is problematic due to the dive
 of TUF implementations.
 
 To achieve the goal of testing diverse TUF implementations, this specification describes the
-design of a common testing tool for TUF compliance.  The goals are to interoperate with
+design of a common testing tool for TUF conformance.  The goals are to interoperate with
 implementations in diverse languages and environments, while having a low burden on
 TUF implementers to the tool in their environment.
 
@@ -46,7 +46,7 @@ the types of attacks and weaknesses listed in [Section
 available and useable by anyone who wishes to test an implementation.
 
 Passing a conformance test with the official tool would be
-an important step in checking if an implementation is TUF-compliant.
+an important step in checking if an implementation is TUF-conformant.
 
 # Rationale
 
@@ -77,19 +77,19 @@ It only needs to function as defined in this TAP for conformance testing.
 
 # Specification
 
-In order to help determine the TUF-compliance of a particular updater
+In order to help determine the TUF-conformance of a particular updater
 implementation, the following components are required by this TAP:
 - Updater
-- Compliance Tester
+- Conformance Tester
 - Wrapper
 
-The **Updater** is the program to be tested, an implementation of a TUF-compliant
+The **Updater** is the program to be tested, an implementation of a TUF-conformant
 updater client, as described in
 [the client section of the TUF specification](https://github.com/theupdateframework/tuf/blob/develop/docs/tuf-spec.txt#L931-L933)
 .
 
-The **Compliance Tester**, provided by TheUpdateFramework, will run a battery
-of tests intended to determine the TUF-compliance of the Updater. The Tester
+The **Conformance Tester**, provided by TheUpdateFramework, will run a battery
+of tests intended to determine the TUF-conformance of the Updater. The Tester
 can be thought of as a source of metadata and targets that will ultimately be
 received by the Updater, which must try to validate them correctly. The Updater
 will be expected to reject untrustworthy metadata and targets and accept
@@ -116,24 +116,24 @@ functions must be written for the Wrapper:
 
 - update_repo(metadata_directory, targets_directory):
     Updates the repository files, metadata and targets. This will be the data
-    that should be made available to the client when the
-    client tries to The client will treat these as unvalidated.
+    that should be made available to the Updater when the Updater tries to
+    Update, which the Updater will need to validate.
 
 - update_client(target_id):
     Causes the client to attempt to obtain and validate a particular target
 
 
-Implementations of the updater may vary dramatically, so this wrapper may
-perform things like:
+Implementations of the updater may vary dramatically, so the Wrapper may, in
+these functions, perform things like:
  - Calling an external binary with, e.g., the subprocess module, in order to
  run an updater implementation.
  - Moving metadata or target files into the directory structure the updater
  implementation expects
- - If, e.g., the client doesn't have a notion of a filesystem, the wrapper may
- need to read the files the tester provides and distribute data to the client
- in the manner the client expects.
+ - If, e.g., the Updater doesn't have a notion of a filesystem, the wrapper may
+ need to read the files the tester provides and distribute data to the Updater
+ in the manner the Updater expects.
  - Translate metadata from the format the tester provides into the custom
- format the client implementation expects
+ format the Updater expects
  - If the communication model involves different synchronization (e.g. server
  push vs client pull), the update_client() Wrapper function will need to bridge
  this; for example, it may need to wait and collect results from some separate
@@ -186,7 +186,7 @@ defend against the following attacks and weaknesses:
 (9) vulnerability to key compromises.
 ```
 
-Note that the conformance tester generates the metadata
+Note that the Conformance Tester generates the metadata
 and files that the implementation uses, and can test for various conditions.
 For instance, the tester tool can generate metadata signed by an invalid key,
 so it can test whether the implementation will reject
@@ -194,7 +194,7 @@ an untrusted signature.
 
 ### Setting Up a TUF Implementation to Work with the Tool
 Suppose a developer is interested in adopting TUF and wants to verify
-that his Python implementation is compliant with the specification.  He can
+that his Python implementation is conformant with the specification.  He can
 begin by creating a script that accepts input metadata and, when certain
 attacks are present, exits with the return codes defined in this TAP.  The
 script can simply be an interface, or wrapper, to the developer's actual Python
@@ -264,7 +264,7 @@ the following snippet of code:
   # Parse the options.
   (target, metadata_directory, targets_directory) = parse_options()
 
-  # Return codes for compliant_updater.py.  This list is not yet finalized.
+  # Return codes for conformant_updater.py.  This list is not yet finalized.
   SUCCESS = 0
   UNSIGNED_METADATA_ERROR = 1
   UNKNOWN_TARGET_ERROR = 2
@@ -348,7 +348,7 @@ metadata (and thus update files), and confirming that the program exits with a
 return code of `4`. As defined in this TAP, this number indicates that a
 rollback error has occurred.
 
-A user can run the developer's script, `compliant_updater.py`, to initiate a
+A user can run the developer's script, `conformant_updater.py`, to initiate a
 normal update (e.g., to download the `foo.tgz` package).  In this case, the
 script refreshes top-level metadata to ensure that it has the latest repository
 information, downloads the requested `foo.tgz` file, and exits with a return code
@@ -356,7 +356,7 @@ of `0`.  The output after running the script (and verifying the script's return
 code with the `echo $?` command) would be as follows:
 
 ```Bash
-$ python compliant_updater.py
+$ python conformant_updater.py
  --file foo.tgz
  --repository-files tmp/repository-files
  --client-metadata tmp/client-metadata
@@ -388,7 +388,7 @@ $ python conformance_tester.py
   --config tmp/.tuf-tester.yml
 ```
 
-The conformance tester returns `0` if the implementation complies with the
+The conformance tester returns `0` if the implementation conforms with the
 specification. If conformance_tester.py returns a non-zero return code,
 it signals a failure. Optionally, a list of the conformance tests that the
 updater failed is printed or logged.
@@ -396,18 +396,18 @@ updater failed is printed or logged.
 An example of a `.tuf-tester.yml` configuration file for a Python updater:
 
 ```
-# The command that the conformance tester executes to verify compliant_updater.py's
+# The command that the conformance tester executes to verify conformant_updater.py's
 # conformity with the specification.
-command: "python compliant_updater.py
+command: "python conformant_updater.py
   --file foo.tgz
   --repository-files tmp/repository-files
   --client-metadata tmp/client-metadata
   --client-targets tmp/client-targets"
 
-# compliant_updater.py supports the following keytypes.
+# conformant_updater.py supports the following keytypes.
 keytype: ed25519, ecdsa
 
-# compliant_updater.py expects the Root file to be signed by a max of 3 different keys.
+# conformant_updater.py expects the Root file to be signed by a max of 3 different keys.
 number-of-root-keys: 3
 
 # At a minimum, the Root file MUST be signed by at least 2 out of 3 Root keys.
@@ -501,7 +501,7 @@ device.  In this case, the developer or user running the conformance tests
 would need to arrange that the files which are requested and stored by the device
 be saved unmodified to directories that *can* be accessed by the conformance
 tests.  These directories would be specified in the command-line options of the
-compliant updater or the conformance tool's configuration file (i.e., the
+conformant updater or the conformance tool's configuration file (i.e., the
 --client-metadata and --client-targets command-line options used in the
 preceding examples).
 
