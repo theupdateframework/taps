@@ -18,11 +18,11 @@ tests](https://github.com/theupdateframework/tuf/tree/6fde6222c9c6abf905ef4a56cf
 that verify correct behavior, such as updating metadata in the expected order
 and blocking known updater attacks, these unit tests only work within the
 parameters of the reference implementation, which is problematic due to the diversity
-of TUF implementations.  
+of TUF implementations.
 
-To achieve the goal of testing diverse TUF implementations, this specification describes the 
-design of a common testing tool for TUF compliance.  The goals are to interoperate with 
-implementations in diverse languages and environments, while having a low burden on 
+To achieve the goal of testing diverse TUF implementations, this specification describes the
+design of a common testing tool for TUF compliance.  The goals are to interoperate with
+implementations in diverse languages and environments, while having a low burden on
 TUF implementers to the tool in their environment.
 
 # Motivation
@@ -135,7 +135,7 @@ perform things like:
  - Translate metadata from the format the tester provides into the custom
  format the client implementation expects
  - If the communication model involves different synchronization (e.g. server
- push vs client pull), the update_client() wrapper function will need to bridge
+ push vs client pull), the update_client() Wrapper function will need to bridge
  this; for example, it may need to wait and collect results from some separate
  process.
 
@@ -187,7 +187,7 @@ defend against the following attacks and weaknesses:
 ```
 
 Note that the conformance tester generates the metadata
-and files that the implementation uses, and can test for various conditions. 
+and files that the implementation uses, and can test for various conditions.
 For instance, the tester tool can generate metadata signed by an invalid key,
 so it can test whether the implementation will reject
 an untrusted signature.
@@ -340,7 +340,7 @@ downloads the requested file.  As brief examples: the conformance tool can start
 update program and feed it the correct metadata and update file when the
 requests are made.  The tool will inspect the local metadata directory to
 ensure that the correct metadata is downloaded. If the update program
-succeeds, it returns a code of `0`.  
+succeeds, it returns a code of `0`.
 
 The tool can then check the program for
 rollback attacks by providing a previously trusted version of
@@ -521,7 +521,7 @@ mechanism used, developers should take care to prevent their updaters from
 being vulnerable to such attacks, which can happen before any data is
 transferred, or after the transfer of data has begun.
 
-Lastly, a summary of the steps that should be followed to test an 
+Lastly, a summary of the steps that should be followed to test an
 updater for conformance to TUF are as follows:
 
 ```
