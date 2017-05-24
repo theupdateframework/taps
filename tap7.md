@@ -1,7 +1,7 @@
 * TAP: 7
 * Title: Conformance testing
-* Version: 1
-* Last-Modified: 17-May-2017
+* Version: 2
+* Last-Modified: 24-May-2017
 * Author: Vladimir Diaz, Sebastien Awwad
 * Status: Draft
 * Content-Type: text/markdown
@@ -146,36 +146,12 @@ these functions, perform things like:
 
 
 
+### Expected Output
 
-
-
-
-An implementation under test will need to accept command-line arguments that indicate
-(1) the target file to download when the program initiates an update,
-(2) a directory containing the metadata and targets provided to the updater,
-and (3) the location where requested metadata and target files are saved
-unmodified after a request is made by the updater.  Specifically, the
-implementation needs to accept the command-line arguments as follows:
-
-```Bash
-$ command foo.tgz tmp/repository-files tmp/client-metadata tmp/client-targets
-```
-
-A Python example:
-
-```Bash
-$ python compliant_updater.py
-  --file foo.tgz
-  --repository-files tmp/repository-files
-  --client-metadata tmp/client-metadata
-  --client-targets tmp/client-targets
-```
-
-In turn, the conformance tester tool will execute this command when it runs its
-suite of tests. During this process, the tester tool verifies that the expected
-metadata and update files are downloaded, and examines the return codes of the
-program when attacks on the updater are present, as defined later in this
-section. The tool will also verify that the implementation can
+During this process, the Tester tool verifies that the expected
+metadata and update files are downloaded, and examines the values returned by
+the Wrapper when attacks on the Updater are present, as defined later in this
+section. The Tester will also verify that the Updater can
 defend against the following attacks and weaknesses:
 
 ```
@@ -436,7 +412,7 @@ return code      outcome
 ```
 
 ### Dealing with Implementation Restrictions
-Now, suppose that the Python implementation has the following restrictions:
+Suppose, for example, that the Python implementation has the following restrictions:
 
 ```
 (1) metadata is encoded in DER (rather than JSON)
@@ -449,12 +425,6 @@ its `.tuf-tester.yml` configuration file.  The configuration file can be edited
 by the developer to list:
 
 ```
-command: "python compliant_updater.py
-  --file foo.tgz
-  --repository-files tmp/repository-files
-  --client-metadata tmp/client-metadata
-  --client-targets tmp/client-targets"
-
 keytype: ed25519
 number-of-root-keys: 2
 root-threshold: 1
@@ -552,6 +522,9 @@ This TAP does not introduce any backwards incompatibilities.
 A git branch containing the official tool for conformance testing, and a client
 set up for conformance testing can be found at:
 https://github.com/theupdateframework/tuf/tree/tap7/tuf/scripts/conformance_tester
+
+**Note that the preceding must be updated to match the modified spec.**
+
 
 # Copyright
 
