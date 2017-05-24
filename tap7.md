@@ -77,6 +77,76 @@ It only needs to function as defined in this TAP for conformance testing.
 
 # Specification
 
+In order to help determine the TUF-compliance of a particular updater
+implementation, the following components are required by this TAP:
+- Updater
+- Compliance Tester
+- Wrapper: An invididual implementation will need a custom wrapper for
+the Compliance Tester to use to communicate with it. (This will need to include
+at least a few lines of Python.)
+
+The **Updater** is the program to be tested, an implementation of a TUF-compliant
+updater client, as described in
+[the client section of the TUF specification](https://github.com/theupdateframework/tuf/blob/develop/docs/tuf-spec.txt#L931-L933)
+.
+
+The **Compliance Tester**, provided by TheUpdateFramework, will run a battery
+of tests intended to determine the TUF-compliance of the Updater. The Tester
+can be thought of as a source of metadata and targets that will ultimately be
+received by the Updater, which must try to validate them correctly. The Updater
+will be expected to reject untrustworthy metadata and targets and accept
+trustworthy metadata and targets.
+
+The **Wrapper** mediates communication between the Tester and Updater. In order
+for the Tester to interact with the updater implementation, a Wrapper around
+that implementation will need to support the following few functions as an
+interface to the tester. The tester will interact with the implementation by
+calling these functions, providing as arguments metadata and/or target/image
+files. Examples will be provided in a later section of this TAP. The client
+updater implementation (or, more likely, a wrapper) will need to support the
+following calls from the tester:
+
+- initialize_client(already_trusted_metadata):
+    Sets the client's initial state up for a future test, providing it with
+    metadata to be treated as already-validated. A client updater delivered
+    to end users will always need some kind of root of trust (in the TUF
+    spec, an initial Root role metadata file, e.g. root.json) to use when
+    validating future metadata.
+    The format of already_trusted_metadata will be as follows:
+    `{repository_name: {role_name: {<role metadata>}}}` # TODO: Expand this.
+
+- update_repo(metadata_directory, targets_directory):
+    Updates the repository files, metadata and targets. This will be the data
+    that should be made available to the client when the
+    client tries to The client will treat these as unvalidated.
+
+- update_client(target_id):
+    Causes the client to attempt to obtain and validate a particular target
+
+
+Implementations of the updater may vary dramatically, so this wrapper may
+perform things like:
+ - Calling an external binary with, e.g., the subprocess module, in order to
+ run an updater implementation.
+ - Moving metadata or target files into the directory structure the updater
+ implementation expects
+ - If, e.g., the client doesn't have a notion of a filesystem, the wrapper may
+ need to read the files the tester provides and distribute data to the client
+ in the manner the client expects.
+ - Translate metadata from the format the tester provides into the custom
+ format the client implementation expects
+ - If the communication model involves different synchronization (e.g. server
+ push vs client pull), the update_client() wrapper function will need to bridge
+ this; for example, it may need to wait and collect results from some separate
+ process.
+
+
+
+
+
+
+
+
 An implementation under test will need to accept command-line arguments that indicate
 (1) the target file to download when the program initiates an update,
 (2) a directory containing the metadata and targets provided to the updater,
