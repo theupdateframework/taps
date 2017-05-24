@@ -120,7 +120,11 @@ functions must be written for the Wrapper:
     Update, which the Updater will need to validate.
 
 - update_client(target_id):
-    Causes the client to attempt to obtain and validate a particular target
+    Causes the client to attempt to obtain and validate a particular target.
+    This function will have to translate Updater behavior into the appropriate
+    [error codes](#expected_output) based on whether or not the Updater
+    detects a particular attack. These will be returned by this function to
+    the Tester, which will evaluate them against what it expects.
 
 
 Implementations of the updater may vary dramatically, so the Wrapper may, in
