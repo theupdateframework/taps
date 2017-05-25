@@ -1,7 +1,7 @@
 * TAP: 7
 * Title: Conformance testing
 * Version: 2
-* Last-Modified: 24-May-2017
+* Last-Modified: 25-May-2017
 * Author: Vladimir Diaz, Sebastien Awwad
 * Status: Draft
 * Content-Type: text/markdown
@@ -90,8 +90,7 @@ implementation, the following components are required by this TAP:
 
 The **Updater** is the program to be tested, an implementation of a TUF-conformant
 updater client, as described in
-[the client section of the TUF specification](https://github.com/theupdateframework/tuf/blob/develop/docs/tuf-spec.txt#L931-L933)
-.
+[the client section of the TUF specification](https://github.com/theupdateframework/tuf/blob/develop/docs/tuf-spec.txt#L931-L933).
 
 The **Conformance Tester**, provided by TheUpdateFramework, will run a battery
 of tests intended to determine the TUF-conformance of the Updater. The Tester
@@ -105,27 +104,25 @@ metadata and communicating it in the way the Updater expects. An
 individual Updater will need a custom Wrapper written for the Tester to use to
 communicate with it. This will need to involve at least a few lines of Python.
 In order for the Tester to interact with the Updater implementation, a Wrapper
-around that implementation will need to support the following few functions as
-an interface to the tester. The tester will interact with the implementation by
-calling these functions, providing as arguments metadata and/or target/image
-files. These functions and optional Wrapper functionality are specified in
-[the Wrapper Specification section below](#wrapper_specification).
+around that implementation will need to support as an interface to the Tester
+the 3-5 functions listed below.
 
 
 ## Wrapper Specification
 
-The Wrapper must implement three functions specified [below](#wrapper_functions).
+The Wrapper must implement at least the first three functions specified
+[below](#wrapper_functions).
 Note also, however, that because implementations may vary substantially, the
 Wrapper may need to perform things like:
  - Calling an external binary with, e.g., the subprocess module, in order to
- run an updater implementation.
+ run an updater implementation that is not in Python.
  - Moving metadata or target files into the directory structure the updater
  implementation expects
  - If, e.g., the Updater doesn't have a notion of a filesystem, the wrapper may
  need to read the files the tester provides and distribute data to the Updater
  in the manner the Updater expects.
  - Translate metadata from the format the tester provides into the custom
- format the Updater expects
+ format the Updater expects (optional functions 4 and 5)
  - If the Updater's communication model involves different synchronization
  (e.g. server push vs client pull), the update_client() Wrapper function will
  need to bridge this; for example, it may need to wait and collect results from
@@ -139,143 +136,146 @@ called by the Tester. The first three are required, and the last two are only
 necessary if the format of metadata varies from that employed by the TUF
 specification.
 
-- **`initialize_updater(metadata_directory)`**:
-    Purpose:
-      Sets the client's initial state up for a future test, providing it with
-      metadata to be treated as already-validated. A client updater delivered
-      to end users will always need some kind of root of trust (in the TUF
-      spec, an initial Root role metadata file, e.g. root.json) to use when
-      validating future metadata.
+- 1: **`initialize_updater(metadata_directory)`**:
+    - Purpose:
+        Sets the client's initial state up for a future test, providing it with
+        metadata to be treated as already-validated. A client updater delivered
+        to end users will always need some kind of root of trust (in the TUF
+        spec, an initial Root role metadata file, e.g. root.json) to use when
+        validating future metadata.
 
-    Arguments:
-      `metadata_directory`:
-        Metadata in the TUF specification's metadata format will be provided in
-        the directory at path `metadata_directory`. This should be provided to
-        the Updater in whatever form it requires. The common case here will be
-        the path of a directory containing a trustworthy root.json file.
+    - Arguments:
+        - `metadata_directory`:
+          Metadata in the TUF specification's metadata format will be provided in
+          the directory at path `metadata_directory`. This should be provided to
+          the Updater in whatever form it requires. The common case here will be
+          the path of a directory containing a trustworthy root.json file.
 
-    Returns: None
+    - Returns: None
 
-- **`update_repo(metadata_directory, targets_directory)`**:
-    Purpose:
-      Updates the repository files, metadata and targets. This will be the data
-      that should be made available to the Updater when the Updater tries to
-      update.
+- 2: **`update_repo(metadata_directory, targets_directory)`**:
+    - Purpose:
+        Updates the repository files, metadata and targets. This will be the
+        data that should be made available to the Updater when the Updater
+        tries to update.
 
-    Arguments:
-      `metadata_directory`:
-        As above, `metadata_directory` will be the path of a directory
-        containing metadata files in the format specified in the TUF
-        specification.
-      `targets_directory`:
-        the path of a directory containing target files that should be made
-        available to the Updater.
+    - Arguments:
+        - `metadata_directory`:
+          As above, `metadata_directory` will be the path of a directory
+          containing metadata files in the format specified in the TUF
+          specification.
+        - `targets_directory`:
+          the path of a directory containing target files that should be made
+          available to the Updater.
 
-    Returns: None
+    - Returns: None
 
 
-- **`update_client(target_filepath)`**:
-    Purpose:
-      Causes the client to attempt to (obtain and) validate a particular target,
-      along with all metadata required to do so in a secure manner conforming to
-      the TUF specification.
+- 3: **`update_client(target_filepath)`**:
+    - Purpose:
+        Causes the client to attempt to (obtain and) validate a particular target,
+        along with all metadata required to do so in a secure manner conforming to
+        the TUF specification.
 
-      This function will have to translate Updater behavior/output into the
-      return values (below) that the Tester expects, based on
-      whether or not the Updater detects a particular attack. `update_client`
-      must return the appropriate code to the Tester, which will evaluate them
-      against what it expects.
+        This function will have to translate Updater behavior/output into the
+        return values (below) that the Tester expects, based on
+        whether or not the Updater detects a particular attack. `update_client`
+        must return the appropriate code to the Tester, which will evaluate them
+        against what it expects.
 
-    Arguments:
-      `target_filepath`:
-        The path of a target file that the Updater should try to update.
-        This must be inside the `targets_directory` directory provided to
-        `update_repo`, and it should be written relative to
-        `targets_directory`. As noted previously, it is not necessary for the
-        Updater to have a notion of files; `update_client` may abstract this
-        away.
+    - Arguments:
+        - `target_filepath`:
+          The path of a target file that the Updater should try to update.
+          This must be inside the `targets_directory` directory provided to
+          `update_repo`, and it should be written relative to
+          `targets_directory`. As noted previously, it is not necessary for the
+          Updater to have a notion of files; `update_client` may abstract this
+          away.
 
-    Returns:
-      An integer describing the result of the attempted update. This value is
-      what the Tester is ultimately testing.
+    - Returns:
+        An integer describing the result of the attempted update. This value is
+        what the Tester is ultimately testing.
 
-      return value     outcome
-      -----------      ------
-      0                SUCCESS: target identified by target_filepath has been
-                       obtained from one of the mirrors and validated per
-                       trustworthy metadata
-      1                FAILURE/rejection: unable to obtain a target identified
-                       by target_filepath from any of the known mirrors that is
-                       valid according to trustworthy metadata
-      2                an unknown error has occurred (never expected, but
-                       helpful to provide for test output)
+        ```
+        return value     outcome
+        -----------      ------
+        0                SUCCESS: target identified by target_filepath has been
+                         obtained from one of the mirrors and validated per
+                         trustworthy metadata
+        1                FAILURE/rejection: unable to obtain a target identified
+                         by target_filepath from any of the known mirrors that
+                         is valid according to trustworthy metadata
+        2                an unknown error has occurred (never expected, but
+                         helpful to provide for test output)
 
-      # TODO: Consider additional return fields:
-        hash: (Verdict: No, for now)
-          the hash of the target file installed if there was a target file
-          validated and "installed" (to be tested against the expected
-          fileinfo). This may allow us to make sure that the success was real /
-          the right target was actually chosen.
-          This is probably not necessary, but it's food for thought as we write
-          tests.
-        metadata versions: (Verdict: No)
-          a dictionary mapping metadata filename to the version validated in
-          this update. The purpose of this is to allow for an easier time
-          writing the Tester, since it spares us the complication of making the
-          test go so far as to validate a particular target in a large number
-          of sub-tests when all we want to do is determine that e.g. replayed
-          metadata is rejected. Tests are just more complicated to construct
-          sometimes otherwise. Not a good enough reason, IMO; simplicity for
-          the external implementer is paramount.
+        # TODO: Consider additional return fields:
+          hash: (Verdict: No, for now)
+            the hash of the target file installed if there was a target file
+            validated and "installed" (to be tested against the expected
+            fileinfo). This may allow us to make sure that the success was real
+            / the right target was actually chosen.
+            This is probably not necessary, but it's food for thought as we
+            write tests.
 
-- **`transform_metadata_for_signing(metadata_dict)`**:
+          metadata versions: (Verdict: No)
+            a dictionary mapping metadata filename to the version validated in
+            this update. The purpose of this is to allow for an easier time
+            writing the Tester, since it spares us the complication of making
+            the test go so far as to validate a particular target in a large
+            number of sub-tests when all we want to do is determine that e.g.
+            replayed metadata is rejected. Tests are just more complicated to
+            construct sometimes otherwise. Not a good enough reason, IMO;
+            simplicity for the external implementer is paramount.
+        ```
+
+- 4: **`transform_metadata_for_signing(metadata_dict)`**:
     NOTE THAT THIS IS OPTIONAL, only necessary if the format of metadata
     must vary from the JSON described in the TUF specification.
 
-    Purpose:
-      Converts raw role metadata in a JSON-compatible format described in the
-      TUF specification (in 'signed' fields in signed metadata) into metadata
-      of the format that the Updater expects to check signatures over.
-      This will be what the Tester signs (instead of the JSON-compatible
-      'signed' element) when it signs metadata.
-      # TODO: Elaborate with example.
+    - Purpose:
+        Converts raw role metadata in a JSON-compatible format described in the
+        TUF specification (in 'signed' fields in signed metadata) into metadata
+        of the format that the Updater expects to check signatures over.
+        This will be what the Tester signs (instead of the JSON-compatible
+        'signed' element) when it signs metadata.
+        (((TODO: Elaborate with example.)))
 
-    Arguments:
-      `metadata_dict`:
-        Metadata for one role.
-        A dictionary conforming to
-        [tuf.formats.ANYROLE_SCHEMA](https://github.com/theupdateframework/tuf/blob/develop/tuf/formats.py#L388-L390)
-        that contains role metadata as specified by the TUF specification.
-        This will be the metadata in the 'signed' element in familiar .json
-        metadata files.
+    - Arguments:
+        - `metadata_dict`:
+          Metadata for one role.
+          A dictionary conforming to
+          [tuf.formats.ANYROLE_SCHEMA](https://github.com/theupdateframework/tuf/blob/develop/tuf/formats.py#L388-L390)
+          that contains role metadata as specified by the TUF specification.
+          This will be the metadata in the 'signed' element in familiar .json
+          metadata files.
 
-    Returns:
-      A bytes() object over which the Tester can sign, which will be what the
-      Updater/Wrapper checks when it tests the validity of the metadata against
-      a signature.
+    - Returns:
+        A bytes() object over which the Tester can sign, which will be what the
+        Updater/Wrapper checks when it tests the validity of the metadata against
+        a signature.
 
-- **`transform_finished_metadata(metadata_w_signatures_dict)`**:
+- 5: **`transform_finished_metadata(metadata_w_signatures_dict)`**:
     NOTE THAT THIS IS OPTIONAL, only necessary if the format of metadata
     must vary from the JSON described in the TUF specification.
 
-    Purpose:
-      Converts raw role metadata in a JSON-compatible format described in the
-      TUF specification (in 'signed' fields in signed metadata) into metadata
-      of the format that the Updater expects to see and check signatures over.
-      # TODO: Elaborate with example.
+    - Purpose:
+        Converts raw role metadata in a JSON-compatible format described in the
+        TUF specification (in 'signed' fields in signed metadata) into metadata
+        of the format that the Updater expects to see and check signatures over.
+        (((TODO: Elaborate with example.)))
 
-    Arguments:
-      `metadata_w_signatures_dict`:
-      Metadata for one role plus signature(s) over it.
-      A dictionary conforming to
-      [tuf.formats.SIGNABLE_SCHEMA](https://github.com/theupdateframework/tuf/blob/develop/tuf/formats.py#L305-L309)
-      that contains role metadata and a signature/signatures over (a
-      transformed version of) it.
+    - Arguments:
+        - `metadata_w_signatures_dict`:
+          Metadata for one role plus signature(s) over it.
+          A dictionary conforming to
+          [tuf.formats.SIGNABLE_SCHEMA](https://github.com/theupdateframework/tuf/blob/develop/tuf/formats.py#L305-L309)
+          that contains role metadata and a signature/signatures over (a
+          transformed version of) it.
 
-    Returns:
-      A bytes() object which can be written to a file in binary mode, resulting
-      in a metadata file that the Wrapper can (modify if necessary and) provide
-      to the Updater.
+    - Returns:
+        A bytes() object which can be written to a file in binary mode, resulting
+        in a metadata file that the Wrapper can (modify if necessary and) provide
+        to the Updater.
 
 
 
@@ -426,9 +426,9 @@ ETC
 Here's a sample Wrapper module that allows the Conformance Tester to test the
 TUF Reference Implementation.
 
-# TODO: NOTE that I need to continue to go through the below. It's not finished.
-# TODO: Indent the below properly. (Avoiding now to avoid misleading commit
-# diffs)
+(((TODO: NOTE that I need to continue to go through the below. It's
+not finished. I also have to indent the below properly. (Avoiding now to avoid
+misleading commit diffs))))
 
 ```Python
 
@@ -563,6 +563,7 @@ number-of-root-keys: 3
 # At a minimum, the Root file MUST be signed by at least 2 out of 3 Root keys.
 root-threshold: 2
 ...
+```
 
 ### Dealing with Implementation Restrictions
 Suppose, for example, that the Python implementation has the following restrictions:
