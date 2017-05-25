@@ -108,8 +108,7 @@ In order for the Tester to interact with the Updater implementation, a Wrapper
 around that implementation will need to support the following few functions as
 an interface to the tester. The tester will interact with the implementation by
 calling these functions, providing as arguments metadata and/or target/image
-files. These functions are `initialize_updater`, `update_repo`, and
-`update_client`. They and other Wrapper functionality are specified in
+files. These functions and optional Wrapper functionality are specified in
 [the Wrapper Specification section below](#wrapper_specification).
 
 
@@ -136,7 +135,9 @@ Wrapper may need to perform things like:
 
 ### Wrapper Functions
 The following functions must be written for the Wrapper module, and will be
-called by the Tester.
+called by the Tester. The first three are required, and the last two are only
+necessary if the format of metadata varies from that employed by the TUF
+specification.
 
 - **`initialize_updater(metadata_directory)`**:
     Purpose:
@@ -226,6 +227,57 @@ called by the Tester.
           metadata is rejected. Tests are just more complicated to construct
           sometimes otherwise. Not a good enough reason, IMO; simplicity for
           the external implementer is paramount.
+
+- **`transform_metadata_for_signing(metadata_dict)`**:
+    NOTE THAT THIS IS OPTIONAL, only necessary if the format of metadata
+    must vary from the JSON described in the TUF specification.
+
+    Purpose:
+      Converts raw role metadata in a JSON-compatible format described in the
+      TUF specification (in 'signed' fields in signed metadata) into metadata
+      of the format that the Updater expects to check signatures over.
+      This will be what the Tester signs (instead of the JSON-compatible
+      'signed' element) when it signs metadata.
+      # TODO: Elaborate with example.
+
+    Arguments:
+      `metadata_dict`:
+        Metadata for one role.
+        A dictionary conforming to
+        [tuf.formats.ANYROLE_SCHEMA](https://github.com/theupdateframework/tuf/blob/develop/tuf/formats.py#L388-L390)
+        that contains role metadata as specified by the TUF specification.
+        This will be the metadata in the 'signed' element in familiar .json
+        metadata files.
+
+    Returns:
+      A bytes() object over which the Tester can sign, which will be what the
+      Updater/Wrapper checks when it tests the validity of the metadata against
+      a signature.
+
+- **`transform_finished_metadata(metadata_w_signatures_dict)`**:
+    NOTE THAT THIS IS OPTIONAL, only necessary if the format of metadata
+    must vary from the JSON described in the TUF specification.
+
+    Purpose:
+      Converts raw role metadata in a JSON-compatible format described in the
+      TUF specification (in 'signed' fields in signed metadata) into metadata
+      of the format that the Updater expects to see and check signatures over.
+      # TODO: Elaborate with example.
+
+    Arguments:
+      `metadata_w_signatures_dict`:
+      Metadata for one role plus signature(s) over it.
+      A dictionary conforming to
+      [tuf.formats.SIGNABLE_SCHEMA](https://github.com/theupdateframework/tuf/blob/develop/tuf/formats.py#L305-L309)
+      that contains role metadata and a signature/signatures over (a
+      transformed version of) it.
+
+    Returns:
+      A bytes() object which can be written to a file in binary mode, resulting
+      in a metadata file that the Wrapper can (modify if necessary and) provide
+      to the Updater.
+
+
 
 <!---
 (((DEBUG: Here, for reference, are the scraps of an old error list I started to
