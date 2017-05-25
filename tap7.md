@@ -258,23 +258,24 @@ For instance, the tester tool can generate metadata signed by an invalid key,
 so it can test whether the implementation will reject
 an untrusted signature.
 
-### Setting Up a TUF Implementation to Work with the Tool
-Suppose a developer is interested in adopting TUF and wants to verify
-that his Python implementation is conformant with the specification.  He can
-begin by creating a script that accepts input metadata and, when certain
-attacks are present, exits with the return codes defined in this TAP.  The
-script can simply be an interface, or wrapper, to the developer's actual Python
-implementation, which in production raises exceptions when an error occurs.
-Furthermore, consider that the implementation might use a different
-command-line interface from the one used by the script.
 
-In the example code below, the `metadata_directory` and `targets_directory`
-arguments correspond to the --client-metadata and --client-targets command-line
-arguments, respectively.  The 'target' argument is the --file update file that the
-implementation is expected to securely update.
+
+## Example Wrapper
+
+Here's a sample Wrapper module that allows the Conformance Tester to test the
+TUF Reference Implementation.
+
+# TODO: NOTE that I need to continue to go through the below. It's not finished.
+# TODO: Indent the below properly. (Avoiding now to avoid misleading commit
+# diffs)
 
 ```Python
-def update_client(target, metadata_directory, targets_directory):
+
+def initialize_updater(metadata_directory):
+# TODO: Copy the contents of the given directory to a temp directory and host
+# that via http simpleserver on port 8001 on localhost.
+# TODO: Initialize a tuf.client.updater.Updater object and stick the given
+# metadata files into its current metadata directory.
 
 # The HTTP repository that serves metadata and update files to client.  Not
 # all implementations of the framework use this transport mechanism to serve
@@ -298,14 +299,23 @@ updater = tuf.client.updater.Updater('repository', repository_mirrors)
 # we get from the command line argument supplied to this wrapper script.
 destination_directory = targets_directory
 
+# ...
+
+
+def update_repo(metadata_directory, targets_directory):
+# TODO: Copy the given files into place in the hosted repository directory.
+
+
+def update_client(target_filepath):
+
 # Refresh the repository's top-level roles, store the target information for
 # all the targets tracked, and determine which of these targets have been
 # updated.
 updater.refresh(unsafely_update_root_if_necessary=False)
 
-# Retrieve the target info of the 'target' argument, which contains its
-# length, hash, etc.
-file_targetinfo = updater.get_one_valid_targetinfo(target)
+# Retrieve the target info of the 'target_filepath' argument, which contains
+# its length, hash, etc.
+file_targetinfo = updater.get_one_valid_targetinfo(target_filepath)
 updated_targets = updater.updated_targets([file_targetinfo], destination_directory)
 
 # Download each of these updated targets and save them to the local
