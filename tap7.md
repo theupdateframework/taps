@@ -173,7 +173,8 @@ specification.
 
 - 3: **`update_client(target_filepath)`**:
     - Purpose:
-        Causes the client to attempt to (obtain and) validate a particular target,
+        Refreshes metadata and causes the client to attempt to (obtain and)
+        validate a particular target,
         along with all metadata required to do so in a secure manner conforming to
         the TUF specification.
 
@@ -226,9 +227,10 @@ specification.
             replayed metadata is rejected. Tests are just more complicated to
             construct sometimes otherwise. Not a good enough reason, IMO;
             simplicity for the external implementer is paramount.
+
         ```
 
-- 4: **`transform_metadata_for_signing(metadata_dict)`**:
+- 4: **`transform_metadata_for_signing(metadata_dict)`** (optional):
     NOTE THAT THIS IS OPTIONAL, only necessary if the format of metadata
     must vary from the JSON described in the TUF specification.
 
@@ -254,7 +256,7 @@ specification.
         Updater/Wrapper checks when it tests the validity of the metadata against
         a signature.
 
-- 5: **`transform_finished_metadata(metadata_w_signatures_dict)`**:
+- 5: **`transform_finished_metadata(metadata_w_signatures_dict)`** (optional):
     NOTE THAT THIS IS OPTIONAL, only necessary if the format of metadata
     must vary from the JSON described in the TUF specification.
 
