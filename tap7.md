@@ -365,9 +365,11 @@ metadata.
 When a Case Set below lists one of these multipliers, the number of tests of
 that case set will need to be multiplied in the listed way.
 - **Per Role**
-    - Run the case at least five different ways, where the offending metadata
-      is a different role: Timestamp, Snapshot, Target, Delegated Target
-      (((depth x > 1, x < 5?))), Root.
+    - Run the case at least four different ways, where the offending metadata
+      is a different role: Timestamp, Snapshot, Target, and Root.
+      If delegated target roles are supported (See
+      [Configuration File](#configuration-file)), then a delegated target role
+      file should also be tested.
 - **Mirrors**
     - Run the case in two scenarios:
         - 2 attack mirrors
@@ -379,6 +381,11 @@ that case set will need to be multiplied in the listed way.
           - The return value expected is always Success (0)
             (A bad mirror should not be able to prevent update from a
              good mirror; that would be an easy denial of service attack.)
+    - Note that if the particular Updater doesn't support multiple mirrors,
+      (see [Configuration File](#configuration-file)), then the two cases above
+      should be:
+        - 1 attack mirror instead of 2 attack mirrors
+        - 1 good mirror instead of 1 good mirror and 1 bad mirror
 
 #### Case Sets
 
@@ -532,8 +539,17 @@ keytype: ed25519, ecdsa
 # conformant_updater.py expects the Root file to be signed by a max of 3 different keys.
 number-of-root-keys: 3
 
-# At a minimum, the Root file MUST be signed by at least 2 out of 3 Root keys.
+# For this Updater implementation, at a minimum, the Root file MUST be signed
+# by at least 2 out of 3 Root keys.
 root-threshold: 2
+
+# Let's say that this Updater implementation doesn't support delegated Targets
+# roles. (Default is true.)
+delegated-roles-support: false
+
+# Let's say that this Updater implementation doesn't support mirrors - it just
+# uses one location for the repository. (Default is true.)
+mirror-support: false
 ...
 ```
 
