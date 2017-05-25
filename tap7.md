@@ -41,8 +41,9 @@ implementers to add test code in parallel.  A
 single tool for conformance testing can avoid issues with interoperability and
 duplicate work, can ensure update behavior as intended by the designers of TUF,
 and, most importantly, ensure that an updater is secure against
-the types of attacks and weaknesses listed in [Section
-1.5.2](https://github.com/theupdateframework/tuf/blob/6fde6222c9c6abf905ef4a56cf56fe35c4a85e14/docs/tuf-spec.txt#L124-L181) of the TUF Specification. In addition, the official tool should be publicly
+the types of attacks and weaknesses listed in
+[Section 1.5.2](https://github.com/theupdateframework/tuf/blob/6fde6222c9c6abf905ef4a56cf56fe35c4a85e14/docs/tuf-spec.txt#L124-L181)
+of the TUF Specification. In addition, the official tool should be publicly
 available and useable by anyone who wishes to test an implementation.
 
 Passing a conformance test with the official tool would be
@@ -63,17 +64,21 @@ that claim becomes stronger.  Consequently, any
 implementation of TUF would need some way of accepting given metadata
 and indicating when it has detected a particular attack.
 
-This TAP prescribes that an implementation, or a wrapper script for it, accept
-a set of command-line arguments as defined in this document, and exit with return
-codes under certain conditions (e.g., to signal that a Freeze attack was
-detected).  A fixed set of arguments is needed so that conformance testing is
-consistent across different languages.  In turn, the conformance tester will
-execute the implementation with different sets of metadata and verify its exit
-codes for numerous outcomes.  The conformance tester proposed here also requires
-a minimum number of arguments so that it can thoroughly cover all potential
-outcomes for which it wishes to test.  It should be noted, however, that the
-implementation does not necessarily have to be the updater used in production.
-It only needs to function as defined in this TAP for conformance testing.
+This TAP prescribes that an implementation of a client updater ("Updater")
+employ a wrapper module ("Wrapper") that implements a common set of functions
+defined in this document. These can be called by a general TUF Conformance
+Tester ("Tester"), which will pass in sets of metadata and target files. The
+Tester will determine based on output produced by the wrapped Updater --
+including error codes that signal that particular attacks have been detected --
+whether or not the Updater is conformant with the TUF specification. In
+general, these constitute a battery of attacks against which the Updater should
+be resilient.
+
+It should be noted, however, that the implementation does not necessarily have
+to be the updater used in production. It only needs to function as defined in
+this TAP for conformance testing, though it is expected that the behavior be
+the same at a high level -- for example, the validity of metadata should be
+determined the same way. ((TODO: This paragraph still seems wordy. Unnecessary?))
 
 # Specification
 
@@ -103,7 +108,7 @@ In order for the Tester to interact with the Updater implementation, a Wrapper
 around that implementation will need to support the following few functions as
 an interface to the tester. The tester will interact with the implementation by
 calling these functions, providing as arguments metadata and/or target/image
-files. These functions are `initialize_client`, `update_repo`, and
+files. These functions are `initialize_updater`, `update_repo`, and
 `update_client`. They and other Wrapper functionality are specified in
 [the Wrapper Specification section below](#wrapper_specification).
 
@@ -133,7 +138,7 @@ Wrapper may need to perform things like:
 The following functions must be written for the Wrapper module, and will be
 called by the Tester.
 
-- **`initialize_client(metadata_directory)`**:
+- **`initialize_updater(metadata_directory)`**:
     Purpose:
       Sets the client's initial state up for a future test, providing it with
       metadata to be treated as already-validated. A client updater delivered
@@ -244,7 +249,7 @@ defend against the following attacks and weaknesses:
 (6) malicious mirrors
 (7) mix-and-match
 (8) rollback
-(9) vulnerability to key compromises.
+(9) vulnerability to key compromises
 ```
 
 Note that the Conformance Tester generates the metadata
@@ -315,7 +320,7 @@ via the implementation's `tuf.settings.repositories_directory` configuration
 setting.  The script also saves updated files to the directory indicated with
 --client-targets, which the testing tool can use for verification.
 
-#### Exceptions
+### Expected Output
 The part of the developer's script that captures the exceptions of the
 original implementation and exits with the expected return codes can resemble
 the following snippet of code:
@@ -369,7 +374,7 @@ the following snippet of code:
 
 ### Configuration File
 To launch the test, the conformance tester accepts a
-command-line option (and others, which will be covered later) that point to
+command-line option that points to
 the location of a configuration file:
 
 ```Bash
