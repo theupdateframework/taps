@@ -95,40 +95,24 @@ received by the Updater, which must try to validate them correctly. The Updater
 will be expected to reject untrustworthy metadata and targets and accept
 trustworthy metadata and targets.
 
-The **Wrapper** mediates communication between the Tester and Updater. An
+The **Wrapper** mediates communication between the Tester and Updater, adapting
+metadata and communicating it in the way the Updater expects. An
 individual Updater will need a custom Wrapper written for the Tester to use to
 communicate with it. This will need to involve at least a few lines of Python.
-In order for the Tester to interact with the updater implementation, a Wrapper
+In order for the Tester to interact with the Updater implementation, a Wrapper
 around that implementation will need to support the following few functions as
 an interface to the tester. The tester will interact with the implementation by
 calling these functions, providing as arguments metadata and/or target/image
-files. Examples will be provided in a later section of this TAP. The following
-functions must be written for the Wrapper:
-
-- initialize_client(already_trusted_metadata):
-    Sets the client's initial state up for a future test, providing it with
-    metadata to be treated as already-validated. A client updater delivered
-    to end users will always need some kind of root of trust (in the TUF
-    spec, an initial Root role metadata file, e.g. root.json) to use when
-    validating future metadata.
-    The format of already_trusted_metadata will be as follows:
-    `{repository_name: {role_name: {<role metadata>}}}` # TODO: Expand this.
-
-- update_repo(metadata_directory, targets_directory):
-    Updates the repository files, metadata and targets. This will be the data
-    that should be made available to the Updater when the Updater tries to
-    Update, which the Updater will need to validate.
-
-- update_client(target_id):
-    Causes the client to attempt to obtain and validate a particular target.
-    This function will have to translate Updater behavior into the appropriate
-    [error codes](#expected_output) based on whether or not the Updater
-    detects a particular attack. These will be returned by this function to
-    the Tester, which will evaluate them against what it expects.
+files. These functions are `initialize_client`, `update_repo`, and
+`update_client`. They and other Wrapper functionality are specified in
+[the Wrapper Specification section below](#wrapper_specification).
 
 
-Implementations of the updater may vary dramatically, so the Wrapper may, in
-these functions, perform things like:
+## Wrapper Specification
+
+The Wrapper must implement three functions specified [below](#wrapper_functions).
+Note also, however, that because implementations may vary substantially, the
+Wrapper may need to perform things like:
  - Calling an external binary with, e.g., the subprocess module, in order to
  run an updater implementation.
  - Moving metadata or target files into the directory structure the updater
@@ -138,20 +122,117 @@ these functions, perform things like:
  in the manner the Updater expects.
  - Translate metadata from the format the tester provides into the custom
  format the Updater expects
- - If the communication model involves different synchronization (e.g. server
- push vs client pull), the update_client() Wrapper function will need to bridge
- this; for example, it may need to wait and collect results from some separate
- process.
+ - If the Updater's communication model involves different synchronization
+ (e.g. server push vs client pull), the update_client() Wrapper function will
+ need to bridge this; for example, it may need to wait and collect results from
+ some separate process.
 
 
 
+### Wrapper Functions
+The following functions must be written for the Wrapper module, and will be
+called by the Tester.
 
-### Expected Output
+- **`initialize_client(metadata_directory)`**:
+    Purpose:
+      Sets the client's initial state up for a future test, providing it with
+      metadata to be treated as already-validated. A client updater delivered
+      to end users will always need some kind of root of trust (in the TUF
+      spec, an initial Root role metadata file, e.g. root.json) to use when
+      validating future metadata.
 
-During this process, the Tester tool verifies that the expected
-metadata and update files are downloaded, and examines the values returned by
-the Wrapper when attacks on the Updater are present, as defined later in this
-section. The Tester will also verify that the Updater can
+    Arguments:
+      `metadata_directory`:
+        Metadata in the TUF specification's metadata format will be provided in
+        the directory at path `metadata_directory`. This should be provided to
+        the Updater in whatever form it requires. The common case here will be
+        the path of a directory containing a trustworthy root.json file.
+
+    Returns: None
+
+- **`update_repo(metadata_directory, targets_directory)`**:
+    Purpose:
+      Updates the repository files, metadata and targets. This will be the data
+      that should be made available to the Updater when the Updater tries to
+      update.
+
+    Arguments:
+      `metadata_directory`:
+        As above, `metadata_directory` will be the path of a directory
+        containing metadata files in the format specified in the TUF
+        specification.
+      `targets_directory`:
+        the path of a directory containing target files that should be made
+        available to the Updater.
+
+    Returns: None
+
+
+- **`update_client(target_filepath)`**:
+    Purpose:
+      Causes the client to attempt to (obtain and) validate a particular target,
+      along with all metadata required to do so in a secure manner conforming to
+      the TUF specification.
+
+      This function will have to translate Updater behavior/output into the
+      return values (below) that the Tester expects, based on
+      whether or not the Updater detects a particular attack. `update_client`
+      must return the appropriate code to the Tester, which will evaluate them
+      against what it expects.
+
+    Arguments:
+      `target_filepath`:
+        The path of a target file that the Updater should try to update.
+        This must be inside the `targets_directory` directory provided to
+        `update_repo`, and it should be written relative to
+        `targets_directory`. As noted previously, it is not necessary for the
+        Updater to have a notion of files; `update_client` may abstract this
+        away.
+
+    Returns:
+      An integer describing the result of the attempted update, matching the
+      set listed in [Expected Output](#expected_output). This value is what
+      the Tester is ultimately testing.
+
+      Note that this list is not yet finalized.
+      # TODO: Add blurb briefly describing each status below.
+      # TODO: Connect each status to the TUF Specification.
+      # TODO: Complete list by walking through what is expected for each
+      #       test scenario.
+
+      return value     outcome
+      -----------      ------
+      0                success: target at target_filepath is trustworthy
+      1                unsigned metadata / invalid signature on metadata
+      2                unknown target (necessary?)
+      3                malicious target (?)
+      4                rollback attack detected, update rejected (replay?)
+      5                endless data attack detected, update rejected
+      7                an unknown error has occurred
+
+      # TODO: Consider additional return values:
+        hash: (Verdict: unsure. "No" for now.)
+          the hash of the target file installed if there was a target file
+          validated and "installed" (to be tested against the expected
+          fileinfo). This may allow us to make sure that the success was real /
+          the right target was actually chosen.
+        metadata versions: (Verdict: No: not necessary, I think)
+          a dictionary mapping metadata filename to the version validated in
+          this update. The purpose of this is to allow for an easier time
+          writing the Tester, since it spares us the complication of making the
+          test go so far as to validate a particular target when all we want
+          to do is determine that e.g. replayed metadata is rejected. Tests are
+          just more complicated to construct sometimes otherwise. Not a good
+          enough reason, IMO.
+
+See [Example Wrapper](#example_wrapper) below for an example of the Wrapper
+module - in this case, a wrapper enabling the Conformance Tester to test the
+TUF Reference Implementation.
+
+
+## Test Specification
+
+The Tester will verify that the Updater can
 defend against the following attacks and weaknesses:
 
 ```
