@@ -111,7 +111,7 @@ the 3-5 functions listed below.
 ## Wrapper Specification
 
 The Wrapper must implement at least the first three functions specified
-[below](#wrapper_functions).
+[below](#wrapper-functions).
 Note also, however, that because implementations may vary substantially, the
 Wrapper may need to perform things like:
  - Calling an external binary with, e.g., the subprocess module, in order to
@@ -311,7 +311,7 @@ value  meaning
 
 
 
-See [Example Wrapper](#example_wrapper) below for an example of the Wrapper
+See [Example Wrapper](#example-wrapper) below for an example of the Wrapper
 module - in this case, a wrapper enabling the Conformance Tester to test the
 TUF Reference Implementation.
 
@@ -596,7 +596,7 @@ In this case, the Conformance Tester has to incorporate metadata that the
 developer's script and implementation can handle.  For this task, the two
 optional Wrapper functions `transform_metadata_for_signing` and
 `transform_finished_metadata`, specified in
-[Wrapper Functions](#wrapper_functions) above, should be implemented to
+[Wrapper Functions](#wrapper-functions) above, should be implemented to
 perform these conversions. The Tester will call these as appropriate.
 
 For an example of how these might look, consider the JSON-to_DER converter
