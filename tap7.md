@@ -638,16 +638,15 @@ mechanism used, developers should take care to prevent their updaters from
 being vulnerable to such attacks, which can happen before any data is
 transferred, or after the transfer of data has begun.
 
-Lastly, a summary of the steps that should be followed to test an
-updater for conformance to TUF are as follows:
+
+## Summary of Steps for Conformance Testing
+In summary, the steps that should be followed to test an Updater for
+conformance to the TUF Specification are as follows:
 
 ```
-(1) provide interface to updater that accepts metadata and exits with the
-    TAP 7 return codes.
-(2) configure conformance tool to abide by the adopter's repository restrictions.
-(3) configure conformance tool to convert JSON metadata to the encoding used
-    by the adopter, if necessary.
-(4) run conformance tool and confirm that all tests are passed.
+(1) Write Wrapper module per specifications above.
+(2) Configure conformance tool to abide by the adopter's repository restrictions.
+(3) Run conformance tool and confirm that all tests are passed.
 ```
 
 # Security Analysis
@@ -666,7 +665,8 @@ A git branch containing the official tool for conformance testing, and a client
 set up for conformance testing can be found at:
 https://github.com/theupdateframework/tuf/tree/tap7/tuf/scripts/conformance_tester
 
-**Note that the preceding must be updated to match the modified spec.**
+**Note that the preceding must be updated to match recent modifications to
+TAP 7.**
 
 
 # Copyright
