@@ -508,46 +508,16 @@ necessary.
 ### Configuration File
 To launch the test, the conformance tester accepts a
 command-line option that points to
-the location of a configuration file:
+the location of a configuration file.
 
-```Bash
-$ python conformance_tester.py
-  --config tmp/.tuf-tester.yml
-```
-
-The configuration file includes the update command that the tool will
-execute to run the updater, along with restrictions, such as the
+The configuration file includes the name of the module that provides the
+Wrapper functions specified above, along with any necessary restrictions on
+TUF functionality, such as the list of
 cryptographic key types supported by the updater, the number of root keys,
 thresholds, etc.  The configuration file is needed because restrictions
 are not shared equally across all implementations.
 For example, the Go implementation might only support ECDSA keys, whereas
 another might support Ed25519 and RSA keys.
-
-### `update_client` Procedure
-The `update_client` function of the Wrapper refreshes metadadata and
-downloads the requested file.  As brief examples: the conformance tool can start the
-update program and feed it the correct metadata and update file when the
-requests are made.  The tool will inspect the local metadata directory to
-ensure that the correct metadata is downloaded. If the update program
-succeeds, it returns a code of `0`. If no target file is verified via verified
-metadata, `1` is returned, as listed above in
-[Wrapper Functions](#wrapper_functions)
-
-
-### Executing Conformance Testing
-The command to execute the conformance testing tool is:
-
-```Bash
-$ python conformance_tester.py
-  --config tmp/.tuf-tester.yml
-```
-
-The conformance tester returns `0` if all tests return results as expected,
-indicating that the implementation conforms to the specification.
-
-If `conformance_tester.py` returns a non-zero return code,
-it signals a failure. Optionally, a list of the conformance tests that the
-updater failed is printed or logged.
 
 An example of a `.tuf-tester.yml` configuration file for a Python updater:
 
@@ -567,42 +537,16 @@ root-threshold: 2
 ...
 ```
 
-### Dealing with Implementation Restrictions
-Suppose, for example, that the Python implementation has the following restrictions:
-
-```
-(1) metadata is encoded in DER (rather than JSON)
-(2) only Ed25519 keys are used and listed in metadata
-(3) only exactly 2 keys are supported for Root metadata, and only a threshold
-    of 1  (((Is this necessary?)))
-```
-
-Items 2 & 3, of the list above, can be configured with the conformance tool via
-its `.tuf-tester.yml` configuration file.  The configuration file can be edited
-by the developer to list:
-
-```
-keytype: ed25519
-number-of-root-keys: 2
-root-threshold: 1
-```
-
-Next, since the developer's implementation uses DER metadata (rather than
-JSON), the conformance tool would have to incorporate metadata that the
-developer's script and implementation can handle.  For this task, the
-developer would need to provide the conformance tool with a path to a program
-that converts JSON to DER metadata.  In this way, prior to calling the
-developer's script and initiating an update, the conformance tool can call the
-external program to convert JSON metadata into DER format.
-
-The command, and its output, that a user can run to test the developer's Python
-implementation for conformance would be similar to the following:
+### Executing Conformance Testing
+The command to execute the conformance testing tool is:
 
 ```Bash
 $ python conformance_tester.py
   --config tmp/.tuf-tester.yml
-  --convert-metadata path/to/convert-json-to-der.py
+```
 
+In response, you'll likely see something along these lines:
+```
 normal update: check.
 blocked freeze attack: check.
 blocked rollback attack: check.
@@ -615,18 +559,60 @@ specification.  More detailed information on the test results was saved to
 test-results.txt
 ```
 
-A JSON-to-DER converter, `convert_signed_metadata_to_der()`, can be found
+The conformance tester returns `0` if all tests return results as expected,
+indicating that the implementation conforms to the specification.
+
+If `conformance_tester.py` returns a non-zero return code,
+it signals a failure. Optionally, a list of the conformance tests that the
+updater failed is printed or logged.
+
+
+### Dealing with Implementation Restrictions
+
+#### Key Restrictions
+
+Suppose, for example, that the Updater implementation has the following restrictions:
+```
+- only Ed25519 keys are used and listed in metadata
+- only exactly 2 keys are supported for Root metadata, and only a threshold
+    of 1  (((Is this necessary?)))
+```
+These restrictions can be handled by configuring the conformance tool via
+its `.tuf-tester.yml` configuration file.  The configuration file can be edited
+by the developer to list:
+
+```
+keytype: ed25519
+number-of-root-keys: 2
+root-threshold: 1
+```
+
+#### Metadata Conversion
+
+Suppose that metadata that the Updater reads must be encoded in DER (rather
+than JSON).
+
+In this case, the Conformance Tester has to incorporate metadata that the
+developer's script and implementation can handle.  For this task, the two
+optional Wrapper functions `transform_metadata_for_signing` and
+`transform_finished_metadata`, specified in
+[Wrapper Functions](#wrapper_functions) above, should be implemented to
+perform these conversions. The Tester will call these as appropriate.
+
+For an example of how these might look, consider the JSON-to_DER converter
+`convert_signed_metadata_to_der` employed by Uptane's TUF fork
 [here](https://github.com/awwad/tuf/blob/36dbb7b8a800dab407fe9ab961155ef0a6d9f7c9/tuf/asn1_codec.py#L156-L352).
 Those curious as to how JSON metadata can be converted to another encoding can
 reference the linked example to learn more.
 
-(NOTE: The code block in the link would be something we could prominently
-mention in the re-organized example section.  I am not listing here the full
-function (in the link) because it's too much and it wouldn't make much sense
-on its own.)
+(((TODO: I should probably add the *high-level* code here to do the ASN.1/DER
+conversion, which is pretty short (asn1_coder.convert*(), inside function
+definition blocks for the optional functions, to make this clearer to the
+reader.))))
 
 
-It should be noted at this point that there might be TUF implementations
+#### No File System
+There might be TUF implementations
 where metadata or update files are not saved to a file system on the
 device.  In this case, the developer or user running the conformance tests
 would need to arrange that the files which are requested and stored by the device
