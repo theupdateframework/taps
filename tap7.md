@@ -195,40 +195,67 @@ called by the Tester.
         away.
 
     Returns:
-      An integer describing the result of the attempted update, matching the
-      set listed in [Expected Output](#expected_output). This value is what
-      the Tester is ultimately testing.
-
-      Note that this list is not yet finalized.
-      # TODO: Add blurb briefly describing each status below.
-      # TODO: Connect each status to the TUF Specification.
-      # TODO: Complete list by walking through what is expected for each
-      #       test scenario.
+      An integer describing the result of the attempted update. This value is
+      what the Tester is ultimately testing.
 
       return value     outcome
       -----------      ------
-      0                success: target at target_filepath is trustworthy
-      1                unsigned metadata / invalid signature on metadata
-      2                unknown target (necessary?)
-      3                malicious target (?)
-      4                rollback attack detected, update rejected (replay?)
-      5                endless data attack detected, update rejected
-      7                an unknown error has occurred
+      0                SUCCESS: target identified by target_filepath has been
+                       obtained from one of the mirrors and validated per
+                       trustworthy metadata
+      1                FAILURE/rejection: unable to obtain a target identified
+                       by target_filepath from any of the known mirrors that is
+                       valid according to trustworthy metadata
+      2                an unknown error has occurred (never expected, but
+                       helpful to provide for test output)
 
-      # TODO: Consider additional return values:
-        hash: (Verdict: unsure. "No" for now.)
+      # TODO: Consider additional return fields:
+        hash: (Verdict: No, for now)
           the hash of the target file installed if there was a target file
           validated and "installed" (to be tested against the expected
           fileinfo). This may allow us to make sure that the success was real /
           the right target was actually chosen.
-        metadata versions: (Verdict: No: not necessary, I think)
+          This is probably not necessary, but it's food for thought as we write
+          tests.
+        metadata versions: (Verdict: No)
           a dictionary mapping metadata filename to the version validated in
           this update. The purpose of this is to allow for an easier time
           writing the Tester, since it spares us the complication of making the
-          test go so far as to validate a particular target when all we want
-          to do is determine that e.g. replayed metadata is rejected. Tests are
-          just more complicated to construct sometimes otherwise. Not a good
-          enough reason, IMO.
+          test go so far as to validate a particular target in a large number
+          of sub-tests when all we want to do is determine that e.g. replayed
+          metadata is rejected. Tests are just more complicated to construct
+          sometimes otherwise. Not a good enough reason, IMO; simplicity for
+          the external implementer is paramount.
+
+<!---
+(((DEBUG: Here, for reference, are the scraps of an old error list I started to
+rewrite, which I now think is an unnecessary complication for implementers.)))
+value  meaning
+-----  ------------------------------------------------
+0.     Success
+        (successful update of indicated target file (target_filepath)
+
+1.     Target not validated by signed hash
+         (bad target / bad signature; signed hash in validated metadata does
+          not match the Target provided)
+2.     Metadata not validated by signature
+         (bad metadata / bad signature; signature on a role does not match the
+          metadata in that role)
+3.     Replayed metadata
+         (version of a role provided for validation is less than the previous
+          version already validated by the Updater)
+4.     Expired metadata
+         (current date/time is later than the expiration date in the metadata
+          provided for validation)
+5.     Endless data / expected size exceeded
+         (a target file is being provided that has exceeded the size listed
+          for the target in validated metadata)
+6. ...
+
+```
+-->
+
+
 
 See [Example Wrapper](#example_wrapper) below for an example of the Wrapper
 module - in this case, a wrapper enabling the Conformance Tester to test the
@@ -238,7 +265,8 @@ TUF Reference Implementation.
 ## Test Specification
 
 The Tester will verify that the Updater can
-defend against the following attacks and weaknesses:
+defend against the attacks and weaknesses discussed in the TUF specification.
+Broadly, these include:
 
 ```
 (1) arbitrary installation
@@ -254,7 +282,7 @@ defend against the following attacks and weaknesses:
 
 Note that the Conformance Tester generates the metadata
 and files that the implementation uses, and can test for various conditions.
-For instance, the tester tool can generate metadata signed by an invalid key,
+For instance, the Tester can generate metadata signed by an invalid key,
 so it can test whether the implementation will reject
 an untrusted signature.
 
