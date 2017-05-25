@@ -436,7 +436,8 @@ def initialize_updater(metadata_directory):
 # TODO: Copy the contents of the given directory to a temp directory and host
 # that via http simpleserver on port 8001 on localhost.
 # TODO: Initialize a tuf.client.updater.Updater object and stick the given
-# metadata files into its current metadata directory.
+# metadata files into its current metadata directory. (Such code exists in the
+# Uptane demo already. Grab from there.)
 
 # The HTTP repository that serves metadata and update files to client.  Not
 # all implementations of the framework use this transport mechanism to serve
@@ -482,66 +483,25 @@ updated_targets = updater.updated_targets([file_targetinfo], destination_directo
 # Download each of these updated targets and save them to the local
 # 'targets_directory' supplied to the script.  The conformance tool
 # can verify the files saved unmodified to 'targets_directory'.
-updater.download_target(file_targetinfo, destination_directory)
+try:
+  updater.download_target(file_targetinfo, destination_directory)
+
+except tuf.NoWorkingMirrorError:
+  return FAILURE
+
+# TODO: Check if the target file has been obtained and retained post-validation
+if #obtained and retained#:
+  return SUCCESS
+else:
+  return FAILURE
 ```
 
-As shown in the code snippet above, the script loads metadata from the
-directory specified in the --client-metadata command-line option, and sets it
-via the implementation's `tuf.settings.repositories_directory` configuration
-setting.  The script also saves updated files to the directory indicated with
---client-targets, which the testing tool can use for verification.
+As shown in the code snippet above, the Wrapper functions loads metadata from
+the directories specified. The Updater.download_target() call in the TUF
+reference implementation employs the suite of TUF verifications to obtain the
+target file indicated and retain it only if it validates, updating metadata as
+necessary.
 
-### Expected Output
-The part of the developer's script that captures the exceptions of the
-original implementation and exits with the expected return codes can resemble
-the following snippet of code:
-
-
-```Python
-  # Parse the options.
-  (target, metadata_directory, targets_directory) = parse_options()
-
-  # Return codes for conformant_updater.py.  This list is not yet finalized.
-  SUCCESS = 0
-  UNSIGNED_METADATA_ERROR = 1
-  UNKNOWN_TARGET_ERROR = 2
-  MALICIOUS_TARGET_ERROR = 3
-  ROLLBACK_ERROR = 4
-  ENDLESS_DATA_ERROR = 5
-  REPOSITORY_ERROR = 6
-  UNKNOWN_ERROR = 7
-
-  # Perform an update for 'target'.  The updated target is saved unmodified to
-  # 'targets_directory', and refreshed metadata to 'metadata_directory'.  Any
-  # exceptions raised are caught here, and the program ends with an appropriate
-  # return code.
-  try:
-    update_client(target, metadata_directory, targets_directory)
-
-  except (tuf.exceptions.NoWorkingMirrorError) as exception:
-
-    # 'exception.mirror_errors' should only contain one (key, value) dict
-    # entry, since only a single mirror is queried.
-    for mirror_url, mirror_error in six.iteritems(exception.mirror_errors):
-      sys.stderr.write('Error: ' + str(mirror_error) + '\n')
-
-      if isinstance(mirror_error, tuf.exceptions.ReplayedMetadataError):
-        sys.exit(ROLLBACK_ERROR)
-
-      elif isinstance(mirror_error, tuf.exceptions.Error):
-        sys.exit(ENDLESS_DATA_ERROR)
-
-      elif isinstance(mirror_error, tuf.exceptions.RepositoryError):
-        sys.exit(REPOSITORY_ERROR)
-
-      # catch other known error conditions here...
-
-      else:
-        sys.exit(UNKNOWN_ERROR)
-
-  # Successfully updated the target file.
-  sys.exit(SUCCESS)
-```
 
 ### Configuration File
 To launch the test, the conformance tester accepts a
@@ -561,63 +521,18 @@ are not shared equally across all implementations.
 For example, the Go implementation might only support ECDSA keys, whereas
 another might support Ed25519 and RSA keys.
 
-### root.json
-Before running the conformance tests, the tool generates a
-`root.json` according to the restrictions set in `.tuf-tester.yml`, saves it to
-*tmp/client-metadata* (or the path indicated by the `client-metadata`
-command-line option), populates the directory containing the remote repository
-files, and executes the update command.  At a minimum, TUF requires clients to
-have the root.json locally, prior to initiating an update request.  The updater
-should load *tmp/client-metadata/root.json* (or the appropriate path), refresh
-metadata accordingly, and fetch the requested update file.
-
-### Update Procedure
-The update procedure of the program refreshes metadadata and
+### `update_client` Procedure
+The `update_client` function of the Wrapper refreshes metadadata and
 downloads the requested file.  As brief examples: the conformance tool can start the
 update program and feed it the correct metadata and update file when the
 requests are made.  The tool will inspect the local metadata directory to
 ensure that the correct metadata is downloaded. If the update program
-succeeds, it returns a code of `0`.
+succeeds, it returns a code of `0`. If no target file is verified via verified
+metadata, `1` is returned, as listed above in
+[Wrapper Functions](#wrapper_functions)
 
-The tool can then check the program for
-rollback attacks by providing a previously trusted version of
-metadata (and thus update files), and confirming that the program exits with a
-return code of `4`. As defined in this TAP, this number indicates that a
-rollback error has occurred.
-
-A user can run the developer's script, `conformant_updater.py`, to initiate a
-normal update (e.g., to download the `foo.tgz` package).  In this case, the
-script refreshes top-level metadata to ensure that it has the latest repository
-information, downloads the requested `foo.tgz` file, and exits with a return code
-of `0`.  The output after running the script (and verifying the script's return
-code with the `echo $?` command) would be as follows:
-
-```Bash
-$ python conformant_updater.py
- --file foo.tgz
- --repository-files tmp/repository-files
- --client-metadata tmp/client-metadata
- --client-targets tmp/client-targets
-
-$ echo $?
-0
-```
-
-Similarly, the conformance tool is able to execute the script with the same
-command-line arguments and examine the outcome.  For instance, the tool can
-check the metadata saved unmodified to *tmp/client-metadata* and confirm that
-the Snapshot, Targets, and Timestamp metadata were saved unmodified to the
-*tmp/client-metadata* directory, according to the Root file loaded from
-*tmp/client-metadata* prior to the start of the update call, and generated by
-the conformance tool.  Additionally, it can compare the `foo.tgz` saved
-unmodified to *tmp/client-targets* with the valid one provided by the
-conformance tool via the --repository-files command-line option.
 
 ### Executing Conformance Testing
-The conformance tester stores `root.json` in the metadata directory indicated
-on the command line (e.g., *tmp/client-metadata* above).  The root file is
-generated according to the restrictions set in the configuration file.
-
 The command to execute the conformance testing tool is:
 
 ```Bash
@@ -625,21 +540,19 @@ $ python conformance_tester.py
   --config tmp/.tuf-tester.yml
 ```
 
-The conformance tester returns `0` if the implementation conforms with the
-specification. If conformance_tester.py returns a non-zero return code,
+The conformance tester returns `0` if all tests return results as expected,
+indicating that the implementation conforms to the specification.
+
+If `conformance_tester.py` returns a non-zero return code,
 it signals a failure. Optionally, a list of the conformance tests that the
 updater failed is printed or logged.
 
 An example of a `.tuf-tester.yml` configuration file for a Python updater:
 
 ```
-# The command that the conformance tester executes to verify conformant_updater.py's
-# conformity with the specification.
-command: "python conformant_updater.py
-  --file foo.tgz
-  --repository-files tmp/repository-files
-  --client-metadata tmp/client-metadata
-  --client-targets tmp/client-targets"
+# The name of the Wrapper module, which will be imported and used by the
+# Tester.
+module: ref_impl_wrapper
 
 # conformant_updater.py supports the following keytypes.
 keytype: ed25519, ecdsa
@@ -650,23 +563,6 @@ number-of-root-keys: 3
 # At a minimum, the Root file MUST be signed by at least 2 out of 3 Root keys.
 root-threshold: 2
 ...
-```
-The updater is expected to exit with the following return codes in the
-following situations:
-
-[TODO: These return codes are not yet finalized]
-
-```
-return code      outcome
------------      ------
-0                success
-1                unsigned metadata error
-2                unknown target error
-3                malicious target
-4                rollback error
-5                endless data error
-...
-```
 
 ### Dealing with Implementation Restrictions
 Suppose, for example, that the Python implementation has the following restrictions:
@@ -674,7 +570,8 @@ Suppose, for example, that the Python implementation has the following restricti
 ```
 (1) metadata is encoded in DER (rather than JSON)
 (2) only Ed25519 keys are used and listed in metadata
-(3) the Root file must be signed by 1 out of 2 keys (i.e., threshold of 1)
+(3) only exactly 2 keys are supported for Root metadata, and only a threshold
+    of 1  (((Is this necessary?)))
 ```
 
 Items 2 & 3, of the list above, can be configured with the conformance tool via
@@ -689,7 +586,7 @@ root-threshold: 1
 
 Next, since the developer's implementation uses DER metadata (rather than
 JSON), the conformance tool would have to incorporate metadata that the
-developer's script and Python implementation can handle.  For this task, the
+developer's script and implementation can handle.  For this task, the
 developer would need to provide the conformance tool with a path to a program
 that converts JSON to DER metadata.  In this way, prior to calling the
 developer's script and initiating an update, the conformance tool can call the
