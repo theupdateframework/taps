@@ -136,6 +136,9 @@ called by the Tester. The first three are required, and the last two are only
 necessary if the format of metadata varies from that employed by the TUF
 specification.
 
+[A skeletal module defining the functions below](tap7_resources/tap7_wrapper_skeleton.py)
+is available.
+
 - 1: **`initialize_updater(metadata_directory)`**:
     - Purpose:
         Sets the client's initial state up for a future test, providing it with
