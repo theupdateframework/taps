@@ -29,6 +29,7 @@ from __future__ import unicode_literals
 # Python2 and Python3.
 import subprocess
 import atexit
+import time
 import os
 import shutil
 import sys
@@ -123,7 +124,9 @@ def initialize_updater(metadata_directory):
   # threading.Thread(target=server.serve_forever).start()
   server_process = subprocess.Popen(command, stderr=subprocess.PIPE)
   os.chdir('..')
-  # Kill server process after calling exit().
+  # Give the forked server process a bit of time to start hosting
+  time.sleep(1)
+  # Schedule the killing of the server process for when exit() is called.
   atexit.register(kill_server)
 
 
@@ -254,7 +257,6 @@ def update_client(target_filepath):
       return 1
 
   except:
-    raise
     return 1
 
 
