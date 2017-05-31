@@ -1,6 +1,6 @@
 """
 <Program Name>
-  keys.py
+  tap7_wrapper_example.py
 
 <Purpose>
   This is a skeletal version of a module that enables the Conformance Tester
@@ -11,7 +11,7 @@
   perform the tests necessary to ascertain the conformance of the Updater to
   the TUF spec.
 
-  The following three functions below must be defined:
+  The following three functions must be defined:
    - initialize_updater
    - update_repo
    - update_client
@@ -33,15 +33,6 @@ import time
 import os
 import shutil
 import sys
-# import threading
-# try:
-#     from SimpleHTTPServer import SimpleHTTPRequestHandler
-# except ImportError:
-#     from http.server import SimpleHTTPRequestHandler
-# try:
-#     from SocketServer import TCPServer as HTTPServer
-# except ImportError:
-#     from http.server import HTTPServer
 
 # TUF utilities
 import tuf.repository_tool
@@ -233,8 +224,6 @@ def update_client(target_filepath):
 
 
 
-  # This function will probably look something like this for your
-  # implementation:
   try:
     # Run the updater. Refresh top-level metadata and try updating
     # target_filepath.
