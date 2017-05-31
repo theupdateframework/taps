@@ -3,9 +3,10 @@
   tap7_wrapper_example.py
 
 <Purpose>
-  This is a skeletal version of a module that enables the Conformance Tester
+  This is an example of a Wrapper module, which enables the Conformance Tester
   (as described in TUF TAP 7) to communicate with a particular TUF-conformant
-  Updater implementation.
+  Updater implementation - in this case, the pre-TAP4 TUF Reference
+  Implementation (configuration file option tap_4_support: false).
 
   The Conformance Tester will call the functions listed here in order to
   perform the tests necessary to ascertain the conformance of the Updater to
@@ -39,48 +40,12 @@ import tuf.settings
 updater = None
 server_process = None
 
-def initialize_updater(metadata_directory, keys=None, instructions=None):
+def initialize_updater(trusted_data_dir, keys, instructions):
   """
-  <Purpose>
-      Sets the client's initial state up for a future test, providing it with
-      metadata to be treated as already-validated. A client updater delivered
-      to end users will always need some kind of root of trust (in the TUF
-      spec, an initial Root role metadata file, e.g. root.json) to use when
-      validating future metadata.
+    Sets the client's initial state up for a future test, providing it with
+    metadata to be treated as already-validated.
 
-  <Arguments>
-      metadata_directory
-        String, a filepath specifying a directory.
-        Metadata in the TUF specification's metadata format will be provided in
-        the directory at path `metadata_directory`. This should be provided to
-        the Updater in whatever form it requires. The common case here will be
-        the path of a directory containing a trustworthy root.json file.
-
-      keys
-        If the Updater can process signatures in TUF's default metadata, then
-        you SHOULD IGNORE this argument.
-        This is provided only in case the metadata format the Updater expects
-        signatures to be made over is not the same as the metadata format that
-        TUF signs over (canonicalized JSON).
-        If the Updater uses a different metadata format, then you may need to
-        re-sign the metadata the Tester provides in the metadata_directory.
-        This dict contains the signing keys that can be used to re-sign the
-        metadata.
-
-      instructions
-        If the Updater can process signatures in TUF's default metadata, then
-        you SHOULD IGNORE this argument.
-        This, too, is provided only in case the metadata format the Updater
-        expects signatures to be made over is not the same as the metadata
-        format that TUF signs over (canonicalized JSON).
-        If you'll be re-signing the metadata provided here, then this
-        dictionary of instructions will tell you what, if any, modifications
-        to make. For example, {'invalidate_signature': True} instructs that
-        the signature be made and then some byte(s) in it be modified so that
-        it is no longer a valid signature over the metadata.
-
-  <Returns>
-    None
+    Note that the full function docstring is available in the text of TAP 7.
   """
 
   # Client Setup
@@ -92,16 +57,10 @@ def initialize_updater(metadata_directory, keys=None, instructions=None):
   tuf.settings.repositories_directory = 'client' # where client stores repo info
   if os.path.exists('client'):
     shutil.rmtree('client')
-  # Hacky assumption: as currently written, the create_tuf_client_directory
-  # utility function expects the repository directory, not the metadata
-  # subdirectory. We don't actually need a whole repo directory, but I'll just
-  # assume here that it's the parent directory of the metadata directory,
-  # which must unfortunately be named 'metadata'. (I suppose I should modify
-  # the utility function to just take the metadata directory since that's all
-  # it should be using anyway....). I also work around the possible case where
-  # the directory provided ends in / already.
+
+  # Create a client directory at client/test_repo, based on the given data.
   tuf.repository_tool.create_tuf_client_directory(
-      metadata_directory[:metadata_directory[:-1].rfind('/')], 'client/repo1')
+      trusted_data_dir + 'test_repo', 'client/test_repo')
 
   os.mkdir('client/validated_targets') # We'll put validated target files here.
 
@@ -111,7 +70,7 @@ def initialize_updater(metadata_directory, keys=None, instructions=None):
       'targets_path': 'targets',
       'confined_target_dirs': ['']}}
 
-  updater = tuf.client.updater.Updater('repo1', repository_mirrors)
+  updater = tuf.client.updater.Updater('test_repo', repository_mirrors)
 
 
   # Repository Setup
@@ -119,9 +78,7 @@ def initialize_updater(metadata_directory, keys=None, instructions=None):
   # Copy the provided metadata into a directory that we'll host.
   if os.path.exists('hosted'):
     shutil.rmtree('hosted')
-  os.mkdir('hosted')
-  shutil.copytree(metadata_directory, 'hosted/metadata')
-  os.mkdir('hosted/targets')
+  shutil.copytree(trusted_data_dir + 'test_repo', 'hosted')
 
   # Start up hosting for the repository.
   os.chdir('hosted')
@@ -144,8 +101,7 @@ def initialize_updater(metadata_directory, keys=None, instructions=None):
 
 
 
-def update_repo(
-    metadata_directory, targets_directory, keys, instructions):
+def update_repo(test_data_dir, keys, instructions):
   """
   <Purpose>
     Sets the repository files that will be made available to the Updater when
@@ -153,14 +109,14 @@ def update_repo(
 
   <Arguments>
 
-      metadata_directory
-        As above, metadata_directory will be the path of a directory
-        containing metadata files in the format specified in the TUF
-        specification.
-
-      targets_directory
-        the path of a directory containing target files that should be made
-        available to the Updater.
+      test_data_dir
+        This will be the path of the directory containing files that the
+        Updater should find when it attempts to update. This data should be
+        treated normally by the Updater (not as initially-shipped, trusted
+        data, that is, unlike trusted_data_dir in initialize_updater).
+        The directory contents will have the same structure as those of
+        'trusted_data_dir' in 'initialize_updater' above, but lacking a
+        'map.json' file.
 
       keys
         If the Updater can process signatures in TUF's default metadata, then
@@ -178,13 +134,15 @@ def update_repo(
     None
   """
 
-  # Replace the existing repository files with the new ones.
-  # Naively, all we want to do here is something like the single command
-  #   'shutil.move(metadata_directory, 'hosted/metadata')'
-  # Unfortunately, that won't work correctly if hosted/metadata already exists,
-  # and deleting it would take time and we'd rather not have a gap during
-  # which the hosted repository state is strange, so I'll go for an awkward
-  # solution the operative part of which is four moves (individually atomic).
+  # Replace the existing repository files with the new ones. Naively, all we
+  # want to do here is something like the single command
+  #   'shutil.move(test_data_dir/test_repo, 'hosted')'
+  # Unfortunately, that won't work correctly if hosted already exists, and
+  # deleting it would take time and we'd rather not have a gap during which the
+  # hosted repository state is strange, plus the Python simple HTTP server
+  # doesn't change the folder it's hosting even if that folder moves, so I'll
+  # go for an awkward solution the operative part of which is four moves
+  # (individually atomic).
 
   # Destroy any lingering temp directories.
   if os.path.exists('temp_metadata'):
@@ -196,10 +154,13 @@ def update_repo(
   if os.path.exists('old_targets'):
     shutil.rmtree('old_targets')
 
-  # Copy the provided metadata_directory to a temp directory that we'll move
-  # into place afterwards. There is a gap here between each of the two moves in
-  # the two sets of moves. One could avoid this by using a command like
-  # 'cp -T metadata_temp hosted/metadata', which would also make the
+  metadata_directory = test_data_dir + '/test_repo/metadata'
+  targets_directory = test_data_dir + '/test_repo/targets'
+
+  # Copy the contents of the provided test_data_dir to temp directories that
+  # we'll move into place afterwards. There is a gap here between each of the
+  # two moves in the two sets of moves. One could avoid this by using a command
+  # like 'cp -T metadata_temp hosted/metadata', which would also make the
   # metadata_old temp unnecessary; however, we won't go to that length here for
   # this example, and -T isn't always available.
   shutil.copytree(metadata_directory, 'temp_metadata')

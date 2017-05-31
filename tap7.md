@@ -135,10 +135,10 @@ Wrapper may need to perform things like:
 The following functions must be written for the Wrapper module, and will be
 called by the Tester.
 
-[A skeletal module defining the functions below](tap7_resources/tap7_wrapper_skeleton.py)
+[A skeletal module defining the functions](tap7_resources/tap7_wrapper_skeleton.py)
 is available, and an [example is available below](#example-wrapper) as well.
 
-- 1: **`initialize_updater(metadata_directory, keys, instructions)`**:
+- 1: **`initialize_updater(trusted_data_dir, keys, instructions)`**:
     - Purpose:
         Sets the client's initial state up for a future test, providing it with
         metadata to be treated as already-validated. A client updater delivered
@@ -147,28 +147,111 @@ is available, and an [example is available below](#example-wrapper) as well.
         validating future metadata.
 
     - Arguments:
-        - `metadata_directory`:
-          Metadata in the TUF specification's metadata format will be provided in
-          the directory at path `metadata_directory`. This should be provided to
-          the Updater in whatever form it requires. The common case here will be
-          the path of a directory containing a trustworthy root.json file.
-          The structure of this directory is the same as that used by the
-          TUF Reference Implementation, made compatible with [TAP 4](tap4.md).
-          Structure of metadata_directory:
+        - `trusted_data_dir`:
+          Metadata in the TUF specification's metadata format will be provided
+          in the directory at path `trusted_data_dir`. This should be provided
+          to the Updater in whatever form it requires. The common case here
+          will be the path of a directory containing a trustworthy root.json
+          file.
+
+          This structure allows for optional multi-repository support per
+          [TAP 4](tap4.md). If TAP 4 is not supported (See
+          [Configuration File](#configuration-file)), then `map.json` will be
+          excluded, and there will only be one repository directory, named
+          `test_repo`.
+
+          The data provided for
+          `initialize_updater` should be treated as already validated.
+
+          Contents of `trusted_data_dir`:
+            ```
+            - map.json   // see TAP 4
+            - <repository_1_name>
+                        |- metadata
+                              |- root.json
+                              |- timestamp.json
+                              |- snapshot.json
+                              |- targets.json
+                              |- <a delegated role>.json
+                              |- <another delegated role>.json
+                              |   ...
+                        |- targets
+                              |- <some_target.img>
+                              |-  ...
+            - <repository_2_name>
+                        |- metadata
+                              |- root.json
+                        // etc.
+            ```
+          In most cases, this will contain simply:
+            ```
+            - map.json // if TAP 4 is supported
+            - test_repo
+                     |- root.json
             ```
 
-            ```
-        - `keys`
+        - `keys`:
           If the Updater can process signatures in TUF's default metadata, then
           you SHOULD IGNORE this argument.
           This is provided only in case the metadata format the Updater expects
           signatures to be made over is not the same as the metadata format that
           TUF signs over (canonicalized JSON).
           If the Updater uses a different metadata format, then you may need to
-          re-sign the metadata the Tester provides in the metadata_directory.
+          re-sign the metadata the Tester provides in the `trusted_data_dir`.
           This dict contains the signing keys that can be used to re-sign the
-          metadata.
-        - `instructions`
+          metadata. The format of this dictionary of keys is as follows.
+          (Note that the individual keys resemble ANYKEY_SCHEMA in the
+          [TUF format definitions](https://github.com/theupdateframework/tuf/blob/develop/tuf/formats.py)) The format below anticipates the optional use of
+          multiple repositories, as provided for in [TAP 4](tap4.md). If TAP 4
+          support is disabled, the only repository listed will be `test_repo`.
+            ```javascript
+            {
+              <repository_1_name>: {
+                <rolename_1>: [ // This role should be signed by these two keys:
+                  {'keytype': <type, e.g. 'ed25519'>,
+                   'keyid': <id string>,
+                   'keyval': {'public': <key string>, 'private': <key string>},
+                  },
+                  {'keytype': <type, e.g. 'ed25519'>,
+                   'keyid': <id string>,
+                   'keyval': {'public': <key string>, 'private': <key string>},
+                  }],
+                <rolename_2>: [...]},
+
+              <repository_2_name>: {...}
+            }
+            ```
+
+          Here's an excerpt from a particular example:
+          ```javascript
+          {
+            'imagerepo': {
+              {'root': [{
+                'keytype': 'ed25519',
+                'keyid': '94c836f0c45168f0a437eef0e487b910f58db4d462ae457b5730a4487130f290',
+                'keyval': {
+                  'public': 'f4ac8d95cfdf65a4ccaee072ba5a48e8ad6a0c30be6ffd525aec6bc078211033',
+                  'private': '879d244c6720361cf1f038a84082b08ac9cd586c32c1c9c6153f6db61b474957'}}]},
+              {'timestamp': [{
+                'keytype': 'ed25519',
+                'keyid': '6fcd9a928358ad8ca7e946325f57ec71d50cb5977a8d02c5ab0de6765fef040a',
+                'keyval': {
+                  'public': '97c1112bbd9047b1fdb50dd638bfed6d0639e0dff2c1443f5593fea40e30f654',
+                  'private': 'ef373ea36a633a0044bbca19a298a4100e7f353461d7fe546e0ec299ac1b659e'}}]},
+              ...
+              {'delegated_role1': [{
+                'keytype': 'ed25519',
+                'keyid': '8650aed05799a74f5febc9070c5d3e58d62797662d48062614b1ce0a643ee368',
+                'keyval': {
+                  'public': 'c5a78db3f3ba96462525664e502f2e7893b81e7e270d75ffb9a6bb95b56857ca',
+                  'private': '134dc07435cd0d5a371d51ee938899c594c578dd0a3ab048aa70de5dd71f99f2'}}]}
+            },
+            'director': {
+              {'root': [{
+                ...
+          ```
+
+        - `instructions`:
           If the Updater can process signatures in TUF's default metadata, then
           you SHOULD IGNORE this argument.
           This, too, is provided only in case the metadata format the Updater
@@ -178,25 +261,32 @@ is available, and an [example is available below](#example-wrapper) as well.
           dictionary of instructions will tell you what, if any, modifications
           to make. For example, {'invalidate_signature': True} instructs that
           the signature be made and then some byte(s) in it be modified so that
-          it is no longer a valid signature over the metadata.
+          it is no longer a valid signature over the metadata. Most tests
+          should not require this, but some may; this should be documented in
+          the list of test cases.
 
     - Returns: None
 
-- 2: **`update_repo(metadata_directory, targets_directory, keys, instructions)`**:
+- 2: **`update_repo(test_data_dir, keys, instructions)`**:
     - Purpose:
         Updates the repository files, metadata and targets. This will be the
         data that should be made available to the Updater when the Updater
         tries to update.
 
     - Arguments:
-        - `metadata_directory`:
+        - `test_data_dir`:
+          This will be the path of the directory containing files that the
+          Updater should find when it attempts to update. This data should be
+          treated normally by the Updater (not as initially-shipped, trusted
+          data, that is).
+          The directory contents will have the same structure as those of
+          `trusted_data_dir` in `initialize_updater` above, but lacking a
+          `map.json` file.
+
+        - `keys`:
           See `initialize_updater` above.
-        - `targets_directory`:
-          The path of a directory containing target files that should be made
-          available to the Updater.
-        - `keys`
-          See `initialize_updater` above.
-        - `instructions`
+
+        - `instructions`:
           See `initialize_updater` above.
 
     - Returns: None
@@ -389,24 +479,6 @@ TUF Reference Implementation. (This can also be seen with the full docstrings
 included [in this file](tap7_resources/tap7_wrapper_example.py).)
 
 ```Python
-  """
-  <Program Name>
-    tap7_wrapper_example.py
-
-  <Purpose>
-    This is a skeletal version of a module that enables the Conformance Tester
-    (as described in TUF TAP 7) to communicate with a particular TUF-conformant
-    Updater implementation.
-
-    The Conformance Tester will call the functions listed here in order to
-    perform the tests necessary to ascertain the conformance of the Updater to
-    the TUF spec.
-
-    The following three functions must be defined:
-     - initialize_updater
-     - update_repo
-     - update_client
-   """
   # Python 2/3 compatibility
   from __future__ import print_function
   from __future__ import absolute_import
@@ -430,7 +502,7 @@ included [in this file](tap7_resources/tap7_wrapper_example.py).)
   updater = None
   server_process = None
 
-  def initialize_updater(metadata_directory, keys=None, instructions=None):
+  def initialize_updater(trusted_data_dir, keys, instructions):
 
     # Client Setup
     global updater
@@ -441,16 +513,10 @@ included [in this file](tap7_resources/tap7_wrapper_example.py).)
     tuf.settings.repositories_directory = 'client' # where client stores repo info
     if os.path.exists('client'):
       shutil.rmtree('client')
-    # Hacky assumption: as currently written, the create_tuf_client_directory
-    # utility function expects the repository directory, not the metadata
-    # subdirectory. We don't actually need a whole repo directory, but I'll just
-    # assume here that it's the parent directory of the metadata directory,
-    # which must unfortunately be named 'metadata'. (I suppose I should modify
-    # the utility function to just take the metadata directory since that's all
-    # it should be using anyway....). I also work around the possible case where
-    # the directory provided ends in / already.
+
+    # Create a client directory at client/test_repo, based on the given data.
     tuf.repository_tool.create_tuf_client_directory(
-        metadata_directory[:metadata_directory[:-1].rfind('/')], 'client/repo1')
+        trusted_data_dir + 'test_repo', 'client/test_repo')
 
     os.mkdir('client/validated_targets') # We'll put validated target files here.
 
@@ -460,7 +526,7 @@ included [in this file](tap7_resources/tap7_wrapper_example.py).)
         'targets_path': 'targets',
         'confined_target_dirs': ['']}}
 
-    updater = tuf.client.updater.Updater('repo1', repository_mirrors)
+    updater = tuf.client.updater.Updater('test_repo', repository_mirrors)
 
 
     # Repository Setup
@@ -468,9 +534,7 @@ included [in this file](tap7_resources/tap7_wrapper_example.py).)
     # Copy the provided metadata into a directory that we'll host.
     if os.path.exists('hosted'):
       shutil.rmtree('hosted')
-    os.mkdir('hosted')
-    shutil.copytree(metadata_directory, 'hosted/metadata')
-    os.mkdir('hosted/targets')
+    shutil.copytree(trusted_data_dir + 'test_repo', 'hosted')
 
     # Start up hosting for the repository.
     os.chdir('hosted')
@@ -491,17 +555,17 @@ included [in this file](tap7_resources/tap7_wrapper_example.py).)
 
 
 
-  def update_repo(
 
-    metadata_directory, targets_directory, keys=None, instructions=None):
-
-    # Replace the existing repository files with the new ones.
-    # Naively, all we want to do here is something like the single command
-    #   'shutil.move(metadata_directory, 'hosted/metadata')'
-    # Unfortunately, that won't work correctly if hosted/metadata already exists,
-    # and deleting it would take time and we'd rather not have a gap during
-    # which the hosted repository state is strange, so I'll go for an awkward
-    # solution the operative part of which is four moves (individually atomic).
+  def update_repo(test_data_dir, keys, instructions):
+    # Replace the existing repository files with the new ones. Naively, all we
+    # want to do here is something like the single command
+    #   'shutil.move(test_data_dir/test_repo, 'hosted')'
+    # Unfortunately, that won't work correctly if hosted already exists, and
+    # deleting it would take time and we'd rather not have a gap during which the
+    # hosted repository state is strange, plus the Python simple HTTP server
+    # doesn't change the folder it's hosting even if that folder moves, so I'll
+    # go for an awkward solution the operative part of which is four moves
+    # (individually atomic).
 
     # Destroy any lingering temp directories.
     if os.path.exists('temp_metadata'):
@@ -513,10 +577,13 @@ included [in this file](tap7_resources/tap7_wrapper_example.py).)
     if os.path.exists('old_targets'):
       shutil.rmtree('old_targets')
 
-    # Copy the provided metadata_directory to a temp directory that we'll move
-    # into place afterwards. There is a gap here between each of the two moves in
-    # the two sets of moves. One could avoid this by using a command like
-    # 'cp -T metadata_temp hosted/metadata', which would also make the
+    metadata_directory = test_data_dir + '/test_repo/metadata'
+    targets_directory = test_data_dir + '/test_repo/targets'
+
+    # Copy the contents of the provided test_data_dir to temp directories that
+    # we'll move into place afterwards. There is a gap here between each of the
+    # two moves in the two sets of moves. One could avoid this by using a command
+    # like 'cp -T metadata_temp hosted/metadata', which would also make the
     # metadata_old temp unnecessary; however, we won't go to that length here for
     # this example, and -T isn't always available.
     shutil.copytree(metadata_directory, 'temp_metadata')
@@ -568,12 +635,11 @@ included [in this file](tap7_resources/tap7_wrapper_example.py).)
     if server_process is not None:
       print('Killing server process with pid: ' + str(server_process.pid))
       server_process.kill()
-
 ```
 
 
-As shown in the code snippet above, the Wrapper functions loads metadata from
-the directories specified. The Updater.download_target() call in the TUF
+As shown in the code above, the Wrapper functions load metadata from
+the directories specified. The Updater.download_target() call to the TUF
 reference implementation employs the suite of TUF verifications to obtain the
 target file indicated and retain it only if it validates, updating metadata as
 necessary.
@@ -600,7 +666,7 @@ An example of a `.tuf-tester.yml` configuration file for a Python updater:
 # Tester.
 module: ref_impl_wrapper
 
-# conformant_updater.py supports the following keytypes.
+# List the keytypes that Updater supports.
 keytype: ed25519, ecdsa
 
 # Let's say that this Updater implementation doesn't support delegated Targets
@@ -610,6 +676,10 @@ delegated-roles-support: false
 # Let's say that this Updater implementation doesn't support mirrors - it just
 # uses one location for the repository. (Default is true.)
 mirror-support: false
+
+# If TAP 4 (multi-repository / map file support) is not supported, set the
+# following. (Default is true.)
+tap4-support: false
 ...
 ```
 
