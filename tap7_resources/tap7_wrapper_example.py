@@ -15,9 +15,6 @@
    - initialize_updater
    - update_repo
    - update_client
-
-  The remaining functions are only necessary if metadata needs to be
-  transformed from TUF's usual format to something else.
  """
 # Python 2/3 compatibility
 from __future__ import print_function
@@ -42,7 +39,7 @@ import tuf.settings
 updater = None
 server_process = None
 
-def initialize_updater(metadata_directory):
+def initialize_updater(metadata_directory, keys=None, instructions=None):
   """
   <Purpose>
       Sets the client's initial state up for a future test, providing it with
@@ -58,6 +55,29 @@ def initialize_updater(metadata_directory):
         the directory at path `metadata_directory`. This should be provided to
         the Updater in whatever form it requires. The common case here will be
         the path of a directory containing a trustworthy root.json file.
+
+      keys
+        If the Updater can process signatures in TUF's default metadata, then
+        you SHOULD IGNORE this argument.
+        This is provided only in case the metadata format the Updater expects
+        signatures to be made over is not the same as the metadata format that
+        TUF signs over (canonicalized JSON).
+        If the Updater uses a different metadata format, then you may need to
+        re-sign the metadata the Tester provides in the metadata_directory.
+        This dict contains the signing keys that can be used to re-sign the
+        metadata.
+
+      instructions
+        If the Updater can process signatures in TUF's default metadata, then
+        you SHOULD IGNORE this argument.
+        This, too, is provided only in case the metadata format the Updater
+        expects signatures to be made over is not the same as the metadata
+        format that TUF signs over (canonicalized JSON).
+        If you'll be re-signing the metadata provided here, then this
+        dictionary of instructions will tell you what, if any, modifications
+        to make. For example, {'invalidate_signature': True} instructs that
+        the signature be made and then some byte(s) in it be modified so that
+        it is no longer a valid signature over the metadata.
 
   <Returns>
     None
@@ -124,7 +144,8 @@ def initialize_updater(metadata_directory):
 
 
 
-def update_repo(metadata_directory, targets_directory):
+def update_repo(
+    metadata_directory, targets_directory, keys, instructions):
   """
   <Purpose>
     Sets the repository files that will be made available to the Updater when
@@ -140,6 +161,18 @@ def update_repo(metadata_directory, targets_directory):
       targets_directory
         the path of a directory containing target files that should be made
         available to the Updater.
+
+      keys
+        If the Updater can process signatures in TUF's default metadata, then
+        you SHOULD IGNORE this argument.
+
+        As above - see in initialize_updater
+
+      instructions
+        If the Updater can process signatures in TUF's default metadata, then
+        you SHOULD IGNORE this argument.
+
+        As above - see in initialize_updater
 
   <Returns>
     None
@@ -247,71 +280,6 @@ def update_client(target_filepath):
 
   except:
     return 1
-
-
-
-
-
-def transform_metadata_for_signing(metadata_dict):
-  """
-  MODIFYING THIS FUNCTION IS OPTIONAL.
-
-  It is only necessary if the format of metadata must vary from the JSON
-  described in the TUF specification. Otherwise, it can just return None.
-
-  <Purpose>
-    Converts raw role metadata in a JSON-compatible format described in the
-    TUF specification (in 'signed' fields in signed metadata) into metadata
-    of the format that the Updater expects to check signatures over.
-    This will be what the Tester signs (instead of the JSON-compatible
-    'signed' element) when it signs metadata.
-
-  <Arguments>
-      metadata_dict
-        Metadata for one role, a dictionary conforming to
-        tuf.formats.ANYROLE_SCHEMA
-        Contains role metadata as specified by the TUF specification.
-        This will be the metadata in the 'signed' element in familiar .json
-        metadata files.
-
-  <Returns>
-    If no transformation is necessary, None.
-    Else, a bytes() object over which the Tester can sign, which will be what
-    the Updater/Wrapper checks when it tests the validity of the metadata
-    against a signature.
-  """
-
-  return None # No transformation necessary
-
-
-
-
-
-def transform_finished_metadata(metadata_w_signatures_dict):
-  """
-  MODIFYING THIS FUNCTION IS OPTIONAL.
-
-  It is only necessary if the format of metadata must vary from the JSON
-  described in the TUF specification. Otherwise, it can just return None.
-
-  <Purpose>
-    Converts raw role metadata in a JSON-compatible format described in the
-    TUF specification (in 'signed' fields in signed metadata) into metadata
-    of the format that the Updater expects to see and check signatures over.
-
-  <Arguments>
-    metadata_w_signatures_dict
-      Metadata for one role plus signature(s) over it.
-      A dictionary conforming to tuf.formats.SIGNABLE_SCHEMA that contains role
-      metadata and a signature/signatures over (a transformed version of) it.
-
-  <Returns>
-    If no transformation is necessary, None.
-    Else, a bytes() object which can be written to a file in binary mode,
-    resulting in a metadata file that the Wrapper can (modify if necessary and)
-    provide to the Updater.
-  """
-  return None # No transformation necessary
 
 
 

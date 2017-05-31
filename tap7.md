@@ -105,12 +105,12 @@ individual Updater will need a custom Wrapper written for the Tester to use to
 communicate with it. This will need to involve at least a few lines of Python.
 In order for the Tester to interact with the Updater implementation, a Wrapper
 around that implementation will need to support as an interface to the Tester
-the 3-5 functions listed below.
+three functions.
 
 
 ## Wrapper Specification
 
-The Wrapper must implement at least the first three functions specified
+The Wrapper must implement the three functions specified
 [below](#wrapper-functions).
 Note also, however, that because implementations may vary substantially, the
 Wrapper may need to perform things like:
@@ -122,7 +122,8 @@ Wrapper may need to perform things like:
  need to read the files the tester provides and distribute data to the Updater
  in the manner the Updater expects.
  - Translate metadata from the format the tester provides into the custom
- format the Updater expects (optional functions 4 and 5)
+ format the Updater expects, potentially re-signing metadata if the Updater
+ will expect signatures over a different format
  - If the Updater's communication model involves different synchronization
  (e.g. server push vs client pull), the update_client() Wrapper function will
  need to bridge this; for example, it may need to wait and collect results from
@@ -132,14 +133,12 @@ Wrapper may need to perform things like:
 
 ### Wrapper Functions
 The following functions must be written for the Wrapper module, and will be
-called by the Tester. The first three are required, and the last two are only
-necessary if the format of metadata varies from that employed by the TUF
-specification.
+called by the Tester.
 
 [A skeletal module defining the functions below](tap7_resources/tap7_wrapper_skeleton.py)
 is available.
 
-- 1: **`initialize_updater(metadata_directory)`**:
+- 1: **`initialize_updater(metadata_directory, keys, instructions)`**:
     - Purpose:
         Sets the client's initial state up for a future test, providing it with
         metadata to be treated as already-validated. A client updater delivered
@@ -153,10 +152,37 @@ is available.
           the directory at path `metadata_directory`. This should be provided to
           the Updater in whatever form it requires. The common case here will be
           the path of a directory containing a trustworthy root.json file.
+          The structure of this directory is the same as that used by the
+          TUF Reference Implementation, made compatible with [TAP 4](tap4.md).
+          Structure of metadata_directory:
+            ```
+
+            ```
+        - `keys`
+          If the Updater can process signatures in TUF's default metadata, then
+          you SHOULD IGNORE this argument.
+          This is provided only in case the metadata format the Updater expects
+          signatures to be made over is not the same as the metadata format that
+          TUF signs over (canonicalized JSON).
+          If the Updater uses a different metadata format, then you may need to
+          re-sign the metadata the Tester provides in the metadata_directory.
+          This dict contains the signing keys that can be used to re-sign the
+          metadata.
+        - `instructions`
+          If the Updater can process signatures in TUF's default metadata, then
+          you SHOULD IGNORE this argument.
+          This, too, is provided only in case the metadata format the Updater
+          expects signatures to be made over is not the same as the metadata
+          format that TUF signs over (canonicalized JSON).
+          If you'll be re-signing the metadata provided here, then this
+          dictionary of instructions will tell you what, if any, modifications
+          to make. For example, {'invalidate_signature': True} instructs that
+          the signature be made and then some byte(s) in it be modified so that
+          it is no longer a valid signature over the metadata.
 
     - Returns: None
 
-- 2: **`update_repo(metadata_directory, targets_directory)`**:
+- 2: **`update_repo(metadata_directory, targets_directory, keys, instructions)`**:
     - Purpose:
         Updates the repository files, metadata and targets. This will be the
         data that should be made available to the Updater when the Updater
@@ -164,12 +190,14 @@ is available.
 
     - Arguments:
         - `metadata_directory`:
-          As above, `metadata_directory` will be the path of a directory
-          containing metadata files in the format specified in the TUF
-          specification.
+          See `initialize_updater` above.
         - `targets_directory`:
-          the path of a directory containing target files that should be made
+          The path of a directory containing target files that should be made
           available to the Updater.
+        - `keys`
+          See `initialize_updater` above.
+        - `instructions`
+          See `initialize_updater` above.
 
     - Returns: None
 
@@ -232,86 +260,6 @@ is available.
             simplicity for the external implementer is paramount.
 
         ```
-
-- 4: **`transform_metadata_for_signing(metadata_dict)`** (optional):
-    NOTE THAT THIS IS OPTIONAL, only necessary if the format of metadata
-    must vary from the JSON described in the TUF specification.
-
-    - Purpose:
-        Converts raw role metadata in a JSON-compatible format described in the
-        TUF specification (in 'signed' fields in signed metadata) into metadata
-        of the format that the Updater expects to check signatures over.
-        This will be what the Tester signs (instead of the JSON-compatible
-        'signed' element) when it signs metadata.
-        (((TODO: Elaborate with example.)))
-
-    - Arguments:
-        - `metadata_dict`:
-          Metadata for one role.
-          A dictionary conforming to
-          [tuf.formats.ANYROLE_SCHEMA](https://github.com/theupdateframework/tuf/blob/develop/tuf/formats.py#L388-L390)
-          that contains role metadata as specified by the TUF specification.
-          This will be the metadata in the 'signed' element in familiar .json
-          metadata files.
-
-    - Returns:
-        A bytes() object over which the Tester can sign, which will be what the
-        Updater/Wrapper checks when it tests the validity of the metadata against
-        a signature.
-
-- 5: **`transform_finished_metadata(metadata_w_signatures_dict)`** (optional):
-    NOTE THAT THIS IS OPTIONAL, only necessary if the format of metadata
-    must vary from the JSON described in the TUF specification.
-
-    - Purpose:
-        Converts raw role metadata in a JSON-compatible format described in the
-        TUF specification (in 'signed' fields in signed metadata) into metadata
-        of the format that the Updater expects to see and check signatures over.
-        (((TODO: Elaborate with example.)))
-
-    - Arguments:
-        - `metadata_w_signatures_dict`:
-          Metadata for one role plus signature(s) over it.
-          A dictionary conforming to
-          [tuf.formats.SIGNABLE_SCHEMA](https://github.com/theupdateframework/tuf/blob/develop/tuf/formats.py#L305-L309)
-          that contains role metadata and a signature/signatures over (a
-          transformed version of) it.
-
-    - Returns:
-        A bytes() object which can be written to a file in binary mode, resulting
-        in a metadata file that the Wrapper can (modify if necessary and) provide
-        to the Updater.
-
-
-
-<!---
-(((DEBUG: Here, for reference, are the scraps of an old error list I started to
-rewrite, which I now think is an unnecessary complication for implementers.)))
-value  meaning
------  ------------------------------------------------
-0.     Success
-        (successful update of indicated target file (target_filepath)
-
-1.     Target not validated by signed hash
-         (bad target / bad signature; signed hash in validated metadata does
-          not match the Target provided)
-2.     Metadata not validated by signature
-         (bad metadata / bad signature; signature on a role does not match the
-          metadata in that role)
-3.     Replayed metadata
-         (version of a role provided for validation is less than the previous
-          version already validated by the Updater)
-4.     Expired metadata
-         (current date/time is later than the expiration date in the metadata
-          provided for validation)
-5.     Endless data / expected size exceeded
-         (a target file is being provided that has exceeded the size listed
-          for the target in validated metadata)
-6. ...
-
-```
--->
-
 
 
 See [Example Wrapper](#example-wrapper) below for an example of the Wrapper
@@ -599,21 +547,37 @@ root-threshold: 1
 
 #### Metadata Conversion
 
-Suppose that metadata that the Updater reads must be encoded in DER (rather
-than JSON).
+(Note again that this is not necessary if the Updater uses the metadata format
+specified in the TUF Specification.)
 
-In this case, the Conformance Tester has to incorporate metadata that the
-developer's script and implementation can handle.  For this task, the two
-optional Wrapper functions `transform_metadata_for_signing` and
-`transform_finished_metadata`, specified in
-[Wrapper Functions](#wrapper-functions) above, should be implemented to
-perform these conversions. The Tester will call these as appropriate.
+Suppose that metadata that the Updater receives must be encoded in DER (rather
+than JSON). In this case, the Wrapper will need to convert the metadata
+received from the Tester in `initialize_updater` and `update_repo` (specified
+in [Wrapper Functions](#wrapper-functions) above).
 
-For an example of how these might look, consider the JSON-to_DER converter
+For this reason, `initialize_updater` and `update_repo` also provide arguments
+`keys` and `instructions`. The keys in `keys` will allow the Wrapper to
+re-sign the metadata provided in a manner that the Updater will expect. If
+there were manipulations made to the resulting metadata for test purposes
+(such as invalidating the signature by changing a byte in it), the
+`instructions` argument will describe these, so that they can be repeated in
+the converted and re-signed metadata.
+
+For an example of how such code might look, consider the JSON-to-DER converter
 `convert_signed_metadata_to_der` employed by Uptane's TUF fork
 [here](https://github.com/awwad/tuf/blob/36dbb7b8a800dab407fe9ab961155ef0a6d9f7c9/tuf/asn1_codec.py#L156-L352).
-Those curious as to how JSON metadata can be converted to another encoding can
-reference the linked example to learn more.
+
+##### Re-Signing Converted Metadata
+Two situations arise depending on the behavior of your Updater:
+1. When the Updater receives the converted metadata, it converts it back to
+canonical JSON and checks the signatures in this (original) format.
+2. When the Updater receives the converted metadata, it will not convert it
+back into canonical JSON, and will expect the signatures to be over the same
+new format (foreign to TUF).
+
+In the second case, the converted metadata must also be re-signed, so that the
+Updater will be able to correctly validate the metadata.
+
 
 (((TODO: I should probably add the *high-level* code here to do the ASN.1/DER
 conversion, which is pretty short (asn1_coder.convert*(), inside function
