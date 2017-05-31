@@ -478,13 +478,6 @@ module: ref_impl_wrapper
 # conformant_updater.py supports the following keytypes.
 keytype: ed25519, ecdsa
 
-# conformant_updater.py expects the Root file to be signed by a max of 3 different keys.
-number-of-root-keys: 3
-
-# For this Updater implementation, at a minimum, the Root file MUST be signed
-# by at least 2 out of 3 Root keys.
-root-threshold: 2
-
 # Let's say that this Updater implementation doesn't support delegated Targets
 # roles. (Default is true.)
 delegated-roles-support: false
@@ -529,20 +522,15 @@ updater failed is printed or logged.
 
 #### Key Restrictions
 
-Suppose, for example, that the Updater implementation has the following restrictions:
-```
-- only Ed25519 keys are used and listed in metadata
-- only exactly 2 keys are supported for Root metadata, and only a threshold
-    of 1  (((Is this necessary?)))
-```
-These restrictions can be handled by configuring the conformance tool via
+Suppose, for example, that the Updater implementation supports only signatures
+using Ed25519 keys.
+
+This restrictions can be handled by configuring the conformance tool via
 its `.tuf-tester.yml` configuration file.  The configuration file can be edited
 by the developer to list:
 
 ```
 keytype: ed25519
-number-of-root-keys: 2
-root-threshold: 1
 ```
 
 #### Metadata Conversion
