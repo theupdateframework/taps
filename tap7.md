@@ -365,6 +365,16 @@ provided (e.g. the files in the directories indicated by the arguments)
     been validated.
   - Multipliers: Per Role
 
+##### Partial Compromise Role Independence
+  - Return Value Expected: Failure (1)
+  - Description: Timestamp and Snapshot keys are compromised. Validly signed
+    timestamp metadata points to a new snapshot role file, also validly signed,
+    which lists the hash of a new Targets role file. This new Targets role file
+    is signed with a different key than Root lists for the Targets role.
+    (Timestamp and Snapshot keys are frequently used and may tend to be online
+    and more readily compromised.)
+  - Multipliers: None
+
 ...
 ETC
 ...
