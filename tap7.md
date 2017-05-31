@@ -360,6 +360,21 @@ call specifies this new target, that target will only validate if the new
 metadata has been validated and the target obtained matches that now-validated
 metadata.
 
+At least two cases will be run in each of the scenarios below, in a randomized
+order:
+ - Error case: a case as described in the Description, where the update attempt
+ is expected to result in no update. The Wrapper is expected to return the
+ value Failure (1) to the Tester. If the Updater supports multiple mirrors
+ (See [Configuration File](#configuration-file)), then this test will be
+ performed with two distinct "bad" mirrors each modified as described in the
+ Description.
+ - Control case: a case absent the malicious/erroneous modification in the
+ Description. The Wrapper is expected to return the value Success (0) to the
+ Tester.
+ If the Updater supports multiple mirrors, then this test will
+ instead be performed with one "bad" mirror (set up as described in the
+ Description) and one "good" mirror (absent the malicious/erroneous
+ modification in the Description).
 
 #### Case Multipliers
 When a Case Set below lists one of these multipliers, the number of tests of
@@ -370,22 +385,6 @@ that case set will need to be multiplied in the listed way.
       If delegated target roles are supported (See
       [Configuration File](#configuration-file)), then a delegated target role
       file should also be tested.
-- **Mirrors**
-    - Run the case in two scenarios:
-        - 2 attack mirrors
-          - Setup is as listed
-          - Return value expected is as listed
-        - 1 attack mirror, 1 good mirror
-          - The attack mirror is as described, and the good mirror lacks the
-            malicious modification described.
-          - The return value expected is always Success (0)
-            (A bad mirror should not be able to prevent update from a
-             good mirror; that would be an easy denial of service attack.)
-    - Note that if the particular Updater doesn't support multiple mirrors,
-      (see [Configuration File](#configuration-file)), then the two cases above
-      should be:
-        - 1 attack mirror instead of 2 attack mirrors
-        - 1 good mirror instead of 1 good mirror and 1 bad mirror
 
 #### Case Sets
 
@@ -393,35 +392,30 @@ These can be expanded to indicate more about the definitions of the test cases,
 e.g. what calls are made to the Wrapper and a description of the arguments
 provided (e.g. the files in the directories indicated by the arguments)
 
-##### Normal case
-  - Description: A normal update with all-valid metadata.
-  - Return: 0: success
-  - Multipliers: none
-
 ##### Target tampering w/ no compromised keys
   - Return Value Expected: Failure (1)
   - Description: Metadata is unaltered, but the target file is altered and does
     not match signed hash in metadata.
-  - Multipliers: Per Role x Mirrors
+  - Multipliers: Per Role
 
 ##### Metadata tampering w/ no compromised keys
   - Return Value Expected: Failure (1)
   - Description: Signed metadata is altered and the signature
     on that signed metadata is unaltered and no longer valid.
-  - Multipliers: Per Role x Mirrors
+  - Multipliers: Per Role
 
 ##### Freezes / Expired metadata provided for validation
   - Return Value Expected: Failure (1)
   - Description: The metadata role in question is altered to make its
     expiration earlier than the current date/time (to test expiry)
-  - Multipliers: Per Role x Mirrors
+  - Multipliers: Per Role
 
-##### Replays
+##### Replays / Old but unexpired metadata provided for validation
   - Return Value Expected: Failure (1)
   - Description: A metadata role provided for validation by the mirror has a
     lower version number than that of the corresponding role that has already
     been validated.
-  - Multipliers: Per Role x Mirrors
+  - Multipliers: Per Role
 
 ...
 ETC
