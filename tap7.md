@@ -1,7 +1,7 @@
 * TAP: 7
 * Title: Conformance testing
-* Version: 2
-* Last-Modified: 25-May-2017
+* Version: 3
+* Last-Modified: 31-May-2017
 * Author: Vladimir Diaz, Sebastien Awwad
 * Status: Draft
 * Content-Type: text/markdown
@@ -136,7 +136,7 @@ The following functions must be written for the Wrapper module, and will be
 called by the Tester.
 
 [A skeletal module defining the functions below](tap7_resources/tap7_wrapper_skeleton.py)
-is available.
+is available, and an [example is available below](#example-wrapper) as well.
 
 - 1: **`initialize_updater(metadata_directory, keys, instructions)`**:
     - Purpose:
@@ -375,77 +375,192 @@ ETC
 ## Example Wrapper
 
 Here's a sample Wrapper module that allows the Conformance Tester to test the
-TUF Reference Implementation.
-
-(((TODO: NOTE that I need to continue to go through the below. It's
-not finished. I also have to indent the below properly. (Avoiding now to avoid
-misleading commit diffs))))
+TUF Reference Implementation. (This can also be seen with the full docstrings
+included [in this file](tap7_resources/tap7_wrapper_example.py).)
 
 ```Python
+  """
+  <Program Name>
+    tap7_wrapper_example.py
 
-def initialize_updater(metadata_directory):
-# TODO: Copy the contents of the given directory to a temp directory and host
-# that via http simpleserver on port 8001 on localhost.
-# TODO: Initialize a tuf.client.updater.Updater object and stick the given
-# metadata files into its current metadata directory. (Such code exists in the
-# Uptane demo already. Grab from there.)
+  <Purpose>
+    This is a skeletal version of a module that enables the Conformance Tester
+    (as described in TUF TAP 7) to communicate with a particular TUF-conformant
+    Updater implementation.
 
-# The HTTP repository that serves metadata and update files to client.  Not
-# all implementations of the framework use this transport mechanism to serve
-# files.
-REPOSITORY_MIRROR = http://localhost:8001
+    The Conformance Tester will call the functions listed here in order to
+    perform the tests necessary to ascertain the conformance of the Updater to
+    the TUF spec.
 
-# Set the local repository directory containing all of the metadata files.
-tuf.settings.repositories_directory = metadata_directory
+    The following three functions must be defined:
+     - initialize_updater
+     - update_repo
+     - update_client
+   """
+  # Python 2/3 compatibility
+  from __future__ import print_function
+  from __future__ import absolute_import
+  from __future__ import division
+  from __future__ import unicode_literals
 
-# Set the repository mirrors.  This dictionary is needed by the Updater
-# client.
-repository_mirrors = {'mirror': {'url_prefix': REPOSITORY_MIRROR,
-                                'metadata_path': 'metadata',
-                                'targets_path': 'targets'}}
+  # To run a simple HTTP server in parallel in a way compatible with both
+  # Python2 and Python3.
+  import subprocess
+  import atexit
+  import time
+  import os
+  import shutil
+  import sys
 
-# Create the repository object using the repository name 'repository'
-# and the repository mirrors defined above.
-updater = tuf.client.updater.Updater('repository', repository_mirrors)
+  # TUF utilities
+  import tuf.repository_tool
+  import tuf.client.updater
+  import tuf.settings
 
-# The local destination directory to save the target files, which
-# we get from the command line argument supplied to this wrapper script.
-destination_directory = targets_directory
+  updater = None
+  server_process = None
 
-# ...
+  def initialize_updater(metadata_directory, keys=None, instructions=None):
+
+    # Client Setup
+    global updater
+    global server_process
+
+    # Initialize the Updater implementation. We'll put trusted client files in
+    # directory 'client', copying some of them from the provided metadata.
+    tuf.settings.repositories_directory = 'client' # where client stores repo info
+    if os.path.exists('client'):
+      shutil.rmtree('client')
+    # Hacky assumption: as currently written, the create_tuf_client_directory
+    # utility function expects the repository directory, not the metadata
+    # subdirectory. We don't actually need a whole repo directory, but I'll just
+    # assume here that it's the parent directory of the metadata directory,
+    # which must unfortunately be named 'metadata'. (I suppose I should modify
+    # the utility function to just take the metadata directory since that's all
+    # it should be using anyway....). I also work around the possible case where
+    # the directory provided ends in / already.
+    tuf.repository_tool.create_tuf_client_directory(
+        metadata_directory[:metadata_directory[:-1].rfind('/')], 'client/repo1')
+
+    os.mkdir('client/validated_targets') # We'll put validated target files here.
+
+    repository_mirrors = {'mirror1': {
+        'url_prefix': 'http://localhost:8000',
+        'metadata_path': 'metadata',
+        'targets_path': 'targets',
+        'confined_target_dirs': ['']}}
+
+    updater = tuf.client.updater.Updater('repo1', repository_mirrors)
 
 
-def update_repo(metadata_directory, targets_directory):
-# TODO: Copy the given files into place in the hosted repository directory.
+    # Repository Setup
+
+    # Copy the provided metadata into a directory that we'll host.
+    if os.path.exists('hosted'):
+      shutil.rmtree('hosted')
+    os.mkdir('hosted')
+    shutil.copytree(metadata_directory, 'hosted/metadata')
+    os.mkdir('hosted/targets')
+
+    # Start up hosting for the repository.
+    os.chdir('hosted')
+    command = []
+    if sys.version_info.major < 3: # Python 2 compatibility
+      command = ['python2', '-m', 'SimpleHTTPServer', '8000']
+    else:
+      command = ['python3', '-m', 'http.server', '8000']
+    # server = HTTPServer(("", 8000), SimpleHTTPRequestHandler)
+    # print('Serving Repository data on port 8000')
+    # threading.Thread(target=server.serve_forever).start()
+    server_process = subprocess.Popen(command, stderr=subprocess.PIPE)
+    os.chdir('..')
+    # Give the forked server process a bit of time to start hosting
+    time.sleep(1)
+    # Schedule the killing of the server process for when exit() is called.
+    atexit.register(kill_server)
 
 
-def update_client(target_filepath):
 
-# Refresh the repository's top-level roles, store the target information for
-# all the targets tracked, and determine which of these targets have been
-# updated.
-updater.refresh(unsafely_update_root_if_necessary=False)
+  def update_repo(
 
-# Retrieve the target info of the 'target_filepath' argument, which contains
-# its length, hash, etc.
-file_targetinfo = updater.get_one_valid_targetinfo(target_filepath)
-updated_targets = updater.updated_targets([file_targetinfo], destination_directory)
+    metadata_directory, targets_directory, keys=None, instructions=None):
 
-# Download each of these updated targets and save them to the local
-# 'targets_directory' supplied to the script.  The conformance tool
-# can verify the files saved unmodified to 'targets_directory'.
-try:
-  updater.download_target(file_targetinfo, destination_directory)
+    # Replace the existing repository files with the new ones.
+    # Naively, all we want to do here is something like the single command
+    #   'shutil.move(metadata_directory, 'hosted/metadata')'
+    # Unfortunately, that won't work correctly if hosted/metadata already exists,
+    # and deleting it would take time and we'd rather not have a gap during
+    # which the hosted repository state is strange, so I'll go for an awkward
+    # solution the operative part of which is four moves (individually atomic).
 
-except tuf.NoWorkingMirrorError:
-  return FAILURE
+    # Destroy any lingering temp directories.
+    if os.path.exists('temp_metadata'):
+      shutil.rmtree('temp_metadata')
+    if os.path.exists('temp_targets'):
+      shutil.rmtree('temp_targets')
+    if os.path.exists('old_metadata'):
+      shutil.rmtree('old_metadata')
+    if os.path.exists('old_targets'):
+      shutil.rmtree('old_targets')
 
-# TODO: Check if the target file has been obtained and retained post-validation
-if #obtained and retained#:
-  return SUCCESS
-else:
-  return FAILURE
+    # Copy the provided metadata_directory to a temp directory that we'll move
+    # into place afterwards. There is a gap here between each of the two moves in
+    # the two sets of moves. One could avoid this by using a command like
+    # 'cp -T metadata_temp hosted/metadata', which would also make the
+    # metadata_old temp unnecessary; however, we won't go to that length here for
+    # this example, and -T isn't always available.
+    shutil.copytree(metadata_directory, 'temp_metadata')
+    shutil.copytree(targets_directory, 'temp_targets')
+    shutil.move('hosted/metadata', 'old_metadata')
+    shutil.move('temp_metadata', 'hosted/metadata')
+    shutil.move('hosted/targets', 'old_targets')
+    shutil.move('temp_targets', 'hosted/targets')
+    shutil.rmtree('old_targets')
+    shutil.rmtree('old_metadata')
+
+
+
+  def update_client(target_filepath):
+
+    try:
+      # Run the updater. Refresh top-level metadata and try updating
+      # target_filepath.
+      updater.refresh()
+      target = updater.get_one_valid_targetinfo(target_filepath)
+      updater.download_target(target, 'client/validated_targets')
+
+      # Determine if the attempt has been successful (if the target file has been
+      # validated, and metadata necessary to validate it has been validated,
+      # following the Client Workflow instructions (TUF specification section
+      # 5.1).
+      # If the calls above haven't raised errors, then the file has downloaded
+      # and validated and all metadata checks succeeded at at least one mirror,
+      # so we can return 0 here. For good measure, we check to make sure the
+      # file exists where we expect it.
+      if os.path.exists('client/validated_targets/' + target_filepath):
+        return 0
+      else:
+        print('client/validated_targets/' + target_filepath + ' does not exist.')
+        return 1
+
+    except:
+      return 1
+
+
+
+  # This function is not related to any Wrapper requirement; it's just here to
+  # clean things up after we're done.
+  def kill_server():
+    """
+    Kills the forked process that is hosting the repositories via Python's
+    simple HTTP server
+    """
+    if server_process is not None:
+      print('Killing server process with pid: ' + str(server_process.pid))
+      server_process.kill()
+
 ```
+
 
 As shown in the code snippet above, the Wrapper functions loads metadata from
 the directories specified. The Updater.download_target() call in the TUF
