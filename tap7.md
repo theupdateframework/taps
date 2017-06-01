@@ -195,6 +195,11 @@ is available, and an [example is available below](#example-wrapper) as well.
                      |- root.json
             ```
 
+          filepaths in the targets directory map directly to the filepaths
+          used to identify targets in the repository. For example, a target
+          identified in metadata with the filepath 'package1/tarball.tar' will
+          be found in 'targets/package1/tarball.tar'.
+
         - `keys`:
           If the Updater can process signatures in TUF's default metadata, then
           you SHOULD IGNORE this argument.
