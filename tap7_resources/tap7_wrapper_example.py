@@ -117,7 +117,7 @@ def update_repo(test_data_dir, keys, instructions):
         data, that is, unlike trusted_data_dir in initialize_updater).
         The directory contents will have the same structure as those of
         'trusted_data_dir' in 'initialize_updater' above, but lacking a
-        'map.json' file.
+        'map.json' file (even with TAP 4 support on).
 
       keys
         If the Updater can process signatures in TUF's default metadata, then
@@ -135,15 +135,9 @@ def update_repo(test_data_dir, keys, instructions):
     None
   """
 
-  # Replace the existing repository files with the new ones. Naively, all we
-  # want to do here is something like the single command
-  #   'shutil.move(test_data_dir/test_repo, 'hosted')'
-  # Unfortunately, that won't work correctly if hosted already exists, and
-  # deleting it would take time and we'd rather not have a gap during which the
-  # hosted repository state is strange, plus the Python simple HTTP server
-  # doesn't change the folder it's hosting even if that folder moves, so I'll
-  # go for an awkward solution the operative part of which is four moves
-  # (individually atomic).
+  # Replace the existing repository files with the new ones.
+  # The commands here are somewhat awkward in order to try to achieve a quick
+  # swap-in for live-hosted files using individually-atomic move commands.
 
   # Destroy any lingering temp directories.
   if os.path.exists('temp_metadata'):
@@ -159,11 +153,7 @@ def update_repo(test_data_dir, keys, instructions):
   targets_directory = test_data_dir + '/test_repo/targets'
 
   # Copy the contents of the provided test_data_dir to temp directories that
-  # we'll move into place afterwards. There is a gap here between each of the
-  # two moves in the two sets of moves. One could avoid this by using a command
-  # like 'cp -T metadata_temp hosted/metadata', which would also make the
-  # metadata_old temp unnecessary; however, we won't go to that length here for
-  # this example, and -T isn't always available.
+  # we'll move into place afterwards.
   shutil.copytree(metadata_directory, 'temp_metadata')
   shutil.copytree(targets_directory, 'temp_targets')
   shutil.move('hosted/metadata', 'old_metadata')
