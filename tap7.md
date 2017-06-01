@@ -801,14 +801,6 @@ than JSON). In this case, the Wrapper will need to convert the metadata
 received from the Tester in `initialize_updater` and `update_repo` (specified
 in [Wrapper Functions](#wrapper-functions) above).
 
-For this reason, `initialize_updater` and `update_repo` also provide arguments
-`keys` and `instructions`. The keys in `keys` will allow the Wrapper to
-re-sign the metadata provided in a manner that the Updater will expect. If
-there were manipulations made to the resulting metadata for test purposes
-(such as invalidating the signature by changing a byte in it), the
-`instructions` argument will describe these, so that they can be repeated in
-the converted and re-signed metadata.
-
 For an example of how such code might look, consider the JSON-to-DER converter
 `convert_signed_metadata_to_der` employed by Uptane's TUF fork
 [here](https://github.com/awwad/tuf/blob/36dbb7b8a800dab407fe9ab961155ef0a6d9f7c9/tuf/asn1_codec.py#L156-L352).
@@ -824,6 +816,14 @@ new format (foreign to TUF).
 
 In the second case, the converted metadata must also be re-signed, so that the
 Updater will be able to correctly validate the metadata.
+
+For this reason, `initialize_updater` and `update_repo` also provide arguments
+`keys` and `instructions`. The keys in `keys` will allow the Wrapper to
+re-sign the metadata provided in a manner that the Updater will expect. If
+there were manipulations made to the resulting metadata for test purposes
+(such as invalidating the signature by changing a byte in it), the
+`instructions` argument will describe these, so that they can be repeated in
+the converted and re-signed metadata.
 
 
 #### No File System
