@@ -36,6 +36,7 @@ import sys
 import tuf.repository_tool
 import tuf.client.updater
 import tuf.settings
+from tuf.exceptions import *
 
 updater = None
 server_process = None
@@ -239,9 +240,16 @@ def update_client(target_filepath):
       print('client/validated_targets/' + target_filepath + ' does not exist.')
       return 1
 
-  except:
+  except (
+      NoWorkingMirrorError, NotFoundError, UnknownTargetError,
+      ForbiddenTargetError, UnknownRoleError,
+      BadHashError, BadSignatureError, DownloadLengthMismatchError,
+      InsufficientKeysError, UnsignedMetadataError, UnknownKeyError,
+      ExpiredMetadataError):
     return 1
 
+  except:
+    return 2
 
 
 
