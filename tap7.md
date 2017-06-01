@@ -90,8 +90,8 @@ implementation, the following components are required by this TAP:
 - Configuration File
 
 The **Updater** is the program to be tested, an implementation of a
-TUF-conformant updater client, as described in
-[the client section of the TUF specification](https://github.com/theupdateframework/tuf/blob/develop/docs/tuf-spec.txt#L931-L933).
+TUF-conformant updater client, as described in the client workflow in
+[the TUF specification](https://github.com/theupdateframework/tuf/blob/develop/docs/tuf-spec.txt), section 5.1.
 
 The **Conformance Tester**, provided by TheUpdateFramework, will run a battery
 of tests intended to determine the TUF-conformance of the Updater. The Tester
@@ -205,7 +205,7 @@ is available, and an [example is available below](#example-wrapper) as well.
           you SHOULD IGNORE this argument.
           This is provided only in case the metadata format the Updater expects
           signatures to be made over is not the same as the metadata format that
-          TUF signs over (canonicalized JSON).
+          the TUF reference implementation signs over (canonicalized JSON).
           If the Updater uses a different metadata format, then you may need to
           re-sign the metadata the Tester provides in the `trusted_data_dir`.
           This dict contains the signing keys that can be used to re-sign the
@@ -267,7 +267,8 @@ is available, and an [example is available below](#example-wrapper) as well.
           you SHOULD IGNORE this argument.
           This, too, is provided only in case the metadata format the Updater
           expects signatures to be made over is not the same as the metadata
-          format that TUF signs over (canonicalized JSON).
+          format that the TUF reference implementation signs over
+          (canonicalized JSON).
           If you'll be re-signing the metadata provided here, then this
           dictionary of instructions will tell you what, if any, modifications
           to make. For example, {'invalidate_signature': True} instructs that
