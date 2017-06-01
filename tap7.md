@@ -855,12 +855,14 @@ This TAP does not introduce any backwards incompatibilities.
 
 # Augmented Reference Implementation
 
-A git branch containing the official tool for conformance testing, and a client
-set up for conformance testing can be found at:
-https://github.com/theupdateframework/tuf/tree/tap7/tuf/scripts/conformance_tester
+An example of a particular implementation's Wrapper is
+[above](#example-wrapper).
 
-**Note that the preceding must be updated to match recent modifications to
-TAP 7.**
+A short sample of how the Tester can behave is
+[in this file](tap7_resources/tap7_tester_sample.py).
+
+A full implementation of the Tester will written after this TAP is accepted,
+and that will be linked to from here.
 
 
 # Copyright
