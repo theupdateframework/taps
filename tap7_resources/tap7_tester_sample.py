@@ -1,8 +1,49 @@
-# Sample tester script.
+"""
+Sample tester script.
 
-# The Tester will execute tests along these lines.
+The Tester will execute tests along these lines.
+
+Because of their size, I haven't included the sample data in this repository.
+This example is instead provided to give an idea of how the Tester might employ
+Wrapper modules.
+"""
 
 import tap7_wrapper_example as wrapper
+
+def main():
+  # Deliver initial trusted metadata state to the Updater client.
+  wrapper.initialize_updater(
+      trusted_data_dir=SAMPLE_1_DIR, keys=KEYS, instructions=None)
+
+  # Deliver new metadata & targets state to the repository.
+  # This new state includes the target file 'firmware.img' and metadata validly
+  # signing it.
+  wrapper.update_repo(test_data_dir=SAMPLE_2_DIR, keys=KEYS, instructions=None)
+
+  randomized_tests = [('firmware.img', 0), ('firmware_b.img', 1)]
+  expected_results = []
+  actual_results = []
+
+  # Instruct the client to attempt to attempt to validate specified files.
+  # Store the return code.
+  for target, expected_result in randomized_tests:
+    expected_results.append(expected_result)
+    actual_result = wrapper.update_client(target)
+    actual_results.append(actual_result)
+    if actual_result != expected_result:
+      print('Test failure for ' + repr(target))
+
+  print('Summary:')
+  print('  Expecting these results:' + repr(expected_results))
+  print('  Received these results: ' + repr(actual_results))
+
+  if actual_results == expected_results:
+    print('Tests successful: Updater appears to be conformant.')
+    exit(0)
+  else:
+    print('Tests failed: Updater appears not to be conformant.')
+    exit(1)
+
 
 SAMPLE_1_DIR = 'samples_ir1' # initial state
 SAMPLE_2_DIR = 'samples_ir2' # test state
@@ -39,38 +80,6 @@ KEYS = {'imagerepo': {
         'public': 'c5a78db3f3ba96462525664e502f2e7893b81e7e270d75ffb9a6bb95b56857ca',
         'private': '134dc07435cd0d5a371d51ee938899c594c578dd0a3ab048aa70de5dd71f99f2'}}]}}
 
-# Deliver initial trusted metadata state to the Updater client.
-wrapper.initialize_updater(
-    trusted_data_dir=SAMPLE_1_DIR + '/metadata', keys=KEYS, instructions=None)
 
-# Deliver new metadata & targets state to the repository.
-# This new state includes the target file 'firmware.img' and metadata validly
-# signing it.
-wrapper.update_repo(
-    test_data_dir=SAMPLE_2_DIR + '/metadata',
-    targets_directory=SAMPLE_2_DIR + '/targets',
-    keys=KEYS, instructions=None)
-
-randomized_tests = [('firmware.img', 0), ('firmware_b.img', 1)]
-expected_results = []
-actual_results = []
-
-# Instruct the client to attempt to attempt to validate specified files.
-# Store the return code.
-for target, expected_result in randomized_tests:
-  expected_results.append(expected_result)
-  actual_result = wrapper.update_client(target)
-  actual_results.append(actual_result)
-  if actual_result != expected_result:
-    print('Test failure for ' + repr(target))
-
-print('Summary:')
-print('  Expecting these results:' + repr(expected_results))
-print('  Received these results: ' + repr(actual_results))
-
-if actual_results == expected_results:
-  print('Tests successful: Updater appears to be conformant.')
-  exit(0)
-else:
-  print('Tests failed: Updater appears not to be conformant.')
-  exit(1)
+if __name__ == '__main__':
+  main()
