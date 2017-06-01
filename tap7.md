@@ -88,8 +88,8 @@ implementation, the following components are required by this TAP:
 - Conformance Tester
 - Wrapper
 
-The **Updater** is the program to be tested, an implementation of a TUF-conformant
-updater client, as described in
+The **Updater** is the program to be tested, an implementation of a
+TUF-conformant updater client, as described in
 [the client section of the TUF specification](https://github.com/theupdateframework/tuf/blob/develop/docs/tuf-spec.txt#L931-L933).
 
 The **Conformance Tester**, provided by TheUpdateFramework, will run a battery
@@ -99,7 +99,8 @@ received by the Updater, which must try to validate them correctly. The Updater
 will be expected to reject untrustworthy metadata and targets and accept
 trustworthy metadata and targets.
 
-The **Wrapper** mediates communication between the Tester and Updater, adapting
+The [**Wrapper**](#wrapper-specification) mediates communication between the
+Tester and Updater, adapting
 metadata and communicating it in the way the Updater expects. An
 individual Updater will need a custom Wrapper written for the Tester to use to
 communicate with it. This will need to involve at least a few lines of Python.
@@ -269,7 +270,7 @@ is available, and an [example is available below](#example-wrapper) as well.
 
 - 2: **`update_repo(test_data_dir, keys, instructions)`**:
     - Purpose:
-        Updates the repository files, metadata and targets. This will be the
+        Sets the repository files, metadata and targets. This will be the
         data that should be made available to the Updater when the Updater
         tries to update.
 
@@ -330,6 +331,7 @@ is available, and an [example is available below](#example-wrapper) as well.
         2                an unknown error has occurred (never expected, but
                          helpful to provide for test output)
 
+        <!---
         # TODO: Consider additional return fields:
           hash: (Verdict: No, for now)
             the hash of the target file installed if there was a target file
@@ -348,13 +350,15 @@ is available, and an [example is available below](#example-wrapper) as well.
             replayed metadata is rejected. Tests are just more complicated to
             construct sometimes otherwise. Not a good enough reason, IMO;
             simplicity for the external implementer is paramount.
-
+        --->
         ```
 
 
-See [Example Wrapper](#example-wrapper) below for an example of the Wrapper
-module - in this case, a Wrapper enabling the Conformance Tester to test the
-TUF Reference Implementation.
+A skeleton that can be filled in by implementers is provided
+[here]((tap7_resources/tap7_wrapper_skeleton.py).
+Also see [Example Wrapper](#example-wrapper) below for a functioning example of
+the Wrapper module - in this case, a Wrapper enabling the Conformance Tester to
+test the pre-TAP4 TUF Reference Implementation.
 
 
 ## Test Specification
@@ -488,10 +492,24 @@ happen before any data is transferred, or after the transfer of data has begun.
 ## Example Wrapper
 
 Here's a sample Wrapper module that allows the Conformance Tester to test the
-TUF Reference Implementation. (This can also be seen with the full docstrings
-included [in this file](tap7_resources/tap7_wrapper_example.py).)
+TUF Reference Implementation. (This can also be seen
+[in this file](tap7_resources/tap7_wrapper_example.py).)
 
 ```Python
+  """
+  <Program Name>
+    tap7_wrapper_example.py
+
+  <Purpose>
+    This is an example of a Wrapper module, which enables the Conformance Tester
+    (as described in TUF TAP 7) to communicate with a particular TUF-conformant
+    Updater implementation - in this case, the pre-TAP4 TUF Reference
+    Implementation (configuration file option tap_4_support: false).
+
+    The Conformance Tester will call the functions listed here in order to
+    perform the tests necessary to ascertain the conformance of the Updater to
+    the TUF spec.
+  """
   # Python 2/3 compatibility
   from __future__ import print_function
   from __future__ import absolute_import
@@ -611,6 +629,18 @@ included [in this file](tap7_resources/tap7_wrapper_example.py).)
 
 
   def update_client(target_filepath):
+    """
+    <Purpose>
+      Refreshes metadata and causes the client to attempt to (obtain and)
+      validate a particular target,
+      along with all metadata required to do so in a secure manner conforming to
+      the TUF specification.
+
+      The full docstring is available above, in the text of TAP 7.
+    """
+
+
+
     try:
       # Run the updater. Refresh top-level metadata and try updating
       # target_filepath.
