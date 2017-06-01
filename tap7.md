@@ -75,14 +75,14 @@ general, these constitute a battery of attacks against which the Updater should
 be resilient.
 
 It should be noted, however, that the implementation does not necessarily have
-to be the updater used in production. It only needs to function as defined in
+to be the Updater used in production. It only needs to function as defined in
 this TAP for conformance testing, though it is expected that the behavior be
 the same at a high level -- for example, the validity of metadata should be
 determined the same way. ((TODO: This paragraph still seems wordy. Unnecessary?))
 
 # Specification
 
-In order to help determine the TUF-conformance of a particular updater
+In order to help determine the TUF-conformance of a particular TUF
 implementation, the following components are required by this TAP:
 - Updater
 - Conformance Tester
@@ -115,10 +115,10 @@ The Wrapper must implement the three functions specified
 Note also, however, that because implementations may vary substantially, the
 Wrapper may need to perform things like:
  - Calling an external binary with, e.g., the subprocess module, in order to
- run an updater implementation that is not in Python.
- - Moving metadata or target files into the directory structure the updater
+ run an Updater implementation that is not in Python.
+ - Moving metadata or target files into the directory structure the Updater
  implementation expects
- - If, e.g., the Updater doesn't have a notion of a filesystem, the wrapper may
+ - If, e.g., the Updater doesn't have a notion of a filesystem, the Wrapper may
  need to read the files the tester provides and distribute data to the Updater
  in the manner the Updater expects.
  - Translate metadata from the format the tester provides into the custom
@@ -141,7 +141,7 @@ is available, and an [example is available below](#example-wrapper) as well.
 - 1: **`initialize_updater(trusted_data_dir, keys, instructions)`**:
     - Purpose:
         Sets the client's initial state up for a future test, providing it with
-        metadata to be treated as already-validated. A client updater delivered
+        metadata to be treated as already-validated. A client Updater delivered
         to end users will always need some kind of root of trust (in the TUF
         spec, an initial Root role metadata file, e.g. root.json) to use when
         validating future metadata.
@@ -353,7 +353,7 @@ is available, and an [example is available below](#example-wrapper) as well.
 
 
 See [Example Wrapper](#example-wrapper) below for an example of the Wrapper
-module - in this case, a wrapper enabling the Conformance Tester to test the
+module - in this case, a Wrapper enabling the Conformance Tester to test the
 TUF Reference Implementation.
 
 
@@ -478,9 +478,9 @@ depends heavily on the transport mechanism used by the implementation, it is up
 to the Updater implementers to test whether the implementation is vulnerable to
 this attack.  This might entail modifying an HTTP server to limit the rate at
 which requests are satisifed, or inserting a MITM that intercepts XMLRPC
-traffic between the updater and server, and then manipulating the rate of
+traffic between the Updater and server, and then manipulating the rate of
 transfer.  Regardless of the transport mechanism used, developers should take
-care to prevent their updaters from being vulnerable to such attacks, which can
+care to prevent their Updaters from being vulnerable to such attacks, which can
 happen before any data is transferred, or after the transfer of data has begun.
 
 
@@ -665,13 +665,13 @@ the location of a configuration file.
 The configuration file includes the name of the module that provides the
 Wrapper functions specified above, along with any necessary restrictions on
 TUF functionality, such as the list of
-cryptographic key types supported by the updater, the number of root keys,
+cryptographic key types supported by the Updater, the number of root keys,
 thresholds, etc.  The configuration file is needed because restrictions
 are not shared equally across all implementations.
 For example, the Go implementation might only support ECDSA keys, whereas
 another might support Ed25519 and RSA keys.
 
-An example of a `.tuf-tester.yml` configuration file for a Python updater:
+An example of a `.tuf-tester.yml` configuration file for an Updater:
 
 ```
 # The name of the Wrapper module, which will be imported and used by the
@@ -722,7 +722,7 @@ indicating that the implementation conforms to the specification.
 
 If `conformance_tester.py` returns a non-zero return code,
 it signals a failure. Optionally, a list of the conformance tests that the
-updater failed is printed or logged.
+Updater failed is printed or logged.
 
 
 ### Dealing with Implementation Restrictions
