@@ -662,7 +662,7 @@ TUF Reference Implementation. (This can also be seen
       # following the Client Workflow instructions (TUF specification section
       # 5.1).
       # If the calls above haven't raised errors, then the file has downloaded
-      # and validated and all metadata checks succeeded at at least one mirror,
+      # and validated and all metadata checks succeeded from at least one mirror,
       # so we can return 0 here. For good measure, we check to make sure the
       # file exists where we expect it.
       if os.path.exists('client/validated_targets/' + target_filepath):
@@ -729,16 +729,16 @@ module: ref_impl_wrapper
 # List the keytypes that Updater supports.
 keytype: ed25519, ecdsa
 
-# Let's say that this Updater implementation doesn't support delegated Targets
-# roles. (Default is true.)
+# If this Updater implementation doesn't support delegated Targets roles
+# (Default is true.)
 delegated-roles-support: false
 
-# Let's say that this Updater implementation doesn't support mirrors - it just
-# uses one location for the repository. (Default is true.)
+# If this Updater implementation doesn't support multiple mirrors, set to
+# false. (Default is true.)
 mirror-support: false
 
-# If TAP 4 (multi-repository / map file support) is not supported, set the
-# following. (Default is true.)
+# If TAP 4 (multi-repository / map file support) is not supported, set to
+# false. (Default is true.)
 tap4-support: false
 ...
 ```
@@ -780,7 +780,7 @@ Updater failed is printed or logged.
 Suppose, for example, that the Updater implementation supports only signatures
 using Ed25519 keys.
 
-This restrictions can be handled by configuring the conformance tool via
+This restriction can be handled by configuring the conformance tool via
 its `.tuf-tester.yml` configuration file.  The configuration file can be edited
 by the developer to list:
 
