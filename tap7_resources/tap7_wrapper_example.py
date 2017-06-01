@@ -88,9 +88,6 @@ def initialize_updater(trusted_data_dir, keys, instructions):
     command = ['python2', '-m', 'SimpleHTTPServer', '8000']
   else:
     command = ['python3', '-m', 'http.server', '8000']
-  # server = HTTPServer(("", 8000), SimpleHTTPRequestHandler)
-  # print('Serving Repository data on port 8000')
-  # threading.Thread(target=server.serve_forever).start()
   server_process = subprocess.Popen(command, stderr=subprocess.PIPE)
   os.chdir('..')
   # Give the forked server process a bit of time to start hosting
