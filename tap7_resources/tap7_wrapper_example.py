@@ -61,7 +61,7 @@ def initialize_updater(trusted_data_dir, keys, instructions):
 
   # Create a client directory at client/test_repo, based on the given data.
   tuf.repository_tool.create_tuf_client_directory(
-      trusted_data_dir + 'test_repo', 'client/test_repo')
+      trusted_data_dir + '/test_repo', 'client/test_repo')
 
   os.mkdir('client/validated_targets') # We'll put validated target files here.
 
@@ -79,7 +79,7 @@ def initialize_updater(trusted_data_dir, keys, instructions):
   # Copy the provided metadata into a directory that we'll host.
   if os.path.exists('hosted'):
     shutil.rmtree('hosted')
-  shutil.copytree(trusted_data_dir + 'test_repo', 'hosted')
+  shutil.copytree(trusted_data_dir + '/test_repo', 'hosted')
 
   # Start up hosting for the repository.
   os.chdir('hosted')
