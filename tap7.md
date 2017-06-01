@@ -9,21 +9,21 @@
 
 # Abstract
 
-[Conformance testing](https://en.wikipedia.org/wiki/Conformance_testing) can
-determine whether an implementation meets the requirements set by a given
+[Conformance testing](https://en.wikipedia.org/wiki/Conformance_testing)
+can determine whether an implementation meets the requirements set by a given
 specification.  At this point, no tool exists to help developers and users affirm
-that an implementation behaves according to the TUF specification. Although
-the reference implementation contains [unit
-tests](https://github.com/theupdateframework/tuf/tree/6fde6222c9c6abf905ef4a56cf56fe35c4a85e14/tests)
-that verify correct behavior, such as updating metadata in the expected order
-and blocking known updater attacks, these unit tests only work within the
-parameters of the reference implementation, which is problematic due to the diversity
-of TUF implementations.
+that an implementation of an update system behaves according to the TUF
+specification. Although the reference implementation contains
+[unit tests](https://github.com/theupdateframework/tuf/tree/develop/tests)
+that verify correct behavior (such as updating metadata in the expected order
+and blocking known updater attacks) these unit tests only work within the
+parameters of the reference implementation. This is problematic due to the
+diversity of TUF implementations.
 
-To achieve the goal of testing diverse TUF implementations, this specification describes the
-design of a common testing tool for TUF conformance.  The goals are to interoperate with
-implementations in diverse languages and environments, while having a low burden on
-TUF implementers to the tool in their environment.
+To achieve the goal of testing diverse TUF implementations, this specification
+describes the design of a common testing tool for TUF conformance.  The goals
+are to interoperate with implementations in diverse languages and environments,
+while having a low burden on TUF implementers to the tool in their environment.
 
 # Motivation
 
