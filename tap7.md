@@ -1,7 +1,7 @@
 * TAP: 7
 * Title: Conformance testing
 * Version: 3
-* Last-Modified: 31-May-2017
+* Last-Modified: 01-June-2017
 * Author: Vladimir Diaz, Sebastien Awwad
 * Status: Draft
 * Content-Type: text/markdown
@@ -336,6 +336,8 @@ is available, and an [example is available below](#example-wrapper) as well.
         2                an unknown error has occurred (never expected, but
                          helpful to provide for test output)
 
+        ```
+
         <!---
         # TODO: Consider additional return fields:
           hash: (Verdict: No, for now)
@@ -356,11 +358,10 @@ is available, and an [example is available below](#example-wrapper) as well.
             construct sometimes otherwise. Not a good enough reason, IMO;
             simplicity for the external implementer is paramount.
         --->
-        ```
 
 
 A skeleton that can be filled in by implementers is provided
-[here]((tap7_resources/tap7_wrapper_skeleton.py).
+[here](tap7_resources/tap7_wrapper_skeleton.py).
 Also see [Example Wrapper](#example-wrapper) below for a functioning example of
 the Wrapper module - in this case, a Wrapper enabling the Conformance Tester to
 test the pre-TAP4 TUF Reference Implementation.
