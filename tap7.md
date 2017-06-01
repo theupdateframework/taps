@@ -87,6 +87,7 @@ implementation, the following components are required by this TAP:
 - Updater
 - Conformance Tester
 - Wrapper
+- Configuration File
 
 The **Updater** is the program to be tested, an implementation of a
 TUF-conformant updater client, as described in
@@ -107,6 +108,9 @@ communicate with it. This will need to involve at least a few lines of Python.
 In order for the Tester to interact with the Updater implementation, a Wrapper
 around that implementation will need to support as an interface to the Tester
 three functions.
+
+The [**Configuration File**](#configuration-file) tells the Tester what your
+Wrapper module's name is and what TUF features it does or does not support.
 
 
 ## Wrapper Specification
