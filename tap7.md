@@ -206,7 +206,8 @@ is available, and an [example is available below](#example-wrapper) as well.
           This dict contains the signing keys that can be used to re-sign the
           metadata. The format of this dictionary of keys is as follows.
           (Note that the individual keys resemble ANYKEY_SCHEMA in the
-          [TUF format definitions](https://github.com/theupdateframework/tuf/blob/develop/tuf/formats.py)) The format below anticipates the optional use of
+          [TUF format definitions](https://github.com/theupdateframework/tuf/blob/develop/tuf/formats.py))
+          The format below anticipates the optional use of
           multiple repositories, as provided for in [TAP 4](tap4.md). If TAP 4
           support is disabled, the only repository listed will be `test_repo`.
             ```javascript
@@ -533,12 +534,18 @@ TUF Reference Implementation. (This can also be seen
   import tuf.repository_tool
   import tuf.client.updater
   import tuf.settings
+  from tuf.exceptions import *
 
   updater = None
   server_process = None
 
   def initialize_updater(trusted_data_dir, keys, instructions):
+    """
+      Sets the client's initial state up for a future test, providing it with
+      metadata to be treated as already-validated.
 
+      Note that the full function docstring is available in the text of TAP 7.
+    """
     # Client Setup
     global updater
     global server_process
@@ -551,7 +558,7 @@ TUF Reference Implementation. (This can also be seen
 
     # Create a client directory at client/test_repo, based on the given data.
     tuf.repository_tool.create_tuf_client_directory(
-        trusted_data_dir + 'test_repo', 'client/test_repo')
+        trusted_data_dir + '/test_repo', 'client/test_repo')
 
     os.mkdir('client/validated_targets') # We'll put validated target files here.
 
@@ -569,7 +576,7 @@ TUF Reference Implementation. (This can also be seen
     # Copy the provided metadata into a directory that we'll host.
     if os.path.exists('hosted'):
       shutil.rmtree('hosted')
-    shutil.copytree(trusted_data_dir + 'test_repo', 'hosted')
+    shutil.copytree(trusted_data_dir + '/test_repo', 'hosted')
 
     # Start up hosting for the repository.
     os.chdir('hosted')
@@ -592,15 +599,16 @@ TUF Reference Implementation. (This can also be seen
 
 
   def update_repo(test_data_dir, keys, instructions):
-    # Replace the existing repository files with the new ones. Naively, all we
-    # want to do here is something like the single command
-    #   'shutil.move(test_data_dir/test_repo, 'hosted')'
-    # Unfortunately, that won't work correctly if hosted already exists, and
-    # deleting it would take time and we'd rather not have a gap during which the
-    # hosted repository state is strange, plus the Python simple HTTP server
-    # doesn't change the folder it's hosting even if that folder moves, so I'll
-    # go for an awkward solution the operative part of which is four moves
-    # (individually atomic).
+    """
+      Sets the repository files that will be made available to the Updater when
+      update_client runs.
+
+      The full docstring is available above, in the text of TAP 7.
+    """
+
+    # Replace the existing repository files with the new ones.
+    # The commands here are somewhat awkward in order to try to achieve a quick
+    # swap-in for live-hosted files using individually-atomic move commands.
 
     # Destroy any lingering temp directories.
     if os.path.exists('temp_metadata'):
@@ -616,11 +624,7 @@ TUF Reference Implementation. (This can also be seen
     targets_directory = test_data_dir + '/test_repo/targets'
 
     # Copy the contents of the provided test_data_dir to temp directories that
-    # we'll move into place afterwards. There is a gap here between each of the
-    # two moves in the two sets of moves. One could avoid this by using a command
-    # like 'cp -T metadata_temp hosted/metadata', which would also make the
-    # metadata_old temp unnecessary; however, we won't go to that length here for
-    # this example, and -T isn't always available.
+    # we'll move into place afterwards.
     shutil.copytree(metadata_directory, 'temp_metadata')
     shutil.copytree(targets_directory, 'temp_targets')
     shutil.move('hosted/metadata', 'old_metadata')
@@ -666,8 +670,17 @@ TUF Reference Implementation. (This can also be seen
         print('client/validated_targets/' + target_filepath + ' does not exist.')
         return 1
 
-    except:
+    except (
+        NoWorkingMirrorError, NotFoundError, UnknownTargetError,
+        ForbiddenTargetError, UnknownRoleError,
+        BadHashError, BadSignatureError, DownloadLengthMismatchError,
+        InsufficientKeysError, UnsignedMetadataError, UnknownKeyError,
+        ExpiredMetadataError):
       return 1
+
+    except:
+      return 2
+
 
 
 
