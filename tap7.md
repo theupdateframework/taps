@@ -414,8 +414,8 @@ call specifies this new target, that target will only validate if the new
 metadata has been validated and the target obtained matches that now-validated
 metadata.
 
-At least two cases will be run in each of the scenarios below, in a randomized
-order:
+At least the following two cases will be run in each of the scenarios below,
+in a randomized order:
  - Error case: a case as described in the Description, where the update attempt
  is expected to result in no update. The Wrapper is expected to return the
  value Failure (1) to the Tester. If the Updater supports multiple mirrors
@@ -442,9 +442,9 @@ that case set will need to be multiplied in the listed way.
 
 #### Case Sets
 
-These can be expanded to indicate more about the definitions of the test cases,
-e.g. what calls are made to the Wrapper and a description of the arguments
-provided (e.g. the files in the directories indicated by the arguments)
+The full set of cases and expected results will be kept updated
+[alongside the TUF specification](https://github.com/theupdateframework/tuf/tree/develop/docs).
+The following are examples.
 
 ##### Target tampering w/ no compromised keys
   - Return Value Expected: Failure (1)
@@ -481,9 +481,6 @@ provided (e.g. the files in the directories indicated by the arguments)
     and more readily compromised.)
   - Multipliers: None
 
-...
-ETC
-...
 
 
 #### Excluded Tests
