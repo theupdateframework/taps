@@ -470,6 +470,19 @@ ETC
 ...
 
 
+#### Excluded Tests
+##### Slow Retrieval Attack
+Since testing defense against a slow retrieval attack (see section 1.5.2 in the
+[TUF Specification](https://github.com/theupdateframework/tuf/blob/develop/docs/tuf-spec.txt))
+depends heavily on the transport mechanism used by the implementation, it is up
+to the Updater implementers to test whether the implementation is vulnerable to
+this attack.  This might entail modifying an HTTP server to limit the rate at
+which requests are satisifed, or inserting a MITM that intercepts XMLRPC
+traffic between the updater and server, and then manipulating the rate of
+transfer.  Regardless of the transport mechanism used, developers should take
+care to prevent their updaters from being vulnerable to such attacks, which can
+happen before any data is transferred, or after the transfer of data has begun.
+
 
 
 ## Example Wrapper
@@ -598,7 +611,6 @@ included [in this file](tap7_resources/tap7_wrapper_example.py).)
 
 
   def update_client(target_filepath):
-
     try:
       # Run the updater. Refresh top-level metadata and try updating
       # target_filepath.
@@ -750,6 +762,7 @@ For an example of how such code might look, consider the JSON-to-DER converter
 `convert_signed_metadata_to_der` employed by Uptane's TUF fork
 [here](https://github.com/awwad/tuf/blob/36dbb7b8a800dab407fe9ab961155ef0a6d9f7c9/tuf/asn1_codec.py#L156-L352).
 
+
 ##### Re-Signing Converted Metadata
 Two situations arise depending on the behavior of your Updater:
 1. When the Updater receives the converted metadata, it converts it back to
@@ -762,38 +775,13 @@ In the second case, the converted metadata must also be re-signed, so that the
 Updater will be able to correctly validate the metadata.
 
 
-(((TODO: I should probably add the *high-level* code here to do the ASN.1/DER
-conversion, which is pretty short (asn1_coder.convert*(), inside function
-definition blocks for the optional functions, to make this clearer to the
-reader.))))
-
-
 #### No File System
 There might be TUF implementations
 where metadata or update files are not saved to a file system on the
-device.  In this case, the developer or user running the conformance tests
-would need to arrange that the files which are requested and stored by the device
-be saved unmodified to directories that *can* be accessed by the conformance
-tests.  These directories would be specified in the command-line options of the
-conformant updater or the conformance tool's configuration file (i.e., the
---client-metadata and --client-targets command-line options used in the
-preceding examples).
+device, but are instead stored in the absence of a file system.
 
-What the conformance tool must ultimately verify are the metadata and update
-file(s) that the updater eventually trusts, and not that these files are
-"installed" in some particular manner. Additionally, the conformance tests must
-confirm the updater's ability to detect the attacks covered in the
-specification (with the exclusion of the slow retrieval attack).
-
-Since testing of the slow retrieval attack depends on the transport mechanism
-used by the implementation, it is up to the developer to test whether the
-implementation is vulnerable to this attack.  This might entail
-modifying an HTTP server to limit the rate at which requests are satisifed, or
-inserting a MITM that intercepts XMLRPC traffic between the updater and server,
-and then manipulating the rate of transfer.  Regardless of the transport
-mechanism used, developers should take care to prevent their updaters from
-being vulnerable to such attacks, which can happen before any data is
-transferred, or after the transfer of data has begun.
+In such cases, the Wrapper should take the provided metadata and target file
+data and provide them to the Updater in whatever form it expects.
 
 
 ## Summary of Steps for Conformance Testing
@@ -811,12 +799,13 @@ conformance to the TUF Specification are as follows:
 This TAP does not detract from existing security guarantees because it does not
 propose architectual changes to the specification.
 
+
 # Backwards Compatibility
 
 This TAP does not introduce any backwards incompatibilities.
 
-# Augmented Reference Implementation
 
+# Augmented Reference Implementation
 
 A git branch containing the official tool for conformance testing, and a client
 set up for conformance testing can be found at:
