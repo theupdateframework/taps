@@ -75,11 +75,16 @@ whether or not the Updater is conformant with the TUF specification. In
 general, these constitute a battery of attacks against which the Updater should
 be resilient.
 
-It should be noted, however, that the implementation does not necessarily have
-to be the Updater used in production. It only needs to function as defined in
-this TAP for conformance testing, though it is expected that the behavior be
-the same at a high level -- for example, the validity of metadata should be
-determined the same way. ((TODO: This paragraph still seems wordy. Unnecessary?))
+The behavior necessary to provide the Conformance Tester with what it needs to
+judge conformance may be slightly different from the usual or production
+behavior of the Updater, resulting in a need for a testing mode, or logic in
+the Wrapper to interpret behavior. For example, if errors are usually ignored
+rather than producing any return value, that's something that may be adjusted
+by using test-mode-specific code in the Updater, or post-hoc by the Wrapper
+module. The validation behavior during testing should not vary significantly
+from that in production so that test results can represent real Updater
+performance.
+
 
 # Specification
 
@@ -782,9 +787,7 @@ Suppose, for example, that the Updater implementation supports only signatures
 using Ed25519 keys.
 
 This restriction can be handled by configuring the conformance tool via
-its `.tuf-tester.yml` configuration file.  The configuration file can be edited
-by the developer to list:
-
+its `.tuf-tester.yml` configuration file. The developer can add:
 ```
 keytype: ed25519
 ```
