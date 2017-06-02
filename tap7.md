@@ -1,11 +1,12 @@
 * TAP: 7
 * Title: Conformance testing
-* Version: 3
-* Last-Modified: 01-June-2017
+* Version: 1
+* Last-Modified: 02-June-2017
 * Author: Vladimir Diaz, Sebastien Awwad
 * Status: Draft
 * Content-Type: text/markdown
 * Created: 20-Jan-2017
+* Post-History:
 
 # Abstract
 
