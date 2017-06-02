@@ -537,9 +537,11 @@ is available, and an [example is available below](#example-wrapper) as well.
         0                SUCCESS: target identified by target_filepath has been
                          obtained from one of the mirrors and validated per
                          trustworthy metadata
+
         1                FAILURE/rejection: unable to obtain a target identified
                          by target_filepath from any of the known mirrors that
                          is valid according to trustworthy metadata
+
         2                an unknown error has occurred (never expected, but
                          helpful to provide for test output)
 
