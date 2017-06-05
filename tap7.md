@@ -488,6 +488,17 @@ is available, and an [example is available below](#example-wrapper) as well.
 
 
 A skeleton that can be filled in by implementers is provided
+Note that the Tester will only expect a matching success-or-failure code from
+`update_client` instead of the correct code from a long a list of specific
+error codes (expired metadata, bad signature, replay attack, fewer than the
+threshold number of signatures, etc.) in order to simplify work for Updater
+implementers. This will entail more test and control cases, but should make it
+easier for implementers to use the Conformance Tester without having to make
+substantial changes to Updaters or having to too much extra work in writing
+Wrapper functions.
+
+
+A code skeleton that can be filled in by implementers is provided
 [here](tap7_resources/tap7_wrapper_skeleton.py).
 Also see [Example Wrapper](#example-wrapper) below for a functioning example of
 the Wrapper module - in this case, a Wrapper enabling the Conformance Tester to
