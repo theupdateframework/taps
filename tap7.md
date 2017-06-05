@@ -465,33 +465,18 @@ is available, and an [example is available below](#example-wrapper) as well.
 
         ```
 
-        <!---
-        # TODO: Consider additional return fields:
-          hash: (Verdict: No, for now)
-            the hash of the target file installed if there was a target file
-            validated and "installed" (to be tested against the expected
-            fileinfo). This may allow us to make sure that the success was real
-            / the right target was actually chosen.
-            This is probably not necessary, but it's food for thought as we
-            write tests.
-
-          metadata versions: (Verdict: No)
-            a dictionary mapping metadata filename to the version validated in
-            this update. The purpose of this is to allow for an easier time
-            writing the Tester, since it spares us the complication of making
-            the test go so far as to validate a particular target in a large
-            number of sub-tests when all we want to do is determine that e.g.
-            replayed metadata is rejected. Tests are just more complicated to
-            construct sometimes otherwise. Not a good enough reason, IMO;
-            simplicity for the external implementer is paramount.
-        --->
+Note that the Tester will only expect a matching success-or-failure code from
+`update_client` instead of the correct code from a long a list of specific
+error codes (expired metadata, bad signature, replay attack, fewer than the
+threshold number of signatures, etc.) in order to simplify work for Updater
+implementers. This will entail more test and control cases, but should make it
+easier for implementers to use the Conformance Tester without substantial
+changes to Updaters or too much extra work writing Wrapper functions.
 
 
-A skeleton that can be filled in by implementers is provided
+A code skeleton that can be filled in by implementers is provided
 [here](tap7_resources/tap7_wrapper_skeleton.py).
-Also see [Example Wrapper](#example-wrapper) below for a functioning example of
-the Wrapper module - in this case, a Wrapper enabling the Conformance Tester to
-test the pre-TAP4 TUF Reference Implementation.
+Also see [Example Wrapper](#example-wrapper) below.
 
 
 ### Example Wrapper
