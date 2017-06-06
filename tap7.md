@@ -80,8 +80,17 @@ data set. In general, these data sets constitute a battery of attacks against
 which the Updater should be resilient, contrasted by controls which should
 succeed.
 
+Note that the Tester will only expect a matching success-or-failure code
+instead of a specific code indicating the type of attack detected or error
+encountered (expired metadata, bad signature, replay attack, fewer than the
+threshold number of signatures, etc.). This is in order to simplify work for
+Updater implementers. This will entail more test and control cases, but should
+make it easier for implementers to use the Conformance Tester without
+substantial changes to Updaters or too much extra work writing Wrapper
+functions.
+
 The behavior necessary to provide the Conformance Tester with what it needs to
-judge conformance may be slightly different from the usual or production
+judge conformance may still be slightly different from the usual or production
 behavior of the Updater, resulting in a need for a testing mode, or logic in
 the Wrapper to interpret behavior. For example, if errors are usually ignored
 rather than producing any return value, that's something that may be adjusted
@@ -469,14 +478,6 @@ is available, and an [example is available below](#example-wrapper) as well.
                          helpful to provide for test output)
 
         ```
-
-Note that the Tester will only expect a matching success-or-failure code from
-`update_client` instead of the correct code from a long a list of specific
-error codes (expired metadata, bad signature, replay attack, fewer than the
-threshold number of signatures, etc.) in order to simplify work for Updater
-implementers. This will entail more test and control cases, but should make it
-easier for implementers to use the Conformance Tester without substantial
-changes to Updaters or too much extra work writing Wrapper functions.
 
 
 A code skeleton that can be filled in by implementers is provided
