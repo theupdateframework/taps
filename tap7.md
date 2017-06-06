@@ -77,8 +77,8 @@ will pass in sets of metadata and target files. In response, the wrapped
 Updater will provide return values indicating successful update or failure to
 update, and the Tester will compare these to the expected values for each test
 data set. In general, these data sets constitute a battery of attacks against
-which the Updater should be resilient, contrasted by controls which should
-succeed.
+which the Updater should be resilient, contrasted by positive control cases
+which should succeed.
 
 Note that the Tester will only expect a matching success-or-failure code
 instead of a specific code indicating the type of attack detected or error
