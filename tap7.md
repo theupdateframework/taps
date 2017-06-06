@@ -53,27 +53,32 @@ an important step in checking if an implementation is TUF-conformant.
 # Rationale
 
 Developers need a convenient way of verifying whether an implementation
-conforms to the TUF specification. Such a verification could be quite desirable,
-as it would affirm that the tested implementation meets a recognized standard of
-secure operation. One possible verification method could be to define, and ideally
-automate, the expected outcome of an update request when given different sets of
-input metadata. If an implementation is given the Root file and instructed to
-download a particular package, its ability to correctly download both the required
-top-level metadata and the requested package could indicate conformance.  Moreover,
-if it is able to do so while still preventing the attacks listed in the specification,
-that claim becomes stronger.  Consequently, any
-implementation of TUF would need some way of accepting given metadata
-and indicating when it has detected a particular attack.
+conforms to the TUF specification, affirming that the tested
+implementation meets a recognized standard of secure operation.
 
-This TAP prescribes that an implementation of a client updater ("Updater")
-employ a wrapper module ("Wrapper") that implements a common set of functions
-defined in this document. These can be called by a general TUF Conformance
-Tester ("Tester"), which will pass in sets of metadata and target files. The
-Tester will determine based on output produced by the wrapped Updater --
-including error codes that signal that particular attacks have been detected --
-whether or not the Updater is conformant with the TUF specification. In
-general, these constitute a battery of attacks against which the Updater should
-be resilient.
+The strategy for testing TUF conformance proposed in this TAP is to generate
+sets of metadata and targets with the expectation that all implementations
+should react to certain sets by successfully validating and updating, and all
+implementations should react to other sets by rejecting the invalid metadata or
+targets. Determining which data sets an implementation accepts and which it
+rejects allows us to determine the implementation's TUF conformance, including
+its resilience against the attacks listed in the TUF Specification (section
+1.5.2).
+
+Toward this end, it is necessary to define a test harness that allows a
+conformance tester to run the updater implementation, provide it with data it
+can interpret, and receive a success or failure code in response.
+
+Therefore, This TAP prescribes that an implementation of a client updater
+("Updater") have a corresponding custom wrapper module ("Wrapper") that
+implements a common set of functions defined in this document. These Wrapper
+functions will be called by a general TUF Conformance Tester ("Tester"), which
+will pass in sets of metadata and target files. In response, the wrapped
+Updater will provide return values indicating successful update or failure to
+update, and the Tester will compare these to the expected values for each test
+data set. In general, these data sets constitute a battery of attacks against
+which the Updater should be resilient, contrasted by controls which should
+succeed.
 
 The behavior necessary to provide the Conformance Tester with what it needs to
 judge conformance may be slightly different from the usual or production
