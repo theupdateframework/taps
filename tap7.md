@@ -45,7 +45,7 @@ and, most importantly, ensure that an updater is secure against
 the types of attacks and weaknesses listed in
 [Section 1.5.2](https://github.com/theupdateframework/tuf/blob/6fde6222c9c6abf905ef4a56cf56fe35c4a85e14/docs/tuf-spec.txt#L124-L181)
 of the TUF Specification. In addition, the official tool should be publicly
-available and useable by anyone who wishes to test an implementation.
+available and usable by anyone who wishes to test an implementation.
 
 Passing a conformance test with the official tool would be
 an important step in checking if an implementation is TUF-conformant.
@@ -751,7 +751,7 @@ conformance to the TUF Specification are as follows:
 # Security Analysis
 
 This TAP does not detract from existing security guarantees because it does not
-propose architectual changes to the specification.
+propose architectural changes to the specification.
 
 
 # Backwards Compatibility
