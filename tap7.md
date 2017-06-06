@@ -21,10 +21,14 @@ and blocking known updater attacks) these unit tests only work within the
 parameters of the reference implementation. This is problematic due to the
 diversity of TUF implementations.
 
-To achieve the goal of testing diverse TUF implementations, this specification
-describes the design of a common testing tool for TUF conformance.  The goals
-are to interoperate with implementations in diverse languages and environments,
-while having a low burden on TUF implementers to the tool in their environment.
+This proposal describes the design of a common testing tool for TUF
+Specification conformance - most importantly, for testing resilience to
+attacks against updaters.
+
+The goals are to automate determining whether or not an updater implementation
+conforms to the TUF specification, to interoperate with implementations in
+diverse languages and environments, and to minimize the burden of such testing
+on implementers.
 
 # Motivation
 
