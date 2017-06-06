@@ -196,7 +196,7 @@ An example of a `.tuf-tester.yml` configuration file for an Updater:
 ```
 # The name of the Wrapper module, which will be imported and used by the
 # Tester.
-module: ref_impl_wrapper
+module: tap7_wrapper_example
 
 # List the keytypes that Updater supports.
 keytype: ed25519, ecdsa
@@ -744,8 +744,8 @@ conformance to the TUF Specification are as follows:
 
 ```
 (1) Write Wrapper module per specifications above.
-(2) Configure conformance tool to abide by the adopter's repository restrictions.
-(3) Run conformance tool and confirm that all tests are passed.
+(2) Configure Tester to abide by the adopter's repository restrictions.
+(3) Run Tester and confirm that all tests have passed.
 ```
 
 # Security Analysis
