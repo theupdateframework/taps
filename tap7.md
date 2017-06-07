@@ -364,6 +364,10 @@ is available, and an [example is available below](#example-wrapper) as well.
             }
             ```
 
+            This listing indicates what key(s) should be used to sign each role
+            in the test metadata. Sometimes (in the case of some attacks),
+            these will not be the correct keys for the role.
+
           Here's an excerpt from a particular example:
           ```javascript
           {
