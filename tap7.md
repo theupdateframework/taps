@@ -763,12 +763,10 @@ Updater in whatever form it expects.
 In summary, the steps that should be followed to test an Updater for
 conformance to the TUF Specification are as follows:
 
-```
-(1) Fill in the functions in the
-[Wrapper module skeleton]((tap7_resources/tap7_wrapper_skeleton.py)).
-(2) Configure Tester to abide by the adopter's repository restrictions.
-(3) Run Tester and confirm that all tests have passed.
-```
+1. Fill in the functions in the
+[Wrapper module skeleton](tap7_resources/tap7_wrapper_skeleton.py).
+2. Configure Tester to abide by the adopter's repository restrictions.
+3. Run Tester and confirm that all tests have passed.
 
 # Security Analysis
 
