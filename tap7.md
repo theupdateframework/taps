@@ -203,9 +203,8 @@ the location of a configuration file.
 The configuration file includes the name of the module that provides the
 Wrapper functions specified above, along with any necessary restrictions on
 TUF functionality, such as the list of
-cryptographic key types supported by the Updater, the number of root keys,
-thresholds, etc.  The configuration file is needed because restrictions
-are not shared equally across all implementations.
+cryptographic key types supported by the Updater.  The configuration file is
+needed because restrictions are not shared equally across all implementations.
 For example, the Go implementation might only support ECDSA keys, whereas
 another might support Ed25519 and RSA keys.
 
