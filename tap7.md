@@ -708,7 +708,8 @@ Suppose, for example, that the Updater implementation supports only signatures
 using Ed25519 keys.
 
 This restriction can be handled by configuring the conformance tool via
-its `.tuf-tester.yml` configuration file. The developer can add:
+its `.tuf-tester.yml` [configuration file](#configuration-file-specification).
+The developer can add:
 ```
 keytype: ed25519
 ```
