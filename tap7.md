@@ -239,15 +239,14 @@ tap4-support: false
 The Wrapper must implement the three functions specified
 [below](#wrapper-functions). The Tester will use them in this manner:
 - The Tester will call the Wrapper's `initialize_updater` function to provide
-initial trusted metadata.
-- For each test case, the Tester will call the Wrapper's `update_repo` function
+initial trusted metadata for a test or series of tests.
+- For each test, the Tester will call the Wrapper's `update_repo` function
 with unvalidated new metadata and targets. This metadata will describe a new
 target not included in data provided to the earlier `initialize_updater` call.
 - The Tester will call the Wrapper's `update_client` function to instruct the
 Updater to try updating to the new target. `update_client` will return a value
 indicating success or failure. Based upon that value, the Tester will judge
-the behavior of the Updater in the provided test case conformant or
-non-conformant.
+the behavior of the Updater in the provided test conformant or non-conformant.
 
 Note also, however, that because Updater implementations may vary
 substantially, the Wrapper may need to perform additional work, such as:
