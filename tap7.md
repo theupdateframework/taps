@@ -206,7 +206,8 @@ TUF functionality, such as the list of
 cryptographic key types supported by the Updater.  The configuration file is
 needed because restrictions are not shared equally across all implementations.
 For example, the Go implementation might only support ECDSA keys, whereas
-another might support Ed25519 and RSA keys.
+another might support Ed25519 and RSA keys. The full list of configuration
+options will be provided in documentation for the Conformance Tester.
 
 An example of a `.tuf-tester.yml` configuration file for an Updater:
 
@@ -229,7 +230,6 @@ mirror-support: false
 # If TAP 4 (multi-repository / map file support) is not supported, set to
 # false. (Default is true.)
 tap4-support: false
-...
 ```
 
 
