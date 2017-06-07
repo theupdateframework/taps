@@ -450,11 +450,11 @@ is available, and an [example is available below](#example-wrapper) as well.
     - Arguments:
         - `target_filepath`:
           The path of a target file that the Updater should try to update.
-          This must be inside the `targets_directory` directory provided to
-          `update_repo`, and it should be written relative to
+          This must be inside the directory `targets_directory`, provided to
+          the `update_repo` call, and it should be written relative to
           `targets_directory`. As noted previously, it is not necessary for the
-          Updater to have a notion of files; `update_client` may abstract this
-          away.
+          Updater to have a notion of a filesystem; `update_client` may
+          abstract this away.
 
     - Returns:
         An integer describing the result of the attempted update. This value is
