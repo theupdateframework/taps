@@ -255,9 +255,9 @@ substantially, the Wrapper may need to perform additional work, such as:
  - Moving metadata or target files into the directory structure the Updater
  implementation expects
  - If, e.g., the Updater doesn't have a notion of a filesystem, the Wrapper may
- need to read the files the tester provides and distribute data to the Updater
+ need to read the files the Tester provides and distribute data to the Updater
  in the manner the Updater expects.
- - Translate metadata from the format the tester provides into the custom
+ - Translate metadata from the format the Tester provides into the custom
  format the Updater expects, potentially re-signing metadata if the Updater
  will expect signatures over a different format
  - If the Updater's communication model involves different synchronization
@@ -325,18 +325,19 @@ is available, and an [example is available below](#example-wrapper) as well.
                      |- root.json
             ```
 
-          filepaths in the targets directory map directly to the filepaths
+          Filepaths in the targets directory map directly to the filepaths
           used to identify targets in the repository. For example, a target
-          identified in metadata with the filepath 'package1/tarball.tar' will
+          identified in metadata with the filepath 'package1/tarball.tar' would
           be found in 'targets/package1/tarball.tar'.
 
         - `keys`:
           If the Updater can process signatures in TUF's default metadata, then
-          you SHOULD IGNORE this argument.
+          the Wrapper SHOULD IGNORE this argument.
           This is provided only in case the metadata format the Updater expects
           signatures to be made over is not the same as the metadata format that
           the TUF reference implementation signs over (canonicalized JSON).
-          If the Updater uses a different metadata format, then you may need to
+          If the Updater uses a different metadata format, then the Wrapper may
+          need to
           re-sign the metadata the Tester provides in the `trusted_data_dir`.
           This dict contains the signing keys that can be used to re-sign the
           metadata. The format of this dictionary of keys is as follows.
@@ -394,18 +395,19 @@ is available, and an [example is available below](#example-wrapper) as well.
 
         - `instructions`:
           If the Updater can process signatures in TUF's default metadata, then
-          you SHOULD IGNORE this argument.
+          the Wrapper SHOULD IGNORE this argument.
           This, too, is provided only in case the metadata format the Updater
           expects signatures to be made over is not the same as the metadata
           format that the TUF reference implementation signs over
           (canonicalized JSON).
-          If you'll be re-signing the metadata provided here, then this
-          dictionary of instructions will tell you what, if any, modifications
+          If the Wrapper will be re-signing the metadata provided here, then
+          this
+          dictionary of instructions will tell list what, if any, modifications
           to make. For example, {'invalidate_signature': True} instructs that
           the signature be made and then some byte(s) in it be modified so that
           it is no longer a valid signature over the metadata. Most tests
           should not require this, but some may; this should be documented in
-          the list of test cases.
+          the list of test cases and the Tester documentation.
 
     - Returns: None
 
