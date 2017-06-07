@@ -53,6 +53,9 @@ def initialize_updater(trusted_data_dir, keys, instructions):
   global updater
   global server_process
 
+    # End hosting from any previous test.
+    kill_server()
+
   # Initialize the Updater implementation. We'll put trusted client files in
   # directory 'client', copying some of them from the provided metadata.
   tuf.settings.repositories_directory = 'client' # where client stores repo info
@@ -248,6 +251,8 @@ def kill_server():
   Kills the forked process that is hosting the repositories via Python's
   simple HTTP server
   """
+  global server_process
   if server_process is not None:
     print('Killing server process with pid: ' + str(server_process.pid))
     server_process.kill()
+    server_process = None
