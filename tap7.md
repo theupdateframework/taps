@@ -273,7 +273,7 @@ called by the Tester.
 [A skeletal module defining the functions](tap7_resources/tap7_wrapper_skeleton.py)
 is available, and an [example is available below](#example-wrapper) as well.
 
-- 1: **`initialize_updater(trusted_data_dir, keys, instructions)`**:
+- 1: **`set_up_initial_client_metadata(trusted_data_dir, keys, instructions)`**:
     - Purpose:
         Sets the client's initial state up for a future test, providing it with
         metadata to be treated as already-validated. A client Updater delivered
@@ -296,7 +296,7 @@ is available, and an [example is available below](#example-wrapper) as well.
           `test_repo`.
 
           The data provided for
-          `initialize_updater` should be treated as already validated.
+          `set_up_initial_client_metadata` should be treated as already validated.
 
           Contents of `trusted_data_dir`:
             ```
@@ -415,7 +415,7 @@ is available, and an [example is available below](#example-wrapper) as well.
 
     - Returns: None
 
-- 2: **`update_repo(test_data_dir, keys, instructions)`**:
+- 2: **`set_up_repositories(test_data_dir, keys, instructions)`**:
     - Purpose:
         Sets the repository files, metadata and targets. This will be the
         data that should be made available to the Updater when the Updater
@@ -428,19 +428,19 @@ is available, and an [example is available below](#example-wrapper) as well.
           treated normally by the Updater (not as initially-shipped, trusted
           data, that is).
           The directory contents will have the same structure as those of
-          `trusted_data_dir` in `initialize_updater` above, but lacking a
           `map.json` file.
+          `trusted_data_dir` in `set_up_initial_client_metadata` above, but lacking a
 
         - `keys`:
-          See `initialize_updater` above.
+          See `set_up_initial_client_metadata` above.
 
         - `instructions`:
-          See `initialize_updater` above.
+          See `set_up_initial_client_metadata` above.
 
     - Returns: None
 
 
-- 3: **`update_client(target_filepath)`**:
+- 3: **`attempt_client_update(target_filepath)`**:
     - Purpose:
         Refreshes metadata and causes the client to attempt to (obtain and)
         validate a particular target,
@@ -457,9 +457,9 @@ is available, and an [example is available below](#example-wrapper) as well.
         - `target_filepath`:
           The path of a target file that the Updater should try to update.
           This must be inside the directory `targets_directory`, provided to
-          the `update_repo` call, and it should be written relative to
+          the `set_up_repositories` call, and it should be written relative to
           `targets_directory`. As noted previously, it is not necessary for the
-          Updater to have a notion of a filesystem; `update_client` may
+          Updater to have a notion of a filesystem; `attempt_client_update` may
           abstract this away.
 
     - Returns:
@@ -533,7 +533,7 @@ TUF Reference Implementation. (This can also be seen
   updater = None
   server_process = None
 
-  def initialize_updater(trusted_data_dir, keys, instructions):
+  def set_up_initial_client_metadata(trusted_data_dir, keys, instructions):
     """
       Sets the client's initial state up for a future test, providing it with
       metadata to be treated as already-validated.
@@ -592,10 +592,10 @@ TUF Reference Implementation. (This can also be seen
 
 
 
-  def update_repo(test_data_dir, keys, instructions):
+  def set_up_repositories(test_data_dir, keys, instructions):
     """
       Sets the repository files that will be made available to the Updater when
-      update_client runs.
+      attempt_client_update runs.
 
       The full docstring is available above, in the text of TAP 7.
     """
@@ -630,7 +630,7 @@ TUF Reference Implementation. (This can also be seen
 
 
 
-  def update_client(target_filepath):
+  def attempt_client_update(target_filepath):
     """
     <Purpose>
       Refreshes metadata and causes the client to attempt to (obtain and)
@@ -721,7 +721,7 @@ specified in the TUF Specification.)
 
 Suppose that metadata that the Updater receives must be encoded in DER (rather
 than JSON). In this case, the Wrapper will need to convert the metadata
-received from the Tester in `initialize_updater` and `update_repo` (specified
+received from the Tester in `set_up_initial_client_metadata` and `set_up_repositories` (specified
 in [Wrapper Functions](#wrapper-functions) above).
 
 For an example of how such code might look, consider the JSON-to-DER converter
@@ -740,7 +740,7 @@ new format (foreign to TUF).
 In the second case, the converted metadata must also be re-signed, so that the
 Updater will be able to correctly validate the metadata.
 
-For this reason, `initialize_updater` and `update_repo` also provide arguments
+For this reason, `set_up_initial_client_metadata` and `set_up_repositories` also provide arguments
 `keys` and `instructions`. The keys in `keys` will allow the Wrapper to
 re-sign the metadata provided in a manner that the Updater will expect. If
 there were manipulations made to the resulting metadata for test purposes
@@ -755,8 +755,8 @@ where metadata or update files are not saved to a file system on the
 device, but are instead stored in the absence of a file system.
 
 In such cases, the Wrapper should take the metadata and target file data
-provided to `initialize_updater` and `update_repo` and provide them to the
-Updater in whatever form it expects.
+provided to `set_up_initial_client_metadata` and `set_up_repositories` and
+provide them to the Updater in whatever form it expects.
 
 
 ## Summary of Steps for Conformance Testing

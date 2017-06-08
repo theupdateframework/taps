@@ -12,13 +12,14 @@ import tap7_wrapper_example as wrapper
 
 def main():
   # Deliver initial trusted metadata state to the Updater client.
-  wrapper.initialize_updater(
+  wrapper.set_up_initial_client_metadata(
       trusted_data_dir=SAMPLE_1_DIR, keys=KEYS, instructions=None)
 
   # Deliver new metadata & targets state to the repository.
   # This new state includes the target file 'firmware.img' and metadata validly
   # signing it.
-  wrapper.update_repo(test_data_dir=SAMPLE_2_DIR, keys=KEYS, instructions=None)
+  wrapper.set_up_repositories(
+      test_data_dir=SAMPLE_2_DIR, keys=KEYS, instructions=None)
 
   randomized_tests = [('firmware.img', 0), ('firmware_b.img', 1)]
   expected_results = []
@@ -28,7 +29,7 @@ def main():
   # Store the return code.
   for target, expected_result in randomized_tests:
     expected_results.append(expected_result)
-    actual_result = wrapper.update_client(target)
+    actual_result = wrapper.attempt_client_update(target)
     actual_results.append(actual_result)
     if actual_result != expected_result:
       print('Test failure for ' + repr(target))

@@ -16,9 +16,9 @@
   the TUF spec. More information is available in TAP 7 itself.
 
   The following three functions must be defined:
-   - initialize_updater
-   - update_repo
-   - update_client
+   - set_up_initial_client_metadata
+   - set_up_repositories
+   - attempt_client_update
  """
 # Python 2/3 compatibility
 from __future__ import print_function
@@ -27,7 +27,7 @@ from __future__ import division
 from __future__ import unicode_literals
 
 
-def initialize_updater(trusted_data_dir, keys, instructions):
+def set_up_initial_client_metadata(trusted_data_dir, keys, instructions):
   """
   <Purpose>
       Sets the client's initial state up for a future test, providing it with
@@ -51,7 +51,7 @@ def initialize_updater(trusted_data_dir, keys, instructions):
           test_repo.
 
           The data provided for
-          initialize_updater should be treated as already validated.
+          set_up_initial_client_metadata should be treated as already validated.
 
           Contents of trusted_data_dir:
             - map.json   // see TAP 4
@@ -178,7 +178,7 @@ def initialize_updater(trusted_data_dir, keys, instructions):
 
 
 
-def update_repo(test_data_dir, keys, instructions):
+def set_up_repositories(test_data_dir, keys, instructions):
   """
   <Purpose>
       Sets the repository files, metadata and targets. This will be the
@@ -193,14 +193,14 @@ def update_repo(test_data_dir, keys, instructions):
         treated normally by the Updater (not as initially-shipped, trusted
         data, that is).
         The directory contents will have the same structure as those of
-        trusted_data_dir in initialize_updater above, but lacking a
+        trusted_data_dir in set_up_initial_client_metadata above, but lacking a
         map.json file.
 
       keys
-        See above, in initialize_updater.
+        See above, in set_up_initial_client_metadata.
 
       instructions
-        See above, in initialize_updater.
+        See above, in set_up_initial_client_metadata.
 
 
   <Returns>
@@ -217,7 +217,7 @@ def update_repo(test_data_dir, keys, instructions):
   # Host the repository files in a manner that the client Updater can access.
   # For the examples provided for the TUF Reference Implementation, this
   # entails copying the files into the directory hosted by an HTTP server,
-  # which would be set up by initialize_updater.
+  # which would be set up by set_up_initial_client_metadata.
   # -----
 
   pass
@@ -225,7 +225,7 @@ def update_repo(test_data_dir, keys, instructions):
 
 
 
-def update_client(target_filepath):
+def attempt_client_update(target_filepath):
   """
   <Purpose>
     Refreshes metadata and causes the client to attempt to (obtain and)
@@ -235,7 +235,7 @@ def update_client(target_filepath):
 
     This function will have to translate Updater behavior/output into the
     return values (below) that the Tester expects, based on
-    whether or not the Updater detects a particular attack. update_client
+    whether or not the Updater detects a particular attack. attempt_client_update
     must return the appropriate code to the Tester, which will evaluate them
     against what it expects.
 
@@ -243,9 +243,9 @@ def update_client(target_filepath):
     target_filepath
       The path of a target file that the Updater should try to update.
       This must be inside the targets_directory directory provided to
-      update_repo, and it should be written relative to
+      set_up_repositories, and it should be written relative to
       targets_directory. As noted previously, it is not necessary for the
-      Updater to have a notion of files; update_client may abstract this
+      Updater to have a notion of files; attempt_client_update may abstract this
       away.
 
   <Returns>

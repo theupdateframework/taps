@@ -13,9 +13,9 @@
   the TUF spec.
 
   The following three functions must be defined:
-   - initialize_updater
-   - update_repo
-   - update_client
+   - set_up_initial_client_metadata
+   - set_up_repositories
+   - attempt_client_update
  """
 # Python 2/3 compatibility
 from __future__ import print_function
@@ -41,7 +41,7 @@ from tuf.exceptions import *
 updater = None
 server_process = None
 
-def initialize_updater(trusted_data_dir, keys, instructions):
+def set_up_initial_client_metadata(trusted_data_dir, keys, instructions):
   """
     Sets the client's initial state up for a future test, providing it with
     metadata to be treated as already-validated.
@@ -167,7 +167,7 @@ def update_repo(test_data_dir, keys, instructions):
 
 
 
-def update_client(target_filepath):
+def attempt_client_update(target_filepath):
   """
   <Purpose>
     Refreshes metadata and causes the client to attempt to (obtain and)
