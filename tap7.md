@@ -236,34 +236,34 @@ tap4-support: false
 
 ## Wrapper Specification
 
-The Wrapper must implement the three functions specified
-[below](#wrapper-functions). The Tester will use them in this manner:
-- The Tester will call the Wrapper's `initialize_updater` function to provide
-initial trusted metadata for a test or series of tests.
-- For each test, the Tester will call the Wrapper's `update_repo` function
-with unvalidated new metadata and targets. This metadata will describe a new
-target not included in data provided to the earlier `initialize_updater` call.
-- The Tester will call the Wrapper's `update_client` function to instruct the
-Updater to try updating to the new target. `update_client` will return a value
-indicating success or failure. Based upon that value, the Tester will judge
-the behavior of the Updater in the provided test conformant or non-conformant.
+The Wrapper must implement three functions. These are specified in detail
+[below](#wrapper-functions). In brief, the Tester will call the Wrapper's
+`set_up_initial_client_metadata` and `set_up_repositories` functions to assign
+initial trusted metadata to the client and put metadata and targets on the
+repository, respectively. After this, the Tester will call the Wrapper's
+`attempt_client_update` function to perform the test itself, instructing the
+client to try to update. The Tester will judge the correctness of the result
+based on the return value from `attempt_client_update` that indicates success
+or failure to update.
 
-Note also, however, that because Updater implementations may vary
-substantially, the Wrapper may need to perform additional work, such as:
- - Calling an external binary with, e.g., the subprocess module, in order to
- run an Updater implementation that is not in Python.
- - Moving metadata or target files into the directory structure the Updater
- implementation expects
- - If, e.g., the Updater doesn't have a notion of a filesystem, the Wrapper may
+Beyond the base functionality specified, because different Updaters may
+operate very differently, the Wrapper functions may have other work to do. The
+[Dealing with Implementation Restrictions](#dealing-with-implementation-restrictions)
+section below addresses a variety of such scenarios in detail. Here are some
+examples to keep in mind while reading the specification. Wrapper functions
+might:
+ - use subprocess to call an external binary to run a non-Python Updater.
+ - move metadata or target files into the directory structure an Updater
+ implementation expects.
+ - if, e.g., the Updater doesn't have a notion of a filesystem, the Wrapper may
  need to read the files the Tester provides and distribute data to the Updater
  in the manner the Updater expects.
- - Translate metadata from the format the Tester provides into the custom
+ - translate metadata from the format the Tester provides into the custom
  format the Updater expects, potentially re-signing metadata if the Updater
- will expect signatures over a different format
- - If the Updater's communication model involves different synchronization
- (e.g. server push vs client pull), the update_client() Wrapper function will
- need to bridge this; for example, it may need to wait and collect results from
- some separate process.
+ will expect signatures over a different format.
+ - bridge different communication models - for example, if the Updater's
+ communication model involves server push vs client pull, or if there will need
+ to be asynchronous events to wait for and collect results from.
 
 
 ### Wrapper Functions
