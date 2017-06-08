@@ -255,12 +255,14 @@ might:
  - use subprocess to call an external binary to run a non-Python Updater.
  - move metadata or target files into the directory structure an Updater
  implementation expects.
- - if, e.g., the Updater doesn't have a notion of a filesystem, the Wrapper may
- need to read the files the Tester provides and distribute data to the Updater
- in the manner the Updater expects.
- - translate metadata from the format the Tester provides into the custom
- format the Updater expects, potentially re-signing metadata if the Updater
- will expect signatures over a different format.
+ - if, e.g., the Updater doesn't have a notion of a filesystem, read the files
+ the Tester provides and distribute data to the Updater in the manner the
+ Updater expects.
+ - if the Updater uses a different metadata format, translate
+ metadata from the format the Tester provides into the format the Updater
+ expects.
+ - if the Updater requires signatures to be over a different format, re-sign
+ metadata after translating it.
  - bridge different communication models - for example, if the Updater's
  communication model involves server push vs client pull, or if there will need
  to be asynchronous events to wait for and collect results from.
