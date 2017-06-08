@@ -460,16 +460,15 @@ is available, and an [example is available below](#example-wrapper) as well.
 
 - 3: **`attempt_client_update(target_filepath)`**:
     - Purpose:
-        Refreshes metadata and causes the client to attempt to (obtain and)
-        validate a particular target,
-        along with all metadata required to do so in a secure manner conforming to
-        the TUF specification.
+        Cause the client to attempt to refresh metadata from the repository
+        and obtain and validate a particular target, in a secure manner
+        conforming to the TUF specification.
 
         This function will have to translate Updater behavior/output into the
-        return values (below) that the Tester expects, based on
-        whether or not the Updater detects a particular attack. `update_client`
-        must return the appropriate code to the Tester, which will evaluate them
-        against what it expects.
+        return values (below) that the Tester expects, based on whether or not
+        the Updater updates successfully. It must return the appropriate value
+        to the Tester, which will evaluate this return value against what it
+        expects.
 
     - Arguments:
         - `target_filepath`:
@@ -521,7 +520,7 @@ TUF Reference Implementation. (This can also be seen
     This is an example of a Wrapper module, which enables the Conformance Tester
     (as described in TUF TAP 7) to communicate with a particular TUF-conformant
     Updater implementation - in this case, the pre-TAP4 TUF Reference
-    Implementation (configuration file option tap4-support: false).
+    Implementation (configuration file option tap_4_support: false).
 
     The Conformance Tester will call the functions listed here in order to
     perform the tests necessary to ascertain the conformance of the Updater to
@@ -556,14 +555,10 @@ TUF Reference Implementation. (This can also be seen
       Sets the client's initial state up for a future test, providing it with
       metadata to be treated as already-validated.
 
-      Note that the full function docstring is available in the text of TAP 7.
+      The full function docstring is available in the text of TAP 7 and in
+      tap7_wrapper_skeleton.py.
     """
-    # Client Setup
     global updater
-    global server_process
-
-    # End hosting from any previous test.
-    kill_server()
 
     # Initialize the Updater implementation. We'll put trusted client files in
     # directory 'client', copying some of them from the provided metadata.
@@ -586,12 +581,30 @@ TUF Reference Implementation. (This can also be seen
     updater = tuf.client.updater.Updater('test_repo', repository_mirrors)
 
 
+
+
+
+  def set_up_repositories(test_data_dir, keys, instructions):
+    """
+      Sets the repository files that will be available to the Updater when
+      attempt_client_update runs.
+
+      The full function docstring is available in the text of TAP 7 and in
+      tap7_wrapper_skeleton.py.
+    """
+    global server_process
+
+    # End hosting from any previous test.
+    kill_server()
+
     # Repository Setup
 
     # Copy the provided metadata into a directory that we'll host.
     if os.path.exists('hosted'):
       shutil.rmtree('hosted')
-    shutil.copytree(trusted_data_dir + '/test_repo', 'hosted')
+    assert os.path.exists(test_data_dir + '/test_repo'), 'Invalid ' + \
+        'test_data_dir - we expect a test_repo directory.'
+    shutil.copytree(test_data_dir + '/test_repo', 'hosted')
 
     # Start up hosting for the repository.
     os.chdir('hosted')
@@ -610,43 +623,6 @@ TUF Reference Implementation. (This can also be seen
 
 
 
-  def set_up_repositories(test_data_dir, keys, instructions):
-    """
-      Sets the repository files that will be made available to the Updater when
-      attempt_client_update runs.
-
-      The full docstring is available above, in the text of TAP 7.
-    """
-
-    # Replace the existing repository files with the new ones.
-    # The commands here are somewhat awkward in order to try to achieve a quick
-    # swap-in for live-hosted files using individually-atomic move commands.
-
-    # Destroy any lingering temp directories.
-    if os.path.exists('temp_metadata'):
-      shutil.rmtree('temp_metadata')
-    if os.path.exists('temp_targets'):
-      shutil.rmtree('temp_targets')
-    if os.path.exists('old_metadata'):
-      shutil.rmtree('old_metadata')
-    if os.path.exists('old_targets'):
-      shutil.rmtree('old_targets')
-
-    metadata_directory = test_data_dir + '/test_repo/metadata'
-    targets_directory = test_data_dir + '/test_repo/targets'
-
-    # Copy the contents of the provided test_data_dir to temp directories that
-    # we'll move into place afterwards.
-    shutil.copytree(metadata_directory, 'temp_metadata')
-    shutil.copytree(targets_directory, 'temp_targets')
-    shutil.move('hosted/metadata', 'old_metadata')
-    shutil.move('temp_metadata', 'hosted/metadata')
-    shutil.move('hosted/targets', 'old_targets')
-    shutil.move('temp_targets', 'hosted/targets')
-    shutil.rmtree('old_targets')
-    shutil.rmtree('old_metadata')
-
-
 
   def attempt_client_update(target_filepath):
     """
@@ -656,10 +632,9 @@ TUF Reference Implementation. (This can also be seen
       along with all metadata required to do so in a secure manner conforming to
       the TUF specification.
 
-      The full docstring is available above, in the text of TAP 7.
+      The full function docstring is available in the text of TAP 7 and in
+      tap7_wrapper_skeleton.py.
     """
-
-
 
     try:
       # Run the updater. Refresh top-level metadata and try updating
@@ -673,9 +648,9 @@ TUF Reference Implementation. (This can also be seen
       # following the Client Workflow instructions (TUF specification section
       # 5.1).
       # If the calls above haven't raised errors, then the file has downloaded
-      # and validated and all metadata checks succeeded from at least one mirror,
-      # so we can return 0 here. For good measure, we check to make sure the
-      # file exists where we expect it.
+      # and validated and all metadata checks succeeded on metadata from at least
+      # one mirror, so we can return 0 here. For good measure, we check to make
+      # sure the file exists where we expect it.
       if os.path.exists('client/validated_targets/' + target_filepath):
         return 0
       else:
@@ -696,6 +671,7 @@ TUF Reference Implementation. (This can also be seen
 
 
 
+
   # This function is not related to any Wrapper requirement; it's just here to
   # clean things up after we're done.
   def kill_server():
@@ -708,6 +684,7 @@ TUF Reference Implementation. (This can also be seen
       print('Killing server process with pid: ' + str(server_process.pid))
       server_process.kill()
       server_process = None
+    atexit.unregister(kill_server) # Avoid running kill_server multiple times.
 ```
 
 
