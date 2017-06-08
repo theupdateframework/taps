@@ -46,11 +46,9 @@ def set_up_initial_client_metadata(trusted_data_dir, keys, instructions):
     Sets the client's initial state up for a future test, providing it with
     metadata to be treated as already-validated.
 
-    Note that the full function docstring is available in the text of TAP 7
-    and in tap7_wrapper_skeleton.py.
+    The full function docstring is available in the text of TAP 7 and in
+    tap7_wrapper_skeleton.py.
   """
-
-  # Client Setup
   global updater
 
   # Initialize the Updater implementation. We'll put trusted client files in
@@ -82,8 +80,8 @@ def set_up_repositories(test_data_dir, keys, instructions):
     Sets the repository files that will be available to the Updater when
     attempt_client_update runs.
 
-    Note that the full function docstring is available in the text of TAP 7
-    and in tap7_wrapper_skeleton.py.
+    The full function docstring is available in the text of TAP 7 and in
+    tap7_wrapper_skeleton.py.
   """
   global server_process
 
@@ -125,8 +123,8 @@ def attempt_client_update(target_filepath):
     along with all metadata required to do so in a secure manner conforming to
     the TUF specification.
 
-    Note that the full function docstring is available in the text of TAP 7
-    and in tap7_wrapper_skeleton.py.
+    The full function docstring is available in the text of TAP 7 and in
+    tap7_wrapper_skeleton.py.
   """
 
   try:
@@ -141,9 +139,9 @@ def attempt_client_update(target_filepath):
     # following the Client Workflow instructions (TUF specification section
     # 5.1).
     # If the calls above haven't raised errors, then the file has downloaded
-    # and validated and all metadata checks succeeded at at least one mirror,
-    # so we can return 0 here. For good measure, we check to make sure the
-    # file exists where we expect it.
+    # and validated and all metadata checks succeeded on metadata from at least
+    # one mirror, so we can return 0 here. For good measure, we check to make
+    # sure the file exists where we expect it.
     if os.path.exists('client/validated_targets/' + target_filepath):
       return 0
     else:

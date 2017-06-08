@@ -1,5 +1,5 @@
 """
-Sample tester script.
+Sample tester code.
 
 The Tester will execute tests along these lines.
 
