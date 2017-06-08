@@ -298,7 +298,15 @@ is available, and an [example is available below](#example-wrapper) as well.
           The data provided for
           `set_up_initial_client_metadata` should be treated as already validated.
 
-          Contents of `trusted_data_dir`:
+          In most cases, the contents of `trusted_data_dir` will simply be:
+            ```
+            - map.json // if TAP 4 is supported
+            - test_repo
+                     |-metadata
+                          |- root.json
+            ```
+
+          But more may be provided:
             ```
             - map.json   // see TAP 4
             - <repository_1_name>
@@ -310,25 +318,11 @@ is available, and an [example is available below](#example-wrapper) as well.
                               |- <a delegated role>.json
                               |- <another delegated role>.json
                               |   ...
-                        |- targets
-                              |- <some_target.img>
-                              |-  ...
             - <repository_2_name>
                         |- metadata
                               |- root.json
                         // etc.
             ```
-          In most cases, this will contain simply:
-            ```
-            - map.json // if TAP 4 is supported
-            - test_repo
-                     |- root.json
-            ```
-
-          Filepaths in the targets directory map directly to the filepaths
-          used to identify targets in the repository. For example, a target
-          identified in metadata with the filepath 'package1/tarball.tar' would
-          be found in 'targets/package1/tarball.tar'.
 
         - `keys`:
           If the Updater can process signatures in TUF's default metadata, then
@@ -428,8 +422,32 @@ is available, and an [example is available below](#example-wrapper) as well.
           treated normally by the Updater (not as initially-shipped, trusted
           data, that is).
           The directory contents will have the same structure as those of
-          `map.json` file.
-          `trusted_data_dir` in `set_up_initial_client_metadata` above, but lacking a
+          `trusted_data_dir` in `set_up_initial_client_metadata` above, but
+          will lack a `map.json` file (regardless of TAP 4 support), and will
+          have `targets` directories alongside each repository's `metadata`
+          directory. For example:
+            ```
+            - <repository_1_name>
+                        |- metadata
+                              |- root.json
+                              |- timestamp.json
+                              |- snapshot.json
+                              |- targets.json
+                              |- <a delegated role>.json
+                              |- <another delegated role>.json
+                              |   ...
+                        |- targets
+                              |- <some_target.img>
+                              |-  ...
+            - <repository_2_name>
+                        |- metadata
+                              |- root.json
+                        // etc.
+            ```
+          Filepaths in the targets directory map directly to the filepaths
+          used to identify targets in the repository. For example, a target
+          identified in metadata with the filepath 'package1/tarball.tar' would
+          be found in 'targets/package1/tarball.tar'.
 
         - `keys`:
           See `set_up_initial_client_metadata` above.

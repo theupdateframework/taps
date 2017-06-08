@@ -46,7 +46,8 @@ def set_up_initial_client_metadata(trusted_data_dir, keys, instructions):
     Sets the client's initial state up for a future test, providing it with
     metadata to be treated as already-validated.
 
-    Note that the full function docstring is available in the text of TAP 7.
+    Note that the full function docstring is available in the text of TAP 7
+    and in tap7_wrapper_skeleton.py.
   """
 
   # Client Setup
@@ -175,39 +176,9 @@ def attempt_client_update(target_filepath):
     along with all metadata required to do so in a secure manner conforming to
     the TUF specification.
 
-    This function will have to translate Updater behavior/output into the
-    return values (below) that the Tester expects, based on
-    whether or not the Updater detects a particular attack. update_client
-    must return the appropriate code to the Tester, which will evaluate them
-    against what it expects.
-
-  <Arguments>
-    target_filepath
-      The path of a target file that the Updater should try to update.
-      This must be inside the targets_directory directory provided to
-      update_repo, and it should be written relative to
-      targets_directory. As noted previously, it is not necessary for the
-      Updater to have a notion of files; update_client may abstract this
-      away.
-
-  <Returns>
-
-    An integer describing the result of the attempted update. This value is
-    what the Tester is ultimately testing.
-
-    return value     outcome
-    -----------      ------
-    0                SUCCESS: target identified by target_filepath has been
-                     obtained from one of the mirrors and validated per
-                     trustworthy metadata
-    1                FAILURE/rejection: unable to obtain a target identified
-                     by target_filepath from any of the known mirrors that
-                     is valid according to trustworthy metadata
-    2                an unknown error has occurred (never expected, but
-                     helpful to provide for test output)
+    Note that the full function docstring is available in the text of TAP 7
+    and in tap7_wrapper_skeleton.py.
   """
-
-
 
   try:
     # Run the updater. Refresh top-level metadata and try updating
@@ -240,6 +211,7 @@ def attempt_client_update(target_filepath):
 
   except:
     return 2
+
 
 
 

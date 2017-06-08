@@ -45,15 +45,21 @@ def set_up_initial_client_metadata(trusted_data_dir, keys, instructions):
           file.
 
           This structure allows for optional multi-repository support per
-          [TAP 4](tap4.md). If TAP 4 is not supported (See
-          [Configuration File](#configuration-file)), then map.json will be
+          (tap4.md). If TAP 4 is not supported (See
+          tap7.md#configuration-file-specification), then map.json will be
           excluded, and there will only be one repository directory, named
           test_repo.
 
           The data provided for
           set_up_initial_client_metadata should be treated as already validated.
 
-          Contents of trusted_data_dir:
+          In most cases, the contents of trusted_data_dir will simply be:
+            - map.json // if TAP 4 is supported
+            - test_repo
+                     |-metadata
+                          |- root.json
+
+          But more may be provided:
             - map.json   // see TAP 4
             - <repository_1_name>
                         |- metadata
@@ -64,26 +70,20 @@ def set_up_initial_client_metadata(trusted_data_dir, keys, instructions):
                               |- <a delegated role>.json
                               |- <another delegated role>.json
                               |   ...
-                        |- targets
-                              |- <some_target.img>
-                              |-  ...
             - <repository_2_name>
                         |- metadata
                               |- root.json
                         // etc.
-          In most cases, this will contain simply:
-            - map.json // if TAP 4 is supported
-            - test_repo
-                     |- root.json
 
       keys
           If the Updater can process signatures in TUF's default metadata, then
-          you SHOULD IGNORE this argument.
+          the Wrapper SHOULD IGNORE this argument.
           This is provided only in case the metadata format the Updater expects
           signatures to be made over is not the same as the metadata format that
-          TUF signs over (canonicalized JSON).
-          If the Updater uses a different metadata format, then you may need to
-          re-sign the metadata the Tester provides in the trusted_data_dir.
+          the TUF reference implementation signs over (canonicalized JSON).
+          If the Updater uses a different metadata format, then the Wrapper may
+          need to re-sign the metadata the Tester provides in the
+          trusted_data_dir.
           This dict contains the signing keys that can be used to re-sign the
           metadata. The format of this dictionary of keys is as follows.
           (Note that the individual keys resemble ANYKEY_SCHEMA in the
@@ -107,6 +107,10 @@ def set_up_initial_client_metadata(trusted_data_dir, keys, instructions):
 
               <repository_2_name>: {...}
             }
+
+            This listing indicates what key(s) should be used to sign each role
+            in the test metadata. Sometimes (in the case of some attacks),
+            these will not be the correct keys for the role.
 
           Here's an excerpt from a particular example:
           {
@@ -134,17 +138,22 @@ def set_up_initial_client_metadata(trusted_data_dir, keys, instructions):
             'director': {
               {'root': [{
                 ...
+
       instructions
         If the Updater can process signatures in TUF's default metadata, then
-        you SHOULD IGNORE this argument.
+        the Wrapper SHOULD IGNORE this argument.
         This, too, is provided only in case the metadata format the Updater
         expects signatures to be made over is not the same as the metadata
-        format that TUF signs over (canonicalized JSON).
-        If you'll be re-signing the metadata provided here, then this
-        dictionary of instructions will tell you what, if any, modifications
+        format that the TUF reference implementation signs over
+        (canonicalized JSON).
+        If the Wrapper will be re-signing the metadata provided here, then
+        this
+        dictionary of instructions will tell list what, if any, modifications
         to make. For example, {'invalidate_signature': True} instructs that
         the signature be made and then some byte(s) in it be modified so that
-        it is no longer a valid signature over the metadata.
+        it is no longer a valid signature over the metadata. Most tests
+        should not require this, but some may; this should be documented in
+        the list of test cases and the Tester documentation.
 
   <Returns>
     None
@@ -168,7 +177,7 @@ def set_up_initial_client_metadata(trusted_data_dir, keys, instructions):
   # for example).
   # This might entail adding it to a database, or whatever mechanism the
   # client employs to store this trusted information. For the TUF Reference
-  # Implementation, this simplky involves moving the metadata into client
+  # Implementation, this simply involves moving the metadata into client
   # directory <repository_name>/metadata/current directory.)
   # -----
 
