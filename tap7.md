@@ -239,7 +239,7 @@ tap4-support: false
 The Wrapper must implement three functions. These are specified in detail
 [below](#wrapper-functions). In brief, the Tester will call the Wrapper's
 `set_up_initial_client_metadata` and `set_up_repositories` functions to assign
-initial trusted metadata to the client and put metadata and targets on the
+initial trusted metadata to the client, and put metadata and targets on the
 repository, respectively. After this, the Tester will call the Wrapper's
 `attempt_client_update` function to perform the test itself, instructing the
 client to try to update. The Tester will judge the correctness of the result
@@ -604,7 +604,7 @@ TUF Reference Implementation. (This can also be seen
     # Copy the provided metadata into a directory that we'll host.
     if os.path.exists('hosted'):
       shutil.rmtree('hosted')
-    assert os.path.exists(test_data_dir + '/test_repo'), 'Invalid ' + \
+    assert os.path.exists(test_data_dir + '/test_repo'), 'Invalid ' \
         'test_data_dir - we expect a test_repo directory.'
     shutil.copytree(test_data_dir + '/test_repo', 'hosted')
 

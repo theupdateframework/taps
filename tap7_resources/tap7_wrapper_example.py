@@ -93,7 +93,7 @@ def set_up_repositories(test_data_dir, keys, instructions):
   # Copy the provided metadata into a directory that we'll host.
   if os.path.exists('hosted'):
     shutil.rmtree('hosted')
-  assert os.path.exists(test_data_dir + '/test_repo'), 'Invalid ' + \
+  assert os.path.exists(test_data_dir + '/test_repo'), 'Invalid ' \
       'test_data_dir - we expect a test_repo directory.'
   shutil.copytree(test_data_dir + '/test_repo', 'hosted')
 
