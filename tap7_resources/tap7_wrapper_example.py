@@ -13,9 +13,9 @@
   the TUF spec.
 
   The following three functions must be defined:
-   - initialize_updater
-   - update_repo
-   - update_client
+   - set_up_initial_client_metadata
+   - set_up_repositories
+   - attempt_client_update
  """
 # Python 2/3 compatibility
 from __future__ import print_function
@@ -41,17 +41,15 @@ from tuf.exceptions import *
 updater = None
 server_process = None
 
-def initialize_updater(trusted_data_dir, keys, instructions):
+def set_up_initial_client_metadata(trusted_data_dir, keys, instructions):
   """
     Sets the client's initial state up for a future test, providing it with
     metadata to be treated as already-validated.
 
-    Note that the full function docstring is available in the text of TAP 7.
+    The full function docstring is available in the text of TAP 7 and in
+    tap7_wrapper_skeleton.py.
   """
-
-  # Client Setup
   global updater
-  global server_process
 
   # Initialize the Updater implementation. We'll put trusted client files in
   # directory 'client', copying some of them from the provided metadata.
@@ -74,12 +72,30 @@ def initialize_updater(trusted_data_dir, keys, instructions):
   updater = tuf.client.updater.Updater('test_repo', repository_mirrors)
 
 
+
+
+
+def set_up_repositories(test_data_dir, keys, instructions):
+  """
+    Sets the repository files that will be available to the Updater when
+    attempt_client_update runs.
+
+    The full function docstring is available in the text of TAP 7 and in
+    tap7_wrapper_skeleton.py.
+  """
+  global server_process
+
+  # End hosting from any previous test.
+  kill_server()
+
   # Repository Setup
 
   # Copy the provided metadata into a directory that we'll host.
   if os.path.exists('hosted'):
     shutil.rmtree('hosted')
-  shutil.copytree(trusted_data_dir + '/test_repo', 'hosted')
+  assert os.path.exists(test_data_dir + '/test_repo'), 'Invalid ' \
+      'test_data_dir - we expect a test_repo directory.'
+  shutil.copytree(test_data_dir + '/test_repo', 'hosted')
 
   # Start up hosting for the repository.
   os.chdir('hosted')
@@ -99,72 +115,7 @@ def initialize_updater(trusted_data_dir, keys, instructions):
 
 
 
-def update_repo(test_data_dir, keys, instructions):
-  """
-  <Purpose>
-    Sets the repository files that will be made available to the Updater when
-    update_client runs.
-
-  <Arguments>
-
-      test_data_dir
-        This will be the path of the directory containing files that the
-        Updater should find when it attempts to update. This data should be
-        treated normally by the Updater (not as initially-shipped, trusted
-        data, that is, unlike trusted_data_dir in initialize_updater).
-        The directory contents will have the same structure as those of
-        'trusted_data_dir' in 'initialize_updater' above, but lacking a
-        'map.json' file (even with TAP 4 support on).
-
-      keys
-        If the Updater can process signatures in TUF's default metadata, then
-        you SHOULD IGNORE this argument.
-
-        As above - see in initialize_updater
-
-      instructions
-        If the Updater can process signatures in TUF's default metadata, then
-        you SHOULD IGNORE this argument.
-
-        As above - see in initialize_updater
-
-  <Returns>
-    None
-  """
-
-  # Replace the existing repository files with the new ones.
-  # The commands here are somewhat awkward in order to try to achieve a quick
-  # swap-in for live-hosted files using individually-atomic move commands.
-
-  # Destroy any lingering temp directories.
-  if os.path.exists('temp_metadata'):
-    shutil.rmtree('temp_metadata')
-  if os.path.exists('temp_targets'):
-    shutil.rmtree('temp_targets')
-  if os.path.exists('old_metadata'):
-    shutil.rmtree('old_metadata')
-  if os.path.exists('old_targets'):
-    shutil.rmtree('old_targets')
-
-  metadata_directory = test_data_dir + '/test_repo/metadata'
-  targets_directory = test_data_dir + '/test_repo/targets'
-
-  # Copy the contents of the provided test_data_dir to temp directories that
-  # we'll move into place afterwards.
-  shutil.copytree(metadata_directory, 'temp_metadata')
-  shutil.copytree(targets_directory, 'temp_targets')
-  shutil.move('hosted/metadata', 'old_metadata')
-  shutil.move('temp_metadata', 'hosted/metadata')
-  shutil.move('hosted/targets', 'old_targets')
-  shutil.move('temp_targets', 'hosted/targets')
-  shutil.rmtree('old_targets')
-  shutil.rmtree('old_metadata')
-
-
-
-
-
-def update_client(target_filepath):
+def attempt_client_update(target_filepath):
   """
   <Purpose>
     Refreshes metadata and causes the client to attempt to (obtain and)
@@ -172,39 +123,9 @@ def update_client(target_filepath):
     along with all metadata required to do so in a secure manner conforming to
     the TUF specification.
 
-    This function will have to translate Updater behavior/output into the
-    return values (below) that the Tester expects, based on
-    whether or not the Updater detects a particular attack. update_client
-    must return the appropriate code to the Tester, which will evaluate them
-    against what it expects.
-
-  <Arguments>
-    target_filepath
-      The path of a target file that the Updater should try to update.
-      This must be inside the targets_directory directory provided to
-      update_repo, and it should be written relative to
-      targets_directory. As noted previously, it is not necessary for the
-      Updater to have a notion of files; update_client may abstract this
-      away.
-
-  <Returns>
-
-    An integer describing the result of the attempted update. This value is
-    what the Tester is ultimately testing.
-
-    return value     outcome
-    -----------      ------
-    0                SUCCESS: target identified by target_filepath has been
-                     obtained from one of the mirrors and validated per
-                     trustworthy metadata
-    1                FAILURE/rejection: unable to obtain a target identified
-                     by target_filepath from any of the known mirrors that
-                     is valid according to trustworthy metadata
-    2                an unknown error has occurred (never expected, but
-                     helpful to provide for test output)
+    The full function docstring is available in the text of TAP 7 and in
+    tap7_wrapper_skeleton.py.
   """
-
-
 
   try:
     # Run the updater. Refresh top-level metadata and try updating
@@ -218,9 +139,9 @@ def update_client(target_filepath):
     # following the Client Workflow instructions (TUF specification section
     # 5.1).
     # If the calls above haven't raised errors, then the file has downloaded
-    # and validated and all metadata checks succeeded at at least one mirror,
-    # so we can return 0 here. For good measure, we check to make sure the
-    # file exists where we expect it.
+    # and validated and all metadata checks succeeded on metadata from at least
+    # one mirror, so we can return 0 here. For good measure, we check to make
+    # sure the file exists where we expect it.
     if os.path.exists('client/validated_targets/' + target_filepath):
       return 0
     else:
@@ -241,6 +162,7 @@ def update_client(target_filepath):
 
 
 
+
 # This function is not related to any Wrapper requirement; it's just here to
 # clean things up after we're done.
 def kill_server():
@@ -248,6 +170,9 @@ def kill_server():
   Kills the forked process that is hosting the repositories via Python's
   simple HTTP server
   """
+  global server_process
   if server_process is not None:
     print('Killing server process with pid: ' + str(server_process.pid))
     server_process.kill()
+    server_process = None
+  atexit.unregister(kill_server) # Avoid running kill_server multiple times.

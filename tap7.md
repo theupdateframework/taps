@@ -203,11 +203,11 @@ the location of a configuration file.
 The configuration file includes the name of the module that provides the
 Wrapper functions specified above, along with any necessary restrictions on
 TUF functionality, such as the list of
-cryptographic key types supported by the Updater, the number of root keys,
-thresholds, etc.  The configuration file is needed because restrictions
-are not shared equally across all implementations.
+cryptographic key types supported by the Updater.  The configuration file is
+needed because restrictions are not shared equally across all implementations.
 For example, the Go implementation might only support ECDSA keys, whereas
-another might support Ed25519 and RSA keys.
+another might support Ed25519 and RSA keys. The full list of configuration
+options will be provided in documentation for the Conformance Tester.
 
 An example of a `.tuf-tester.yml` configuration file for an Updater:
 
@@ -230,42 +230,42 @@ mirror-support: false
 # If TAP 4 (multi-repository / map file support) is not supported, set to
 # false. (Default is true.)
 tap4-support: false
-...
 ```
 
 
 
 ## Wrapper Specification
 
-The Wrapper must implement the three functions specified
-[below](#wrapper-functions). The Tester will use them in this manner:
-- The Tester will call the Wrapper's `initialize_updater` function to provide
-initial trusted metadata.
-- For each test case, the Tester will call the Wrapper's `update_repo` function
-with unvalidated new metadata and targets. This metadata will describe a new
-target not included in data provided to the earlier `initialize_updater` call.
-- The Tester will call the Wrapper's `update_client` function to instruct the
-Updater to try updating to the new target. `update_client` will return a value
-indicating success or failure. Based upon that value, the Tester will judge
-the behavior of the Updater in the provided test case conformant or
-non-conformant.
+The Wrapper must implement three functions. These are specified in detail
+[below](#wrapper-functions). In brief, the Tester will call the Wrapper's
+`set_up_initial_client_metadata` and `set_up_repositories` functions to assign
+initial trusted metadata to the client, and put metadata and targets on the
+repository, respectively. After this, the Tester will call the Wrapper's
+`attempt_client_update` function to perform the test itself, instructing the
+client to try to update. The Tester will judge the correctness of the result
+based on the return value from `attempt_client_update` that indicates success
+or failure to update.
 
-Note also, however, that because Updater implementations may vary
-substantially, the Wrapper may need to perform additional work, such as:
- - Calling an external binary with, e.g., the subprocess module, in order to
- run an Updater implementation that is not in Python.
- - Moving metadata or target files into the directory structure the Updater
- implementation expects
- - If, e.g., the Updater doesn't have a notion of a filesystem, the Wrapper may
- need to read the files the tester provides and distribute data to the Updater
- in the manner the Updater expects.
- - Translate metadata from the format the tester provides into the custom
- format the Updater expects, potentially re-signing metadata if the Updater
- will expect signatures over a different format
- - If the Updater's communication model involves different synchronization
- (e.g. server push vs client pull), the update_client() Wrapper function will
- need to bridge this; for example, it may need to wait and collect results from
- some separate process.
+Beyond the base functionality specified, because different Updaters may
+operate very differently, the Wrapper functions may have other work to do. The
+[Dealing with Implementation Restrictions](#dealing-with-implementation-restrictions)
+section below addresses a variety of such scenarios in detail. Here are some
+examples to keep in mind while reading the specification. Wrapper functions
+might:
+ - use subprocess to call an external binary to run a non-Python Updater.
+ - move metadata or target files into the directory structure an Updater
+ implementation expects.
+ - if, e.g., the Updater doesn't have a notion of a filesystem, read the files
+ the Tester provides and distribute data to the Updater in the manner the
+ Updater expects.
+ - if the Updater uses a different metadata format, translate
+ metadata from the format the Tester provides into the format the Updater
+ expects.
+ - if the Updater requires signatures to be over a different format, re-sign
+ metadata after translating it.
+ - bridge different communication models - for example, if the Updater's
+ communication model involves server push vs client pull, or if there will need
+ to be asynchronous events to wait for and collect results from.
 
 
 ### Wrapper Functions
@@ -275,7 +275,7 @@ called by the Tester.
 [A skeletal module defining the functions](tap7_resources/tap7_wrapper_skeleton.py)
 is available, and an [example is available below](#example-wrapper) as well.
 
-- 1: **`initialize_updater(trusted_data_dir, keys, instructions)`**:
+- 1: **`set_up_initial_client_metadata(trusted_data_dir, keys, instructions)`**:
     - Purpose:
         Sets the client's initial state up for a future test, providing it with
         metadata to be treated as already-validated. A client Updater delivered
@@ -298,9 +298,17 @@ is available, and an [example is available below](#example-wrapper) as well.
           `test_repo`.
 
           The data provided for
-          `initialize_updater` should be treated as already validated.
+          `set_up_initial_client_metadata` should be treated as already validated.
 
-          Contents of `trusted_data_dir`:
+          In most cases, the contents of `trusted_data_dir` will simply be:
+            ```
+            - map.json // if TAP 4 is supported
+            - test_repo
+                     |-metadata
+                          |- root.json
+            ```
+
+          But more may be provided:
             ```
             - map.json   // see TAP 4
             - <repository_1_name>
@@ -312,33 +320,20 @@ is available, and an [example is available below](#example-wrapper) as well.
                               |- <a delegated role>.json
                               |- <another delegated role>.json
                               |   ...
-                        |- targets
-                              |- <some_target.img>
-                              |-  ...
             - <repository_2_name>
                         |- metadata
                               |- root.json
                         // etc.
             ```
-          In most cases, this will contain simply:
-            ```
-            - map.json // if TAP 4 is supported
-            - test_repo
-                     |- root.json
-            ```
-
-          filepaths in the targets directory map directly to the filepaths
-          used to identify targets in the repository. For example, a target
-          identified in metadata with the filepath 'package1/tarball.tar' will
-          be found in 'targets/package1/tarball.tar'.
 
         - `keys`:
           If the Updater can process signatures in TUF's default metadata, then
-          you SHOULD IGNORE this argument.
+          the Wrapper SHOULD IGNORE this argument.
           This is provided only in case the metadata format the Updater expects
           signatures to be made over is not the same as the metadata format that
           the TUF reference implementation signs over (canonicalized JSON).
-          If the Updater uses a different metadata format, then you may need to
+          If the Updater uses a different metadata format, then the Wrapper may
+          need to
           re-sign the metadata the Tester provides in the `trusted_data_dir`.
           This dict contains the signing keys that can be used to re-sign the
           metadata. The format of this dictionary of keys is as follows.
@@ -364,6 +359,10 @@ is available, and an [example is available below](#example-wrapper) as well.
               <repository_2_name>: {...}
             }
             ```
+
+            This listing indicates what key(s) should be used to sign each role
+            in the test metadata. Sometimes (in the case of some attacks),
+            these will not be the correct keys for the role.
 
           Here's an excerpt from a particular example:
           ```javascript
@@ -396,22 +395,23 @@ is available, and an [example is available below](#example-wrapper) as well.
 
         - `instructions`:
           If the Updater can process signatures in TUF's default metadata, then
-          you SHOULD IGNORE this argument.
+          the Wrapper SHOULD IGNORE this argument.
           This, too, is provided only in case the metadata format the Updater
           expects signatures to be made over is not the same as the metadata
           format that the TUF reference implementation signs over
           (canonicalized JSON).
-          If you'll be re-signing the metadata provided here, then this
-          dictionary of instructions will tell you what, if any, modifications
+          If the Wrapper will be re-signing the metadata provided here, then
+          this
+          dictionary of instructions will tell list what, if any, modifications
           to make. For example, {'invalidate_signature': True} instructs that
           the signature be made and then some byte(s) in it be modified so that
           it is no longer a valid signature over the metadata. Most tests
           should not require this, but some may; this should be documented in
-          the list of test cases.
+          the list of test cases and the Tester documentation.
 
     - Returns: None
 
-- 2: **`update_repo(test_data_dir, keys, instructions)`**:
+- 2: **`set_up_repositories(test_data_dir, keys, instructions)`**:
     - Purpose:
         Sets the repository files, metadata and targets. This will be the
         data that should be made available to the Updater when the Updater
@@ -424,39 +424,62 @@ is available, and an [example is available below](#example-wrapper) as well.
           treated normally by the Updater (not as initially-shipped, trusted
           data, that is).
           The directory contents will have the same structure as those of
-          `trusted_data_dir` in `initialize_updater` above, but lacking a
-          `map.json` file.
+          `trusted_data_dir` in `set_up_initial_client_metadata` above, but
+          will lack a `map.json` file (regardless of TAP 4 support), and will
+          have `targets` directories alongside each repository's `metadata`
+          directory. For example:
+            ```
+            - <repository_1_name>
+                        |- metadata
+                              |- root.json
+                              |- timestamp.json
+                              |- snapshot.json
+                              |- targets.json
+                              |- <a delegated role>.json
+                              |- <another delegated role>.json
+                              |   ...
+                        |- targets
+                              |- <some_target.img>
+                              |-  ...
+            - <repository_2_name>
+                        |- metadata
+                              |- root.json
+                        // etc.
+            ```
+          Filepaths in the targets directory map directly to the filepaths
+          used to identify targets in the repository. For example, a target
+          identified in metadata with the filepath 'package1/tarball.tar' would
+          be found in 'targets/package1/tarball.tar'.
 
         - `keys`:
-          See `initialize_updater` above.
+          See `set_up_initial_client_metadata` above.
 
         - `instructions`:
-          See `initialize_updater` above.
+          See `set_up_initial_client_metadata` above.
 
     - Returns: None
 
 
-- 3: **`update_client(target_filepath)`**:
+- 3: **`attempt_client_update(target_filepath)`**:
     - Purpose:
-        Refreshes metadata and causes the client to attempt to (obtain and)
-        validate a particular target,
-        along with all metadata required to do so in a secure manner conforming to
-        the TUF specification.
+        Cause the client to attempt to refresh metadata from the repository
+        and obtain and validate a particular target, in a secure manner
+        conforming to the TUF specification.
 
         This function will have to translate Updater behavior/output into the
-        return values (below) that the Tester expects, based on
-        whether or not the Updater detects a particular attack. `update_client`
-        must return the appropriate code to the Tester, which will evaluate them
-        against what it expects.
+        return values (below) that the Tester expects, based on whether or not
+        the Updater updates successfully. It must return the appropriate value
+        to the Tester, which will evaluate this return value against what it
+        expects.
 
     - Arguments:
         - `target_filepath`:
           The path of a target file that the Updater should try to update.
-          This must be inside the `targets_directory` directory provided to
-          `update_repo`, and it should be written relative to
+          This must be inside the directory `targets_directory`, provided to
+          the `set_up_repositories` call, and it should be written relative to
           `targets_directory`. As noted previously, it is not necessary for the
-          Updater to have a notion of files; `update_client` may abstract this
-          away.
+          Updater to have a notion of a filesystem; `attempt_client_update` may
+          abstract this away.
 
     - Returns:
         An integer describing the result of the attempted update. This value is
@@ -499,7 +522,7 @@ TUF Reference Implementation. (This can also be seen
     This is an example of a Wrapper module, which enables the Conformance Tester
     (as described in TUF TAP 7) to communicate with a particular TUF-conformant
     Updater implementation - in this case, the pre-TAP4 TUF Reference
-    Implementation (configuration file option tap4-support: false).
+    Implementation (configuration file option tap_4_support: false).
 
     The Conformance Tester will call the functions listed here in order to
     perform the tests necessary to ascertain the conformance of the Updater to
@@ -529,16 +552,15 @@ TUF Reference Implementation. (This can also be seen
   updater = None
   server_process = None
 
-  def initialize_updater(trusted_data_dir, keys, instructions):
+  def set_up_initial_client_metadata(trusted_data_dir, keys, instructions):
     """
       Sets the client's initial state up for a future test, providing it with
       metadata to be treated as already-validated.
 
-      Note that the full function docstring is available in the text of TAP 7.
+      The full function docstring is available in the text of TAP 7 and in
+      tap7_wrapper_skeleton.py.
     """
-    # Client Setup
     global updater
-    global server_process
 
     # Initialize the Updater implementation. We'll put trusted client files in
     # directory 'client', copying some of them from the provided metadata.
@@ -561,12 +583,30 @@ TUF Reference Implementation. (This can also be seen
     updater = tuf.client.updater.Updater('test_repo', repository_mirrors)
 
 
+
+
+
+  def set_up_repositories(test_data_dir, keys, instructions):
+    """
+      Sets the repository files that will be available to the Updater when
+      attempt_client_update runs.
+
+      The full function docstring is available in the text of TAP 7 and in
+      tap7_wrapper_skeleton.py.
+    """
+    global server_process
+
+    # End hosting from any previous test.
+    kill_server()
+
     # Repository Setup
 
     # Copy the provided metadata into a directory that we'll host.
     if os.path.exists('hosted'):
       shutil.rmtree('hosted')
-    shutil.copytree(trusted_data_dir + '/test_repo', 'hosted')
+    assert os.path.exists(test_data_dir + '/test_repo'), 'Invalid ' \
+        'test_data_dir - we expect a test_repo directory.'
+    shutil.copytree(test_data_dir + '/test_repo', 'hosted')
 
     # Start up hosting for the repository.
     os.chdir('hosted')
@@ -585,45 +625,8 @@ TUF Reference Implementation. (This can also be seen
 
 
 
-  def update_repo(test_data_dir, keys, instructions):
-    """
-      Sets the repository files that will be made available to the Updater when
-      update_client runs.
 
-      The full docstring is available above, in the text of TAP 7.
-    """
-
-    # Replace the existing repository files with the new ones.
-    # The commands here are somewhat awkward in order to try to achieve a quick
-    # swap-in for live-hosted files using individually-atomic move commands.
-
-    # Destroy any lingering temp directories.
-    if os.path.exists('temp_metadata'):
-      shutil.rmtree('temp_metadata')
-    if os.path.exists('temp_targets'):
-      shutil.rmtree('temp_targets')
-    if os.path.exists('old_metadata'):
-      shutil.rmtree('old_metadata')
-    if os.path.exists('old_targets'):
-      shutil.rmtree('old_targets')
-
-    metadata_directory = test_data_dir + '/test_repo/metadata'
-    targets_directory = test_data_dir + '/test_repo/targets'
-
-    # Copy the contents of the provided test_data_dir to temp directories that
-    # we'll move into place afterwards.
-    shutil.copytree(metadata_directory, 'temp_metadata')
-    shutil.copytree(targets_directory, 'temp_targets')
-    shutil.move('hosted/metadata', 'old_metadata')
-    shutil.move('temp_metadata', 'hosted/metadata')
-    shutil.move('hosted/targets', 'old_targets')
-    shutil.move('temp_targets', 'hosted/targets')
-    shutil.rmtree('old_targets')
-    shutil.rmtree('old_metadata')
-
-
-
-  def update_client(target_filepath):
+  def attempt_client_update(target_filepath):
     """
     <Purpose>
       Refreshes metadata and causes the client to attempt to (obtain and)
@@ -631,10 +634,9 @@ TUF Reference Implementation. (This can also be seen
       along with all metadata required to do so in a secure manner conforming to
       the TUF specification.
 
-      The full docstring is available above, in the text of TAP 7.
+      The full function docstring is available in the text of TAP 7 and in
+      tap7_wrapper_skeleton.py.
     """
-
-
 
     try:
       # Run the updater. Refresh top-level metadata and try updating
@@ -648,9 +650,9 @@ TUF Reference Implementation. (This can also be seen
       # following the Client Workflow instructions (TUF specification section
       # 5.1).
       # If the calls above haven't raised errors, then the file has downloaded
-      # and validated and all metadata checks succeeded from at least one mirror,
-      # so we can return 0 here. For good measure, we check to make sure the
-      # file exists where we expect it.
+      # and validated and all metadata checks succeeded on metadata from at least
+      # one mirror, so we can return 0 here. For good measure, we check to make
+      # sure the file exists where we expect it.
       if os.path.exists('client/validated_targets/' + target_filepath):
         return 0
       else:
@@ -671,6 +673,7 @@ TUF Reference Implementation. (This can also be seen
 
 
 
+
   # This function is not related to any Wrapper requirement; it's just here to
   # clean things up after we're done.
   def kill_server():
@@ -678,9 +681,12 @@ TUF Reference Implementation. (This can also be seen
     Kills the forked process that is hosting the repositories via Python's
     simple HTTP server
     """
+    global server_process
     if server_process is not None:
       print('Killing server process with pid: ' + str(server_process.pid))
       server_process.kill()
+      server_process = None
+    atexit.unregister(kill_server) # Avoid running kill_server multiple times.
 ```
 
 
@@ -699,7 +705,8 @@ Suppose, for example, that the Updater implementation supports only signatures
 using Ed25519 keys.
 
 This restriction can be handled by configuring the conformance tool via
-its `.tuf-tester.yml` configuration file. The developer can add:
+its `.tuf-tester.yml` [configuration file](#configuration-file-specification).
+The developer can add:
 ```
 keytype: ed25519
 ```
@@ -711,7 +718,7 @@ specified in the TUF Specification.)
 
 Suppose that metadata that the Updater receives must be encoded in DER (rather
 than JSON). In this case, the Wrapper will need to convert the metadata
-received from the Tester in `initialize_updater` and `update_repo` (specified
+received from the Tester in `set_up_initial_client_metadata` and `set_up_repositories` (specified
 in [Wrapper Functions](#wrapper-functions) above).
 
 For an example of how such code might look, consider the JSON-to-DER converter
@@ -730,7 +737,7 @@ new format (foreign to TUF).
 In the second case, the converted metadata must also be re-signed, so that the
 Updater will be able to correctly validate the metadata.
 
-For this reason, `initialize_updater` and `update_repo` also provide arguments
+For this reason, `set_up_initial_client_metadata` and `set_up_repositories` also provide arguments
 `keys` and `instructions`. The keys in `keys` will allow the Wrapper to
 re-sign the metadata provided in a manner that the Updater will expect. If
 there were manipulations made to the resulting metadata for test purposes
@@ -745,20 +752,18 @@ where metadata or update files are not saved to a file system on the
 device, but are instead stored in the absence of a file system.
 
 In such cases, the Wrapper should take the metadata and target file data
-provided to `initialize_updater` and `update_repo` and provide them to the
-Updater in whatever form it expects.
+provided to `set_up_initial_client_metadata` and `set_up_repositories` and
+provide them to the Updater in whatever form it expects.
 
 
 ## Summary of Steps for Conformance Testing
 In summary, the steps that should be followed to test an Updater for
 conformance to the TUF Specification are as follows:
 
-```
-(1) Fill in the functions in the
-[Wrapper module skeleton]((tap7_resources/tap7_wrapper_skeleton.py)).
-(2) Configure Tester to abide by the adopter's repository restrictions.
-(3) Run Tester and confirm that all tests have passed.
-```
+1. Fill in the functions in the
+[Wrapper module skeleton](tap7_resources/tap7_wrapper_skeleton.py).
+2. Configure Tester to abide by the adopter's repository restrictions.
+3. Run Tester and confirm that all tests have passed.
 
 # Security Analysis
 
