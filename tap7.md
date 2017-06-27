@@ -197,8 +197,9 @@ The format of this dictionary of keys represented in `keys.json` is as follows.
 (Note that the individual keys resemble ANYKEY_SCHEMA in the
 [TUF format definitions](https://github.com/theupdateframework/tuf/blob/develop/tuf/formats.py))
 The format below anticipates the optional use of
-multiple repositories, as provided for in [TAP 4](tap4.md). If TAP 4
-support is disabled, the only repository listed will be `test_repo`.
+multiple repositories, as provided for in [TAP 4](tap4.md). For test data
+provided to support implementations that do not support TAP 4, the only
+repository listed will be `test_repo`.
   ```javascript
   {
     <repository_1_name>: {
