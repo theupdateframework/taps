@@ -85,7 +85,7 @@ from that in production so that test results can represent real updater
 performance.
 
 The official test cases should be publicly
-available and usable by anyone who wishes to test an implementation.
+available so that anyone can use them to test their updater implementation.
 
 
 # Specification
@@ -107,7 +107,7 @@ documentation
 [alongside the TUF Specification](https://github.com/theupdateframework/tuf/blob/develop/docs).
 
 
-## Test Case Specification
+## Test Case Elements
 Each test case will be specified with the following pieces of information:
 - Description
 - Expected Result
@@ -297,6 +297,76 @@ update to.
 
 
 
+## Test Case Specification
+The test cases, containing
+[the elements above (see for details on each element)](#test-case-specification)
+will be provided as a directory of files accompanied by the a JSON file in the
+following JSON format.
+
+```javascript
+[
+  // Each test case is an element in this list.
+  {
+    'description': 'A description of the test case',
+    'expected_result': <either 'success' or 'failure'>,
+    'initial_data': <path to directory containing the metadata to use>,
+    'update_data': <path to directory containing data to use>,
+    'target': <repository filepath of target to try obtaining and updating to>
+  },
+  {
+    ...
+  }
+]
+```
+
+Example:
+```javascript
+[
+  {
+      'description':     'Test 0: Control case, valid test data',
+      'expected_result': 'success',
+      'initial_data':    'test_sets/test0/initial/',
+      'update_data':     'test_sets/test0/repository/',
+      'target':          'target.txt'
+  },
+  {
+      'description':     'Test 1: Defense against metadata replay attacks:
+                         provide a snapshot role that has a lower version than
+                         that already trusted by the client.',
+      'expected_result': 'failure',
+      'initial_data':    'test_sets/test1/initial/',
+      'update_data':     'test_sets/test1/repository/',
+      'target':          'target.txt'
+  },
+  {
+      'description':     'Test 2: Defense against arbitrary package attacks
+                         with no key compromise: provide a target file whose
+                         hash does not match that indicated by trustworthy
+                         metadata.',
+      'expected_result': 'failure',
+      'initial_data':    'test_sets/test2/initial/',
+      'update_data':     'test_sets/test2/repository/',
+      'target':          'target.txt'
+  },
+  {
+      'description':     'Test 3: Acceptance of revoked keys: provide a
+                         target signed by a key no longer trusted by its
+                         delegating role',
+      'expected_result': 'failure',
+      'initial_data':    'test_sets/test3/initial/',
+      'update_data':     'test_sets/test3/repository/',
+      'target':          'target_123.txt'
+  },
+  {
+      'description':     'Test 3C: Control for Test 3',
+      'expected_result': 'success',
+      'initial_data':    'test_sets/test3c/initial/',
+      'update_data':     'test_sets/test3c/repository/',
+      'target':          'target_123.txt'
+  }
+]
+```
+
 
 
 
@@ -321,7 +391,7 @@ examples of what may be necessary:
 
 ### Re-Signing Converted Metadata
 If an updater implementation uses a different metadata format than that
-provided in test data, it becomes necessary to convert it for the updater's
+of the test data, it is necessary to convert test metadata for the updater's
 use. Further, two situations arise depending on the behavior of the updater:
 1. When the updater receives the converted metadata, it converts it back to
 canonical JSON and checks the signatures in this (original) format.
