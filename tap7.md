@@ -1,18 +1,24 @@
 * TAP: 7
 * Title: Conformance testing
-* Version: 1
-* Last-Modified: 05-June-2017
+* Version: 2
+* Last-Modified: 27-June-2017
 * Author: Vladimir Diaz, Sebastien Awwad
 * Status: Draft
 * Content-Type: text/markdown
 * Created: 20-Jan-2017
-* Post-History: 25-Jan-2017
+* Post-History: 12-June-2017
 
 # Abstract
 
+((TODO: Motivation and Rationale sections are too redundant. Part of the
+problem is that "Motivation" and "Rationale" seem to be interpreted as similar
+things. The purpose of this TAP is explained many times, and so is the meaning
+of passing all the tests.))
+
 [Conformance testing](https://en.wikipedia.org/wiki/Conformance_testing)
 can determine whether an implementation meets the requirements set by a given
-specification.  At this point, no tool exists to help developers and users affirm
+specification.  At this point, no tool or set of data exists to help developers
+and users affirm
 that an implementation of an update system behaves according to the TUF
 specification. Although the reference implementation contains
 [unit tests](https://github.com/theupdateframework/tuf/tree/develop/tests)
@@ -21,11 +27,12 @@ and blocking known updater attacks) these unit tests only work within the
 parameters of the reference implementation. This is problematic due to the
 diversity of TUF implementations.
 
-This proposal describes the design of a common testing tool for TUF
-Specification conformance - most importantly, for testing resilience to
-attacks against updaters.
+This proposal describes the design of a data configuration and format for
+defining test cases that determine TUF compliance - most importantly, for
+testing resilience to attacks against updaters.
 
-The goals are to automate determining whether or not an updater implementation
+The goals are to enable determination of whether or not an updater
+implementation
 conforms to the TUF specification, to interoperate with implementations in
 diverse languages and environments, and to minimize the burden of such testing
 on implementers.
@@ -42,17 +49,21 @@ metadata is updated.  In the second case, the implementation is said to
 conform depending on how thoroughly the unit tests are reproduced in X.
 There are bound to be inconsistencies between the two sets of unit tests. Any
 improvements in TUF testing or changes to the program would require
-implementers to add test code in parallel.  A
-single tool for conformance testing can avoid issues with interoperability and
-duplicate work, can ensure update behavior as intended by the designers of TUF,
+implementers to add test code in parallel.
+
+The ability to distribute test data accompanied by prescriptions for the
+behavior expected from the updater processing each test case can ensure update
+behavior as intended by the designers of TUF,
 and, most importantly, ensure that an updater is secure against
 the types of attacks and weaknesses listed in
 [Section 1.5.2](https://github.com/theupdateframework/tuf/blob/6fde6222c9c6abf905ef4a56cf56fe35c4a85e14/docs/tuf-spec.txt#L124-L181)
-of the TUF Specification. In addition, the official tool should be publicly
+of the TUF Specification. The official test cases should be publicly
 available and usable by anyone who wishes to test an implementation.
 
-Passing a conformance test with the official tool would be
-an important step in checking if an implementation is TUF-conformant.
+If an updater performs as prescribed in every test case
+((TODO: Decide on single term and be consistent:
+test cases? test sets? scenarios? test conditions?)),
+will help determine that the updater conforms to the TUF specification.
 
 # Rationale
 
@@ -69,701 +80,273 @@ rejects allows us to determine the implementation's TUF conformance, including
 its resilience against the attacks listed in the TUF Specification (section
 1.5.2).
 
-Toward this end, it is necessary to define a test harness that allows a
-conformance tester to run the updater implementation, provide it with data it
-can interpret, and receive a success or failure code in response.
+For instance, a set of test data may provide metadata signed by an an untrusted
+key to test whether or not the implementation will reject an untrusted signature.
 
-Therefore, This TAP prescribes that an implementation of a client updater
-("Updater") have a corresponding custom wrapper module ("Wrapper") that
-implements a common set of functions defined in this document. These Wrapper
-functions will be called by a general TUF Conformance Tester ("Tester"), which
-will pass in sets of metadata and target files. In response, the wrapped
-Updater will provide return values indicating successful update or failure to
-update, and the Tester will compare these to the expected values for each test
-data set. In general, these data sets constitute a battery of attacks against
-which the Updater should be resilient, contrasted by positive control cases
-which should succeed.
+While test cases may note the expected reason for an expected failure
+to update, it is not expected that specific errors be raised; the only
+prescription is that an updater correctly update or fail to update. TUF
+conformance shouldn't depend on specific kinds of errors being communicated.
 
-Note that the Tester will only expect a matching success-or-failure code
-instead of a specific code indicating the type of attack detected or error
-encountered (expired metadata, bad signature, replay attack, fewer than the
-threshold number of signatures, etc.). This is in order to simplify work for
-Updater implementers. This will entail more test and control cases, but should
-make it easier for implementers to use the Conformance Tester without
-substantial changes to Updaters or too much extra work writing Wrapper
-functions.
-
-The behavior necessary to provide the Conformance Tester with what it needs to
-judge conformance may still be slightly different from the usual or production
-behavior of the Updater, resulting in a need for a testing mode, or logic in
-the Wrapper to interpret behavior. For example, if errors are usually ignored
-rather than producing any return value, that's something that may be adjusted
-by using test-mode-specific code in the Updater, or post-hoc by the Wrapper
-module. The validation behavior during testing should not vary significantly
-from that in production so that test results can represent real Updater
+The validation behavior during testing should not vary significantly
+from that in production so that test results can represent real updater
 performance.
 
 
 # Specification
 
-In order to help determine the TUF-conformance of a particular TUF
-implementation, the following components are required by this TAP:
-- Updater
-- Conformance Tester
-- Configuration File
-- Wrapper
-
-The **Updater** is the program to be tested, an implementation of a
-TUF-conformant updater client, as described in the client workflow in
-[the TUF specification](https://github.com/theupdateframework/tuf/blob/develop/docs/tuf-spec.txt), section 5.1.
-
-The **Conformance Tester**, to be made available
-[alongside the TUF
-Specification](https://github.com/theupdateframework/tuf/blob/develop/docs),
-will run a battery
-of tests intended to determine the TUF-conformance of the Updater. The Tester
-can be thought of as a source of metadata and targets that will ultimately be
-received by the Updater, which must try to validate them correctly. The Updater
-will be expected to reject untrustworthy metadata and targets and accept
-trustworthy metadata and targets.
-
-The [**Configuration File**](#configuration-file-specification) tells the
-Tester what your Wrapper module's name is and what configurable TUF features it
-does or does not support.
-
-The [**Wrapper**](#wrapper-specification) mediates communication between the
-Tester and Updater, adapting
-metadata and communicating it in the way the Updater expects. An
-individual Updater will need a custom Wrapper written for the Tester to use to
-communicate with it. This will need to involve at least a few lines of Python.
-In order for the Tester to interact with the Updater implementation, a Wrapper
-around that implementation will need to support as an interface to the Tester
-three functions.
-
-
-## Tester Specification
-
-The Conformance Tester will verify that the Updater can
-defend against the attacks and weaknesses discussed in section 1.5.2 of the
+The client updater implementation to be tested should operate as described in
+the Client Workflow in Section 5.1 of the
 [TUF Specification](https://github.com/theupdateframework/tuf/blob/develop/docs/tuf-spec.txt).
-By generating metadata and targets for the Updater implementation, the Tester
-will assess the Updater's behavior in various conditions.
+Tests will verify this behavior, determining whether or not the updater defends
+against attacks described in Section 1.5.2 of the TUF Specification.
 
-For instance, the Tester can generate metadata signed by an an untrusted key
-to test whether or not the implementation will reject an untrusted signature.
-
-Control data will be used alongside each test to verify correct behavior in
-the absence of an attack.
+The updater will be expected to reject untrustworthy metadata and targets and
+accept trustworthy metadata and targets. Control test cases will be used
+alongside each test to verify correct behavior in the absence of an attack.
 
 Tests will attempt endless data attacks, indefinite freeze attacks, replay
 attacks, and a variety of others discussed in the TUF Specification. The full
 listing of conformance tests and expected results will be provided in
-documentation alongside the TUF Specification.
+documentation
+[alongside the TUF Specification](https://github.com/theupdateframework/tuf/blob/develop/docs).
+
+## Test Case Specification
+Each test case will be specified with the following pieces of information:
+- Description
+- Expected Result
+- Initial Trusted Metadata
+- Repository Data
+- Target to Install
 
 
-The command to execute the Conformance Tester is:
+### Description
+The Description field will indicate the purpose of the test -- what attack it
+expects to test the updater's defense against, or what problematic updater
+behavior it checks for.
 
-```Bash
-$ python conformance_tester.py
-  --config tmp/.tuf-tester.yml
+For example:
+```
+Test defense against metadata replay attacks: provide a snapshot role that
+has a lower version than that already trusted by the client.
 ```
 
-where the configuration file (see
-[Configuration File Specification](#configuration-file-specification) below)
-is provided as an argument.
+### Expected Result
 
-Running the Tester will yield a report of tests that have passed and failed,
-along these lines:
+This will be 'Success' or 'Failure'. If the value is 'Success', that will mean
+that the client is expected to indicate that it was able to validate the
+provided metadata and the target the updater was instructed to "install"
+('Install Instruction') was deemed valid and OK to install. If the value is
+'Failure', this means that the client is expected to indicate that the target
+could not be installed - whether because an attack should be detected in the
+metadata, or the target doesn't match values provided in the metadata,
+or so on.
 
+### Initial Trusted Metadata
+This is the initial metadata the updater client will have and trust before
+an update is attempted. TUF always requires some established root of trust to
+be present in the updater client. The common case is generally a root.json file
+that shipped with the updater. For testing purposes, this may also be a full
+set of metadata, that which would have been validated in some previous update.
+
+Metadata in the TUF specification's metadata format will be provided in a
+directory, with the directory structure below. Data here should be converted
+to whatever format the updater requires and delivered in the manner the updater
+requires. he common case here
+will be the path of a directory containing a trustworthy root.json
+file.
+
+This structure allows for optional multi-repository support per
+[TAP 4](tap4.md). In the test data set intended for updaters that do not
+support TAP 4, `map.json` will be excluded, and there will only be one
+repository directory, named `test_repo`.
+
+In most cases, the contents of the directory indicated as Initial Trusted
+Metadata will simply be:
+  ```
+  - map.json // if TAP 4 is supported
+  - keys.json
+  - test_repo
+           |-metadata
+                |- root.json
+  ```
+
+But more may be provided:
+  ```
+  - map.json   // see TAP 4
+  - keys.json
+  - <repository_1_name>
+              |- metadata
+                    |- root.json
+                    |- timestamp.json
+                    |- snapshot.json
+                    |- targets.json
+                    |- <a delegated role>.json
+                    |- <another delegated role>.json
+                    |   ...
+  - <repository_2_name>
+              |- metadata
+                    |- root.json
+              // etc.
+  ```
+
+#### Keys for Re-Signing
+The `keys.json` file will specify the keys used to generate the given metadata.
+This information does not need to be used if the updater implementation uses
+the same canonicalized JSON metadata format described in the TUF Specification
+and used by the TUF Reference Implementation. If metadata has to be converted
+and signed over a different format for the updater, these keys can be used to
+re-sign the metadata and generate equivalent metadata in the new format.
+
+The format of this dictionary of keys represented in `keys.json` is as follows.
+(Note that the individual keys resemble ANYKEY_SCHEMA in the
+[TUF format definitions](https://github.com/theupdateframework/tuf/blob/develop/tuf/formats.py))
+The format below anticipates the optional use of
+multiple repositories, as provided for in [TAP 4](tap4.md). If TAP 4
+support is disabled, the only repository listed will be `test_repo`.
+  ```javascript
+  {
+    <repository_1_name>: {
+      <rolename_1>: [ // This role should be signed by these two keys:
+        {'keytype': <type, e.g. 'ed25519'>,
+         'keyid': <id string>,
+         'keyval': {'public': <key string>, 'private': <key string>},
+        },
+        {'keytype': <type, e.g. 'ed25519'>,
+         'keyid': <id string>,
+         'keyval': {'public': <key string>, 'private': <key string>},
+        }],
+      <rolename_2>: [...]},
+
+    <repository_2_name>: {...}
+  }
+  ```
+
+  This listing indicates what key(s) should be used to sign each role
+  in the test metadata. Sometimes (in the case of some attacks),
+  these will not be the correct keys for the role.
+
+Here's an excerpt from a particular example:
+```javascript
+{
+  'imagerepo': {
+    {'root': [{
+      'keytype': 'ed25519',
+      'keyid': '94c836f0c45168f0a437eef0e487b910f58db4d462ae457b5730a4487130f290',
+      'keyval': {
+        'public': 'f4ac8d95cfdf65a4ccaee072ba5a48e8ad6a0c30be6ffd525aec6bc078211033',
+        'private': '879d244c6720361cf1f038a84082b08ac9cd586c32c1c9c6153f6db61b474957'}}]},
+    {'timestamp': [{
+      'keytype': 'ed25519',
+      'keyid': '6fcd9a928358ad8ca7e946325f57ec71d50cb5977a8d02c5ab0de6765fef040a',
+      'keyval': {
+        'public': '97c1112bbd9047b1fdb50dd638bfed6d0639e0dff2c1443f5593fea40e30f654',
+        'private': 'ef373ea36a633a0044bbca19a298a4100e7f353461d7fe546e0ec299ac1b659e'}}]},
+    ...
+    {'delegated_role1': [{
+      'keytype': 'ed25519',
+      'keyid': '8650aed05799a74f5febc9070c5d3e58d62797662d48062614b1ce0a643ee368',
+      'keyval': {
+        'public': 'c5a78db3f3ba96462525664e502f2e7893b81e7e270d75ffb9a6bb95b56857ca',
+        'private': '134dc07435cd0d5a371d51ee938899c594c578dd0a3ab048aa70de5dd71f99f2'}}]}
+  },
+  'director': {
+    {'root': [{
+      ...
 ```
-normal update: check.
-blocked freeze attack: check.
-blocked rollback attack: check.
-key revocation: check.
-blocked endless data attack: check.
-...
-
-Congratulations! The implementation under test appears to conform with the TUF
-specification.  More detailed information on the test results was saved to
-test-results.txt
-```
-
-The Tester returns `0` if all tests return results as expected,
-indicating that the implementation conforms to the specification.
-
-If `conformance_tester.py` returns a non-zero return code, it signals at least
-one failure.
 
 
-## Configuration File Specification
-To launch the test, the conformance tester accepts a
-command-line option that points to
-the location of a configuration file.
+### Repository Data
+This component of the test set is a directory of data - metadata and targets,
+along with the keys used to sign the metadata - that should be made available
+to the updater when it tries to update. This data should be treated normally by
+the updater (not as initially-shipped, trusted data, that is).
 
-The configuration file includes the name of the module that provides the
-Wrapper functions specified above, along with any necessary restrictions on
-TUF functionality, such as the list of
-cryptographic key types supported by the Updater.  The configuration file is
-needed because restrictions are not shared equally across all implementations.
-For example, the Go implementation might only support ECDSA keys, whereas
-another might support Ed25519 and RSA keys. The full list of configuration
-options will be provided in documentation for the Conformance Tester.
+It is similar to Initial Trusted Metadata in its form, but will lack a
+`map.json` file (regardless of TAP 4 support), and will have `targets`
+directories alongside each repository's `metadata` directory. For example:
+  ```
+  - keys.json
+  - <repository_1_name>
+              |- metadata
+                    |- root.json
+                    |- timestamp.json
+                    |- snapshot.json
+                    |- targets.json
+                    |- <a delegated role>.json
+                    |- <another delegated role>.json
+                    |   ...
+              |- targets
+                    |- <some_target.img>
+                    |-  ...
+  - <repository_2_name>
+              |- metadata
+                    |- root.json
+              // etc.
+  ```
+`keys.json` is as specified [above](#keys-for-re-signing).
 
-An example of a `.tuf-tester.yml` configuration file for an Updater:
-
-```
-# The name of the Wrapper module, which will be imported and used by the
-# Tester.
-module: tap7_wrapper_example
-
-# List the keytypes that Updater supports.
-keytype: ed25519, ecdsa
-
-# If this Updater implementation doesn't support delegated Targets roles
-# (Default is true.)
-delegated-roles-support: false
-
-# If this Updater implementation doesn't support multiple mirrors, set to
-# false. (Default is true.)
-mirror-support: false
-
-# If TAP 4 (multi-repository / map file support) is not supported, set to
-# false. (Default is true.)
-tap4-support: false
-```
+Filepaths in the targets directory map directly to the filepaths
+used to identify targets in the repository. For example, a target
+identified in metadata with the filepath 'package1/tarball.tar' would
+be found in 'targets/package1/tarball.tar'.
 
 
 
-## Wrapper Specification
+### Target to Install
+The path of a target file that the updater should try to update/install, as
+listed in the metadata provided. Filepaths are relative to the root of targets
+directories. It is not necessary for the updater to have a notion of a
+filesystem; this piece of information is intended to specify the target to
+update to.
 
-The Wrapper must implement three functions. These are specified in detail
-[below](#wrapper-functions). In brief, the Tester will call the Wrapper's
-`set_up_initial_client_metadata` and `set_up_repositories` functions to assign
-initial trusted metadata to the client, and put metadata and targets on the
-repository, respectively. After this, the Tester will call the Wrapper's
-`attempt_client_update` function to perform the test itself, instructing the
-client to try to update. The Tester will judge the correctness of the result
-based on the return value from `attempt_client_update` that indicates success
-or failure to update.
 
-Beyond the base functionality specified, because different Updaters may
-operate very differently, the Wrapper functions may have other work to do. The
+
+
+
+
+## Use of Test Data
+Because different updaters may operate very differently, feeding the test data
+to the client updater may require additional work. The
 [Dealing with Implementation Restrictions](#dealing-with-implementation-restrictions)
 section below addresses a variety of such scenarios in detail. Here are some
-examples to keep in mind while reading the specification. Wrapper functions
-might:
- - use subprocess to call an external binary to run a non-Python Updater.
- - move metadata or target files into the directory structure an Updater
+examples of what may be necessary:
+ - move metadata or target files into the directory structure an updater
  implementation expects.
- - if, e.g., the Updater doesn't have a notion of a filesystem, read the files
- the Tester provides and distribute data to the Updater in the manner the
- Updater expects.
- - if the Updater uses a different metadata format, translate
- metadata from the format the Tester provides into the format the Updater
- expects.
- - if the Updater requires signatures to be over a different format, re-sign
+ - if, e.g., the updater doesn't have a notion of a filesystem, read the files
+ the provided and distribute data to the updater in the manner the
+ updater expects.
+ - if the updater uses a different metadata format (for example, ASN.1/DER
+ instead of canonical JSON -- or just a different arrangement in canonical
+ JSON), translate metadata (Initial and Repository) from the format the Tester
+ provides into the format the updater expects.
+ - if the updater requires signatures to be over a different format, re-sign
  metadata after translating it.
- - bridge different communication models - for example, if the Updater's
- communication model involves server push vs client pull, or if there will need
- to be asynchronous events to wait for and collect results from.
 
 
-### Wrapper Functions
-The following functions must be written for the Wrapper module, and will be
-called by the Tester.
-
-[A skeletal module defining the functions](tap7_resources/tap7_wrapper_skeleton.py)
-is available, and an [example is available below](#example-wrapper) as well.
-
-- 1: **`set_up_initial_client_metadata(trusted_data_dir, keys, instructions)`**:
-    - Purpose:
-        Sets the client's initial state up for a future test, providing it with
-        metadata to be treated as already-validated. A client Updater delivered
-        to end users will always need some kind of root of trust (in the TUF
-        spec, an initial Root role metadata file, e.g. root.json) to use when
-        validating future metadata.
-
-    - Arguments:
-        - `trusted_data_dir`:
-          Metadata in the TUF specification's metadata format will be provided
-          in the directory at path `trusted_data_dir`. This should be provided
-          to the Updater in whatever form it requires. The common case here
-          will be the path of a directory containing a trustworthy root.json
-          file.
-
-          This structure allows for optional multi-repository support per
-          [TAP 4](tap4.md). If TAP 4 is not supported (See
-          [Configuration File](#configuration-file-specification)), then `map.json` will be
-          excluded, and there will only be one repository directory, named
-          `test_repo`.
-
-          The data provided for
-          `set_up_initial_client_metadata` should be treated as already validated.
-
-          In most cases, the contents of `trusted_data_dir` will simply be:
-            ```
-            - map.json // if TAP 4 is supported
-            - test_repo
-                     |-metadata
-                          |- root.json
-            ```
-
-          But more may be provided:
-            ```
-            - map.json   // see TAP 4
-            - <repository_1_name>
-                        |- metadata
-                              |- root.json
-                              |- timestamp.json
-                              |- snapshot.json
-                              |- targets.json
-                              |- <a delegated role>.json
-                              |- <another delegated role>.json
-                              |   ...
-            - <repository_2_name>
-                        |- metadata
-                              |- root.json
-                        // etc.
-            ```
-
-        - `keys`:
-          If the Updater can process signatures in TUF's default metadata, then
-          the Wrapper SHOULD IGNORE this argument.
-          This is provided only in case the metadata format the Updater expects
-          signatures to be made over is not the same as the metadata format that
-          the TUF reference implementation signs over (canonicalized JSON).
-          If the Updater uses a different metadata format, then the Wrapper may
-          need to
-          re-sign the metadata the Tester provides in the `trusted_data_dir`.
-          This dict contains the signing keys that can be used to re-sign the
-          metadata. The format of this dictionary of keys is as follows.
-          (Note that the individual keys resemble ANYKEY_SCHEMA in the
-          [TUF format definitions](https://github.com/theupdateframework/tuf/blob/develop/tuf/formats.py))
-          The format below anticipates the optional use of
-          multiple repositories, as provided for in [TAP 4](tap4.md). If TAP 4
-          support is disabled, the only repository listed will be `test_repo`.
-            ```javascript
-            {
-              <repository_1_name>: {
-                <rolename_1>: [ // This role should be signed by these two keys:
-                  {'keytype': <type, e.g. 'ed25519'>,
-                   'keyid': <id string>,
-                   'keyval': {'public': <key string>, 'private': <key string>},
-                  },
-                  {'keytype': <type, e.g. 'ed25519'>,
-                   'keyid': <id string>,
-                   'keyval': {'public': <key string>, 'private': <key string>},
-                  }],
-                <rolename_2>: [...]},
-
-              <repository_2_name>: {...}
-            }
-            ```
-
-            This listing indicates what key(s) should be used to sign each role
-            in the test metadata. Sometimes (in the case of some attacks),
-            these will not be the correct keys for the role.
-
-          Here's an excerpt from a particular example:
-          ```javascript
-          {
-            'imagerepo': {
-              {'root': [{
-                'keytype': 'ed25519',
-                'keyid': '94c836f0c45168f0a437eef0e487b910f58db4d462ae457b5730a4487130f290',
-                'keyval': {
-                  'public': 'f4ac8d95cfdf65a4ccaee072ba5a48e8ad6a0c30be6ffd525aec6bc078211033',
-                  'private': '879d244c6720361cf1f038a84082b08ac9cd586c32c1c9c6153f6db61b474957'}}]},
-              {'timestamp': [{
-                'keytype': 'ed25519',
-                'keyid': '6fcd9a928358ad8ca7e946325f57ec71d50cb5977a8d02c5ab0de6765fef040a',
-                'keyval': {
-                  'public': '97c1112bbd9047b1fdb50dd638bfed6d0639e0dff2c1443f5593fea40e30f654',
-                  'private': 'ef373ea36a633a0044bbca19a298a4100e7f353461d7fe546e0ec299ac1b659e'}}]},
-              ...
-              {'delegated_role1': [{
-                'keytype': 'ed25519',
-                'keyid': '8650aed05799a74f5febc9070c5d3e58d62797662d48062614b1ce0a643ee368',
-                'keyval': {
-                  'public': 'c5a78db3f3ba96462525664e502f2e7893b81e7e270d75ffb9a6bb95b56857ca',
-                  'private': '134dc07435cd0d5a371d51ee938899c594c578dd0a3ab048aa70de5dd71f99f2'}}]}
-            },
-            'director': {
-              {'root': [{
-                ...
-          ```
-
-        - `instructions`:
-          If the Updater can process signatures in TUF's default metadata, then
-          the Wrapper SHOULD IGNORE this argument.
-          This, too, is provided only in case the metadata format the Updater
-          expects signatures to be made over is not the same as the metadata
-          format that the TUF reference implementation signs over
-          (canonicalized JSON).
-          If the Wrapper will be re-signing the metadata provided here, then
-          this
-          dictionary of instructions will tell list what, if any, modifications
-          to make. For example, {'invalidate_signature': True} instructs that
-          the signature be made and then some byte(s) in it be modified so that
-          it is no longer a valid signature over the metadata. Most tests
-          should not require this, but some may; this should be documented in
-          the list of test cases and the Tester documentation.
-
-    - Returns: None
-
-- 2: **`set_up_repositories(test_data_dir, keys, instructions)`**:
-    - Purpose:
-        Sets the repository files, metadata and targets. This will be the
-        data that should be made available to the Updater when the Updater
-        tries to update.
-
-    - Arguments:
-        - `test_data_dir`:
-          This will be the path of the directory containing files that the
-          Updater should find when it attempts to update. This data should be
-          treated normally by the Updater (not as initially-shipped, trusted
-          data, that is).
-          The directory contents will have the same structure as those of
-          `trusted_data_dir` in `set_up_initial_client_metadata` above, but
-          will lack a `map.json` file (regardless of TAP 4 support), and will
-          have `targets` directories alongside each repository's `metadata`
-          directory. For example:
-            ```
-            - <repository_1_name>
-                        |- metadata
-                              |- root.json
-                              |- timestamp.json
-                              |- snapshot.json
-                              |- targets.json
-                              |- <a delegated role>.json
-                              |- <another delegated role>.json
-                              |   ...
-                        |- targets
-                              |- <some_target.img>
-                              |-  ...
-            - <repository_2_name>
-                        |- metadata
-                              |- root.json
-                        // etc.
-            ```
-          Filepaths in the targets directory map directly to the filepaths
-          used to identify targets in the repository. For example, a target
-          identified in metadata with the filepath 'package1/tarball.tar' would
-          be found in 'targets/package1/tarball.tar'.
-
-        - `keys`:
-          See `set_up_initial_client_metadata` above.
-
-        - `instructions`:
-          See `set_up_initial_client_metadata` above.
-
-    - Returns: None
-
-
-- 3: **`attempt_client_update(target_filepath)`**:
-    - Purpose:
-        Cause the client to attempt to refresh metadata from the repository
-        and obtain and validate a particular target, in a secure manner
-        conforming to the TUF specification.
-
-        This function will have to translate Updater behavior/output into the
-        return values (below) that the Tester expects, based on whether or not
-        the Updater updates successfully. It must return the appropriate value
-        to the Tester, which will evaluate this return value against what it
-        expects.
-
-    - Arguments:
-        - `target_filepath`:
-          The path of a target file that the Updater should try to update.
-          This must be inside the directory `targets_directory`, provided to
-          the `set_up_repositories` call, and it should be written relative to
-          `targets_directory`. As noted previously, it is not necessary for the
-          Updater to have a notion of a filesystem; `attempt_client_update` may
-          abstract this away.
-
-    - Returns:
-        An integer describing the result of the attempted update. This value is
-        what the Tester is ultimately testing.
-
-        ```
-        return value     outcome
-        -----------      ------
-        0                SUCCESS: target identified by target_filepath has been
-                         obtained from one of the mirrors and validated per
-                         trustworthy metadata
-
-        1                FAILURE/rejection: unable to obtain a target identified
-                         by target_filepath from any of the known mirrors that
-                         is valid according to trustworthy metadata
-
-        2                an unknown error has occurred (never expected, but
-                         helpful to provide for test output)
-
-        ```
-
-
-A code skeleton that can be filled in by implementers is provided
-[here](tap7_resources/tap7_wrapper_skeleton.py).
-Also see [Example Wrapper](#example-wrapper) below.
-
-
-### Example Wrapper
-
-Here's a sample Wrapper module that allows the Conformance Tester to test the
-TUF Reference Implementation. (This can also be seen
-[in this file](tap7_resources/tap7_wrapper_example.py).)
-
-```Python
-  """
-  <Program Name>
-    tap7_wrapper_example.py
-
-  <Purpose>
-    This is an example of a Wrapper module, which enables the Conformance Tester
-    (as described in TUF TAP 7) to communicate with a particular TUF-conformant
-    Updater implementation - in this case, the pre-TAP4 TUF Reference
-    Implementation (configuration file option tap_4_support: false).
-
-    The Conformance Tester will call the functions listed here in order to
-    perform the tests necessary to ascertain the conformance of the Updater to
-    the TUF spec.
-  """
-  # Python 2/3 compatibility
-  from __future__ import print_function
-  from __future__ import absolute_import
-  from __future__ import division
-  from __future__ import unicode_literals
-
-  # To run a simple HTTP server in parallel in a way compatible with both
-  # Python2 and Python3.
-  import subprocess
-  import atexit
-  import time
-  import os
-  import shutil
-  import sys
-
-  # TUF utilities
-  import tuf.repository_tool
-  import tuf.client.updater
-  import tuf.settings
-  from tuf.exceptions import *
-
-  updater = None
-  server_process = None
-
-  def set_up_initial_client_metadata(trusted_data_dir, keys, instructions):
-    """
-      Sets the client's initial state up for a future test, providing it with
-      metadata to be treated as already-validated.
-
-      The full function docstring is available in the text of TAP 7 and in
-      tap7_wrapper_skeleton.py.
-    """
-    global updater
-
-    # Initialize the Updater implementation. We'll put trusted client files in
-    # directory 'client', copying some of them from the provided metadata.
-    tuf.settings.repositories_directory = 'client' # where client stores repo info
-    if os.path.exists('client'):
-      shutil.rmtree('client')
-
-    # Create a client directory at client/test_repo, based on the given data.
-    tuf.repository_tool.create_tuf_client_directory(
-        trusted_data_dir + '/test_repo', 'client/test_repo')
-
-    os.mkdir('client/validated_targets') # We'll put validated target files here.
-
-    repository_mirrors = {'mirror1': {
-        'url_prefix': 'http://localhost:8000',
-        'metadata_path': 'metadata',
-        'targets_path': 'targets',
-        'confined_target_dirs': ['']}}
-
-    updater = tuf.client.updater.Updater('test_repo', repository_mirrors)
-
-
-
-
-
-  def set_up_repositories(test_data_dir, keys, instructions):
-    """
-      Sets the repository files that will be available to the Updater when
-      attempt_client_update runs.
-
-      The full function docstring is available in the text of TAP 7 and in
-      tap7_wrapper_skeleton.py.
-    """
-    global server_process
-
-    # End hosting from any previous test.
-    kill_server()
-
-    # Repository Setup
-
-    # Copy the provided metadata into a directory that we'll host.
-    if os.path.exists('hosted'):
-      shutil.rmtree('hosted')
-    assert os.path.exists(test_data_dir + '/test_repo'), 'Invalid ' \
-        'test_data_dir - we expect a test_repo directory.'
-    shutil.copytree(test_data_dir + '/test_repo', 'hosted')
-
-    # Start up hosting for the repository.
-    os.chdir('hosted')
-    command = []
-    if sys.version_info.major < 3: # Python 2 compatibility
-      command = ['python2', '-m', 'SimpleHTTPServer', '8000']
-    else:
-      command = ['python3', '-m', 'http.server', '8000']
-    server_process = subprocess.Popen(command, stderr=subprocess.PIPE)
-    os.chdir('..')
-    # Give the forked server process a bit of time to start hosting
-    time.sleep(1)
-    # Schedule the killing of the server process for when exit() is called.
-    atexit.register(kill_server)
-
-
-
-
-
-  def attempt_client_update(target_filepath):
-    """
-    <Purpose>
-      Refreshes metadata and causes the client to attempt to (obtain and)
-      validate a particular target,
-      along with all metadata required to do so in a secure manner conforming to
-      the TUF specification.
-
-      The full function docstring is available in the text of TAP 7 and in
-      tap7_wrapper_skeleton.py.
-    """
-
-    try:
-      # Run the updater. Refresh top-level metadata and try updating
-      # target_filepath.
-      updater.refresh()
-      target = updater.get_one_valid_targetinfo(target_filepath)
-      updater.download_target(target, 'client/validated_targets')
-
-      # Determine if the attempt has been successful (if the target file has been
-      # validated, and metadata necessary to validate it has been validated,
-      # following the Client Workflow instructions (TUF specification section
-      # 5.1).
-      # If the calls above haven't raised errors, then the file has downloaded
-      # and validated and all metadata checks succeeded on metadata from at least
-      # one mirror, so we can return 0 here. For good measure, we check to make
-      # sure the file exists where we expect it.
-      if os.path.exists('client/validated_targets/' + target_filepath):
-        return 0
-      else:
-        print('client/validated_targets/' + target_filepath + ' does not exist.')
-        return 1
-
-    except (
-        NoWorkingMirrorError, NotFoundError, UnknownTargetError,
-        ForbiddenTargetError, UnknownRoleError,
-        BadHashError, BadSignatureError, DownloadLengthMismatchError,
-        InsufficientKeysError, UnsignedMetadataError, UnknownKeyError,
-        ExpiredMetadataError):
-      return 1
-
-    except:
-      return 2
-
-
-
-
-
-  # This function is not related to any Wrapper requirement; it's just here to
-  # clean things up after we're done.
-  def kill_server():
-    """
-    Kills the forked process that is hosting the repositories via Python's
-    simple HTTP server
-    """
-    global server_process
-    if server_process is not None:
-      print('Killing server process with pid: ' + str(server_process.pid))
-      server_process.kill()
-      server_process = None
-    atexit.unregister(kill_server) # Avoid running kill_server multiple times.
-```
-
-
-As shown in the code above, the Wrapper functions load metadata from
-the directories specified. The Updater.download_target() call to the TUF
-reference implementation employs the suite of TUF verifications to obtain the
-target file indicated and retain it only if it validates, updating metadata as
-necessary.
-
-
-## Dealing with Implementation Restrictions
-
-### Key Restrictions
-
-Suppose, for example, that the Updater implementation supports only signatures
-using Ed25519 keys.
-
-This restriction can be handled by configuring the conformance tool via
-its `.tuf-tester.yml` [configuration file](#configuration-file-specification).
-The developer can add:
-```
-keytype: ed25519
-```
-
-### Metadata Conversion
-
-(Note again that this is not necessary if the Updater uses the metadata format
-specified in the TUF Specification.)
-
-Suppose that metadata that the Updater receives must be encoded in DER (rather
-than JSON). In this case, the Wrapper will need to convert the metadata
-received from the Tester in `set_up_initial_client_metadata` and `set_up_repositories` (specified
-in [Wrapper Functions](#wrapper-functions) above).
-
-For an example of how such code might look, consider the JSON-to-DER converter
-`convert_signed_metadata_to_der` employed by Uptane's TUF fork
-[here](https://github.com/awwad/tuf/blob/36dbb7b8a800dab407fe9ab961155ef0a6d9f7c9/tuf/asn1_codec.py#L156-L352).
-
-
-#### Re-Signing Converted Metadata
-Two situations arise depending on the behavior of your Updater:
-1. When the Updater receives the converted metadata, it converts it back to
+### Re-Signing Converted Metadata
+If an updater implementation uses a different metadata format than that
+provided in test data, it becomes necessary to convert it for the updater's
+use. Further, two situations arise depending on the behavior of the updater:
+1. When the updater receives the converted metadata, it converts it back to
 canonical JSON and checks the signatures in this (original) format.
-2. When the Updater receives the converted metadata, it will not convert it
+2. When the updater receives the converted metadata, it will not convert it
 back into canonical JSON, and will expect the signatures to be over the same
 new format (foreign to TUF).
 
 In the second case, the converted metadata must also be re-signed, so that the
-Updater will be able to correctly validate the metadata.
+updater will be able to correctly validate the metadata.
 
-For this reason, `set_up_initial_client_metadata` and `set_up_repositories` also provide arguments
-`keys` and `instructions`. The keys in `keys` will allow the Wrapper to
-re-sign the metadata provided in a manner that the Updater will expect. If
-there were manipulations made to the resulting metadata for test purposes
-(such as invalidating the signature by changing a byte in it), the
-`instructions` argument will describe these, so that they can be repeated in
-the converted and re-signed metadata.
+For this reason, a `keys.json` file is provided with any test case metadata.
+This file,
+[described above](#keys-for-re-signing), indicates which keys should be used to
+sign each piece of metadata, if that metadata should need to be converted and
+re-signed.
 
+For an example of how such re-signing code might look, consider the JSON-to-DER
+converter `convert_signed_metadata_to_der` employed by Uptane's TUF fork
+[here](https://github.com/awwad/tuf/blob/36dbb7b8a800dab407fe9ab961155ef0a6d9f7c9/tuf/asn1_codec.py#L156-L352).
 
-### No File System
-There might be TUF implementations
-where metadata or update files are not saved to a file system on the
-device, but are instead stored in the absence of a file system.
-
-In such cases, the Wrapper should take the metadata and target file data
-provided to `set_up_initial_client_metadata` and `set_up_repositories` and
-provide them to the Updater in whatever form it expects.
-
-
-## Summary of Steps for Conformance Testing
-In summary, the steps that should be followed to test an Updater for
-conformance to the TUF Specification are as follows:
-
-1. Fill in the functions in the
-[Wrapper module skeleton](tap7_resources/tap7_wrapper_skeleton.py).
-2. Configure Tester to abide by the adopter's repository restrictions.
-3. Run Tester and confirm that all tests have passed.
 
 # Security Analysis
 
@@ -778,14 +361,10 @@ This TAP does not introduce any backwards incompatibilities.
 
 # Augmented Reference Implementation
 
-An example of a particular implementation's Wrapper is
-[in the Example Wrapper section](#example-wrapper).
-
-A short sample of how the Tester can behave is
-[in this file](tap7_resources/tap7_tester_sample.py).
-
-A full implementation of the Tester will be written after this TAP is accepted,
+Full test sets will be written after this TAP is accepted,
 and that will be linked to from here.
+Code employing them to test the TUF Reference Implementation will also be
+provided, as a further guide for their use.
 
 
 # Copyright
