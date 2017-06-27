@@ -10,11 +10,6 @@
 
 # Abstract
 
-((TODO: Motivation and Rationale sections are too redundant. Part of the
-problem is that "Motivation" and "Rationale" seem to be interpreted as similar
-things. The purpose of this TAP is explained many times, and so is the meaning
-of passing all the tests.))
-
 [Conformance testing](https://en.wikipedia.org/wiki/Conformance_testing)
 can determine whether an implementation meets the requirements set by a given
 specification.  At this point, no tool or set of data exists to help developers
@@ -39,6 +34,10 @@ on implementers.
 
 # Motivation
 
+Developers need a convenient way of verifying whether an implementation
+conforms to the TUF specification, affirming that the tested
+implementation meets a recognized standard of secure operation.
+
 Up to this point, adopters of TUF who had written an implementation could only test
 for conformance by (1) verifying that metadata generated in some language X
 matches that of the reference implementation, and/or (2) reproducing the unit
@@ -56,29 +55,22 @@ behavior expected from the updater processing each test case can ensure update
 behavior as intended by the designers of TUF,
 and, most importantly, ensure that an updater is secure against
 the types of attacks and weaknesses listed in
-[Section 1.5.2](https://github.com/theupdateframework/tuf/blob/6fde6222c9c6abf905ef4a56cf56fe35c4a85e14/docs/tuf-spec.txt#L124-L181)
-of the TUF Specification. The official test cases should be publicly
-available and usable by anyone who wishes to test an implementation.
+Section 1.5.2 of the
+[TUF Specification](https://github.com/theupdateframework/tuf/blob/develop/docs/tuf-spec.txt).
 
-If an updater performs as prescribed in every test case
-((TODO: Decide on single term and be consistent:
-test cases? test sets? scenarios? test conditions?)),
-will help determine that the updater conforms to the TUF specification.
 
 # Rationale
 
-Developers need a convenient way of verifying whether an implementation
-conforms to the TUF specification, affirming that the tested
-implementation meets a recognized standard of secure operation.
-
 The strategy for testing TUF conformance proposed in this TAP is to generate
 sets of metadata and targets with the expectation that all implementations
-should react to certain sets by successfully validating and updating, and all
-implementations should react to other sets by rejecting the invalid metadata or
+should react to certain sets by successfully validating and updating, and react
+to other sets by rejecting the invalid metadata or
 targets. Determining which data sets an implementation accepts and which it
 rejects allows us to determine the implementation's TUF conformance, including
 its resilience against the attacks listed in the TUF Specification (section
 1.5.2).
+If an updater implementation performs as prescribed in every test case, it is
+likely that it complies with the TUF Specification.
 
 For instance, a set of test data may provide metadata signed by an an untrusted
 key to test whether or not the implementation will reject an untrusted signature.
@@ -91,6 +83,9 @@ conformance shouldn't depend on specific kinds of errors being communicated.
 The validation behavior during testing should not vary significantly
 from that in production so that test results can represent real updater
 performance.
+
+The official test cases should be publicly
+available and usable by anyone who wishes to test an implementation.
 
 
 # Specification
@@ -111,6 +106,7 @@ listing of conformance tests and expected results will be provided in
 documentation
 [alongside the TUF Specification](https://github.com/theupdateframework/tuf/blob/develop/docs).
 
+
 ## Test Case Specification
 Each test case will be specified with the following pieces of information:
 - Description
@@ -118,7 +114,6 @@ Each test case will be specified with the following pieces of information:
 - Initial Trusted Metadata
 - Repository Data
 - Target to Install
-
 
 ### Description
 The Description field will indicate the purpose of the test -- what attack it
