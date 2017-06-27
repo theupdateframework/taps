@@ -322,48 +322,46 @@ following JSON format.
 Example:
 ```javascript
 [
-  {
-      'description':     'Test 0: Control case, valid test data',
-      'expected_result': 'success',
-      'initial_data':    'test_sets/test0/initial/',
-      'update_data':     'test_sets/test0/repository/',
-      'target':          'target.txt'
-  },
-  {
-      'description':     'Test 1: Defense against metadata replay attacks:
-                         provide a snapshot role that has a lower version than
-                         that already trusted by the client.',
-      'expected_result': 'failure',
-      'initial_data':    'test_sets/test1/initial/',
-      'update_data':     'test_sets/test1/repository/',
-      'target':          'target.txt'
-  },
-  {
-      'description':     'Test 2: Defense against arbitrary package attacks
-                         with no key compromise: provide a target file whose
-                         hash does not match that indicated by trustworthy
-                         metadata.',
-      'expected_result': 'failure',
-      'initial_data':    'test_sets/test2/initial/',
-      'update_data':     'test_sets/test2/repository/',
-      'target':          'target.txt'
-  },
-  {
-      'description':     'Test 3: Acceptance of revoked keys: provide a
-                         target signed by a key no longer trusted by its
-                         delegating role',
-      'expected_result': 'failure',
-      'initial_data':    'test_sets/test3/initial/',
-      'update_data':     'test_sets/test3/repository/',
-      'target':          'target_123.txt'
-  },
-  {
-      'description':     'Test 3C: Control for Test 3',
-      'expected_result': 'success',
-      'initial_data':    'test_sets/test3c/initial/',
-      'update_data':     'test_sets/test3c/repository/',
-      'target':          'target_123.txt'
-  }
+{
+  'description':
+     '0: Control case, valid test data',
+  'expected_result': 'success',
+  'initial_data':    'test_sets/test0/initial/',
+  'update_data':     'test_sets/test0/repository/',
+  'target':          'target.txt'
+},
+{
+  'description':
+     '1: replay: snapshot w/ lower version than that already trusted by client',
+  'expected_result': 'failure',
+  'initial_data':    'test_sets/test1/initial/',
+  'update_data':     'test_sets/test1/repository/',
+  'target':          'target.txt'
+},
+{
+  'description':
+     '2: target file provided does not match hash in trustworthy metadata',
+  'expected_result': 'failure',
+  'initial_data':    'test_sets/test2/initial/',
+  'update_data':     'test_sets/test2/repository/',
+  'target':          'target.txt'
+},
+{
+  'description':
+     '3: delegated role signed by key no longer trusted by delegator'
+  'expected_result': 'failure',
+  'initial_data':    'test_sets/test3/initial/',
+  'update_data':     'test_sets/test3/repository/',
+  'target':          'target_123.txt'
+},
+{
+  'description':
+     '3C: control for Test 3',
+  'expected_result': 'success',
+  'initial_data':    'test_sets/test3c/initial/',
+  'update_data':     'test_sets/test3c/repository/',
+  'target':          'target_123.txt'
+}
 ]
 ```
 
