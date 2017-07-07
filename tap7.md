@@ -152,7 +152,7 @@ will be the path of a directory containing a trustworthy root.json
 file.
 
 Additional files may appear in test data directories to support new TUF
-features. See, for example, the [TAP 4 support section](#tap-4).
+features. See, for example, the [TAP 4 support section](#tap-4-support).
 
 In most cases, the contents of the directory indicated as Initial Trusted
 Metadata will simply be:
@@ -388,7 +388,7 @@ converter `convert_signed_metadata_to_der` employed by Uptane's TUF fork
 
 
 
-# TAP 4
+## TAP 4 Support
 Certain TUF features require a slightly different arrangement of test data.
 Operating with multiple repositories, an optional feature provided by
 [TAP 4](tap4.md), requires that test data provide for multiple repositories.
@@ -397,7 +397,7 @@ Other such features may also require expanded test data, and future TAPs that
 affect test data should specify how test data must be changed.
 
 
-### TAP 4 Initial Trusted Metadata
+#### TAP 4 Initial Trusted Metadata
 When supporting TAP 4, [Initial Trusted Metadata](#initial-trusted-metadata)
 changes as follows, to allow for multiple repositories:
  1. An extra level of directories is added, one per repository, which then
@@ -409,7 +409,7 @@ changes as follows, to allow for multiple repositories:
 
 Structure and examples of the above modifications for TAP 4 support follow:
 
-#### 1. TAP 4 Initial Trusted Metadata Directory
+##### 1. TAP 4 Initial Trusted Metadata Directory
 The structure of the directory of metadata provided in Initial Trusted
    Metadata when TAP 4 is supported:
   ```
@@ -430,7 +430,7 @@ The structure of the directory of metadata provided in Initial Trusted
               // etc.
   ```
 
-#### 2. TAP 4 Initial Trusted Metadata keys.json
+##### 2. TAP 4 Initial Trusted Metadata keys.json
 The `keys.json` file provided in Initial Trusted Metadata or Repository Data
 when TAP 4 is supported looks like this:
   ```javascript
@@ -491,7 +491,7 @@ when TAP 4 is supported looks like this:
 
 
 
-### TAP 4 Repository Data
+#### TAP 4 Repository Data
 When supporting TAP 4, [Repository Data](#repository-data)
 changes as follows, to allow for multiple repositories:
  1. An extra level of directories is added, one per repository, which then
@@ -505,7 +505,7 @@ TAP 4 support. `map.json` is a client-side configuration file.
 
 Structure and examples of the above modifications for TAP 4 support follow:
 
-#### 1. TAP 4 Repository Data Directory
+##### 1. TAP 4 Repository Data Directory
 The structure of the directory of metadata provided in Repository Data when
 TAP 4 is supported:
   ```
@@ -536,7 +536,7 @@ TAP 4 is supported:
   ...
   ```
 
-#### 2. TAP 4 Repository Data keys.json
+##### 2. TAP 4 Repository Data keys.json
 `keys.json` is modified as specified for Initial Trusted Metadata
 [above](#2-tap-4-initial-trusted-metadata-keys-json).
 
