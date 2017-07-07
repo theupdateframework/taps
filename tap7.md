@@ -218,7 +218,7 @@ repository listed will be `test_repo`.
   }
   ```
 
-  This listing indicates what key(s) should be used to sign each role
+  This listing indicates which key(s) should be used to sign each role
   in the test metadata. Sometimes (in the case of some attacks),
   these will not be the correct keys for the role.
 
@@ -256,7 +256,7 @@ Here's an excerpt from a particular example:
 This component of the test set is a directory of data - metadata and targets,
 along with the keys used to sign the metadata - that should be made available
 to the updater when it tries to update. This data should be treated normally by
-the updater (not as initially-shipped, trusted data, that is).
+the updater (i.e. not as initially-shipped, trusted data).
 
 It is similar to Initial Trusted Metadata in its form, but will lack a
 `map.json` file (regardless of TAP 4 support), and will have `targets`
