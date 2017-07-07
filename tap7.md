@@ -151,38 +151,28 @@ requires. he common case here
 will be the path of a directory containing a trustworthy root.json
 file.
 
-This structure allows for optional multi-repository support per
-[TAP 4](tap4.md). In the test data set intended for updaters that do not
-support TAP 4, `map.json` will be excluded, and there will only be one
-repository directory, named `test_repo`.
+Additional files may appear in test data directories to support new TUF
+features. See, for example, the [TAP 4 support section](#tap-4).
 
 In most cases, the contents of the directory indicated as Initial Trusted
 Metadata will simply be:
   ```
-  - map.json // if TAP 4 is supported
   - keys.json
-  - test_repo
-           |-metadata
-                |- root.json
+  - metadata
+          |- root.json
   ```
 
 But more may be provided:
   ```
-  - map.json   // see TAP 4
   - keys.json
-  - <repository_1_name>
-              |- metadata
-                    |- root.json
-                    |- timestamp.json
-                    |- snapshot.json
-                    |- targets.json
-                    |- <a delegated role>.json
-                    |- <another delegated role>.json
-                    |   ...
-  - <repository_2_name>
-              |- metadata
-                    |- root.json
-              // etc.
+  - metadata
+          |- root.json
+          |- timestamp.json
+          |- snapshot.json
+          |- targets.json
+          |- <a delegated role>.json
+          |- <another delegated role>.json
+          |   ...
   ```
 
 #### Keys for Re-Signing
@@ -196,25 +186,19 @@ re-sign the metadata and generate equivalent metadata in the new format.
 The format of this dictionary of keys represented in `keys.json` is as follows.
 (Note that the individual keys resemble ANYKEY_SCHEMA in the
 [TUF format definitions](https://github.com/theupdateframework/tuf/blob/develop/tuf/formats.py))
-The format below anticipates the optional use of
-multiple repositories, as provided for in [TAP 4](tap4.md). For test data
-provided to support implementations that do not support TAP 4, the only
-repository listed will be `test_repo`.
   ```javascript
   {
-    <repository_1_name>: {
-      <rolename_1>: [ // This role should be signed by these two keys:
-        {'keytype': <type, e.g. 'ed25519'>,
-         'keyid': <id string>,
-         'keyval': {'public': <key string>, 'private': <key string>},
-        },
-        {'keytype': <type, e.g. 'ed25519'>,
-         'keyid': <id string>,
-         'keyval': {'public': <key string>, 'private': <key string>},
-        }],
-      <rolename_2>: [...]},
-
-    <repository_2_name>: {...}
+    <rolename_1>: [ // This role should be signed by these two keys:
+      {'keytype': <type, e.g. 'ed25519'>,
+       'keyid': <id string>,
+       'keyval': {'public': <key string>, 'private': <key string>},
+      },
+      {'keytype': <type, e.g. 'ed25519'>,
+       'keyid': <id string>,
+       'keyval': {'public': <key string>, 'private': <key string>},
+      }],
+    <rolename_2>: [...],
+    ...
   }
   ```
 
@@ -225,30 +209,26 @@ repository listed will be `test_repo`.
 Here's an excerpt from a particular example:
 ```javascript
 {
-  'imagerepo': {
-    {'root': [{
+    'root': [{
       'keytype': 'ed25519',
       'keyid': '94c836f0c45168f0a437eef0e487b910f58db4d462ae457b5730a4487130f290',
       'keyval': {
         'public': 'f4ac8d95cfdf65a4ccaee072ba5a48e8ad6a0c30be6ffd525aec6bc078211033',
-        'private': '879d244c6720361cf1f038a84082b08ac9cd586c32c1c9c6153f6db61b474957'}}]},
-    {'timestamp': [{
+        'private': '879d244c6720361cf1f038a84082b08ac9cd586c32c1c9c6153f6db61b474957'}}],
+    'timestamp': [{
       'keytype': 'ed25519',
       'keyid': '6fcd9a928358ad8ca7e946325f57ec71d50cb5977a8d02c5ab0de6765fef040a',
       'keyval': {
         'public': '97c1112bbd9047b1fdb50dd638bfed6d0639e0dff2c1443f5593fea40e30f654',
-        'private': 'ef373ea36a633a0044bbca19a298a4100e7f353461d7fe546e0ec299ac1b659e'}}]},
+        'private': 'ef373ea36a633a0044bbca19a298a4100e7f353461d7fe546e0ec299ac1b659e'}}],
     ...
-    {'delegated_role1': [{
+    'delegated_role1': [{
       'keytype': 'ed25519',
       'keyid': '8650aed05799a74f5febc9070c5d3e58d62797662d48062614b1ce0a643ee368',
       'keyval': {
         'public': 'c5a78db3f3ba96462525664e502f2e7893b81e7e270d75ffb9a6bb95b56857ca',
-        'private': '134dc07435cd0d5a371d51ee938899c594c578dd0a3ab048aa70de5dd71f99f2'}}]}
-  },
-  'director': {
-    {'root': [{
-      ...
+        'private': '134dc07435cd0d5a371d51ee938899c594c578dd0a3ab048aa70de5dd71f99f2'}}]
+}
 ```
 
 
@@ -258,27 +238,21 @@ along with the keys used to sign the metadata - that should be made available
 to the updater when it tries to update. This data should be treated normally by
 the updater (i.e. not as initially-shipped, trusted data).
 
-It is similar to Initial Trusted Metadata in its form, but will lack a
-`map.json` file (regardless of TAP 4 support), and will have `targets`
-directories alongside each repository's `metadata` directory. For example:
+It is similar to Initial Trusted Metadata in its form, but will have a
+`targets` directory alongside the `metadata` directory. For example:
   ```
   - keys.json
-  - <repository_1_name>
-              |- metadata
-                    |- root.json
-                    |- timestamp.json
-                    |- snapshot.json
-                    |- targets.json
-                    |- <a delegated role>.json
-                    |- <another delegated role>.json
-                    |   ...
-              |- targets
-                    |- <some_target.img>
-                    |-  ...
-  - <repository_2_name>
-              |- metadata
-                    |- root.json
-              // etc.
+  - metadata
+        |- root.json
+        |- timestamp.json
+        |- snapshot.json
+        |- targets.json
+        |- <a delegated role>.json
+        |- <another delegated role>.json
+        |   ...
+  - targets
+        |- <some_target.img>
+        |-  ...
   ```
 `keys.json` is as specified [above](#keys-for-re-signing).
 
@@ -410,6 +384,162 @@ re-signed.
 For an example of how such re-signing code might look, consider the JSON-to-DER
 converter `convert_signed_metadata_to_der` employed by Uptane's TUF fork
 [here](https://github.com/awwad/tuf/blob/36dbb7b8a800dab407fe9ab961155ef0a6d9f7c9/tuf/asn1_codec.py#L156-L352).
+
+
+
+
+# TAP 4
+Certain TUF features require a slightly different arrangement of test data.
+Operating with multiple repositories, an optional feature provided by
+[TAP 4](tap4.md), requires that test data provide for multiple repositories.
+TAP 4 support expands the formats in this TAP somewhat, as indicated below.
+Other such features may also require expanded test data, and future TAPs that
+affect test data should specify how test data must be changed.
+
+
+### TAP 4 Initial Trusted Metadata
+When supporting TAP 4, [Initial Trusted Metadata](#initial-trusted-metadata)
+changes as follows, to allow for multiple repositories:
+ 1. An extra level of directories is added, one per repository, which then
+   each contain 'metadata' directories.
+ 2. An extra level is added at the root of the `keys.json` dictionary,
+   identifying each repository.
+ 3. A `map.json` file is included, to identify the repositories and the
+   client's trust relationships with them / delegations to them.
+
+Structure and examples of the above modifications for TAP 4 support follow:
+
+#### 1. TAP 4 Initial Trusted Metadata Directory
+The structure of the directory of metadata provided in Initial Trusted
+   Metadata when TAP 4 is supported:
+  ```
+  - map.json   // see TAP 4
+  - keys.json
+  - <repository_1_name>
+              |- metadata
+                    |- root.json
+                    |- timestamp.json
+                    |- snapshot.json
+                    |- targets.json
+                    |- <a delegated role>.json
+                    |- <another delegated role>.json
+                    |   ...
+  - <repository_2_name>
+              |- metadata
+                    |- root.json
+              // etc.
+  ```
+
+#### 2. TAP 4 Initial Trusted Metadata keys.json
+The `keys.json` file provided in Initial Trusted Metadata or Repository Data
+when TAP 4 is supported looks like this:
+  ```javascript
+  {
+    <repository_1_name>: {
+      <rolename_1>: [ // This role should be signed by these two keys:
+        {'keytype': <type, e.g. 'ed25519'>,
+         'keyid': <id string>,
+         'keyval': {'public': <key string>, 'private': <key string>},
+        },
+        {'keytype': <type, e.g. 'ed25519'>,
+         'keyid': <id string>,
+         'keyval': {'public': <key string>, 'private': <key string>},
+        }],
+      <rolename_2>: [...]},
+
+    <repository_2_name>: {...}
+  }
+  ```
+
+   A particular example of `keys.json` with TAP 4 support:
+
+  ```javascript
+  {
+    'imagerepo': {
+      {'root': [{
+        'keytype': 'ed25519',
+        'keyid': '94c836f0c45168f0a437eef0e487b910f58db4d462ae457b5730a4487130f290',
+        'keyval': {
+          'public': 'f4ac8d95cfdf65a4ccaee072ba5a48e8ad6a0c30be6ffd525aec6bc078211033',
+          'private': '879d244c6720361cf1f038a84082b08ac9cd586c32c1c9c6153f6db61b474957'}}]},
+      {'timestamp': [{
+        'keytype': 'ed25519',
+        'keyid': '6fcd9a928358ad8ca7e946325f57ec71d50cb5977a8d02c5ab0de6765fef040a',
+        'keyval': {
+          'public': '97c1112bbd9047b1fdb50dd638bfed6d0639e0dff2c1443f5593fea40e30f654',
+          'private': 'ef373ea36a633a0044bbca19a298a4100e7f353461d7fe546e0ec299ac1b659e'}}]},
+      ...
+      {'delegated_role1': [{
+        'keytype': 'ed25519',
+        'keyid': '8650aed05799a74f5febc9070c5d3e58d62797662d48062614b1ce0a643ee368',
+        'keyval': {
+          'public': 'c5a78db3f3ba96462525664e502f2e7893b81e7e270d75ffb9a6bb95b56857ca',
+          'private': '134dc07435cd0d5a371d51ee938899c594c578dd0a3ab048aa70de5dd71f99f2'}}]}
+    },
+    'director': {
+      {'root': [{
+        ...
+  ```
+
+
+
+3. `map.json`  TBC!!!!!!! # TODO: Finish.
+
+
+
+
+
+
+
+### TAP 4 Repository Data
+When supporting TAP 4, [Repository Data](#repository-data)
+changes as follows, to allow for multiple repositories:
+ 1. An extra level of directories is added, one per repository, which then
+   each contain 'metadata' and 'targets' directories.
+ 2. An extra level is added at the root of the `keys.json` dictionary,
+   identifying each repository, exactly as with
+   [TAP 4 Initial Trusted Metadata](#tap-4-initial-trusted-metadata)
+
+Note that a `map.json` file is not provided for Repository Data with or without
+TAP 4 support. `map.json` is a client-side configuration file.
+
+Structure and examples of the above modifications for TAP 4 support follow:
+
+#### 1. TAP 4 Repository Data Directory
+The structure of the directory of metadata provided in Repository Data when
+TAP 4 is supported:
+  ```
+  - keys.json
+  - <repository_1_name>
+              |- metadata
+                    |- root.json
+                    |- timestamp.json
+                    |- snapshot.json
+                    |- targets.json
+                    |- <a delegated role>.json
+                    |- <another delegated role>.json
+                    |   ...
+              |- targets
+                    |- <some_target.img>
+                    |-  ...
+  - <repository_2_name>
+              |- metadata
+                    |- root.json
+                    |- ...
+              |- targets
+                    |- ...
+  - <repository_3_name>
+              |- metadata
+                    |- ...
+              |- targets
+                    |- ...
+  ...
+  ```
+
+#### 2. TAP 4 Repository Data keys.json
+`keys.json` is modified as specified for Initial Trusted Metadata
+[above](#2-tap-4-initial-trusted-metadata-keys-json).
+
 
 
 # Security Analysis
