@@ -1,7 +1,7 @@
 * TAP: 7
 * Title: Conformance testing
 * Version: 2
-* Last-Modified: 27-June-2017
+* Last-Modified: 18-July-2017
 * Author: Vladimir Diaz, Sebastien Awwad
 * Status: Draft
 * Content-Type: text/markdown
@@ -392,28 +392,88 @@ converter `convert_signed_metadata_to_der` employed by Uptane's TUF fork
 Certain TUF features require a slightly different arrangement of test data.
 Operating with multiple repositories, an optional feature provided by
 [TAP 4](tap4.md), requires that test data provide for multiple repositories.
-TAP 4 support expands the formats in this TAP somewhat, as indicated below.
+Optional TAP 4 support expands the formats in this TAP somewhat, as indicated
+below.
 Other such features may also require expanded test data, and future TAPs that
 affect test data should specify how test data must be changed.
 
+For TAP 4 support in TAP 7, these changes are required:
+1. [Include map.json file with Initial Trusted Metadata](#tap-4-support-map-json)
+2. [Separate metadata and targets in data directories by repository](#tap-4-support-repository-directories)
+(in Initial Trusted Metadata and Repository Data)
+3. [Organize keys.json by repository](#tap-4-support-keys-json)
 
-#### TAP 4 Initial Trusted Metadata
-When supporting TAP 4, [Initial Trusted Metadata](#initial-trusted-metadata)
-changes as follows, to allow for multiple repositories:
- 1. An extra level of directories is added, one per repository, which then
-   each contain 'metadata' directories.
- 2. An extra level is added at the root of the `keys.json` dictionary,
-   identifying each repository.
- 3. A `map.json` file is included, to identify the repositories and the
-   client's trust relationships with them / delegations to them.
 
-Structure and examples of the above modifications for TAP 4 support follow:
 
-##### 1. TAP 4 Initial Trusted Metadata Directory
-The structure of the directory of metadata provided in Initial Trusted
-   Metadata when TAP 4 is supported:
+#### TAP 4 Support - map.json
+[TAP 4](tap4.md) requires that clients have a `map.json` to identify known
+repositories and the client's trust relationships with them / delegations to
+them (which repositories or combinations of repositories a client trusts to
+provide target files in different namespaces. For TAP 4 Support in TAP 7, a
+`map.json` file is included in
+[Initial Trusted Metadata](#initial-trusted-metadata).
+
+`map.json` maps repository names to lists of mirrors/locations and repository
+names to namespaces of target files. Since test setups vary, the lists of
+mirrors will need to be modified to be used. The locations listed are
+irrelevant, since we cannot specify the locations of mirrors you use. Instead,
+the repository names are important and will tell you which directories will
+contain relevant data for a given repository, and which repository to trust for
+which targets. See the next two sections on TAP 4 Support below.
+
+For example, here is a map file that requires Repository1 and Repository2 to
+agree on target file info for targets in `project123/`, trusts Repository1
+alone for all other projects, and specifies the (irrelevant for test data)
+location of the two repositories.
+
+```Javascript
+{
+  "repositories": {
+    "Repository1": [<ignore this location>],
+    "Repository2": [<ignore this location>]
+  },
+  "mapping": [
+    {
+      "paths":        ["project123/*"],
+      "repositories": ["Repository1", "Repository2"],
+      "terminating":  true,
+    },
+    {
+      "paths":        ["*"],
+      "repositories": ["Repository1"]
+    }
+  ]
+}
+```
+
+
+
+#### TAP 4 Support - Repository Directories
+When TAP 4 is supported, the structure of the directories of metadata and
+targets in the test cases' [Initial Trusted Metadata](#initial-trusted-metadata)
+and [Repository Data](#repository-data) changes slightly to organize contents
+by repository, using the repository names listed in `map.json`. An extra level of
+directories is added, one per repository named in `map.json`, each containing
+'metadata' (and in the case of Repository Data, 'targets') directories.
+
+
+[Initial Trusted Metadata](#initial-trusted-metadata) will now look like this:
   ```
-  - map.json   // see TAP 4
+  - map.json // See section below on map.json, and also TAP 4.
+  - keys.json
+  - <repository_1_name>
+              |- metadata
+                    |- root.json
+                    ...
+  - <repository_2_name>
+              |- metadata
+                    |- root.json
+                    ...
+  ...
+  ```
+
+And [Repository Data](#repository-data) will now look like this:
+  ```
   - keys.json
   - <repository_1_name>
               |- metadata
@@ -424,15 +484,30 @@ The structure of the directory of metadata provided in Initial Trusted
                     |- <a delegated role>.json
                     |- <another delegated role>.json
                     |   ...
+              |- targets
+                    |- <some_target.img>
+                    |-  ...
   - <repository_2_name>
               |- metadata
                     |- root.json
-              // etc.
+                    |- ...
+              |- targets
+                    |- ...
+  - <repository_3_name>
+              |- metadata
+                    |- ...
+              |- targets
+                    |- ...
+  ...
   ```
 
-##### 2. TAP 4 Initial Trusted Metadata keys.json
-The `keys.json` file provided in Initial Trusted Metadata or Repository Data
-when TAP 4 is supported looks like this:
+
+
+##### TAP 4 Support - keys.json
+When TAP 4 is supported, the `keys.json` file provided in Initial Trusted
+Metadata and Repository Data gains an additional level of strucutre at the
+root of the dictionary, separating keys by repository, using repository names
+from `map.json`, like this:
   ```javascript
   {
     <repository_1_name>: {
@@ -480,66 +555,6 @@ when TAP 4 is supported looks like this:
       {'root': [{
         ...
   ```
-
-
-
-3. `map.json`  TBC!!!!!!! # TODO: Finish.
-
-
-
-
-
-
-
-#### TAP 4 Repository Data
-When supporting TAP 4, [Repository Data](#repository-data)
-changes as follows, to allow for multiple repositories:
- 1. An extra level of directories is added, one per repository, which then
-   each contain 'metadata' and 'targets' directories.
- 2. An extra level is added at the root of the `keys.json` dictionary,
-   identifying each repository, exactly as with
-   [TAP 4 Initial Trusted Metadata](#tap-4-initial-trusted-metadata)
-
-Note that a `map.json` file is not provided for Repository Data with or without
-TAP 4 support. `map.json` is a client-side configuration file.
-
-Structure and examples of the above modifications for TAP 4 support follow:
-
-##### 1. TAP 4 Repository Data Directory
-The structure of the directory of metadata provided in Repository Data when
-TAP 4 is supported:
-  ```
-  - keys.json
-  - <repository_1_name>
-              |- metadata
-                    |- root.json
-                    |- timestamp.json
-                    |- snapshot.json
-                    |- targets.json
-                    |- <a delegated role>.json
-                    |- <another delegated role>.json
-                    |   ...
-              |- targets
-                    |- <some_target.img>
-                    |-  ...
-  - <repository_2_name>
-              |- metadata
-                    |- root.json
-                    |- ...
-              |- targets
-                    |- ...
-  - <repository_3_name>
-              |- metadata
-                    |- ...
-              |- targets
-                    |- ...
-  ...
-  ```
-
-##### 2. TAP 4 Repository Data keys.json
-`keys.json` is modified as specified for Initial Trusted Metadata
-[above](#2-tap-4-initial-trusted-metadata-keys-json).
-
 
 
 # Security Analysis
