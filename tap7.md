@@ -390,10 +390,12 @@ Implementation's current TUF fork
 
 
 ## TAP 4 Support
-Certain TUF features require a slightly different arrangement of test data.
-Operating with multiple repositories, an optional feature provided by
-[TAP 4](tap4.md), requires that test data provide for multiple repositories.
-Optional TAP 4 support expands the formats in this TAP somewhat, as indicated
+Accomodating future TUF features or TAPs may require a slightly different
+arrangement of test data.
+
+Operating with multiple repositories, an ability slated for addition to TUF
+in [TAP 4](tap4.md), requires that test data provide for multiple repositories.
+TAP 4 support expands the formats in this TAP somewhat, as indicated
 below.
 Other such features may also require expanded test data, and future TAPs that
 affect test data should specify how test data must be changed.
