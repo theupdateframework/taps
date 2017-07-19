@@ -418,13 +418,26 @@ provide target files in different namespaces. For TAP 4 Support in TAP 7, a
 `map.json` file is included in
 [Initial Trusted Metadata](#initial-trusted-metadata).
 
-`map.json` maps repository names to lists of mirrors/locations and repository
-names to namespaces of target files. Since test setups vary, the locations
-listed are irrelevant, since we cannot specify the locations of mirrors you use
-or assume what transport mechanism will be employed. Instead, the repository
+`map.json` normally maps:
+1. target file namespaces to (groups of) repository names to trust for those
+target files
+2. repository names to the locations where clients can find data for each
+repository
+
+As normal, the repository
 names will tell you which directories will contain relevant test data for a
 given repository, and which repository to trust for which targets. See the next
 two sections on TAP 4 Support below.
+
+Since test setups vary, however, we cannot in pre-generated test data map the
+names of repositories to the locations of mirrors or assume what transport
+mechanism will be employed. The locations listed should be corrected to
+reflect the real location of the repositories where test data will be made
+available to the clients. (In more exotic setups -- for example, if http(s)://
+or file:// are not to be used and repository data is distributed through some
+other protocol -- the map file should be adjusted to ensure that
+the client is able to find the appropriate test data for each repository.)
+
 
 For example, here is a map file that requires Repository1 and Repository2 to
 agree on target file info for targets in `project123/`, trusts Repository3
@@ -434,8 +447,8 @@ location of the repositories.
 ```Javascript
 {
   "repositories": {
-    "Repository1": [<ignore this location>],
-    "Repository2": [<ignore this location>],
+    "Repository1": [<test_case_0/repo1>],
+    "Repository2": [<test_case_0/repo2>],
     "Repository3": ...,
   },
   "mapping": [
