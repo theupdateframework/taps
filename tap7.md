@@ -153,7 +153,8 @@ case metadata has to be converted to a different format and re-signed, as
 explained [below](#keys-for-re-signing).
 
 Additional files may appear in test data directories to support new TUF
-features. See, for example, the [TAP 4 support section](#tap-4-support).
+features. See
+[Adapting TAP 7 for Future Changes below](#adapting-tap-7-for-future-changes).
 
 In most cases, the contents of the directory indicated as Initial Trusted
 Metadata will simply be:
@@ -389,16 +390,17 @@ Implementation's current TUF fork
 
 
 
-## TAP 4 Support
-Accomodating future TUF features or TAPs may require a slightly different
-arrangement of test data.
+## Adapting TAP 7 for Future Changes
+Accommodating future TUF features or TAPs may require a slightly different
+arrangements of test data. [TAP 4 support is provided below](#tap-4-support)
+as an example. Future TAPs that affect test data should specify how test data
+must be changed.
 
+### TAP 4 Support
 Operating with multiple repositories, an ability slated for addition to TUF
 in [TAP 4](tap4.md), requires that test data provide for multiple repositories.
 TAP 4 support expands the formats in this TAP somewhat, as indicated
 below.
-Other such features may also require expanded test data, and future TAPs that
-affect test data should specify how test data must be changed.
 
 For TAP 4 support in TAP 7, these changes are required:
 1. [Include map.json file with Initial Trusted Metadata](#tap-4-support-map-json)
@@ -408,7 +410,7 @@ For TAP 4 support in TAP 7, these changes are required:
 
 
 
-### TAP 4 Support - map.json
+#### TAP 4 Support - map.json
 [TAP 4](tap4.md) requires that clients have a `map.json` to identify known
 repositories and the client's trust relationships with them / delegations to
 them (which repositories or combinations of repositories a client trusts to
@@ -452,7 +454,7 @@ location of the repositories.
 
 
 
-### TAP 4 Support - Repository Directories
+#### TAP 4 Support - Repository Directories
 When TAP 4 is supported, the structure of the directories of metadata and
 targets in the test cases' [Initial Trusted Metadata](#initial-trusted-metadata)
 and [Repository Data](#repository-data) changes slightly to organize contents
@@ -502,7 +504,7 @@ And [Repository Data](#repository-data) will now look like this:
 
 
 
-### TAP 4 Support - keys.json
+#### TAP 4 Support - keys.json
 When TAP 4 is supported, the `keys.json` file provided in Initial Trusted
 Metadata and Repository Data gains an additional level of strucutre at the
 root of the dictionary, separating keys by repository, using repository names
