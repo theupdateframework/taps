@@ -1,7 +1,7 @@
 * TAP: 7
 * Title: Conformance testing
 * Version: 2
-* Last-Modified: 18-July-2017
+* Last-Modified: 19-July-2017
 * Author: Vladimir Diaz, Sebastien Awwad
 * Status: Draft
 * Content-Type: text/markdown
@@ -66,7 +66,7 @@ sets of metadata and targets with the expectation that all implementations
 should react to certain sets by successfully validating and updating, and react
 to other sets by rejecting the invalid metadata or
 targets. Determining which data sets an implementation accepts and which it
-rejects allows us to determine the implementation's TUF conformance, including
+rejects helps to determine the implementation's TUF conformance, including
 its resilience against the attacks listed in the TUF Specification (section
 1.5.2).
 If an updater implementation performs as prescribed in every test case, it is
@@ -138,18 +138,19 @@ metadata, or the target doesn't match values provided in the metadata,
 or so on.
 
 ### Initial Trusted Metadata
-This is the initial metadata the updater client will have and trust before
-an update is attempted. TUF always requires some established root of trust to
-be present in the updater client. The common case is generally a root.json file
-that shipped with the updater. For testing purposes, this may also be a full
-set of metadata, that which would have been validated in some previous update.
+This is the path to a directory containing initial metadata the updater client
+will have and trust before an update is attempted. TUF always requires some
+established root of trust to be present in the updater client. The common case
+is generally a trustworthy root.json file that shipped with the updater. For
+testing purposes, this may also be a full set of metadata that would have been
+validated in a hypothetical previous update.
 
-Metadata in the TUF specification's metadata format will be provided in a
-directory, with the directory structure below. Data here should be converted
-to whatever format the updater requires and delivered in the manner the updater
-requires. he common case here
-will be the path of a directory containing a trustworthy root.json
-file.
+Metadata in the TUF specification's metadata format will be provided in the
+directory, with the directory structure below. Data here should be converted to
+whatever format the updater requires and delivered in the manner the updater
+requires. Also provided in the indicated directory is a `keys.json` file, in
+case metadata has to be converted to a different format and re-signed, as
+explained [below](#keys-for-re-signing).
 
 Additional files may appear in test data directories to support new TUF
 features. See, for example, the [TAP 4 support section](#tap-4-support).
@@ -178,10 +179,11 @@ But more may be provided:
 #### Keys for Re-Signing
 The `keys.json` file will specify the keys used to generate the given metadata.
 This information does not need to be used if the updater implementation uses
-the same canonicalized JSON metadata format described in the TUF Specification
-and used by the TUF Reference Implementation. If metadata has to be converted
-and signed over a different format for the updater, these keys can be used to
-re-sign the metadata and generate equivalent metadata in the new format.
+the same structure and canonicalized JSON metadata format described in the TUF
+Specification and used by the TUF Reference Implementation. If metadata has to
+be converted and signed over a different format for the updater, these keys can
+be used to re-sign the metadata and generate equivalent metadata in the new
+format.
 
 The format of this dictionary of keys represented in `keys.json` is as follows.
 (Note that the individual keys resemble ANYKEY_SCHEMA in the
@@ -275,8 +277,8 @@ update to.
 ## Test Case Specification
 The test cases, containing
 [the elements above (see for details on each element)](#test-case-specification)
-will be provided as a directory of files accompanied by the a JSON file in the
-following JSON format.
+will be provided as a directory accompanied by a JSON file in the following
+JSON format.
 
 ```javascript
 [
@@ -285,7 +287,7 @@ following JSON format.
     'description': 'A description of the test case',
     'expected_result': <either 'success' or 'failure'>,
     'initial_data': <path to directory containing the metadata to use>,
-    'update_data': <path to directory containing data to use>,
+    'repository_data': <path to directory containing data to use>,
     'target': <repository filepath of target to try obtaining and updating to>
   },
   {
@@ -298,11 +300,10 @@ Example:
 ```javascript
 [
 {
-  'description':
-     '0: Control case, valid test data',
+  'description':     '0: Control case, valid test data',
   'expected_result': 'success',
   'initial_data':    'test_sets/test0/initial/',
-  'update_data':     'test_sets/test0/repository/',
+  'repository_data': 'test_sets/test0/repository/',
   'target':          'target.txt'
 },
 {
@@ -310,7 +311,7 @@ Example:
      '1: replay: snapshot w/ lower version than that already trusted by client',
   'expected_result': 'failure',
   'initial_data':    'test_sets/test1/initial/',
-  'update_data':     'test_sets/test1/repository/',
+  'repository_data': 'test_sets/test1/repository/',
   'target':          'target.txt'
 },
 {
@@ -318,23 +319,22 @@ Example:
      '2: target file provided does not match hash in trustworthy metadata',
   'expected_result': 'failure',
   'initial_data':    'test_sets/test2/initial/',
-  'update_data':     'test_sets/test2/repository/',
+  'repository_data': 'test_sets/test2/repository/',
   'target':          'target.txt'
 },
 {
   'description':
-     '3: delegated role signed by key no longer trusted by delegator'
+     '3: delegated role is signed by key no longer trusted by delegating role'
   'expected_result': 'failure',
   'initial_data':    'test_sets/test3/initial/',
-  'update_data':     'test_sets/test3/repository/',
+  'repository_data': 'test_sets/test3/repository/',
   'target':          'target_123.txt'
 },
 {
-  'description':
-     '3C: control for Test 3',
+  'description':     '3C: control for Test 3',
   'expected_result': 'success',
   'initial_data':    'test_sets/test3c/initial/',
-  'update_data':     'test_sets/test3c/repository/',
+  'repository_data': 'test_sets/test3c/repository/',
   'target':          'target_123.txt'
 }
 ]
@@ -359,7 +359,7 @@ examples of what may be necessary:
  JSON), translate metadata (Initial and Repository) from the format the Tester
  provides into the format the updater expects.
  - if the updater requires signatures to be over a different format, re-sign
- metadata after translating it.
+ metadata (using `keys.json`) after translating it.
 
 
 ### Re-Signing Converted Metadata
@@ -382,7 +382,8 @@ sign each piece of metadata, if that metadata should need to be converted and
 re-signed.
 
 For an example of how such re-signing code might look, consider the JSON-to-DER
-converter `convert_signed_metadata_to_der` employed by Uptane's TUF fork
+converter `convert_signed_metadata_to_der` employed by the Uptane Reference
+Implementation's current TUF fork
 [here](https://github.com/awwad/tuf/blob/36dbb7b8a800dab407fe9ab961155ef0a6d9f7c9/tuf/asn1_codec.py#L156-L352).
 
 
@@ -405,7 +406,7 @@ For TAP 4 support in TAP 7, these changes are required:
 
 
 
-#### TAP 4 Support - map.json
+### TAP 4 Support - map.json
 [TAP 4](tap4.md) requires that clients have a `map.json` to identify known
 repositories and the client's trust relationships with them / delegations to
 them (which repositories or combinations of repositories a client trusts to
@@ -414,23 +415,24 @@ provide target files in different namespaces. For TAP 4 Support in TAP 7, a
 [Initial Trusted Metadata](#initial-trusted-metadata).
 
 `map.json` maps repository names to lists of mirrors/locations and repository
-names to namespaces of target files. Since test setups vary, the lists of
-mirrors will need to be modified to be used. The locations listed are
-irrelevant, since we cannot specify the locations of mirrors you use. Instead,
-the repository names are important and will tell you which directories will
-contain relevant data for a given repository, and which repository to trust for
-which targets. See the next two sections on TAP 4 Support below.
+names to namespaces of target files. Since test setups vary, the locations
+listed are irrelevant, since we cannot specify the locations of mirrors you use
+or assume what transport mechanism will be employed. Instead, the repository
+names will tell you which directories will contain relevant test data for a
+given repository, and which repository to trust for which targets. See the next
+two sections on TAP 4 Support below.
 
 For example, here is a map file that requires Repository1 and Repository2 to
-agree on target file info for targets in `project123/`, trusts Repository1
+agree on target file info for targets in `project123/`, trusts Repository3
 alone for all other projects, and specifies the (irrelevant for test data)
-location of the two repositories.
+location of the repositories.
 
 ```Javascript
 {
   "repositories": {
     "Repository1": [<ignore this location>],
-    "Repository2": [<ignore this location>]
+    "Repository2": [<ignore this location>],
+    "Repository3": ...,
   },
   "mapping": [
     {
@@ -440,7 +442,7 @@ location of the two repositories.
     },
     {
       "paths":        ["*"],
-      "repositories": ["Repository1"]
+      "repositories": ["Repository3"]
     }
   ]
 }
@@ -448,7 +450,7 @@ location of the two repositories.
 
 
 
-#### TAP 4 Support - Repository Directories
+### TAP 4 Support - Repository Directories
 When TAP 4 is supported, the structure of the directories of metadata and
 targets in the test cases' [Initial Trusted Metadata](#initial-trusted-metadata)
 and [Repository Data](#repository-data) changes slightly to organize contents
@@ -459,7 +461,7 @@ directories is added, one per repository named in `map.json`, each containing
 
 [Initial Trusted Metadata](#initial-trusted-metadata) will now look like this:
   ```
-  - map.json // See section below on map.json, and also TAP 4.
+  - map.json // See section above on map.json
   - keys.json
   - <repository_1_name>
               |- metadata
@@ -493,17 +495,12 @@ And [Repository Data](#repository-data) will now look like this:
                     |- ...
               |- targets
                     |- ...
-  - <repository_3_name>
-              |- metadata
-                    |- ...
-              |- targets
-                    |- ...
   ...
   ```
 
 
 
-##### TAP 4 Support - keys.json
+### TAP 4 Support - keys.json
 When TAP 4 is supported, the `keys.json` file provided in Initial Trusted
 Metadata and Repository Data gains an additional level of strucutre at the
 root of the dictionary, separating keys by repository, using repository names
@@ -563,9 +560,9 @@ This TAP does not detract from existing security guarantees because it does not
 propose architectural changes to the specification.
 
 
-# Backwards Compatibility
+# Backward Compatibility
 
-This TAP does not introduce any backwards incompatibilities.
+This TAP does not introduce any backward incompatibilities.
 
 
 # Augmented Reference Implementation
