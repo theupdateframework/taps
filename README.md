@@ -14,3 +14,4 @@
 * [TAP 7: Conformance testing](tap7.md)
 * [TAP 8: Key rotation and explicit self-revocation](tap8.md)
 * [TAP 9: Mandatory metadata signing schemes](tap9.md)
+* [TAP 10: Remove native support for compressed metadata](tap10.md)
