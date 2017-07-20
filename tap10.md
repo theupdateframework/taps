@@ -1,7 +1,7 @@
 * TAP: 10
 * Title: Remove native support for compressed metadata
 * Version: 1
-* Last-Modified: 19-July-2017
+* Last-Modified: 20-July-2017
 * Author: Vladimir Diaz
 * Status: Draft
 * Content-Type: text/markdown
@@ -75,9 +75,10 @@ algorithms are available on a repository.
 
 Old format of the "signed" portion of Root metadata:
 
+<pre>
 {
   "_type" : "root",
-  **"compression_algorithms": [ COMPRESSION_ALGORITHM, ... ]**,
+  <b>"compression_algorithms"</b>: <b>[ COMPRESSION_ALGORITHM, ... ]</b>,
   "consistent_snapshot": CONSISTENT_SNAPSHOT,
   "version" : VERSION,
   "expires" : EXPIRES,
@@ -92,9 +93,11 @@ Old format of the "signed" portion of Root metadata:
       , ...
     }
 }
+</pre>
 
 New format of the signed portion of the Root file:
 
+<pre>
 {
   "_type" : "root",
   "consistent_snapshot": CONSISTENT_SNAPSHOT,
@@ -111,6 +114,7 @@ New format of the signed portion of the Root file:
       , ...
     }
 }
+</pre>
 
 # Security Analysis
 
