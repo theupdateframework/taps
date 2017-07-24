@@ -1,7 +1,7 @@
 * TAP: 10
 * Title: Remove native support for compressed metadata
 * Version: 1
-* Last-Modified: 20-July-2017
+* Last-Modified: 24-July-2017
 * Author: Vladimir Diaz
 * Status: Draft
 * Content-Type: text/markdown
@@ -19,10 +19,12 @@ specification should instead recommend that compression be implemented at the
 presentation layer of the [OSI protocol
 stack](https://en.wikipedia.org/wiki/OSI_protocols), which is better suited to
 handle decompression of data.  Once decompressed, metadata can be validated
-against the hashes and signatures listed in the Snapshot file.  Relegating the
-use of compression minimizes code complexity, reduces the size of the Snapshot
-file, and doesn't require native protection against malicious archives, which
-can lead to corrupted installation environments.
+against the hashes and signatures listed in the Snapshot file.
+
+Relegating the use of compression minimizes code complexity, reduces the size
+of the Snapshot file, and doesn't require native protection against malicious
+archives, which can lead to corrupted installation environments.  Compression
+code is tricky to write in a way that limits the potential for abuse.
 
 # Motivation
 
@@ -54,7 +56,11 @@ implementor is forced to decompress untrusted data.
 
 * Compressed metadata can potentially unpack to an unexpected directory
 or filename.  This can lead to undesirable states, where target or metadata
-files are overwritten.
+files are overwritten.  An implementor might fail to check that [files in the
+archive do not lead to a malicious directory
+traversal](https://www.exploit-db.com/exploits/39680/) while decompressing,
+possibly [via
+symbolic links](https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=774660).
 
 # Rationale
 
@@ -64,13 +70,13 @@ with a standard approach.  That is, decompressing metadata at layer 6 of the
 OSI model would be ideal and simplify matters.
 
 Compression is also only needed with large repositories.  It should be left
-to adopter to decide whether they want to compress metadata.
+to an adopter to decide whether they want to compress metadata.
 
 # Specification
 
 This TAP does not propose a new feature, thus it does not describe new
 syntax and semantics.  The only change is that the *compression_algorithms*
-attribute is removed from Root metadata, which specifiies which compression
+attribute is removed from Root metadata, which specifies which compression
 algorithms are available on a repository.
 
 Old format of the "signed" portion of Root metadata:
