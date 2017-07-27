@@ -268,7 +268,14 @@ signatures. In the event client does not recognize the scheme or the scheme
 is incompatible with the key type, then the client MUST NOT attempt to
 resolve the error and MUST NOT verify any signatures from the key.
 
-We define two keytypes at present: 'rsa' and 'ed25519'.
+We define two different key types and three signature schemes below.
+
+Key types: 'rsa' and 'ed25519'
+
+Signature schemes: 'rsassa-pss-sha256', 'rsa-pkcsv1.5', and 'ed25519'
+
+However, TUF is not restricted to any particular key type,
+signature scheme, or cryptographic library.
 
 The 'rsa' format is:
 
