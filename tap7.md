@@ -97,8 +97,8 @@ Tests will verify this behavior, determining whether or not the updater defends
 against attacks described in Section 1.5.2 of the TUF Specification.
 
 The updater will be expected to reject untrustworthy metadata and targets and
-accept trustworthy metadata and targets. Control test cases will be used
-alongside each test to verify correct behavior in the absence of an attack.
+accept trustworthy metadata and targets. Positive test cases will be used
+to verify correct behavior in the absence of an attack.
 
 Tests will attempt endless data attacks, indefinite freeze attacks, replay
 attacks, and a variety of others discussed in the TUF Specification. The full
@@ -301,7 +301,7 @@ Example:
 ```javascript
 [
 {
-  'description':     '0: Control case, valid test data',
+  'description':     '0: Basic positive case, valid test data',
   'expected_result': 'success',
   'initial_data':    'test_sets/test0/initial/',
   'repository_data': 'test_sets/test0/repository/',
@@ -332,7 +332,7 @@ Example:
   'target':          'target_123.txt'
 },
 {
-  'description':     '3C: control for Test 3',
+  'description':     '4: Positive w/ delegations (also controls for Test 3)',
   'expected_result': 'success',
   'initial_data':    'test_sets/test3c/initial/',
   'repository_data': 'test_sets/test3c/repository/',
@@ -437,7 +437,6 @@ available to the clients. (In more exotic setups -- for example, if http(s)://
 or file:// are not to be used and repository data is distributed through some
 other protocol -- the map file should be adjusted to ensure that
 the client is able to find the appropriate test data for each repository.)
-
 
 For example, here is a map file that requires Repository1 and Repository2 to
 agree on target file info for targets in `project123/`, trusts Repository3
