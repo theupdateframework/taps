@@ -246,7 +246,52 @@ already in place procedures used for rotating to a new key.
 
 # Specification
 
-TODO complete this section once TUF issue #440 gets merged.
+The field `method` and all references to it need to be removed from section 4.2
+of the current spec as well as all examples of signed metadata.
+
+Additionally, section 4.2. should be rewritten to:
+
+-----------------
+All keys have the format:
+
+```
+{ "keytype" : KEYTYPE,
+  "scheme": SCHEME,
+  "keyval" : KEYVAL }
+```
+
+where KEYTYPE is a string describing the type of the key and how it's
+used to sign documents. The type determines the interpretation of
+KEYVAL. SCHEME is the signature scheme that this key uses to generate
+signatures. The client MUST only use the single defined scheme when verifying
+signatures. In the event client does not recognize the scheme or the scheme
+is incompatible with the key type, then the client MUST NOT attempt to
+resolve the error and MUST NOT verify any signatures from the key.
+
+We define two keytypes at present: 'rsa' and 'ed25519'.
+
+The 'rsa' format is:
+
+```
+{ "keytype" : "rsa",
+  "scheme": "rsassa-pss-sha256|rsa-pkcsv1.5",
+  "keyval" : { "public" : PUBLIC}
+}
+```
+
+where PUBLIC is in PEM format and a string.  All RSA keys
+must be at least 2048 bits.
+
+The 'ed25519' format is:
+  
+```
+{ "keytype" : "ed25519",
+  "scheme": "ed25519",
+  "keyval" : { "public" : PUBLIC}
+}
+```
+
+where PUBLIC is a 32-byte string.
 
 ## Example
 
