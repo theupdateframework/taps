@@ -3,7 +3,7 @@
 * Version: 1
 * Last-Modified: 24-July-2017
 * Author: Vladimir Diaz
-* Status: Draft
+* Status: Accepted
 * Content-Type: text/markdown
 * Created: 19-July-2017
 * Post-History: 25-July-2017
