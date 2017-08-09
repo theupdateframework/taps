@@ -77,7 +77,7 @@ Each TAP should have the following parts:
 
 # TAP Formats and Templates
 
-TAPs are UTF-8 encoded text files using the [Markdown](https://daringfireball.net/projects/markdown/) format. Markdown allows for rich markup that is still quite easy to read, but also results in good-looking and functional HTML. [TAP 2](https://github.com/theupdateframework/taps/blob/master/tap-0002.md) contains instructions and a template for MarkDown TAPs.
+TAPs are UTF-8 encoded text files using the [Markdown](https://daringfireball.net/projects/markdown/) format. Markdown allows for rich markup that is still quite easy to read, but also results in good-looking and functional HTML. [TAP 2](https://github.com/theupdateframework/taps/blob/master/tap2.md) contains instructions and a template for MarkDown TAPs.
 
 # TAP Header Preamble
 
@@ -101,7 +101,7 @@ The Author header lists the names, and optionally the email addresses of all the
 
 If there are multiple authors, each should be on a separate line following RFC 2822 continuation line conventions.  Note that personal email addresses in TAPs will be obscured as a defense against spam harvesters.
 
-The format of a TAP is specified with a Content-Type header. The acceptable values are"text/markdown" for Markdown TAPs (see [TAP 2](https://github.com/theupdateframework/taps/blob/master/tap-0002.md)). Markdown ("text/markdown") is the default if no Content-Type header is present.
+The format of a TAP is specified with a Content-Type header. The acceptable values are"text/markdown" for Markdown TAPs (see [TAP 2](https://github.com/theupdateframework/taps/blob/master/tap2.md)). Markdown ("text/markdown") is the default if no Content-Type header is present.
 
 The Created header records the date that the TAP was assigned a number, while Post-History is used to record the dates of when new versions of the TAP are posted to the TUF mailing list.  Both headers should be in dd-mmm-yyyy format, e.g. 14-Aug-2001.
 
