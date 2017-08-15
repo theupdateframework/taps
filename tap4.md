@@ -1,7 +1,7 @@
 * TAP: 4
 * Title: Multiple repository consensus
 * Version: 1
-* Last-Modified: 14-Aug-2017
+* Last-Modified: 15-Aug-2017
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Draft
@@ -13,16 +13,16 @@
 This TAP is a guideline on how to search multiple repositories for particular
 targets.  It discusses how multiple repositories with separate roots of trust
 can be required to sign off on the same target(s), effectively creating an AND
-relation.  In other words, this TAP demonstrates how to _map_ target names to
+relation.  In other words, this TAP demonstrates how to map target names to
 repositories in a manner similar to how targets with specific names can be
 delegated to different roles.  Like delegations, the repository entries can be
-ordered, be a "terminating" repository that instructs clients to halt the
-search, etc.
+ordered, and be a "terminating" repository that instructs clients to halt the
+search if an entrusted target is not available on its repository.
 
-This TAP allows users to say that a target with a specific type of name (such
-as ```django*``` or ```*.tar.gz```) may be found on a specific repository.
-Each repository has its own root of trust (Root role, etc.) so a compromise of
-one repository does not impact other repositories.
+This TAP shows how a target with a specific type of name (such as ```django*```
+or ```*.tar.gz```) may be found on a specific repository.  Each repository has
+its own root of trust (Root role, etc.) so a compromise of one repository does
+not impact other repositories.
 
 # Motivation
 
@@ -85,7 +85,13 @@ are not at risk.
 
 # Rationale
 
-This TAP aids adopters in multiple-repository concensus,
+There are some implementations that may want to allow clients to contact
+multiple repositories while fetching a target file.  This TAP outlines one
+mechanism to support repository consensus on entrusted targets, namely via a
+map.json file.  However, adopters are free to use any mechanism to implement
+this same feature or behavior.  The main goal of this TAP is to make clear the
+behavior that we recommend should be followed to ensure that the update process
+that depends on multiple repositories is secure.
 
 # Specification
 
