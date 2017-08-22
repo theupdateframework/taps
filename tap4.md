@@ -228,8 +228,9 @@ not need to change how it already stores metadata and targets.
 # Augmented Reference Implementation
 
 [This](https://gist.github.com/trishankkarthik/e5d8134a4052f712b7416c76787b077b#file-tap4-py-L7-L46)
-GitHub gist]demonstrates how TAP 4 can be implemented without modifying an
-existing TUF client.
+GitHub gist and [branch](https://github.com/theupdateframework/tuf/tree/tap4)
+demonstrate how TAP 4 can be implemented without modifying an existing TUF
+client.
 
 # Copyright
 
