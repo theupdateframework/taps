@@ -1,7 +1,7 @@
 * TAP: 4
 * Title: Multiple repository consensus
 * Version: 1
-* Last-Modified: 15-Aug-2017
+* Last-Modified: 22-Aug-2017
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Draft
@@ -10,19 +10,15 @@
 * Created: 09-Sep-2016
 
 # Abstract
-This TAP is a guideline on how to search multiple repositories for particular
-targets.  It discusses how multiple repositories with separate roots of trust
-can be required to sign off on the same target(s), effectively creating an AND
-relation.  In other words, this TAP demonstrates how to map target names to
-repositories in a manner similar to how targets with specific names can be
-delegated to different roles.  Like delegations, the repository entries can be
-ordered, and be a "terminating" repository that instructs clients to halt the
-search if an entrusted target is not available on its repository.
-
-This TAP shows how a target with a specific type of name (such as ```django*```
-or ```*.tar.gz```) may be found on a specific repository.  Each repository has
-its own root of trust (Root role, etc.) so a compromise of one repository does
-not impact other repositories.
+This TAP is a guideline on how clients can search multiple repositories for
+particular targets.  It discusses how multiple repositories with separate roots
+of trust can be required to sign off on the same target(s), effectively
+creating an AND relation.  In other words, this TAP demonstrates how to map
+target names to repositories in a manner similar to how targets with specific
+names can be delegated to different roles.  Like delegations, the repository
+entries can be ordered/prioritized and be a "terminating" repository that
+instructs clients to halt the search if an entrusted target is not available on
+its repository.
 
 # Motivation
 
@@ -79,9 +75,9 @@ malicious targets files.  However, if repository A's root role or its top level
 targets role were to be compromised, all users can be given malicious targets
 files, even if repository B is not compromised.
 
-We wish to remedy this case by requiring valid signatures from two
-repositories, so that if either of the two repositories is compromised, users
-are not at risk.
+We wish to remedy this case by showing adopters how to require valid signatures
+from two repositories, so that if either of the two repositories is
+compromised, users are not at risk.
 
 # Rationale
 
@@ -95,22 +91,25 @@ that depends on multiple repositories is secure.
 
 # Specification
 
-We introduce a mandatory top-level metadata file called `map.json`.  This _map
-file_ comes into play when a TUF client requests targets.
+This section shows how a target with a specific type of name (such as
+```django*``` or ```*.tar.gz```) may be found on a specific repository.  Each
+repository has its own root of trust (Root role, etc.) so a compromise of one
+repository does not impact other repositories.
 
+We use, as an example, a file named `map.json` to handle multiple repository
+consensus.  This _map file_ comes into play when a TUF client requests targets.
 Using a scheme similar to targets delegations within a repository, targets may
-be mapped to one or more repository in this file.
+be mapped to one or more repository in this file.  A client will keep all
+metadata for each repository in a separate directory of the client's choice.
 
-A client will keep all metadata for each repository in a separate directory of
-the client's choice.
+## The map file and repository concensus
 
-## The map file
-
-The map file maps targets to repositories.  This file is not intended to be
-automatically available / refreshed from a repository.  The map file is either
-constructed by the user using the TUF command-line tools, or distributed by an
-out-of-band bootstrap process.  The file is kept on the client and is only
-modified by a user who is trusted to configure the TUF instance.
+The map file can be used to map targets to repositories.  This file is not
+intended to be automatically available / refreshed from a repository.  The map
+file is either constructed by the user using the TUF command-line tools, or
+distributed by an out-of-band bootstrap process.  The file is kept on the
+client and is only modified by a user who is trusted to configure the TUF
+instance.
 
 The map file contains a dictionary that holds two keys, "repositories" and
 "mapping."
