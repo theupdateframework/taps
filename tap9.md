@@ -1,9 +1,9 @@
 * TAP: 9
 * Title: Mandatory Metadata Signing Schemes
 * Version: 1
-* Last-Modified: 2017-05-11
+* Last-Modified: 25-July-2017
 * Author: heartsucker
-* Status: Draft
+* Status: Accepted
 * Content-Type: text/markdown
 * Created: 20-Jan-2017
 
@@ -59,7 +59,7 @@ signature. While this does not pose an issue at the moment, if more signature
 schemes are being implemented in the future, the ability to control which
 scheme is used could potentially lead to security problems and risks.
 
-root.json signature example:
+A Root file example:
 
 ```python
 {
@@ -82,7 +82,7 @@ root.json signature example:
 
 It is recommended to reconsider whether the method field of a signature is
 actually needed. This especially holds when there is a mismatch between how
-different clients parse the root.json data. For example, a client could trust
+different clients parse the Root data. For example, a client could trust
 the unprotected method field over the protected keytype. In case this field is
 not necessary, it should be removed. Alternatively, precautions should be taken
 to protect the method field.
@@ -103,7 +103,7 @@ into a cryptographically verified section of the metadata.
 
 The current system allows a given key for a top-level role or any delegated role
 to produce a signature using any scheme that key is capable of. Take this
-snippet of a `root.json`:
+snippet of a Root file:
 
 ```python
 {
@@ -152,7 +152,7 @@ object which includes a `method` field that describes the method the given key
 used to create the signature. It is possible that an attacker can modify the key
 in one of two ways:
 
-1. **cross-type**: the signature method is change to use the wrong key type
+1. **cross-type**: the signature method is changed to use the wrong key type
    (e.g., `ed25519` to `rsassa-pss-sha256`)
 2. **intra-type**: the signature method is changed to use the wrong scheme for
    the same key type (e.g., `rsa-pkcs1` to `rsassa-pss-sha256`)
@@ -228,7 +228,7 @@ the following example, the two RSA keys are identical.
 
 This itself would be insufficient because when checking a threshold, a client
 would have have to check that each key ID calculated in the above way points to
-exactly one real key. We would have a calculate a second key ID that is
+exactly one real key. We would have to calculate a second key ID that is
 `sha256(encoded_key)` inside each key object. This adds additional complexity
 and, like the above iteration over allowed signing schemes, it is a source of
 bugs.
@@ -236,7 +236,7 @@ bugs.
 ## Argument 4: There is no practical reason to allow arbitrary switching of signing schemes
 
 An argument against this proposal is that forcing a signing key to use exactly
-one signing scheme would require a the `root.json` or delegator to resign
+one signing scheme would require the Root role or delegator to re-sign
 metadata authorizing the change of signing schemes. This sounds like an
 inconvenience or loss of a feature, but this restriction does not degrade the
 usability of the framework. The owner of a key may still chose a signing scheme
@@ -246,11 +246,63 @@ already in place procedures used for rotating to a new key.
 
 # Specification
 
-TODO complete this section once TUF issue #440 gets merged.
+The field `method` and all references to it need to be removed from section 4.2
+of the current spec as well as all examples of signed metadata.
+
+Additionally, section 4.2. should be rewritten to:
+
+-----------------
+All keys have the format:
+
+```
+{ "keytype" : KEYTYPE,
+  "scheme": SCHEME,
+  "keyval" : KEYVAL }
+```
+
+where KEYTYPE is a string describing the type of the key and how it's
+used to sign documents. The type determines the interpretation of
+KEYVAL. SCHEME is the signature scheme that this key uses to generate
+signatures. The client MUST only use the single defined scheme when verifying
+signatures. In the event client does not recognize the scheme or the scheme
+is incompatible with the key type, then the client MUST NOT attempt to
+resolve the error and MUST NOT verify any signatures from the key.
+
+We define two different key types and three signature schemes below.
+
+Key types: 'rsa' and 'ed25519'
+
+Signature schemes: 'rsassa-pss-sha256', 'rsa-pkcsv1.5', and 'ed25519'
+
+However, TUF is not restricted to any particular key type,
+signature scheme, or cryptographic library.
+
+The 'rsa' format is:
+
+```
+{ "keytype" : "rsa",
+  "scheme": "rsassa-pss-sha256|rsa-pkcsv1.5",
+  "keyval" : { "public" : PUBLIC}
+}
+```
+
+where PUBLIC is in PEM format and a string.  All RSA keys
+must be at least 2048 bits.
+
+The 'ed25519' format is:
+  
+```
+{ "keytype" : "ed25519",
+  "scheme": "ed25519",
+  "keyval" : { "public" : PUBLIC}
+}
+```
+
+where PUBLIC is a 32-byte string.
 
 ## Example
 
-Here is a current `root.json`:
+Here is the format of a current Root file:
 
 ```python
 {
@@ -276,12 +328,12 @@ Here is a current `root.json`:
 
 And it would be changed to:
 
-```python
+<pre>
 {
   "signatures": [
     {
-      "keyid": "ed3c845525d34937bf0584989a76fa300c0a6072de714b11b8dca535e10b9088",
-      "sig": "3a0e4666ffbdb5d80001d1539c6a4c27821c3d69065b17ed02a099591b0b4..."
+    <b>"keyid"</b>: <b>"ed3c845525d34937bf0584989a76fa300c0a6072de714b11b8dca535e10b9088"</b>,
+    <b>"sig"</b>: <b>"3a0e4666ffbdb5d80001d1539c6a4c27821c3d69065b17ed02a099591b0b4...</b>"
     },
   ],
   "signed": {
@@ -289,14 +341,14 @@ And it would be changed to:
     "keys": {
       "ed3c845525d34937bf0584989a76fa300c0a6072de714b11b8dca535e10b9088": {
         "keytype": "rsa",
-        "scheme": "rsassa-pss-sha256",
+        <b>"scheme"</b>: <b>"rsassa-pss-sha256"</b>,
         "keyval": {
           "public": "-----BEGIN PUBLIC KEY----- <etc>"
        }
     }
   }
 }
-```
+</pre>
 
 # Security Analysis
 
@@ -304,8 +356,8 @@ This proposal increases the net security of TUF by removing information from the
 attacker controlled space and thus removing one possible way an attacker could
 influence the way a client operates.
 
-The TAP also increases the amount of control each roles has over subordinate
-roles. The root role has complete control over the approved signing schemes of
+The TAP also increases the amount of control each role has over subordinate
+roles. The Root role has complete control over the approved signing schemes of
 the other top-level roles, and each top-level role has complete control over the
 signing schemes of the delegatees. This control can be used to revoke usage of a
 signing scheme that has become insecure or no longer complies with some

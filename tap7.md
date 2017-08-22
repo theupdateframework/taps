@@ -1,14 +1,16 @@
 * TAP: 7
 * Title: Conformance testing
 * Version: 2
-* Last-Modified: 19-July-2017
+* Last-Modified: 14-August-2017
 * Author: Vladimir Diaz, Sebastien Awwad
-* Status: Draft
+* Status: Rejected
 * Content-Type: text/markdown
 * Created: 20-Jan-2017
 * Post-History: v1: 12-June-2017, v2: None
 
 # Abstract
+
+NOTE: This TAP will be informally implemented but will not be part of the specification for TUF.
 
 [Conformance testing](https://en.wikipedia.org/wiki/Conformance_testing)
 can determine whether an implementation meets the requirements set by a given

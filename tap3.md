@@ -1,7 +1,7 @@
 * TAP: 3
 * Title: Multi-role delegations
 * Version: 1
-* Last-Modified: 14-Dec-2016
+* Last-Modified: 5-Jul-2017
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Accepted
@@ -74,7 +74,8 @@ the given set of targets.
           <b>"name"</b>: <b>ROLENAME-1</b>,
           "keyids": [KEYID-1],
           "threshold": THRESHOLD-1,
-          "paths": ["/foo/*.pkg"]
+          "paths": ["/foo/*.pkg"],
+          "terminating": false,
         },
         // This is the second delegation to a <b>single</b> role.
         // Note that this delegation is separate from the first one.
@@ -83,7 +84,8 @@ the given set of targets.
           <b>"name"</b>: <b>ROLENAME-2</b>,
           "keyids": [KEYID-2],
           "threshold": THRESHOLD-2,
-          "paths": ["/foo/bar.pkg"]
+          "paths": ["/foo/bar.pkg"],
+          "terminating": false,
         }
         // Note that, unfortunately, there is no way to require <b>multiple</b>
         // roles to sign targets in a single delegation.
@@ -112,6 +114,7 @@ role names instead of a single one.
           // However, we can still specify the name of a single role.
           // Each role continues to use a filename based on its rolename.
           "paths": ["/foo/*.pkg"],
+          "terminating": false,
           <b>"names"</b>: <b>{</b>
             <b>ROLENAME-1</b>: <b>{</b>
               "keyids": [KEYID-1],
@@ -124,6 +127,7 @@ role names instead of a single one.
         // The first delegation may still override this delegation.
         {
           "paths": ["/foo/bar.pkg"],
+          "terminating": false,
           <b>"names"</b>: <b>{</b>
             <b>ROLENAME-2</b>: <b>{</b>
               "keyids": [KEYID-2],
@@ -137,6 +141,7 @@ role names instead of a single one.
         {
           // Both roles must sign the same hashes and length of the following targets.
           "paths": ["baz/*.pkg"],
+          "terminating": false,
           <b>"names"</b>: <b>{</b>
             <b>ROLENAME-1</b>: <b>{</b>
               "keyids": [KEYID-1],
@@ -192,6 +197,7 @@ targets:
         {
           // These targets must be signed by <b>both</b> of these roles.
           "paths": ["/baz/*.pkg"],
+          "terminating", true,
           <b>"names"</b>: <b>{</b>
             // The release engineering role must sign using this key.
             <b>"release-engineering"</b>: <b>{</b>
@@ -238,7 +244,12 @@ provide metadata about the desired target, then the rest of the delegations
 will be searched (given that the "terminating" attribute is False).  If a
 role does not provide the required metadata, or provides mismatching metadata,
 the search is stopped and an error is reported to the client (given that the
-"terminating" attribute is True).
+"terminating" attribute is True).  For instance: In the preceding example the
+second multi-role delegation to the "release-engineering" and "quality-assurance"
+roles is a terminating delegation.  If the client requests the "/baz/baz-1.0.pkg"
+target and conflicting hashes and lengths are specified by the
+"release-engineering" and "quality-assurance" roles, an error occurs and
+the client is notified that "/baz/baz-1.0.pkg" is unavailable.
 
 # Security Analysis
 
