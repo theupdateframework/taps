@@ -94,7 +94,7 @@ more piece of information from the attacker controled space. It additionally
 reduces code complexity by not requiring sanity checks and key-to-scheme
 matching on the client side.
 
-# Rationale 
+# Rationale
 
 There are several reasons to favor moving information about the signature method
 into a cryptographically verified section of the metadata.
@@ -127,7 +127,7 @@ snippet of a Root file:
           "0bde74244f238cd6d4e3839d35a5b248d6cde5759b760ebdbee45a386109a41a"
         ],
         "threshold": 1
-      }, 
+      },
       ...
     }
   }
@@ -290,7 +290,7 @@ where PUBLIC is in PEM format and a string.  All RSA keys
 must be at least 2048 bits.
 
 The 'ed25519' format is:
-  
+
 ```
 { "keytype" : "ed25519",
   "scheme": "ed25519",
@@ -375,7 +375,9 @@ the TAP would be fully implemented.
 
 # Augmented Reference Implementation
 
-`TODO`
+The reference implementation incorporates TAP 9
+[here](https://github.com/secure-systems-lab/securesystemslib/pull/48) and
+[here](https://github.com/theupdateframework/tuf/pull/484).
 
 # Copyright
 
