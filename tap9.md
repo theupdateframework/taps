@@ -1,5 +1,5 @@
 * TAP: 9
-* Title: Mandatory Metadata Signing Schemes
+* Title: Mandatory metadata signing schemes
 * Version: 1
 * Last-Modified: 25-July-2017
 * Author: heartsucker
