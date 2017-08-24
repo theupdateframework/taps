@@ -10,12 +10,14 @@
 * Created: 09-Sep-2016
 
 # Abstract
-This TAP is a guideline on how clients can securely search multiple repositories
-for particular targets.  It discusses how multiple repositories with separate
-roots of trust can be required to sign off on the same target(s), effectively
-creating an AND relation.  In other words, this TAP demonstrates how
-target names can be mapped to repositories in a manner similar to the way targets
-with specific names can be delegated to different roles.  Like delegations, these
+This TAP offer clients guidance in conducting a secure search for particular
+targets across multiple repositories. It discusses how multiple repositories with
+separate roots of trust can be required to sign off on the same target(s),
+effectively creating an AND relation and ensure the file obtained can be trusted.
+In other words, this TAP demonstrates how target names can be mapped to
+repositories in a manner similar to the way targets with specific names
+can be delegated to different
+roles.  Like delegations, these
 repository entries can be ordered/prioritized and can "terminate" a search if
 an entrusted target is not available.
 
@@ -36,8 +38,10 @@ instance (e.g., copy of ```pip```) for each repository.
 ## Use case 2: hiding sensitive metadata and targets
 
 Extending the previous example, enterprise users may not wish to upload some
-metadata and targets to a public repository, because doing so may reveal some
-sensitive / proprietary information.  Therefore, these users may host these sensitive metadata and targets on a private repository, while still employing a public
+metadata and targets to a public repository, because doing so may reveal
+information that is sensitive or proprietary.  Therefore, these
+users may host the sensitive metadata and targets on a private repository,
+while still employing a public
 repository for other files. However, in order to use both private and public
 repositories, TUF clients need to know how to search for selected targets on
 the private repository, and all
@@ -60,7 +64,7 @@ repositories, each representing an interested signing group.
 
 To improve compromise-resilience, a user may wish to have multiple
 repositories, each with a different root of trust, sign for targets. This
-would ensure that both repository A and repository B sign for a target file
+means both repository A and repository B must sign for a target file
 before it can be installed.  The effect is similar to the AND relation used in
 [multi-role delegations](tap3.md).
 
@@ -72,39 +76,38 @@ Thus, if repository A downloaded the targets metadata from repository B, and
 used a multi-role delegation for the targets metadata, it would achieve a similar
 result.  If repository B is compromised, the users are not impacted because
 repository A's multi-role delegation will prevent the use of repository B's
-malicious targets files.  However, if repository A's root role or its top level
-targets role were to be compromised, all users can be given malicious targets
-files, even if repository B is not compromised.
+malicious targets files.  Unfortunately, if repository A's root role or its top level
+targets role were to be compromised, nothing could prevent users from receiving
+malicious targets
+files, even if repository B is not compromised. If, though, adopters required
+valid signatures on the metadata from two repositories, even the compromise described
+above would not impact users.
 
-This case can be remedied if adopters require valid signatures
-from two repositories. In this manner, if one of the two repositories is
-compromised, users are not at risk.
 
 # Rationale
 
 As our use cases suggest, there are some implementations that may want to allow
-clients to fetch target files from multiple repositories. This TAP presents an implementation strategy to support repository consensus on entrusted targets.
-While this document employs a
-map.json file for this purpose, any type of data storage/file format may be used to establish this feature, as long as it follows the implementation logic presented
-here.
+clients to fetch target files from multiple repositories. Yet, in doing so, users
+risk receiving malicious files if one of these repositories is compromised.
+This TAP presents an implementation strategy to ensure repository consensus on
+entrusted targets. The guidance here can be applied using any type of data
+storage/file format, as long as it follows
+the implementation logic presented here.
 
-The main goal of this TAP is to delineate the
-steps to be followed to secure any update process
-that depends on multiple repositories.
 
 # Specification
 
 This section shows how a target with a specific type of name (such as
 ```django*``` or ```*.tar.gz```) may be found on a specific repository.  Each
 repository has its own root of trust (Root role, etc.) so a compromise of one
-repository does not impact other repositories.
+repository does not impact other repositories. Using a scheme similar to targets
+delegations within a repository, targets may
+be mapped to one or more repository in this file.  Clients will keep all
+metadata for each repository in a separate directory of their choice.
 
 To demonstrate our procedure for handling multiple repository consensus, we
 employ a file named `map.json.` This _map file_ comes into play when a TUF
 client requests targets.
-Using a scheme similar to targets delegations within a repository, targets may
-be mapped to one or more repository in this file.  Clients will keep all
-metadata for each repository in a separate directory of their choice.
 
 ## The map file and repository consensus
 
