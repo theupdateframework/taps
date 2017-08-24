@@ -1,5 +1,5 @@
 * TAP: 4
-* Title: Multiple repository consensus
+* Title: Multiple repository consensus on entrusted targets
 * Version: 1
 * Last-Modified: 22-Aug-2017
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
