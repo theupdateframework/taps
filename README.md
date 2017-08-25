@@ -6,7 +6,7 @@
 * [TAP 2: TAP template](tap2.md)
 * [TAP 3: Multi-role delegations](tap3.md)
 * [TAP 9: Mandatory metadata signing schemes](tap9.md)
-
+* [TAP 10: Remove native support for compressed metadata](tap10.md)
 
 ## Draft
 
@@ -14,7 +14,6 @@
 * [TAP 5: Setting URLs for roles in the root metadata file](tap5.md)
 * [TAP 6: Include specification version in metadata](tap6.md)
 * [TAP 8: Key rotation and explicit self-revocation](tap8.md)
-* [TAP 10: Remove native support for compressed metadata](tap10.md)
 
 ## Rejected
 
