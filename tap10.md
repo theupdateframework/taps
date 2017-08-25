@@ -134,7 +134,7 @@ of the *compressed_algorithms* attribute.
 
 # Augmented Reference Implementation
 
-This branch (TODO) removes native support for compressed metadata.
+[Pull request #485](https://github.com/theupdateframework/tuf/pull/485) removes native support for compressed metadata.
 
 # Copyright
 
