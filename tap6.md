@@ -1,7 +1,7 @@
 * TAP: 6
-* Title: Include specification version identifier in metadata
+* Title: Include specification version in metadata
 * Version: 1
-* Last-Modified: 20-Mar-2017
+* Last-Modified: 25-Aug-2017
 * Author: David Lawrence, Vladimir Diaz, Justin Cappos
 * Status: Draft
 * Content-Type: text/markdown
