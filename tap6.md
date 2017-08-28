@@ -1,7 +1,7 @@
 * TAP: 6
 * Title: Include specification version in metadata
 * Version: 1
-* Last-Modified: 25-Aug-2017
+* Last-Modified: 28-Aug-2017
 * Author: David Lawrence, Vladimir Diaz, Justin Cappos
 * Status: Accepted
 * Content-Type: text/markdown
@@ -10,7 +10,7 @@
 
 # Abstract
 
-This TAP requires that the specification's version identifier, against which
+This TAP requires that the specification's version, against which
 the TUF repository should be assessed for validity, must be included in
 metadata.
 
@@ -20,7 +20,7 @@ As the TUF specification evolves there are likely to be breaking changes.  For
 example, commit 5d2c8fdc7658a9f7648c38b0c79c0aa09d234fe2 in
 github.com/theupdateframework/tuf removes the "private" field, which would
 break key ID calculations for older clients. Specifying the specification
-version identifier a repository is operating under allows clients to determine
+version a repository is operating under allows clients to determine
 whether they are compatible, rather than breaking in undefined ways.
 
 # Rationale
@@ -30,7 +30,7 @@ the TUF specification evolves.
 
 # Specification
 
-This TAP proposes adding a new JSON field, named "spec_version", that contains
+This TAP proposes adding a new field, named "spec_version", that contains
 a string value indicating the specification version of metadata. The field
 would be added to the "signed" section of metadata.
 
@@ -75,7 +75,7 @@ The addition of the "spec_version" field is compatible with all existing
 consumers. However, clients that do not support it and are used to sign and
 publish a new metadata are at risk to strip the field from the metadata. This
 will happen in at least the Notary and go-tuf implementations due to their use
-of concrete types with defined fields to parse retrieved JSON data.
+of concrete types with defined fields to parse retrieved metadata data.
 
 # Augmented Reference Implementation
 
