@@ -1,7 +1,7 @@
 * TAP: 6
 * Title: Include specification version in metadata
 * Version: 1
-* Last-Modified: 28-Aug-2017
+* Last-Modified: 29-Aug-2017
 * Author: David Lawrence, Vladimir Diaz, Justin Cappos
 * Status: Accepted
 * Content-Type: text/markdown
@@ -10,8 +10,8 @@
 
 # Abstract
 
-This TAP requires that the specification's version, against which
-the TUF repository should be assessed for validity, must be included in
+This TAP requires that the specification's version number, against which
+the TUF repository should be assessed for validity, be included in
 metadata.
 
 # Motivation
@@ -79,7 +79,8 @@ of concrete types with defined fields to parse retrieved metadata data.
 
 # Augmented Reference Implementation
 
-https://github.com/theupdateframework/tuf/tree/spec_version_in_metadata
+Pull request [#487](https://github.com/theupdateframework/tuf/pull/487) adds
+"spec_version" to metadata.
 
 # Copyright
 
