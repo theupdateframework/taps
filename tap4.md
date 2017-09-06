@@ -223,9 +223,10 @@ sure they are signing the same targets metadata (i.e., length and hashes).
 # Backwards Compatibility
 
 This specification is backwards-compatible, however older clients will not
-utilize the map file and so will ignore this TAP.  Older clients may continue
-to use a single repository.  New clients need to add relatively little code to
-interpret the map file.  However, they must be careful to store the metadata
+support multiple repository consensus on entrusted target files, and so will
+ignore this TAP.  Older clients may continue to use a single repository.  New
+clients need to add relatively little code to follow the behaviour defined
+by TAP 4.  However, they must be careful to store the metadata
 for each repository separately from others (e.g., by using a different
 directory for each repository).
 
