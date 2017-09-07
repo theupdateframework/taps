@@ -125,11 +125,11 @@ this requirement.
 none of the repositories signed metadata about the desired target, then take
 one of the following actions:
 
-  5.1. If the "terminating" attribute is set to true, either report that the
-  repositories do not agree on the target, or that none of them have signed for
-  the target.
+    5.1. If the "terminating" attribute is set to true, either report that the
+    repositories do not agree on the target, or that none of them have signed
+    for the target.
 
-  5.2. Otherwise, process the next mapping following the steps above.
+    5.2. Otherwise, process the next mapping following the steps above.
 
 
 ## Example using TUF's Map File
