@@ -66,7 +66,8 @@ To improve compromise-resilience, a user may wish to have multiple
 repositories, each with a different root of trust, sign for targets. This
 means both repository A and repository B must sign for a target file
 before it can be installed.  The effect is similar to the AND relation used in
-[multi-role delegations](tap3.md).
+[multi-role delegations](tap3.md), only it is applied to repositories instead 
+of target delegations.
 
 Note that if a user is employing multiple repositories with disjointed roots
 of trust, it
@@ -74,7 +75,7 @@ is already possible to do something similar.  One could have one repository
 download and use a multi-role delegation to the other repository's target.
 Thus, if repository A downloaded the targets metadata from repository B, and
 used a multi-role delegation for the targets metadata, it would achieve a similar
-result.  In this instance,if repository B is compromised, users are not impacted because
+result.  In this instance, if repository B is compromised, users are not impacted because
 repository A's multi-role delegation will prevent the use of repository B's
 malicious targets files.  Unfortunately, if repository A's root role or its top level
 targets role were to be compromised, nothing could prevent users from receiving
@@ -89,21 +90,19 @@ above would not impact users.
 As our use cases suggest, there are some implementations that may want to allow
 clients to fetch target files from multiple repositories. Yet, in doing so, users
 risk receiving malicious files if one of these repositories is compromised.
-This TAP presents an implementation strategy to ensure repository consensus,
-or an agreement between a multiple number of repositories
-that a file can be trusted for downloading on
-entrusted targets. The guidance here can be applied
-using any type of data storage/file format, as long as it follows
+This TAP presents an implementation strategy to enable a user to securely and 
+precisely control the trust given to different repositories. The guidance here can 
+be applied using any type of data storage/file format, as long as it follows
 the implementation logic presented here.
 
 # Specification
 
-This section shows how a target with a specific type of name (such as
-```django*``` or ```*.tar.gz```) may be found on a specific repository.  Each
+This section shows how to require that a target with a specific type of name (such as
+```django*``` or ```*.tar.gz```) is retrieved from a specific repository.  Each
 repository has its own root of trust (Root role, etc.) so a compromise of one
 repository does not impact others. Using a scheme similar to targets
 delegations within a repository, targets may
-be mapped to one or more repository in this file.  Clients will keep all
+be mapped to one or more repository in this file.  Clients will keep all of the
 metadata for each repository in a separate directory of their choice.
 
 ## Searching for targets on multiple repositories
@@ -230,8 +229,7 @@ by TAP 4.  However, they must be careful to store the metadata
 for each repository separately from others (e.g., by using a different
 directory for each repository).
 
-An existing repository that used the TUF specification prior to this TAP does
-not need to change how it already stores metadata and targets.
+A TUF repository does not need to change in any way to support this TAP.
 
 # Augmented Reference Implementation
 
