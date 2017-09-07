@@ -1,7 +1,7 @@
 * TAP: 4
 * Title: Multiple repository consensus on entrusted targets
 * Version: 1
-* Last-Modified: 6-Sep-2017
+* Last-Modified: 7-Sep-2017
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Draft
@@ -10,16 +10,15 @@
 * Created: 09-Sep-2016
 
 # Abstract
-This TAP offer clients guidance in conducting a secure search for particular
-targets across multiple repositories. It discusses how multiple repositories with
-separate roots of trust can be required to sign off on the same target(s),
-effectively creating an AND relation and ensuring any files obtained can be trusted.
-In other words, this TAP demonstrates how target names can be mapped to
-repositories in a manner similar to the way targets with specific names
-can be delegated to different
-roles.  Like delegations, these
-repository entries can be ordered/prioritized and can "terminate" a search if
-an entrusted target is not available.
+This TAP offers clients guidance in conducting a secure search for particular
+targets across multiple repositories. It discusses how multiple repositories
+with separate roots of trust can be required to sign off on the same target(s),
+effectively creating an AND relation and ensuring any files obtained can be
+trusted.  In other words, this TAP demonstrates how target names can be mapped
+to repositories in a manner similar to the way targets with specific names can
+be delegated to different roles.  Like delegations, these repository entries
+can be ordered/prioritized and can "terminate" a search if an entrusted target
+is not available.
 
 # Motivation
 
@@ -66,7 +65,7 @@ To improve compromise-resilience, a user may wish to have multiple
 repositories, each with a different root of trust, sign for targets. This
 means both repository A and repository B must sign for a target file
 before it can be installed.  The effect is similar to the AND relation used in
-[multi-role delegations](tap3.md), only it is applied to repositories instead 
+[multi-role delegations](tap3.md), only it is applied to repositories instead
 of target delegations.
 
 Note that if a user is employing multiple repositories with disjointed roots
@@ -88,27 +87,27 @@ above would not impact users.
 # Rationale
 
 As our use cases suggest, there are some implementations that may want to allow
-clients to fetch target files from multiple repositories. Yet, in doing so, users
-risk receiving malicious files if one of these repositories is compromised.
-This TAP presents an implementation strategy to enable a user to securely and 
-precisely control the trust given to different repositories. The guidance here can 
-be applied using any type of data storage/file format, as long as it follows
-the implementation logic presented here.
+clients to fetch target files from multiple repositories. Yet, in doing so,
+users risk receiving malicious files if one of these repositories is
+compromised.  This TAP presents an implementation strategy to enable a user to
+securely and precisely control the trust given to different repositories. The
+guidance here can be applied using any type of data storage/file format, as
+long as it follows the implementation logic presented here.
 
 # Specification
 
-This section shows how to require that a target with a specific type of name (such as
-```django*``` or ```*.tar.gz```) is retrieved from a specific repository.  Each
-repository has its own root of trust (Root role, etc.) so a compromise of one
-repository does not impact others. Using a scheme similar to targets
-delegations within a repository, targets may
-be mapped to one or more repository in this file.  Clients will keep all of the
-metadata for each repository in a separate directory of their choice.
+This section shows how to require that a target with a specific type of name
+(such as ```django*``` or ```*.tar.gz```) is retrieved from a specific
+repository.  Each repository has its own root of trust (Root role, etc.) so a
+compromise of one repository does not impact others. Using a scheme similar to
+targets delegations within a repository, targets may be mapped to one or more
+repositories.  Clients can keep all of the metadata for each repository in a
+separate directory of their choice.
 
 ## Searching for targets on multiple repositories
 
-In order to search for targets on repositories, a TUF client
-should perform the following steps:
+In order to search for targets on repositories, a TUF client should perform the
+following steps:
 
 1. Look at the first entry in the list of mappings.
 
@@ -124,13 +123,13 @@ this requirement.
 
 5. Otherwise, if the targets metadata do not match across repositories, or if
 none of the repositories signed metadata about the desired target, then take
-one of the following actions.
+one of the following actions:
 
-5.1. If the "terminating" attribute is set to true, either report that the
-repositories do not agree on the target, or that none of them have signed for
-the target.
+  5.1. If the "terminating" attribute is set to true, either report that the
+  repositories do not agree on the target, or that none of them have signed for
+  the target.
 
-5.2. Otherwise, process the next mapping following the steps above.
+  5.2. Otherwise, process the next mapping following the steps above.
 
 
 ## Example using TUF's Map File
