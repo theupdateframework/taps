@@ -11,7 +11,7 @@
 
 ## Draft
 
-* [TAP 4: Multiple repository consensus](tap4.md)
+* [TAP 4: Multiple repository consensus on entrusted targets](tap4.md)
 * [TAP 5: Setting URLs for roles in the root metadata file](tap5.md)
 * [TAP 8: Key rotation and explicit self-revocation](tap8.md)
 
