@@ -119,13 +119,13 @@ repositories.  The updater tries each repository in the listed order when it is
 instructed to download metadata or target files.
 
 B. A list of target paths, which may be condensed as [glob
-patterns](https://en.wikipedia.org/wiki/Glob_(programming), that are associated
-with each ordered list of repositories.  For example, the updater can be
-instructed to only download paths that resemble the glob pattern `foo-2.*.tgz`
-from the first list of repositories in (A).
+patterns](https://en.wikipedia.org/wiki/Glob_(programming)), that are
+associated with each ordered list of repositories.  For example, the updater
+can be instructed to only download paths that resemble the glob pattern
+`foo-2.*.tgz` from the first list of repositories in (A).
 
 C. A flag that instructs the updater to continue searching, or not, subsequent
-repositories after failing to download a requested target file from specific
+repositories after failing to download a requested target file from a specific
 repository in list (A).  Each list of repositories in list (A) can indicate/use
 this flag independent of other repositories in the list.
 
@@ -146,9 +146,9 @@ following steps:
 
 1. Look at the first entry in the list of repositories in (A).
 
-2. If a desired target path matches the associated path or glob pattern of the
-list of repositories, then download and verify metadata from each of these
-repositories.
+2. If a desired target path matches the associated path(s) or glob pattern(s)
+of the list of repositories, then download and verify metadata from each of
+these repositories.
 
 3. Ensure that the targets metadata, specifically length and hashes about the
 target, match across all repositories. Custom targets metadata are exempted
@@ -170,7 +170,8 @@ one of the following actions:
 
 To demonstrate our procedure for handling multiple repository consensus on
 entrusted targets, we employ a file named `map.json.` This _map file_ comes
-into play when a TUF client requests targets.
+into play when a TUF client requests targets and follows the three properties
+of the mechaism outlined previously..
 
 If the map file is to be used to map targets to repositories, it will either be
 constructed by a user employing the TUF command-line tools, or distributed by
