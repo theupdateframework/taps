@@ -1,7 +1,7 @@
 * TAP: 4
 * Title: Multiple repository consensus on entrusted targets
 * Version: 1
-* Last-Modified: 6-Sep-2017
+* Last-Modified: 7-Sep-2017
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Draft
@@ -10,16 +10,15 @@
 * Created: 09-Sep-2016
 
 # Abstract
-This TAP offer clients guidance in conducting a secure search for particular
-targets across multiple repositories. It discusses how multiple repositories with
-separate roots of trust can be required to sign off on the same target(s),
-effectively creating an AND relation and ensuring any files obtained can be trusted.
-In other words, this TAP demonstrates how target names can be mapped to
-repositories in a manner similar to the way targets with specific names
-can be delegated to different
-roles.  Like delegations, these
-repository entries can be ordered/prioritized and can "terminate" a search if
-an entrusted target is not available.
+This TAP offers clients guidance in conducting a secure search for particular
+targets across multiple repositories. It discusses how multiple repositories
+with separate roots of trust can be required to sign off on the same target(s),
+effectively creating an AND relation and ensuring any files obtained can be
+trusted.  In other words, this TAP demonstrates how target names can be mapped
+to repositories in a manner similar to the way targets with specific names can
+be delegated to different roles.  Like delegations, these repository entries
+can be ordered/prioritized and can "terminate" a search if an entrusted target
+is not available.
 
 # Motivation
 
@@ -66,7 +65,7 @@ To improve compromise-resilience, a user may wish to have multiple
 repositories, each with a different root of trust, sign for targets. This
 means both repository A and repository B must sign for a target file
 before it can be installed.  The effect is similar to the AND relation used in
-[multi-role delegations](tap3.md), only it is applied to repositories instead 
+[multi-role delegations](tap3.md), only it is applied to repositories instead
 of target delegations.
 
 Note that if a user is employing multiple repositories with disjointed roots
@@ -88,56 +87,91 @@ above would not impact users.
 # Rationale
 
 As our use cases suggest, there are some implementations that may want to allow
-clients to fetch target files from multiple repositories. Yet, in doing so, users
-risk receiving malicious files if one of these repositories is compromised.
-This TAP presents an implementation strategy to enable a user to securely and 
-precisely control the trust given to different repositories. The guidance here can 
-be applied using any type of data storage/file format, as long as it follows
-the implementation logic presented here.
+clients to fetch target files from multiple repositories. Yet, in doing so,
+users risk receiving malicious files if one of these repositories is
+compromised.  This TAP presents an implementation strategy to enable a user to
+securely and precisely control the trust given to different repositories. The
+guidance here can be applied using any type of data storage/file format, as
+long as it follows the implementation logic presented here.
 
 # Specification
 
-This section shows how to require that a target with a specific type of name (such as
-```django*``` or ```*.tar.gz```) is retrieved from a specific repository.  Each
-repository has its own root of trust (Root role, etc.) so a compromise of one
-repository does not impact others. Using a scheme similar to targets
-delegations within a repository, targets may
-be mapped to one or more repository in this file.  Clients will keep all of the
-metadata for each repository in a separate directory of their choice.
+This section shows how to require that a target with a specific type of name
+(such as ```django*``` or ```*.tar.gz```) is retrieved from a specific
+repository.  Each repository has its own root of trust (Root role, etc.) so a
+compromise of one repository does not impact others. Using a scheme similar to
+targets delegations within a repository, targets may be mapped to one or more
+repositories.  Clients can keep all of the metadata for each repository in a
+separate directory of their choice.
+
+## Mechanism to determine mapping of target(s) to repositories
+
+Adopters must implement a mechanism that determines which remote repositories
+are queried when downloading metadata and target files.  The exact design of
+this mechanism is left to adopters, but in the majority of cases it will be a
+simple file that the updater uses when it searches for a requested target file.
+At a minimum, the mechanism must support or exhibit the following three
+properties:
+
+A. An ordered list of one or more repositories that may be queried to fetch
+metadata and target files.  That is, each item of the list can be one or more
+repositories.  The updater tries each repository in the listed order when it is
+instructed to download metadata or target files.
+
+B. A list of target paths, which may be condensed as [glob
+patterns](https://en.wikipedia.org/wiki/Glob_(programming)), that are
+associated with each ordered list of repositories.  For example, the updater
+can be instructed to only download paths that resemble the glob pattern
+`foo-2.*.tgz` from the first list of repositories in (A).
+
+C. A flag that instructs the updater to continue searching, or not, subsequent
+repositories after failing to download a requested target file from a specific
+repository in list (A).  Each list of repositories in list (A) can indicate/use
+this flag independent of other repositories in the list.
+
+The three properties above are all that is required to aid or guide the updater
+in its search for requested target files.  The next section covers the logic
+that an updater must follow when it performs the search, and how it uses the
+machanism outlined in this section.
+
+This TAP provides, as a concrete example, a JSON file (also known as the map
+file) that supports the three properties above.  The reader is encouraged to
+reference the example map file later in this TAP when implementing the
+mechanism outlined here, and the search logic of the following section.
 
 ## Searching for targets on multiple repositories
 
-In order to search for targets on repositories, a TUF client
-should perform the following steps:
+In order to search for targets on repositories, a TUF client should perform the
+following steps:
 
-1. Look at the first entry in the list of mappings.
+1. Look at the first entry in the list of repositories in (A).
 
-2. If a desired target matches a targets path pattern in the "paths" attribute,
-then download and verify metadata from every repository specified in the
-"repositories" attribute.
+2. If a desired target path matches the associated path(s) or glob pattern(s)
+of the list of repositories, then download and verify metadata from each of
+these repositories.
 
 3. Ensure that the targets metadata, specifically length and hashes about the
-target, match across all repositories. Custom targets metadata are exempted from
-this requirement.
+target, match across all repositories. Custom targets metadata are exempted
+from this requirement.
 
 4. If the targets metadata is a match across repositories, return this metadata.
 
 5. Otherwise, if the targets metadata do not match across repositories, or if
 none of the repositories signed metadata about the desired target, then take
-one of the following actions.
+one of the following actions:
 
-5.1. If the "terminating" attribute is set to true, either report that the
-repositories do not agree on the target, or that none of them have signed for
-the target.
+    5.1. If the flag (of mechanism C above) is set to true, either report that
+    the repositories do not agree on the target, or that none of them have
+    signed for the target.
 
-5.2. Otherwise, process the next mapping following the steps above.
-
+    5.2. Otherwise, process the next list of repositories from step 1.
 
 ## Example using TUF's Map File
 
-To demonstrate our procedure for handling multiple repository consensus, we
-employ a file named `map.json.` This _map file_ comes into play when a TUF
-client requests targets.
+To demonstrate our procedure for handling multiple repository consensus on
+entrusted targets, we employ a file named `map.json.` This _map file_ comes
+into play when a TUF client requests targets and follows the three properties
+of the mechaism outlined previously..
 
 If the map file is to be used to map targets to repositories, it will either be
 constructed by a user employing the TUF command-line tools, or distributed by
@@ -154,9 +188,9 @@ also corresponds to the name of the local directory on the TUF client where
 metadata files would be cached.  Crucially, there is where the
 [root metadata file](tap5.md) for a repository is located.
 
-The repository will also contain a list of URLs that indicates the location from
-which files should be
-retrieved.  Each URL points to a root directory containing metadata and target files.
+The repository will also contain a list of URLs that indicates the location
+from which files should be retrieved.  Each URL points to a root directory
+containing metadata and target files.
 
 The value of the "mapping" key is a priority-ordered list that maps paths
 (i.e., target names) to the specific repositories.  Every entry in this list is
