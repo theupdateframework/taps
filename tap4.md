@@ -1,7 +1,7 @@
 * TAP: 4
 * Title: Multiple repository consensus on entrusted targets
 * Version: 1
-* Last-Modified: 8-Sep-2017
+* Last-Modified: 11-Sep-2017
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Draft
@@ -122,7 +122,7 @@ search logic that uses the mapping mechanism to determine what repositories
 are visited, and which must sign off on the client's requested target
 files.
 
-## Mechanism that maps targets to repositories
+## Mechanism that Maps Targets to Repositories
 
 Adopters must implement a mechanism that determines which remote repositories
 are visited when downloading metadata and target files.  The exact design of
@@ -156,7 +156,7 @@ file) that supports the three mandated properties above. The reader is encourage
 consult the example map file later in this TAP when implementing the
 mapping mechanism and search logic that follows.
 
-## Searching for targets on multiple repositories
+## Searching for Targets on Multiple Repositories
 
 In order to search for targets on repositories, a TUF client should perform the
 following steps:
@@ -185,12 +185,12 @@ one of the following actions:
     5.2. Otherwise, go back to step 1 and process the next list of
     repositories.
 
-## Example using the reference implementation's Map File
+## Example using the Reference Implementation's Map File
 
 To demonstrate the reference implementation's handling of multiple repository
 consensus on entrusted targets, we employ a file named `map.json.` This _map
-file_ comes into play when a TUF client requests targets and follows the three
-properties of the mapping mechanism.
+file_ comes into play when a TUF client requests targets and adheres to the
+three properties of the mapping mechanism.
 
 If the map file is to be used to map targets to repositories, it will either be
 constructed by a user employing the TUF command-line tools, or distributed by
