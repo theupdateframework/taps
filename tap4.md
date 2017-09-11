@@ -10,7 +10,7 @@
 * Created: 09-Sep-2016
 
 # Abstract
-This TAP offers guidance in conducting a secure search for particular targets
+This TAP offers guidance for conducting a secure search for particular targets
 across multiple repositories. It discusses how multiple repositories with
 separate roots of trust can be required to sign off on the same targets,
 effectively creating an AND relation and ensuring any files obtained can be
@@ -37,7 +37,7 @@ instance (e.g., copy of ```pip```) for each repository.
 
 Extending the previous example, enterprise users may not wish to upload some
 metadata and targets to a public repository because doing so may reveal
-information that is sensitive or proprietary. Therefore, these users may host
+sensitive or proprietary information. Therefore, these users may host
 the sensitive metadata and targets on a private repository, while still
 employing a public repository for other files. However, in order to use both
 private and public repositories, TUF clients need to know how to search for
@@ -91,33 +91,36 @@ long as it follows the implementation logic presented here.
 
 # Specification
 
-This section shows how to retrieve a target file from a particular repository,
-given a request for a target with a specific type of name (such as
-```django-2.0.1.tgz```, or ```django*```, or ```*.tar.gz```).  Each repository
+This section shows how to retrieve a target file with a specific type of
+name, such as
+```django-2.0.1.tgz```, or ```django*```, or ```*.tar.gz```from a
+particular repository.  Each repository
 has its own root of trust (Root role, etc.) so a compromise of one repository
 does not impact others.  Using a scheme similar to targets delegations within a
-repository, targets may be mapped to one or more repositories.
+repository, targets may be securely mapped to one or more repositories.
 
-This TAP requires that an extra step be performed before a client makes
+This TAP requires an extra step before a client makes
 requests for metadata and target files from remote repositories.  Specifically,
-it requires that a client consult a set of instructions (can be a simple file
-in any format) that guides the decision process for which repositories should
-be visited given a request for a target file.  As an implementation example,
+it requires that a client consult a set of instructions, which can be a simple file
+in any format. These instructions guide the decision process for which
+repositories should be visited to fulfill a request for a particular target file.
+As an implementation example,
 TUF's reference implementation uses a map.json file that the updater employs
-when it searches for repositories that might have the target file that the
-client wishes to update.
+when it searches for repositories that might have the target file the
+client seeks.
 
-The client, or adopter, may precisely control which repositories are trusted
-for particular target paths by editing the map file.  The reference
-implementation uses a map file, but adopters are free to use any mechanism they
+The client, or adopter, can precisely control which repositories are trusted
+for particular target paths by editing the instruction file described above.
+The reference implementation uses a map file, but adopters are free to use
+any mechanism they
 wish to accomplish the same task. Clients must also keep all of the metadata
 for each repository in a separate directory of their choice.
 
-The next two sections cover the two main components of the new "pre-update"
+The next two sections cover the two main components of this new "pre-update"
 step, mainly the mechanism that maps trusted target to repositories, and the
-search logic that uses the mapping mechanism to determine the repositories that
-are visited (and that must all sign off on the client's  requested target
-files).
+search logic that uses the mapping mechanism to determine what repositories
+are visited, and which must sign off on the client's requested target
+files.
 
 ## Mechanism that maps targets to repositories
 
@@ -129,14 +132,13 @@ At a minimum, the mechanism must support or exhibit the following three
 properties:
 
 A. An ordered list of one or more repositories that may be visited to fetch
-metadata and target files.  That is, each item of the list can be one or more
-repositories.  The updater tries each repository in the listed order when it is
-instructed to download metadata or target files.
+metadata and target files. The updater tries each repository in the listed
+order when it is instructed to download metadata or target files.
 
-B. A list of target paths, which may be condensed as [glob
-patterns](https://en.wikipedia.org/wiki/Glob_(programming)), that are
-associated with each ordered list of repositories.  For example, the updater
-can be instructed to download paths that resemble the glob pattern
+B. A list of target paths associated with each ordered list of repositories.
+These target paths may be condensed as [glob
+patterns](https://en.wikipedia.org/wiki/Glob_(programming)). For example,
+the updater can be instructed to download paths that resemble the glob pattern
 `foo-2.*.tgz` from only the first list of repositories in (A).
 
 C. A flag that instructs the updater whether to continue searching subsequent
@@ -145,12 +147,12 @@ repositories in list (A).  Any repositories in list (A) can indicate/use this
 flag independent of other repositories in the list.
 
 The three properties above are all that is required to aid or guide the updater
-in its search for requested target files.  The next section covers the logic
-that an updater must follow when it performs the search, and how it uses the
-mapping mechanism.
+in its search for requested target files. The logic
+that an updater must follow when it performs the search, and the way it uses the
+mapping mechanism is covered in the next section.
 
 This TAP provides, as a concrete example, a JSON file (also known as the map
-file) that supports the three properties above.  The reader is encouraged to
+file) that supports the three mandated properties above. The reader is encouraged to
 consult the example map file later in this TAP when implementing the
 mapping mechanism and search logic that follows.
 
@@ -176,7 +178,7 @@ metadata.
 none of the repositories signed metadata about the desired target, then take
 one of the following actions:
 
-    5.1. If the flag, of the mapping mechanism in property (C), is set to true,
+    5.1. If the flag of the mapping mechanism in property (C) is set to true,
     either report that the repositories do not agree on the target, or that
     none of them have signed for the target.
 
@@ -210,8 +212,8 @@ from which files should be retrieved.  Each URL points to a root directory
 containing metadata and target files.
 
 The value of the "mapping" key is a priority-ordered list that maps paths
-(i.e., target names) to the specific repositories.  Every entry in this list is
-a dictionary with at least two keys:
+(i.e., target names) to specific repositories.  Every entry in this list is
+a dictionary with at least two of the following keys:
 
 * "paths" specifies a list of target paths of patterns. A desired target must
 match a pattern in this list for this mapping to be consulted.
@@ -274,8 +276,8 @@ sure they are signing the same targets metadata (i.e., length and hashes).
 
 This specification is backwards-compatible, however older clients will not
 support multiple repository consensus on entrusted target files, and so will
-ignore this TAP.  Older clients may continue to use a single repository.  New
-clients need to add relatively little code to follow the behaviour defined
+ignore this TAP.  These clients may continue to use a single repository.  New
+clients need to add relatively little code to follow the behavior defined
 by TAP 4.  However, they must be careful to store the metadata
 for each repository separately from others (e.g., by using a different
 directory for each repository).
