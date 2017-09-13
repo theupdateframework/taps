@@ -1,7 +1,7 @@
 * TAP: 3
 * Title: Multi-role delegations
 * Version: 1
-* Last-Modified: 5-Jul-2017
+* Last-Modified: 13-Sep-2017
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Accepted
@@ -12,8 +12,9 @@
 
 This TAP allows a target to be delegated to a combination of roles on a
 repository, all of whom must sign the same hashes and length of the target.
-This is done by adding [the AND relation](https://en.wikipedia.org/wiki/Logical_conjunction)
-to delegations in TUF.
+This is done by adding [the AND
+relation](https://en.wikipedia.org/wiki/Logical_conjunction) to delegations in
+TUF.
 
 # Motivation
 
@@ -22,9 +23,8 @@ TAP 3 has been motivated by the following use case.
 ## Use case 1: requiring a combination of roles to sign the same targets
 
 In some cases, it is desirable to delegate targets to a combination of roles in
-order to increase compromise-resilience.
-For example, a project may require both its release engineering and quality
-assurance roles to sign its targets.
+order to increase compromise-resilience.  For example, a project may require
+both its release engineering and quality assurance roles to sign its targets.
 Both roles are then required to sign the same hashes and length of the targets.
 This is done so that, assuming that both roles use different sets of keys, the
 compromise of either one of these roles is insufficient to execute arbitrary
@@ -33,21 +33,21 @@ software attacks.
 # Rationale
 
 We introduce this TAP because there is no mechanism in place to support such a
-use case.
-TUF uses [prioritized and / or terminating delegations](http://isis.poly.edu/~jcappos/papers/kuppusamy_nsdi_16.pdf) to
+use case.  TUF uses [prioritized and / or terminating
+delegations](http://isis.poly.edu/~jcappos/papers/kuppusamy_nsdi_16.pdf) to
 search for metadata about a desired target in a controlled manner.
 
 Using multiple delegations, one can delegate the same target to multiple roles,
-so that a role with low priority can provide metadata about the target even if a
-role with high priority does not.
-Any one of these roles is permitted to provide different metadata (i.e., length
-and hashes) about the target.
-Effectively, this allows TUF to support [the OR relation](https://en.wikipedia.org/wiki/Logical_disjunction) in delegations.
+so that a role with low priority can provide metadata about the target even if
+a role with high priority does not.  Any one of these roles is permitted to
+provide different metadata (i.e., length and hashes) about the target.
+Effectively, this allows TUF to support [the OR
+relation](https://en.wikipedia.org/wiki/Logical_disjunction) in delegations.
 
 The problem is that TUF presently does not have a mechanism to support the AND
-relation in delegations.
-In other words, it is currently not possible to specify that a combination of
-roles must sign the same hashes and length of the target.
+relation in delegations.  In other words, it is currently not possible to
+specify that a combination of roles must sign the same hashes and length of the
+target.
 
 # Specification
 
@@ -56,10 +56,10 @@ the targets metadata file format.
 
 ## The previous targets metadata file format
 
-In the
-[previous version](https://github.com/theupdateframework/tuf/blob/70fc8dce367cf09563915afa40cffee524f5b12b/docs/tuf-spec.txt#L766-L776)
-of the specification, each delegation could specify only a _single_ role to sign
-the given set of targets.
+In the [previous
+version](https://github.com/theupdateframework/tuf/blob/70fc8dce367cf09563915afa40cffee524f5b12b/docs/tuf-spec.txt#L766-L776)
+of the specification, each delegation could specify only a _single_ role to
+sign the given set of targets.
 
 <pre>
 {
@@ -104,23 +104,28 @@ role names instead of a single one.
 <pre>
 {
   "signed": {
+    // These are the keys for each KEYID listed in "delegations."
+    <b>"keys_for_delegations": {KEYID-1: {"keytype: "ed25519", "keyval": KEYVAL}, KEYID-2: {...}},</b>
+
+    // "delegations" associates KEYIDs (of the keys above) with roles.
     "delegations": {
       "roles": [
         // This is the first delegation to a <b>single</b> role.
         {
-          // NOTE: This is the only adjustment to the file format.
           // We can specify the names of multiple roles, each of which is
           // associated with its own keys and a threshold number of keys.
           // However, we can still specify the name of a single role.
           // Each role continues to use a filename based on its rolename.
+          "name": "my_first_delegation",
           "paths": ["/foo/*.pkg"],
           "terminating": false,
-          <b>"names"</b>: <b>{</b>
-            <b>ROLENAME-1</b>: <b>{</b>
+          <b>"roleinfo": [
+            {
+              "rolename": ROLENAME-1,
               "keyids": [KEYID-1],
               "threshold": THRESHOLD-1,
-            <b>}</b>
-          <b>}</b>
+            }
+          ]</b>
           ...
         },
         // This is the second delegation to a <b>single</b> role.
@@ -241,14 +246,14 @@ same target.
 While resolving a multi-role delegation, the outcome of a search varies
 depending on how the "terminating" attribute is set.  If none of the roles
 provide metadata about the desired target, then the rest of the delegations
-will be searched (given that the "terminating" attribute is False).  If a
-role does not provide the required metadata, or provides mismatching metadata,
-the search is stopped and an error is reported to the client (given that the
+will be searched (given that the "terminating" attribute is False).  If a role
+does not provide the required metadata, or provides mismatching metadata, the
+search is stopped and an error is reported to the client (given that the
 "terminating" attribute is True).  For instance: In the preceding example the
-second multi-role delegation to the "release-engineering" and "quality-assurance"
-roles is a terminating delegation.  If the client requests the "/baz/baz-1.0.pkg"
-target and conflicting hashes and lengths are specified by the
-"release-engineering" and "quality-assurance" roles, an error occurs and
+second multi-role delegation to the "release-engineering" and
+"quality-assurance" roles is a terminating delegation.  If the client requests
+the "/baz/baz-1.0.pkg" target and conflicting hashes and lengths are specified
+by the "release-engineering" and "quality-assurance" roles, an error occurs and
 the client is notified that "/baz/baz-1.0.pkg" is unavailable.
 
 # Security Analysis
