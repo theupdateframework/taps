@@ -116,9 +116,10 @@ role names instead of a single one.
           // associated with its own keys and a threshold number of keys.
           // However, we can still specify the name of a single role.
           // Each role continues to use a filename based on its rolename.
-          "name": "my_first_delegation",
+          <b>"name": "my_first_delegation",</b>
           "paths": ["/foo/*.pkg"],
           "terminating": false,
+          <b>"min_roles_in_agreement": 1,</b>
           <b>"roleinfo": [
             {
               "rolename": ROLENAME-1,
@@ -131,14 +132,17 @@ role names instead of a single one.
         // This is the second delegation to a <b>single</b> role.
         // The first delegation may still override this delegation.
         {
+          <b>"name": "my_second_delegation",</b>
           "paths": ["/foo/bar.pkg"],
           "terminating": false,
-          <b>"names"</b>: <b>{</b>
-            <b>ROLENAME-2</b>: <b>{</b>
+          <b>"min_roles_in_agreement": 1,</b>
+          <b>"roleinfo": [
+            {
+              "rolename": ROLENAME-2,
               "keyids": [KEYID-2],
               "threshold": THRESHOLD-2,
-            <b>}</b>
-          <b>}</b>
+            }
+          ]</b>
           ...
         },
         // Now, we can require <b>multiple</b> roles (in this case, two) to sign
