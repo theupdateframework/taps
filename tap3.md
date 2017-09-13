@@ -225,6 +225,7 @@ targets:
           "terminating", true,
           <b>"min_roles_in_agreement": 2,</b>
           "roleinfo": [
+            {
             // The release engineering role must sign using this key.
               <b>"rolename": "release-engineering",</b>
               "keyids": [
