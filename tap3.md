@@ -120,6 +120,11 @@ role names instead of a single one.
           <b>"name": "my_first_delegation",</b>
           "paths": ["/foo/*.pkg"],
           "terminating": false,
+
+          // "min_roles_in_agreement" enforces the minimum number of roles that
+          // must be in agreement about entrusted targets.  Clients should
+          // ignore target files that are not signed off by a
+          // "min_roles_in_agreement" of roles in this delegation.
           <b>"min_roles_in_agreement": 1,</b>
           <b>"roleinfo": [
             {
