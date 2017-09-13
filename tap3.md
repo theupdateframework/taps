@@ -195,49 +195,56 @@ targets:
         // This is the first delegation.
         {
           // These targets must be signed by this <b>single</b> role.
+          <b>"name": "first_delegation",</b>
           "paths": ["/foo/*.pkg"],
-          <b>"names"</b>: <b>{</b>
+          "terminating": false,
+          <b>"min_roles_in_agreement": 1,</b>
+          <b>"roleinfo": [
+            {
             // This role must sign them using all 3 of these keys.
-            <b>"alice"</b>: <b>{</b>
+              "rolename": "alice",
               "keyids": [
                 "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb",
                 "acac86c0e609ca906f632b0e2dacccb2b77d22b0621f20ebece1a4835b93f6f0",
                 "de7d1b721a1e0632b7cf04edf5032c8ecffa9f9a08492152b926f1a5a7e765d7"
               ],
               "threshold": 3
-            <b>}</b>
-          <b>}</b>,
-          ...
+            }</b>
+          ]
         },
         // This is the second delegation.
         {
           // These targets must be signed by <b>both</b> of these roles.
+          <b>"name": "second_delegation",</b>
           "paths": ["/baz/*.pkg"],
           "terminating", true,
-          <b>"names"</b>: <b>{</b>
+          <b>"min_roles_in_agreement": 2,</b>
+          <b>"roleinfo": [
             // The release engineering role must sign using this key.
-            <b>"release-engineering"</b>: <b>{</b>
+              <b>"rolename": "release-engineering",</b>
               "keyids": [
                 "1a2b4110927d4cba257262f614896179ff85ca1f1353a41b5224ac474ca71cb4"
               ],
               "threshold": 1
-            <b>}</b>,
+            },
+            {
             // The quality assurance role must sign using at least 2/3 of these keys.
-            <b>"quality-assurance"</b>: <b>{</b>
+              <b>"rolename": "quality-assurance",</b>
               "keyids": [
                 "93ec2c3dec7cc08922179320ccd8c346234bf7f21705268b93e990d5273a2a3b",
                 "f2d5020d08aea06a0a9192eb6a4f549e17032ebefa1aa9ac167c1e3e727930d6",
                 "fce9cf1cc86b0945d6a042f334026f31ed8e4ee1510218f198e8d3f191d15309"
               ],
               "threshold": 2
-            <b>}</b>
-          <b>}</b>,
+            }
+          ],
           ...
         }
       ],
       ...
     },
     ...
+  }
 }
 </pre>
 
