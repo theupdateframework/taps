@@ -199,17 +199,17 @@ targets:
           "paths": ["/foo/*.pkg"],
           "terminating": false,
           <b>"min_roles_in_agreement": 1,</b>
-          <b>"roleinfo": [
+          "roleinfo": [
             {
             // This role must sign them using all 3 of these keys.
-              "rolename": "alice",
+              <b>"rolename": "alice",</b>
               "keyids": [
                 "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb",
                 "acac86c0e609ca906f632b0e2dacccb2b77d22b0621f20ebece1a4835b93f6f0",
                 "de7d1b721a1e0632b7cf04edf5032c8ecffa9f9a08492152b926f1a5a7e765d7"
               ],
               "threshold": 3
-            }</b>
+            }
           ]
         },
         // This is the second delegation.
@@ -219,7 +219,7 @@ targets:
           "paths": ["/baz/*.pkg"],
           "terminating", true,
           <b>"min_roles_in_agreement": 2,</b>
-          <b>"roleinfo": [
+          "roleinfo": [
             // The release engineering role must sign using this key.
               <b>"rolename": "release-engineering",</b>
               "keyids": [
