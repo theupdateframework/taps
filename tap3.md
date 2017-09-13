@@ -105,7 +105,8 @@ role names instead of a single one.
 {
   "signed": {
     // These are the keys for each KEYID listed in "delegations."
-    <b>"keys_for_delegations": {KEYID-1: {"keytype: "ed25519", "keyval": KEYVAL}, KEYID-2: {...}},</b>
+    <b>"keys_for_delegations": {KEYID-1: {"keytype: "ed25519", "keyval": KEYVAL},
+        KEYID-2: {...}},</b>
 
     // "delegations" associates KEYIDs (of the keys above) with roles.
     "delegations": {
@@ -149,24 +150,30 @@ role names instead of a single one.
         // off on the same targets.  They must all agree on the same target hashes.
         {
           // Both roles must sign the same hashes and length of the following targets.
+          <b>"name": "my_multi-role_delegation",</b>
           "paths": ["baz/*.pkg"],
           "terminating": false,
-          <b>"names"</b>: <b>{</b>
-            <b>ROLENAME-1</b>: <b>{</b>
+          <b>"min_roles_in_agreement": 1,</b>
+          <b>"roleinfo": [
+            {
+              "rolename": ROLENAME-1,
               "keyids": [KEYID-1],
               "threshold": THRESHOLD-1
-            <b>}</b>,
-            <b>ROLENAME-2</b>: <b>{</b>
+            },
+            {
+              "rolename:: ROLENAME-2,
               "keyids": [KEYID-2],
               "threshold": THRESHOLD-2
-            <b>}</b>
-          },
+            },
+            ...
+          ],</b>
           ...
         }
       ],
       ...
     },
     ...
+  }
 }
 </pre>
 
