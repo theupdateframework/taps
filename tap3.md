@@ -1,7 +1,7 @@
 * TAP: 3
 * Title: Multi-role delegations
 * Version: 1
-* Last-Modified: 13-Sep-2017
+* Last-Modified: 15-Sep-2017
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Accepted
@@ -192,6 +192,13 @@ targets:
 <pre>
 {
   "signed": {
+    "keys_for_delegations": {'ca9781...<snip>': {"keytype: "ed25519", "keyval": KEYVAL},
+        'acac86...<snip>': {...},
+        'de7d1b...<snip>': {...},
+        '1a2b41...<snip>': {...},
+        '93ec2c...<snip>': {...},
+        'f2d502...<snip>': {...},
+        'fce9cf...<snip>': {...}},</b>
     "delegations": {
       "roles": [
         // This is the first delegation.
