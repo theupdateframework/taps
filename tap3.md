@@ -12,9 +12,8 @@
 
 This TAP allows a target to be delegated to a combination of roles on a
 repository, all of whom must sign the same hashes and length of the target.
-This is done by adding [the AND
-relation](https://en.wikipedia.org/wiki/Logical_conjunction) to delegations in
-TUF.
+This is done by adding the [AND
+relation](https://en.wikipedia.org/wiki/Logical_conjunction) to delegations.
 
 # Motivation
 
@@ -24,16 +23,16 @@ TAP 3 has been motivated by the following use case.
 
 In some cases, it is desirable to delegate targets to a combination of roles in
 order to increase compromise-resilience.  For example, a project may require
-both its release engineering and quality assurance roles to sign its targets.
-Both roles are then required to sign the same hashes and length of the targets.
-This is done so that, assuming that both roles use different sets of keys, the
-compromise of either one of these roles is insufficient to execute arbitrary
-software attacks.
+both its release engineering and quality assurance roles to sign for targets on
+the repository.  Both roles are then required to sign the same hashes and
+length of the targets.  This is done so that, assuming that both roles use
+different sets of keys, the compromise of either one of these roles is
+insufficient to execute arbitrary software attacks.
 
 # Rationale
 
-We introduce this TAP because there is no mechanism in place to support such a
-use case.  TUF uses [prioritized and / or terminating
+We introduce this TAP because there is no mechanism in place to support use
+case 1.  TUF uses [prioritized and terminating
 delegations](http://isis.poly.edu/~jcappos/papers/kuppusamy_nsdi_16.pdf) to
 search for metadata about a desired target in a controlled manner.
 
@@ -41,7 +40,7 @@ Using multiple delegations, one can delegate the same target to multiple roles,
 so that a role with low priority can provide metadata about the target even if
 a role with high priority does not.  Any one of these roles is permitted to
 provide different metadata (i.e., length and hashes) about the target.
-Effectively, this allows TUF to support [the OR
+Effectively, this allows TUF to support [OR
 relation](https://en.wikipedia.org/wiki/Logical_disjunction) in delegations.
 
 The problem is that TUF presently does not have a mechanism to support the AND
@@ -51,10 +50,10 @@ target.
 
 # Specification
 
-In order to support this use case, we propose the following simple adjustment to
-the targets metadata file format.
+In order to support use case 1, we propose the following adjustments to the
+file format of targets metadata.
 
-## The previous targets metadata file format
+## The previous file format of targets metadata
 
 In the [previous
 version](https://github.com/theupdateframework/tuf/blob/70fc8dce367cf09563915afa40cffee524f5b12b/docs/tuf-spec.txt#L766-L776)
@@ -70,7 +69,6 @@ sign the given set of targets.
         {
           // We specify the name, keyids, and threshold of a single role allowed
           // to sign the following targets.
-          // Each role uses a filename based on its rolename.
           <b>"name"</b>: <b>ROLENAME-1</b>,
           "keyids": [KEYID-1],
           "threshold": THRESHOLD-1,
@@ -96,10 +94,10 @@ sign the given set of targets.
 }
 </pre>
 
-## The new targets metadata file format
+## The new file format of targets metadata
 
-Using the new targets metadata file format, a delegation may specify _multiple_
-role names instead of a single one.
+Using the new file format of targets metadata, a delegation may specify
+_multiple_ role names instead of a single one.
 
 <pre>
 {
@@ -116,7 +114,6 @@ role names instead of a single one.
           // We can specify the names of multiple roles, each of which is
           // associated with its own keys and a threshold number of keys.
           // However, we can still specify the name of a single role.
-          // Each role continues to use a filename based on its rolename.
           <b>"name": "my_first_delegation",</b>
           "paths": ["/foo/*.pkg"],
           "terminating": false,
@@ -158,7 +155,7 @@ role names instead of a single one.
           <b>"name": "my_multi-role_delegation",</b>
           "paths": ["baz/*.pkg"],
           "terminating": false,
-          <b>"min_roles_in_agreement": 1,</b>
+          <b>"min_roles_in_agreement": 2,</b>
           <b>"roleinfo": [
             {
               "rolename": ROLENAME-1,
@@ -222,7 +219,7 @@ targets:
           // These targets must be signed by <b>both</b> of these roles.
           <b>"name": "second_delegation",</b>
           "paths": ["/baz/*.pkg"],
-          "terminating", true,
+          "terminating": true,
           <b>"min_roles_in_agreement": 2,</b>
           "roleinfo": [
             {
@@ -261,11 +258,11 @@ searched in descending order of priority.  The only difference between the
 previous and current version of the specification is in how every delegation
 is processed.
 
-If a desired target matches a target path pattern in the "paths" attribute,
-then all roles in the "names" attribute must provide exactly the same hashes
-and length of the desired target.  However, note that these roles may
-nevertheless provide different "custom" metadata from each other about the
-same target.
+If a desired target matches a target path pattern in the "paths" attribute of a
+delegation, then all roles in the delegation's "roleinfo" attribute must
+provide exactly the same hashes and length of the desired target.  However,
+note that these roles may nevertheless provide different "custom" metadata from
+each other about the same target.
 
 While resolving a multi-role delegation, the outcome of a search varies
 depending on how the "terminating" attribute is set.  If none of the roles
@@ -283,13 +280,11 @@ the client is notified that "/baz/baz-1.0.pkg" is unavailable.
 # Security Analysis
 
 We argue that this TAP does not change existing security guarantees, because it
-uses essentially the same preorder depth-first search algorithm as before in
-resolving delegations.
-The only difference between the previous and new search algorithm is that, in
-any single delegation, all specified roles must provide the same hashes and
-length of that target.
-This does not interfere with how prioritized and / or terminating delegations
-are used to support the OR relation.
+uses essentially the same preorder depth-first search algorithm to resolve
+delegations.  The only difference between the previous and new search algorithm
+is that, in any multi-role delegation, all specified roles must provide the
+same hashes and length of that target.  This does not interfere with how
+prioritized and terminating delegations are used to support the OR relation.
 
 # Backwards Compatibility
 
@@ -301,7 +296,7 @@ implementation to resolve or encode delegations using the new file format.
 
 # Augmented Reference Implementation
 
-[TODO: Point to a branch containing implementation of TAP 3.]
+[TODO: Point to a branch containing an implementation of TAP 3.]
 
 # Copyright
 
