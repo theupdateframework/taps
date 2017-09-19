@@ -17,7 +17,7 @@ effectively creating an AND relation and ensuring any files obtained can be
 trusted.  In other words, this TAP demonstrates how target names can be mapped
 to repositories in a manner similar to the way targets with specific names can
 be delegated to different roles.  Like delegations, these repository entries
-can be ordered/prioritized and can "terminate" a search if an entrusted target
+can be ordered/prioritized, and can "terminate" a search if an entrusted target
 is unavailable.
 
 # Motivation
@@ -52,7 +52,7 @@ metadata. While this is desirable in some instances, other clients may prefer
 to require this step only for certain roles. For example, a [Continuous
 Integration](https://en.wikipedia.org/wiki/Continuous_integration) system may
 only care about developer signatures, while a staging environment may wish to
-verify both developer and CI signatures.  In order to support this selective
+verify both developer and CI signatures. In order to support this selective
 enforcement, TUF clients need to be able to require valid signatures from
 multiple repositories, each representing an interested signing group.
 
@@ -83,11 +83,11 @@ users.
 
 As our use cases suggest, there are some implementations that may want to allow
 clients to fetch target files from multiple repositories. Yet, in doing so,
-users risk receiving malicious files if one of these repositories is
+users risk receiving malicious files if one of these repositories should be
 compromised.  This TAP presents an implementation strategy to enable a user to
 securely and precisely control the trust given to different repositories. The
-guidance here can be applied using any type of data storage/file format, as
-long as it follows the implementation logic presented here.
+guidance here can be applied using any type of data storage/file format
+mechanism, as long as it follows the implementation logic presented here.
 
 # Specification
 
@@ -99,25 +99,20 @@ has its own root of trust (Root role, etc.) so a compromise of one repository
 does not impact others.  Using a scheme similar to targets delegations within a
 repository, targets may be securely mapped to one or more repositories.
 
-This TAP requires an extra step before a client makes
-requests for metadata and target files from remote repositories.  Specifically,
-it requires that a client consult a set of instructions, which can be a simple file
-in any format. These instructions guide the decision process for which
+This TAP requires an extra step before a client can
+request metadata and target files from remote repositories.  Specifically,
+it requires that a client consult a set of instructions, which can be maintained
+in a file, a
+database entry, or some other mechanism. These instructions control which
 repositories should be visited to fulfill a request for a particular target file.
-As an implementation example,
-TUF's reference implementation uses a map.json file that the updater employs
-when it searches for repositories that might have the target file the
-client seeks.
-
-The client, or adopter, can precisely control which repositories are trusted
-for particular target paths by editing the instruction file described above.
-The reference implementation uses a map file, but adopters are free to use
-any mechanism they
-wish to accomplish the same task. Clients must also keep all of the metadata
+The client, or adopter, can precisely control which repositories are to be
+trusted for particular target paths by editing this set of instructions.
+Clients must also keep all of the metadata
 for each repository in a separate directory of their choice.
 
 The next two sections cover the two main components of this new "pre-update"
-step, mainly the mechanism that maps trusted target to repositories, and the
+step. The first explains the mechanism that maps a trusted target to a specific
+repository. The second describes the
 search logic that uses the mapping mechanism to determine what repositories
 are visited, and which must sign off on the client's requested target
 files.
@@ -126,14 +121,12 @@ files.
 
 Adopters must implement a mechanism that determines which remote repositories
 are visited when downloading metadata and target files.  The exact design of
-this mechanism is left to adopters, but in the majority of cases it will be a
-simple file that the updater uses when it searches for requested target files.
-At a minimum, the mechanism must support or exhibit the following three
-properties:
+this mechanism is left to adopters, but, at a minimum, it must support or
+exhibit the following three properties:
 
 A. An ordered list of one or more repositories that may be visited to fetch
-metadata and target files. The updater tries each repository in the listed
-order when it is instructed to download metadata or target files.
+metadata and target files. The updater tries each repository in the order listed
+when it is instructed to download metadata or target files.
 
 B. A list of target paths associated with each ordered list of repositories.
 These target paths may be condensed as [glob
@@ -142,26 +135,20 @@ the updater can be instructed to download paths that resemble the glob pattern
 `foo-2.*.tgz` from only the first list of repositories in (A).
 
 C. A flag that instructs the updater whether to continue searching subsequent
-repositories after failing to download requested target files from specific
-repositories in list (A).  Any repositories in list (A) can indicate/use this
-flag independent of other repositories in the list.
+repositories after failing to download requested target files from the
+repositories specified in list (A).  Any repository in list (A) can indicate/use
+this flag independent of other repositories on the list.
 
 The three properties above are all that is required to aid or guide the updater
-in its search for requested target files. The logic
-that an updater must follow when it performs the search, and the way it uses the
-mapping mechanism is covered in the next section.
-
-This TAP provides, as a concrete example, a JSON file (also known as the map
-file) that supports the three mandated properties above. The reader is encouraged to
-consult the example map file later in this TAP when implementing the
-mapping mechanism and search logic that follows.
+in its search for requested target files.
 
 ## Searching for Targets on Multiple Repositories
 
 In order to search for targets on repositories, a TUF client should perform the
 following steps:
 
-1. Look at the first entry in the list of repositories in (A).
+1. Consult the chosen mechanism containing the mapping instructions, and
+look at the first entry in the list of repositories in (A).
 
 2. If a desired target path matches the associated paths or glob patterns
 of the list of repositories, then download and verify metadata from each of
@@ -263,10 +250,10 @@ The following is an example of a map file:
 
 # Security Analysis
 
-This TAP allows users to map targets to one or more repositories.  However, it
-does not change the way TUF verifies metadata for any individual repository.
-Each repository will continue to be treated as it was previously, with TUF
-performing the necessary verification of repository metadata.
+Employing this TAP allows users to securely map targets to one or more
+repositories. However, it does not change the way TUF verifies metadata for any
+individual repository. Each repository will continue to be treated as it was
+previously, with TUF performing the necessary verification of repository metadata.
 
 In order to avoid accidental denial-of-service attacks when multiple
 repositories sign the same targets, these repositories should coordinate to be
@@ -274,7 +261,7 @@ sure they are signing the same targets metadata (i.e., length and hashes).
 
 # Backwards Compatibility
 
-This specification is backwards-compatible, however older clients will not
+This specification is backwards-compatible, though older clients will not
 support multiple repository consensus on entrusted target files, and so will
 ignore this TAP.  These clients may continue to use a single repository.  New
 clients need to add relatively little code to follow the behavior defined
