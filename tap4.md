@@ -101,18 +101,16 @@ repository, targets may be securely mapped to one or more repositories.
 
 This TAP requires an extra step before a client can
 request metadata and target files from remote repositories.  Specifically,
-it requires that a client consult a set of instructions, which can be maintained
-in a file, a
-database entry, or some other mechanism. These instructions control which
+it requires that a client consult a list of which
 repositories should be visited to fulfill a request for a particular target file.
 The client, or adopter, can precisely control which repositories are to be
-trusted for particular target paths by editing this set of instructions.
+trusted for particular target paths by editing this list.
 Clients must also keep all of the metadata
 for each repository in a separate directory of their choice.
 
 The next two sections cover the two main components of this new "pre-update"
-step. The first explains the mechanism that maps a trusted target to a specific
-repository. The second describes the
+step. The first explains the mechanism that takes a target an indicates the
+specific repository that target should be retrieved from. The second describes the
 search logic that uses the mapping mechanism to determine what repositories
 are visited, and which must sign off on the client's requested target
 files.
