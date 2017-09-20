@@ -70,8 +70,8 @@ trust, it is already possible to do something similar.  One could have one
 repository download and use a multi-role delegation to the other repository's
 target.  Thus, if repository A downloaded the targets metadata from repository
 B, and used a multi-role delegation for the targets metadata, it would achieve
-a similar result.  In this instance, if repository B is compromised, users are
-not impacted because repository A's multi-role delegation will prevent the use
+a similar result.  In this instance, if repository B is compromised, users would
+not be impacted because repository A's multi-role delegation will prevent the use
 of repository B's malicious targets files.  Unfortunately, if repository A's
 root role or its top-level targets role were to be compromised, nothing could
 prevent users from receiving malicious targets files, even if repository B is
@@ -85,8 +85,9 @@ As our use cases suggest, there are some implementations that may want to allow
 clients to fetch target files from multiple repositories. Yet, in doing so,
 users risk receiving malicious files if one of these repositories should be
 compromised.  This TAP presents an implementation strategy to enable a user to
-securely and precisely control the trust given to different repositories. The
-guidance here can be applied using any type of data storage/file format
+securely and precisely control the amount of trust given to different
+repositories. The guidance here can be applied using any type of
+data storage/file format
 mechanism, as long as it follows the implementation logic presented here.
 
 # Specification
@@ -109,17 +110,18 @@ Clients must also keep all of the metadata
 for each repository in a separate directory of their choice.
 
 The next two sections cover the two main components of this new "pre-update"
-step. The first explains the mechanism that takes a target an indicates the
-specific repository that target should be retrieved from. The second describes the
-search logic that uses the mapping mechanism to determine what repositories
-are visited, and which must sign off on the client's requested target
-files.
+step. The first explains the mechanism that takes a target and indicates the
+specific repository from which that target should be retrieved. The second
+describes the search logic that uses the mapping mechanism to determine what
+repositories are visited, and which must sign off on the client's requested
+target files.
 
 ## Mechanism that Maps Targets to Repositories
 
 Adopters must implement a mechanism that determines which remote repositories
-are visited when downloading metadata and target files.  The exact design of
-this mechanism is left to adopters, but, at a minimum, it must support or
+are to be visited when downloading metadata and target files.  This mechanism
+can be designed in any way that suits the users' needs. At a minimum, though,
+it must support or
 exhibit the following three properties:
 
 A. An ordered list of one or more repositories that may be visited to fetch
@@ -127,7 +129,9 @@ metadata and target files. The updater tries each repository in the order listed
 when it is instructed to download metadata or target files.
 
 B. A list of target paths associated with each ordered list of repositories.
-These target paths may be condensed as [glob
+This property supports implementations like the one outlined in Use case 3,
+in which the user requires valid signatures from multiple repositories.
+The listed target paths may be condensed as [glob
 patterns](https://en.wikipedia.org/wiki/Glob_(programming)). For example,
 the updater can be instructed to download paths that resemble the glob pattern
 `foo-2.*.tgz` from only the first list of repositories in (A).
@@ -189,7 +193,7 @@ The map file contains a dictionary that holds two keys, "repositories" and
 lists the URLs for a set of repositories.  Each key in this dictionary
 is a _repository name_, and its value is a list of URLs.  The repository name
 also corresponds to the name of the local directory on the TUF client where
-metadata files would be cached.  Crucially, there is where the
+metadata files would be cached.  Crucially, this is where the
 [root metadata file](tap5.md) for a repository is located.
 
 The repository will also contain a list of URLs that indicates the location
