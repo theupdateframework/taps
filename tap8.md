@@ -1,7 +1,7 @@
 * TAP: 8
 * Title: Key rotation and explicit self-revocation
 * Version: 1
-* Last-Modified: 26-Sep-2017
+* Last-Modified: 29-Sep-2017
 * Author: Hannes Mehnert, Justin Cappos
 * Status: Draft
 * Content-Type: text/markdown
@@ -10,8 +10,7 @@
 
 # Abstract
 
-TAP 8 generalises the mechanism of chaining public key generations, and
-provides a secure way for key rotation.  Rotation is the process by
+TAP 8 generalises the mechanism of key rotation.  Rotation is the process by
 which a role uses their old key to invalidate their old key and transfer
 trust in the old key to a new key.  Performing a key rotation does not
 require parties that delegated trust to the old key to change their
@@ -30,8 +29,8 @@ actions (by introducing a cycle).
 
 # Motivation
 
-TUF supports key rotation using multiple ways that are ad hoc and differ
-based upon the mechanism.  This leads to some concerns:
+TUF supports key rotation for the root keys using an ad hoc way.
+Several use cases can benefit from a generalised mechanism:
 
 
 ## Self-maintaining *project* role
@@ -71,7 +70,7 @@ old ones are removed need to be fetched and verified.
 Roles which typically have short lived keys, like the timestamp role,
 may wish to revoke trust in the prior key and sign a new key with the
 old.  This limits the ability for attackers to walk back the set of
-trusted keys.  Right now, there is not a good way to do this within TUF,
+trusted keys.  Right now, there is no good way to do this within TUF,
 which may result in some keys being trusted more than they should be.
 
 
@@ -106,14 +105,14 @@ mechanism to all delegations, and extends it with self-revocation.
 
 # Specification
 
-To support key rotation, the new metadata file type `rotate` is
+To support key rotation, the new metadata type `rotate` is
 introduced, which contains the new public key(s), the threshold, and is
 signed by a threshold of old public keys.   The intuition is while
 delegations keep intact, the targets can rotate keys, shrink or grow.
 
 ## Rotate file
 
-The signed portion of a `rotate` file is as folows (there's as well a
+The signed portion of a `rotate` file is as follows (there's as well a
 signatures part as in tuf spec, not shown here):
 
 ```python
@@ -130,61 +129,62 @@ signatures part as in tuf spec, not shown here):
 
 Where ROLE, KEYID, KEY, and THRESHOLD are as defined in the original
 tuf spec.  The value of ROLE has to be the same as the role for the
-delegation.  The value for THRESHOLD is its new value.  The keys
+delegation.  The value of THRESHOLD is its new value.  The keyids
 specify the new valid key ids (which may be a subset or superset of
-the old ones).  The signatures have to be done with the old keys.
-There is no expiration of a rotate file, it is not meant to be
-ever modified or in need of re-signing.
+the old ones).  A rotate file does _not_ contain an expiration date,
+it is meant to be signed once and never modified.  The rotate
+file has to be signed with an old threshold of old keys.
 
 Let's consider a motivating example, project foo is delegated to Alice.
 Alice computer with the key material got stolen, but the disk was
 encrypted.  To be safe, she decides to get her key from her backup and
 roll over her key to a fresh one.  To do that, she creates a file
-`foo.rotate.OLD_KEYID.1` (where OLD_KEYID is the KEYID of the
-old ID, and 1 the old threshold value).  This file contains her
-new key, a threshold of 1, and signed with her old key.  She signs
-her targets file with the new key, and uploads both the rotate file
-and the freshly signed targets file to the repository.
+`foo.rotate.ID`.  This file contains her new key, a threshold of 1, and
+signed with her old key.  She signs her targets file with the new key,
+and uploads both the rotate file and the freshly signed targets file to
+the repository.
 
+The filename suffix, refered as `ID` above and below, is the hex
+representation of the SHA256 hash of the concatenation (using "." as
+separator) of the KEYIDs (in ascending lexical order), and the old
+threshold value, encoded decimal as ASCII (0x31 for 1, 0x32 for 2,
+0x31 0x30 for 10).
 
 ## Client workflow
 
 A client who wants to install foo now fetches Alice targets file, and
 fails to verify the signature with Alice old key - since none of the
 keyids in the signatures match it.  The client fetches
-`foo.rotate.KEYID.THRESHOLD`, where KEYID is the key identifier the
-client found in the delegation to Alice, and THRESHOLD the old threshold, as
-ASCII encoded integer (0x31 for 1).  The client can verify this rotate
-file using the public key from the delegation.  This establishes trust
-in Alice new key, and the client can now verify the signature of Alice
-targets file using the new key.  If the new keyid is still not used in
-the signatures, another rotate file needs to be downloaded,
-`foo.rotate.NEW_KEYID.1`, until either a valid chain is found, in which case
+`foo.rotate.ID`, ID is explained above using Alice old keyid.  The
+client verifies this rotate file using the public key from the
+delegation.  This establishes trust in Alice new key, and the client can
+now verify the signature of Alice targets file using the new key.  If
+the new keyid is still not used in the signatures, another rotate file
+needs to be downloaded, `foo.rotate.ID'`, where ID' is constructed using
+Alice's new keyid, until either a valid chain is found, in which case
 the targets file is valid, or key data is missing or there is a cycle in
 the rotations, in both cases the targets file is invalid.
 
 ## Root rotation
 
 Root, timestamp and snapshot key rotation.  These keys can rotate as
-well, leading to ROLE..rotate.HHH.T files, where HHH is the concatenation of
-the keyids (in ascending order, case-insensitive) of the respective
-public keys, separated by a ".".  The value
-of T is the ASCII encoded old threshold value.  Each file is signed by
-a quorum of keys HHH, and contains the new keys.  A client can fetch the
-actual data, timestamp, and verify it.  If the keyids do not match, the
-client needs to fetch the ROLE.rotate.HH file
-where HH is the keyid of the last trusted timestamp key, either from the
-root file or locally cached.  If the timestamp key is renewed by the
-root, all timestamp.rotate files can be safely removed from the
+well, leading to ROLE.rotate.ID files, where ID is as described above.
+The value of T is the ASCII encoded old threshold value.  Each file is
+signed by a quorum of old keys, and contains the new keys.  A client
+can fetch the actual data, timestamp, and verify it.  If the keyids do
+not match, the client needs to fetch the ROLE.rotate.ID file
+where ID is as described above using the timestamp keyid, either from
+the root file or locally cached.  If the timestamp key is renewed by
+the root, all timestamp.rotate files can be safely removed from the
 repository.
 
 Initial root key provisioning.  The root keys are no longer part of the
-root file, but initially provided via some means (e.g. manually, via an
-URL, or within the repository as initial_root_keys).  When root keys are
-rotated, a root.rotate.HHH.T is generated, containing the new root keys, and
-signed with (a threshold of) the old root keys.  A client downloads the
-root file, and the chain of rotations, starting from its trusted root
-keys.
+root files, but initially provided via other means (e.g. manually, via
+an URL, or within the repository as root0).  This keeps the root files
+more concise.  When root keys are rotated, a root.rotate.ID is
+generated, containing the new root keys, and signed with (a threshold
+of) the old root keys.  A client downloads the root file, and the chain
+of rotations, starting from its trusted root keys.
 
 
 ## Interoperability with TAP 3 (multi-role delegations)
@@ -192,32 +192,31 @@ keys.
 Multi-role delegations are handled using the same methodology.
 
 Let's consider the project foo, initially delegated to a multi-role
-threshold (of 2) to Alice, Bob, and Charlie.  Let's assume the targets
-file to be foo.  When they want to add Dan to the project, they create
-a foo.rotate.Alice.Bob.Charlie.2 file, which contains all four keys, and a
-new threshold (again 2).   The file foo.rotate.Alice.Bob.Charlie is signed
-by at least 2 of Alice, Bob, and Charlie.  The new targets file foo
-is then signed by a new threshold (again 2) of Alice, Bob, Charlie, and
-Dan to complete the rotation.
+threshold (of 2) to keyids Alice, Bob, and Charlie.  When they want
+to add a keyid from Dan to the project, they create a foo.rotate.ID
+file, where ID is as described above (the SHA256 of the concatenated
+key ids of Alice, Bob, Charlie, and the character 0x32).  This
+contains all four keys, and a new threshold (again 2).   The file
+foo.rotate.ID is signed by at least 2 keyids of Alice, Bob, and Charlie.
+The new targets file foo is then signed by a new threshold (again 2) of
+Alice, Bob, Charlie, and Dan to complete the rotation.
 
 Let's assume Bob and Dan signed foo.  A client which encounters a
 delegation to foo notices that its metadata is not valid using
-Alice, Bob, and Charlies keys.  The client looks for a
-foo.rotate.Alice.Bob.Charlie.2 file to fetch new keys.  This is properly
-signed by Alice and Bob, and the client can verify foo using Bob's and
-Dan's signature.
+Alice, Bob, and Charlies keys.  The client looks for a foo.rotate.ID
+file to fetch new keys.  This is properly signed by Alice and Bob, and
+the client can verify foo using Bob's and Dan's signature.
 
 When Evelyn joins, and the threshold is increased to 3,
-foo.rotate.Alice.Bob.Charlie.Dan.2 is created, which contains Alice, Bob,
+foo.rotate.ID' is created (ID' is the SHA256 of the concatenated keyids
+Alice, Bob, Charlie, Dan, and 0x32), which contains Alice, Bob,
 Charlie, Dan, and Evelyn public key, and a threshold value of 3.  This
 is signed with at least 2 keys from Alice, Bob, Charlie, or Dan.
 
 If at a later point, foo decides to remove Evelyn again from the
 project, and decrease the threshold to 2, this would introduce a cycle
-foo.rotate.Alice.Bob.Charlie.Dan.Evelyn.3 to
-foo.rotate.Alice.Bob.Charlie.Dan.2.  To avoid a cycle, anyone of
-Alice, Bob, Charlie, or Dan needs to
-rotate their own key (and re-sign all targets).
+foo.rotate.ID'' to foo.rotate.ID'.  To avoid a cycle, one of Alice, Bob,
+Charlie, or Dan needs to rotate their own key (and re-sign all targets).
 
 ## Client cycle check
 
