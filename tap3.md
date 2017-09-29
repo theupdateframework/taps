@@ -86,7 +86,7 @@ required to sign the given set of targets.
           "terminating": false,
         }
         // Note that, unfortunately, there is no way to require <b>multiple</b>
-        // roles as required to sign targets in a single delegation.
+        // roles to sign targets in a single delegation.
       ],
       ...
     },
