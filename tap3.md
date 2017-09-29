@@ -133,7 +133,7 @@ _multiple_ role names as required to sign, instead of a single one.
           ...
         },
         // This is the second delegation to a <b>single</b> role.
-        // The first delegation may still override this delegation.
+        // The first delegation takes precedence over the second.
         {
           <b>"name": "my_second_delegation",</b>
           "paths": ["/foo/bar.pkg"],
