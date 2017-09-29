@@ -102,7 +102,7 @@ _multiple_ role names as required to sign, instead of a single one.
 <pre>
 {
   "signed": {
-    // These are the keys for each KEYID listed in "delegations."
+    // These are the full public keys for each KEYID listed in "delegations."
     <b>"keys_for_delegations": {KEYID-1: {"keytype: "ed25519", "keyval": KEYVAL},
         KEYID-2: {...}},</b>
 
