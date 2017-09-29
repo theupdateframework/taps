@@ -57,8 +57,8 @@ file format of targets metadata.
 
 In the [previous
 version](https://github.com/theupdateframework/tuf/blob/70fc8dce367cf09563915afa40cffee524f5b12b/docs/tuf-spec.txt#L766-L776)
-of the specification, each delegation could specify only a _single_ role to
-sign the given set of targets.
+of the specification, each delegation could specify only a _single_ role as
+required to sign the given set of targets.
 
 <pre>
 {
@@ -67,8 +67,8 @@ sign the given set of targets.
       "roles": [
         // This is the first delegation to a <b>single</b> role.
         {
-          // We specify the name, keyids, and threshold of a single role allowed
-          // to sign the following targets.
+          // We specify the name, keyids, and threshold of a single role as
+          // required to sign the following targets.
           <b>"name"</b>: <b>ROLENAME-1</b>,
           "keyids": [KEYID-1],
           "threshold": THRESHOLD-1,
@@ -86,7 +86,7 @@ sign the given set of targets.
           "terminating": false,
         }
         // Note that, unfortunately, there is no way to require <b>multiple</b>
-        // roles to sign targets in a single delegation.
+        // roles as required to sign targets in a single delegation.
       ],
       ...
     },
@@ -97,7 +97,7 @@ sign the given set of targets.
 ## The new file format of targets metadata
 
 Using the new file format of targets metadata, a delegation may specify
-_multiple_ role names instead of a single one.
+_multiple_ role names as required to sign, instead of a single one.
 
 <pre>
 {
@@ -148,8 +148,9 @@ _multiple_ role names instead of a single one.
           ]</b>
           ...
         },
-        // Now, we can require <b>multiple</b> roles (in this case, two) to sign
-        // off on the same targets.  They must all agree on the same target hashes.
+        // Now, we can require <b>multiple</b> roles (in this case, two) to
+        // sign off on the same targets.  They must all agree on the same
+        // target hashes.
         {
           // Both roles must sign the same hashes and length of the following targets.
           <b>"name": "my_multi-role_delegation",</b>
