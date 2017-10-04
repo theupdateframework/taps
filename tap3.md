@@ -192,9 +192,17 @@ targets:
             }
           ]
         },
-        // This is the second delegation.
+        // This second delegation requires that both 'release-engineering' and
+        // 'quality-assurance' sign for /baz/*.pkg files in order to validate
+        // them via this delegation.  Both of these roles must agree on the
+        // signed targets because "min_roles_in_agreement" = 2.
+        // 'release-engineering' is expected to be signed with the single
+        // listed key for that role ("threshold" = 1).  'quality-assurance'
+        // must be signed with at least two of the three listed keys for that
+        // role ("threshold" = 2).
         {
-          // These targets must be signed by <b>both</b> of these roles.
+          // These targets must be signed by <b>both</b> release-engineering
+          // and quality-assurance.
           <b>"name": "second_delegation",</b>
           "paths": ["/baz/*.pkg"],
           "terminating": true,
