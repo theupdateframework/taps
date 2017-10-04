@@ -48,6 +48,16 @@ relation in delegations.  In other words, it is currently not possible to
 specify that a combination of roles must sign the same hashes and length of the
 target.
 
+Although the reader might observe that the threshold feature allows an AND
+relation within a role that can in some simple cases lead to the same
+functionality (a requirement of all of a set of keys signing off), this option
+is less versatile.  For one, the keys must sign the same piece of metadata and
+those signatures must sit in the same file. Secondly, existing functionality
+doesn't enable multiple roles with flexible thresholds and key sets to be
+required to sign off together without an explosion in the number of delegations
+and roles required.
+
+
 # Specification
 
 In order to support use case 1, we propose the following adjustments to the
@@ -125,7 +135,6 @@ _multiple_ role names as required to sign, instead of a single one.
     },
     ...
   },
-  ...
 }
 </pre>
 
