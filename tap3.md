@@ -44,9 +44,12 @@ Effectively, this allows TUF to support [OR
 relation](https://en.wikipedia.org/wiki/Logical_disjunction) in delegations.
 
 The problem is that TUF presently does not have a mechanism to support the AND
-relation in delegations.  In other words, it is currently not possible to
-specify that a combination of roles must sign the same hashes and length of the
-target.
+relation in delegations, as it is currently not possible to specify that a
+combination of delegations must sign for the same hashes and length of a
+target.  In addition, there is no way to require that a minimum number of
+delegations must sign for the same hashes and lengths.  The latter is needed in
+cases where it is not known which combination of delegations will eventually
+sign for targets.
 
 Although the reader might observe that the threshold feature allows an AND
 relation within a role that can in some simple cases lead to the same
@@ -54,8 +57,8 @@ functionality (a requirement of all of a set of keys signing off), this option
 is less versatile.  For one, the keys must sign the same piece of metadata and
 those signatures must sit in the same file. Secondly, existing functionality
 doesn't enable multiple roles with flexible thresholds and key sets to be
-required to sign off together without an explosion in the number of delegations
-and roles required.
+required to sign off together, at least without leading to an explosion in the
+number of delegations and roles required.
 
 
 # Specification
