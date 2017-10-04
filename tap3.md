@@ -102,81 +102,30 @@ _multiple_ role names as required to sign, instead of a single one.
 <pre>
 {
   "signed": {
-    // These are the full public keys for each KEYID listed in "delegations."
-    <b>"keys_for_delegations": {KEYID-1: {"keytype: "ed25519", "keyval": KEYVAL},
-        KEYID-2: {...}},</b>
-
-    // "delegations" associates KEYIDs (of the keys above) with roles.
+    <b>"keys_for_delegations": {KEYID: {"keytype: KEYTYPE, "keyval": KEYVAL}, ...},</b>
     "delegations": {
       "roles": [
-        // This is the first delegation to a <b>single</b> role.
         {
-          // We can specify the names of multiple roles, each of which is
-          // associated with its own keys and a threshold number of keys.
-          // However, we can still specify the name of a single role.
-          <b>"name": "my_first_delegation",</b>
-          "paths": ["/foo/*.pkg"],
-          "terminating": false,
-
-          // "min_roles_in_agreement" enforces the minimum number of roles that
-          // must be in agreement about entrusted targets.  Clients should
-          // ignore target files that are not signed off by a
-          // "min_roles_in_agreement" of roles in this delegation.
-          <b>"min_roles_in_agreement": 1,</b>
+          <b>"name": DELEGATION-NAME,</b>
+          "paths": [PATHPATTERN-1, PATHPATTERN-2, ...],
+          "terminating": BOOLEAN,
+          <b>"min_roles_in_agreement": NUM_ROLES,</b>
           <b>"roleinfo": [
             {
-              "rolename": ROLENAME-1,
-              "keyids": [KEYID-1],
-              "threshold": THRESHOLD-1,
+              "rolename": ROLENAME,
+              "keyids": [KEYID],
+              "threshold": THRESHOLD,
             }
           ]</b>
-          ...
         },
-        // This is the second delegation to a <b>single</b> role.
-        // The first delegation takes precedence over the second.
-        {
-          <b>"name": "my_second_delegation",</b>
-          "paths": ["/foo/bar.pkg"],
-          "terminating": false,
-          <b>"min_roles_in_agreement": 1,</b>
-          <b>"roleinfo": [
-            {
-              "rolename": ROLENAME-2,
-              "keyids": [KEYID-2],
-              "threshold": THRESHOLD-2,
-            }
-          ]</b>
-          ...
-        },
-        // Now, we can require <b>multiple</b> roles (in this case, two) to
-        // sign off on the same targets.  They must all agree on the same
-        // target hashes.
-        {
-          // Both roles must sign the same hashes and length of the following targets.
-          <b>"name": "my_multi-role_delegation",</b>
-          "paths": ["baz/*.pkg"],
-          "terminating": false,
-          <b>"min_roles_in_agreement": 2,</b>
-          <b>"roleinfo": [
-            {
-              "rolename": ROLENAME-1,
-              "keyids": [KEYID-1],
-              "threshold": THRESHOLD-1
-            },
-            {
-              "rolename:: ROLENAME-2,
-              "keyids": [KEYID-2],
-              "threshold": THRESHOLD-2
-            },
-            ...
-          ],</b>
-          ...
-        }
+        // Multiple delegations can be specified here after the first one.
+        ...
       ],
       ...
     },
     ...
-  }
+  },
+  ...
 }
 </pre>
 
@@ -193,6 +142,7 @@ targets:
 <pre>
 {
   "signed": {
+    // These are the full public keys for each KEYID listed in "delegations."
     "keys_for_delegations": {'ca9781...<snip>': {"keytype: "ed25519", "keyval": KEYVAL},
         'acac86...<snip>': {...},
         'de7d1b...<snip>': {...},
@@ -200,14 +150,25 @@ targets:
         '93ec2c...<snip>': {...},
         'f2d502...<snip>': {...},
         'fce9cf...<snip>': {...}},</b>
+
+    // "delegations" associates KEYIDs (of the keys above) with roles.
     "delegations": {
       "roles": [
         // This is the first delegation.
         {
-          // These targets must be signed by this <b>single</b> role.
+
+          // We can specify the names of multiple roles, each of which is
+          // associated with its own keys and a threshold number of keys.
+          // However, we can still specify the name of a single role.
           <b>"name": "first_delegation",</b>
+          // These targets must be signed by this <b>single</b> role.
           "paths": ["/foo/*.pkg"],
           "terminating": false,
+
+          // "min_roles_in_agreement" enforces the minimum number of roles that
+          // must be in agreement about entrusted targets.  Clients should
+          // ignore target files that are not signed off by a
+          // "min_roles_in_agreement" of roles in this delegation.
           <b>"min_roles_in_agreement": 1,</b>
           "roleinfo": [
             {
