@@ -144,9 +144,8 @@ guarantees.
 
 ### Example: requiring a combination of roles to sign the same targets
 
-The following targets metadata file illustrates how a project may require: (1)
-a single role to sign some targets, (2) but multiple roles to sign other
-targets:
+The following targets metadata file illustrates how a project may require a
+single role to sign some targets, but multiple roles to sign other targets:
 
 <pre>
 {
@@ -158,7 +157,8 @@ targets:
         '1a2b41...<snip>': {...},
         '93ec2c...<snip>': {...},
         'f2d502...<snip>': {...},
-        'fce9cf...<snip>': {...}},</b>
+        'fce9cf...<snip>': {...},
+        '498aeb...<snip>': {...}},</b>
 
     // "delegations" associates KEYIDs (of the keys above) with roles.
     "delegations": {
@@ -192,24 +192,24 @@ targets:
             }
           ]
         },
-        // This second delegation requires that both 'release-engineering' and
-        // 'quality-assurance' sign for /baz/*.pkg files in order to validate
-        // them via this delegation.  Both of these roles must agree on the
-        // signed targets because "min_roles_in_agreement" = 2.
+        // The second delegation requires that at least two roles sign for
+        // files in order to validate them.  'release-engineering',
+        // 'quality-assurance', and 'continuous-integration' are entrusted to
+        // sign for /baz/*.pkg files, and any two of these three roles must
+        // agree on what's signed because "min_roles_in_agreement" = 2.
         // 'release-engineering' is expected to be signed with the single
         // listed key for that role ("threshold" = 1).  'quality-assurance'
         // must be signed with at least two of the three listed keys for that
-        // role ("threshold" = 2).
+        // role ("threshold" = 2).  'continuous-integration' must be signed
+        // with a single key ("threshold" = 1).
         {
-          // These targets must be signed by <b>both</b> release-engineering
-          // and quality-assurance.
           <b>"name": "second_delegation",</b>
           "paths": ["/baz/*.pkg"],
           "terminating": true,
           <b>"min_roles_in_agreement": 2,</b>
           "roleinfo": [
             {
-            // The release engineering role must sign using this key.
+            // The "release-engineering" role must sign using this key.
               <b>"rolename": "release-engineering",</b>
               "keyids": [
                 "1a2b4110927d4cba257262f614896179ff85ca1f1353a41b5224ac474ca71cb4"
@@ -225,7 +225,14 @@ targets:
                 "fce9cf1cc86b0945d6a042f334026f31ed8e4ee1510218f198e8d3f191d15309"
               ],
               "threshold": 2
-            }
+            },
+            {
+            // The continuous integration role must sign with one key.
+              <b>"rolename": "continuous-integration",</b>
+              "keyids": [
+                "498aeb78523452123dce43434fff346678768676867bae345353453455432544"
+              ],
+              "threshold": 1
           ],
           ...
         }
@@ -257,11 +264,12 @@ will be searched (given that the "terminating" attribute is False).  If a role
 does not provide the required metadata, or provides mismatching metadata, the
 search is stopped and an error is reported to the client (given that the
 "terminating" attribute is True).  For instance: In the preceding example the
-second multi-role delegation to the "release-engineering" and
-"quality-assurance" roles is a terminating delegation.  If the client requests
-the "/baz/baz-1.0.pkg" target and conflicting hashes and lengths are specified
-by the "release-engineering" and "quality-assurance" roles, an error occurs and
-the client is notified that "/baz/baz-1.0.pkg" is unavailable.
+second multi-role delegation to the "release-engineering", "quality-assurance",
+and 'continuous-integration' roles is a terminating delegation.  If the client
+requests the "/baz/baz-1.0.pkg" target and conflicting hashes and lengths are
+specified by the "release-engineering", "quality-assurance", and
+'continuous-integration' roles, an error occurs and the client is notified that
+"/baz/baz-1.0.pkg" is unavailable.
 
 # Security Analysis
 
