@@ -168,10 +168,6 @@ single role to sign some targets, but multiple roles to sign other targets:
       "roles": [
         // This is the first delegation.
         {
-
-          // We can specify the names of multiple roles, each of which is
-          // associated with its own keys and a threshold number of keys.
-          // However, we can still specify the name of a single role.
           <b>"name": "first_delegation",</b>
           // These targets must be signed by this <b>single</b> role.
           "paths": ["/foo/*.pkg"],
@@ -182,6 +178,10 @@ single role to sign some targets, but multiple roles to sign other targets:
           // ignore target files that are not signed off by a
           // "min_roles_in_agreement" of roles in this delegation.
           <b>"min_roles_in_agreement": 1,</b>
+
+          // We can specify the names of multiple roles, each of which is
+          // associated with its own keys and a threshold number of keys.
+          // However, we can still specify the name of a single role.
           "roleinfo": [
             {
             // This role must sign them using all 3 of these keys.
@@ -196,9 +196,10 @@ single role to sign some targets, but multiple roles to sign other targets:
           ]
         },
         // The second delegation requires that at least two roles sign for
-        // files in order to validate them.  'release-engineering',
+        // targets in order to validate them, otherwise the targets cannot be
+        // validated per this delegation.  'release-engineering',
         // 'quality-assurance', and 'continuous-integration' are entrusted to
-        // sign for /baz/*.pkg files, and any two of these three roles must
+        // sign for /baz/*.pkg targets, and any two of these three roles must
         // agree on what's signed because "min_roles_in_agreement" = 2.
         // 'release-engineering' is expected to be signed with the single
         // listed key for that role ("threshold" = 1).  'quality-assurance'
