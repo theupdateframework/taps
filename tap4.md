@@ -98,76 +98,79 @@ name, such as
 particular repository.  Each repository
 has its own root of trust (Root role, etc.) so a compromise of one repository
 does not impact others.  Using a scheme similar to targets delegations within a
-repository, targets may be securely mapped to one or more repositories.
+repository, targets may be securely assigned to one or more repositories.
 
 This TAP requires an extra step before a client can
 request metadata and target files from remote repositories.  Specifically,
-it requires that a client consult a list of which
-repositories can be visited to fulfill a request for a particular target file.
-The client, or adopter, can precisely control which repositories are to be
-trusted for particular target paths by editing this list.
+it requires that a client consult a mechanism that lists what
+repositories should be searched and in what order. By editing this list of
+mappings, or assignment instructions, the client, or adopter, can precisely
+control which repositories are to be trusted for particular target paths.
 Clients must also keep all of the metadata
 for each repository in a separate directory of their choice.
 
 The next two sections cover the two main components of this new "pre-update"
-step. The first explains the mechanism that takes a target and indicates the
-specific repository from which that target should be retrieved. The second
+step. The first explains the mechanism that assigns a target to the specific
+repository or repositories from which it should be retrieved. The second
 describes the search logic that uses the mapping mechanism to determine what
 repositories are visited, and which must sign off on the client's requested
 target files.
 
-## Mechanism that Maps Targets to Repositories
+## Mechanism that Assigns Targets to Repositories
 
-Adopters must implement a mechanism that determines which remote repositories
-can be visited when downloading metadata and target files.  This mechanism can
-be designed in any way that suits the users' needs. At a minimum, though, it
-must support or exhibit the following three properties:
+Adopters must implement a mechanism that directs TUF to the specific repository
+(or repositories) from which metadata and target files should be downloaded.
+Assignments of files to repositories are controlled by sets of instructions
+called mappings. Each mapping contains the following elements:
 
-A. An ordered list of one or more repositories that may be visited to fetch
-metadata and target files. The updater tries each repository in the order
-listed when it is instructed to download metadata or target files.
+A. An ordered list of one or more repositories. When it is instructed to
+download metadata or target fils, the updater tries each repository in the order
+listed.
 
-B. A list of target paths associated with each ordered list of repositories.
-This property supports implementations like the one outlined in use case 3,
+B. A list of target paths associated with each repository.
+This element supports implementations like the one outlined in use case 3,
 in which the user requires valid signatures from multiple repositories.
-The listed target paths may be condensed as [glob
+The target paths may be condensed as [glob
 patterns](https://en.wikipedia.org/wiki/Glob_(programming)). For example,
 the updater can be instructed to download paths that resemble the glob pattern
-`foo-2.*.tgz` from only the first list of repositories in (A).
+`foo-2.*.tgz` from only the first mapping.
 
 C. A flag that instructs the updater whether to continue searching subsequent
 repositories after failing to download requested target files from the
-repositories specified in list (A).  Any repository in list (A) can
+repositories specified in the first mapping.  Any repository within a mapping can
 indicate/use this flag independent of other repositories on the list.
 
 D. A threshold that indicates the minimum number of repositories that are
 required to sign for the same length and hash of a requested target under (B).
 
-The four properties above are all that is required to aid or guide the updater
+The four properties above are all that is required to guide the updater
 in its search for requested target files.
 
 ## Searching for Targets on Multiple Repositories
 
-In order to search for targets on repositories, a TUF client should perform the
-following steps:
+Figure 1 gives an example of an ordered list of mappings for the file foo.tgz.
+To complete a search using the assignment mechanism, a TUF client will follow
+these steps:
 
-1. Consult the chosen mechanism containing the mapping instructions, and
-look at the first entry in the list of repositories in (A).
+1. TUF will open the repo assignment mechanism and identify the first set of
+mappings. In our example, this mapping would direct the user to repositories
+A, B, C.
 
-2. If a desired target path matches the associated paths or glob patterns
-of the list of repositories, then download and verify metadata from each of
-these repositories.
+2. The software updater contacts the assigned repository (or repositories) and
+checks if the desired target path matches the associated paths or glob patterns
+in the mapping.
 
-3. Ensure that the targets metadata, specifically the length and hashes about
-the target, match across a threshold of repositories (D). Custom targets
-metadata are exempt from this requirement.
+3. If the path matches, metadata from each repository in the mapping is downloaded
+and verified. Verification means the length and hashes about
+the target match across a threshold of repositories (per element D).
+Custom targets metadata are exempt from this requirement.
 
 4. If the targets metadata is a match across a threshold of repositories,
 return this metadata.
 
-5. Otherwise, if the targets metadata do not match across repositories, or if
-none of the repositories signed metadata about the desired target, then take
-one of the following actions:
+5. If the metadata is not a match, or if
+none of the repositories signed metadata about the desired target, then the
+client should take one of the following actions:
 
     5.1. If the flag of the mapping mechanism in property (C) is set to true,
     either report that the repositories do not agree on the target, or that
@@ -181,9 +184,9 @@ one of the following actions:
 To demonstrate the reference implementation's handling of multiple repository
 consensus on entrusted targets, we employ a file named `map.json.` This _map
 file_ comes into play when a TUF client requests targets and adheres to the
-three properties of the mapping mechanism.
+four elements of the mapping mechanism.
 
-If the map file is to be used to map targets to repositories, it will either be
+If the map file is to be used to assign targets to repositories, it will either be
 constructed by a user employing the TUF command-line tools, or distributed by
 an out-of-band bootstrap process. This file is not intended to be automatically
 available or refreshed from a repository. In fact, the map file is kept on the
@@ -203,7 +206,8 @@ from which files should be retrieved.  Each URL points to a root directory
 containing metadata and target files.
 
 The value of the "mapping" key is a priority-ordered list that maps paths
-(i.e., target names) to specific repositories.  Every entry in this list is
+(i.e., target names) to specific repositories, like the mechanism described
+earlier in this document.  Every entry in this list is
 a dictionary the following keys:
 
 * "paths" specifies a list of target paths of patterns. A desired target must
