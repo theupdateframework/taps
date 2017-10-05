@@ -1,7 +1,7 @@
 * TAP: 3
 * Title: Multi-role delegations
 * Version: 1
-* Last-Modified: 15-Sep-2017
+* Last-Modified: 5-Oct-2017
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Accepted
@@ -44,10 +44,10 @@ Effectively, this allows TUF to support [OR
 relation](https://en.wikipedia.org/wiki/Logical_disjunction) in delegations.
 
 The problem is that TUF presently does not have a mechanism to support the AND
-relation in delegations, as it is currently not possible to specify that a
-combination of delegations must sign for the same hashes and length of a
-target.  In addition, there is no way to require that a minimum number of
-delegations must sign for the same hashes and lengths.  The latter is needed in
+relation in delegations, as it is currently not possible to require that a
+combination of delegations sign for the same hashes and length of a
+target.  Also, there is no way to require that a minimum number of
+delegations sign for the same hashes and lengths.  The latter is needed in
 cases where it is not known which combination of delegations will eventually
 sign for targets.
 
@@ -57,8 +57,8 @@ functionality (a requirement of all of a set of keys signing off), this option
 is less versatile.  For one, the keys must sign the same piece of metadata and
 those signatures must sit in the same file. Secondly, existing functionality
 doesn't enable multiple roles with flexible thresholds and key sets to be
-required to sign off together, at least without leading to an explosion in the
-number of delegations and roles required.
+required to sign off together, at least not without leading to an explosion in
+the number of delegations and roles required.
 
 
 # Specification
@@ -181,7 +181,7 @@ single role to sign some targets, but multiple roles to sign other targets:
 
           // We can specify the names of multiple roles, each of which is
           // associated with its own keys and a threshold number of keys.
-          // However, we can still specify the name of a single role.
+          // However, here we specify the name of a single role.
           "roleinfo": [
             {
             // This role must sign them using all 3 of these keys.
@@ -269,10 +269,10 @@ does not provide the required metadata, or provides mismatching metadata, the
 search is stopped and an error is reported to the client (given that the
 "terminating" attribute is True).  For instance: In the preceding example the
 second multi-role delegation to the "release-engineering", "quality-assurance",
-and 'continuous-integration' roles is a terminating delegation.  If the client
+and "continuous-integration" roles is a terminating delegation.  If the client
 requests the "/baz/baz-1.0.pkg" target and conflicting hashes and lengths are
 specified by the "release-engineering", "quality-assurance", and
-'continuous-integration' roles, an error occurs and the client is notified that
+"continuous-integration" roles, an error occurs and the client is notified that
 "/baz/baz-1.0.pkg" is unavailable.
 
 # Security Analysis
