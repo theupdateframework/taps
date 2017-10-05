@@ -103,7 +103,7 @@ repository, targets may be securely mapped to one or more repositories.
 This TAP requires an extra step before a client can
 request metadata and target files from remote repositories.  Specifically,
 it requires that a client consult a list of which
-repositories should be visited to fulfill a request for a particular target file.
+repositories can be visited to fulfill a request for a particular target file.
 The client, or adopter, can precisely control which repositories are to be
 trusted for particular target paths by editing this list.
 Clients must also keep all of the metadata
@@ -119,17 +119,16 @@ target files.
 ## Mechanism that Maps Targets to Repositories
 
 Adopters must implement a mechanism that determines which remote repositories
-are to be visited when downloading metadata and target files.  This mechanism
-can be designed in any way that suits the users' needs. At a minimum, though,
-it must support or
-exhibit the following three properties:
+can be visited when downloading metadata and target files.  This mechanism can
+be designed in any way that suits the users' needs. At a minimum, though, it
+must support or exhibit the following three properties:
 
 A. An ordered list of one or more repositories that may be visited to fetch
-metadata and target files. The updater tries each repository in the order listed
-when it is instructed to download metadata or target files.
+metadata and target files. The updater tries each repository in the order
+listed when it is instructed to download metadata or target files.
 
 B. A list of target paths associated with each ordered list of repositories.
-This property supports implementations like the one outlined in Use case 3,
+This property supports implementations like the one outlined in use case 3,
 in which the user requires valid signatures from multiple repositories.
 The listed target paths may be condensed as [glob
 patterns](https://en.wikipedia.org/wiki/Glob_(programming)). For example,
@@ -138,10 +137,13 @@ the updater can be instructed to download paths that resemble the glob pattern
 
 C. A flag that instructs the updater whether to continue searching subsequent
 repositories after failing to download requested target files from the
-repositories specified in list (A).  Any repository in list (A) can indicate/use
-this flag independent of other repositories on the list.
+repositories specified in list (A).  Any repository in list (A) can
+indicate/use this flag independent of other repositories on the list.
 
-The three properties above are all that is required to aid or guide the updater
+D. A threshold that indicates the minimum number of repositories that are
+required to sign for the same length and hash of a requested target under (B).
+
+The four properties above are all that is required to aid or guide the updater
 in its search for requested target files.
 
 ## Searching for Targets on Multiple Repositories
@@ -157,11 +159,11 @@ of the list of repositories, then download and verify metadata from each of
 these repositories.
 
 3. Ensure that the targets metadata, specifically the length and hashes about
-the target, match across all repositories. Custom targets metadata are exempt
-from this requirement.
+the target, match across a threshold of repositories (D). Custom targets
+metadata are exempt from this requirement.
 
-4. If the targets metadata is a match across repositories, return this
-metadata.
+4. If the targets metadata is a match across a threshold of repositories,
+return this metadata.
 
 5. Otherwise, if the targets metadata do not match across repositories, or if
 none of the repositories signed metadata about the desired target, then take
@@ -202,13 +204,15 @@ containing metadata and target files.
 
 The value of the "mapping" key is a priority-ordered list that maps paths
 (i.e., target names) to specific repositories.  Every entry in this list is
-a dictionary with at least two of the following keys:
+a dictionary the following keys:
 
 * "paths" specifies a list of target paths of patterns. A desired target must
-match a pattern in this list for this mapping to be consulted.
+  match a pattern in this list for this mapping to be consulted.
 * "repositories" specifies a list of one or more repository names.
 * "terminating" is a Boolean attribute indicating whether or not
   this mapping terminates [backtracking](#interpreting-the-map-file).
+* "threshold" is the minimum number of roles that must sign for any given
+  target under "paths".
 
 
 The following is an example of a map file:
@@ -233,10 +237,16 @@ The following is an example of a map file:
       // Map any target matching *Django* to both Django and PyPI.
       "paths":        ["*django*"],
       "repositories": ["Django", "PyPI"],
+
+      // At least one repository must sign for the same length and hashes
+      // of a "*django*" target.
+      "threshold": 1
+
       // In this case, the "terminating" attribute is set to false.
       "terminating":  false,
       // Therefore, if this mapping has not signed for a *django* target,
       // the following mapping will be consulted.
+
     },
     {
       // Some paths need not have a URL.  Then those paths will not be updated.
@@ -244,7 +254,9 @@ The following is an example of a map file:
     {
       // Map all other targets only to PyPI.
       "paths":        ["*"],
-      "repositories": ["PyPI"]
+      "repositories": ["PyPI"],
+      "terminating": true
+      "threshold": 1
     }
   ]
 }
