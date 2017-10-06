@@ -1,7 +1,7 @@
 * TAP: 4
 * Title: Multiple repository consensus on entrusted targets
 * Version: 1
-* Last-Modified: 11-Sep-2017
+* Last-Modified: 6-Oct-2017
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Draft
@@ -124,7 +124,7 @@ Assignments of files to repositories are controlled by sets of instructions
 called mappings. Each mapping contains the following elements:
 
 A. An ordered list of one or more repositories. When it is instructed to
-download metadata or target fils, the updater tries each repository in the order
+download metadata or target files, the updater tries each repository in the order
 listed.
 
 B. A list of target paths associated with each repository.
@@ -148,7 +148,7 @@ in its search for requested target files.
 
 ## Searching for Targets on Multiple Repositories
 
-Figure 1 gives an example of an ordered list of mappings for the file foo.tgz.
+Figure 1 gives an example of an ordered list of mappings for the file foo-1.0.tgz.
 To complete a search using the assignment mechanism, a TUF client will follow
 these steps:
 
@@ -172,7 +172,7 @@ return this metadata.
 none of the repositories signed metadata about the desired target, then the
 client should take one of the following actions:
 
-    5.1. If the flag of the mapping mechanism in property (C) is set to true,
+    5.1. If the flag of the mapping mechanism in element (C) is set to true,
     either report that the repositories do not agree on the target, or that
     none of them have signed for the target.
 
