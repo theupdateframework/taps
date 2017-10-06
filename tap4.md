@@ -169,18 +169,18 @@ requirement.  In figure 1, repositories D and F can be contacted to download
 metadata, and both repositories must provide matching metadata about
 `foo-1.0.tgz` because the mapping's threshold is 2 (per element D).
 
-4. If the targets metadata is a match across a threshold of repositories,
+3. If the targets metadata is a match across a threshold of repositories,
 return this metadata.
 
-5. If the metadata is not a match, or if none of the repositories signed
+4. If the metadata is not a match, or if none of the repositories signed
 metadata about the desired target, then the client should take one of the
 following actions:
 
-    5.1. If the flag of the mapping mechanism in element (C) is set to true,
+    4.1. If the flag of the mapping mechanism in element (C) is set to true,
     either report that the repositories do not agree on the target, or that
     none of them have signed for the target.
 
-    5.2. Otherwise, go back to step 1 and process the next mapping that is
+    4.2. Otherwise, go back to step 1 and process the next mapping that is
     a match for the request file.
 
 ## Example using the Reference Implementation's Map File
