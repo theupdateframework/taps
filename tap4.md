@@ -148,7 +148,7 @@ in its search for requested target files.
 
 ## Searching for Targets on Multiple Repositories
 
-![Figure 1 - Mapping](images/tap4-mapping.png)
+![Figure 1 - Mapping](images/figure-1-tap4.png)
 Figure 1 gives an example of an ordered list of mappings for the file
 foo-1.0.tgz.  To complete a search using the assignment mechanism, a TUF client
 will follow these steps:
