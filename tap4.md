@@ -143,56 +143,59 @@ indicate/use this flag independent of other repositories on the list.
 D. A threshold that indicates the minimum number of repositories that are
 required to sign for the same length and hash of a requested target under (B).
 
-The four properties above are all that is required to guide the updater
-in its search for requested target files.
+The four elements above are all that is required to guide the updater in its
+search for requested target files.
 
 ## Searching for Targets on Multiple Repositories
 
 ![Figure 1 - Mapping](images/figure-1-tap4.png)
-Figure 1 gives an example of an ordered list of mappings for the file
-foo-1.0.tgz.  To complete a search using the assignment mechanism, a TUF client
-will follow these steps:
+In the figure above (figure 1), a request is made for `foo-1.0.tgz` and an
+ordered list of mappings is consulted to determine which repositories should be
+contacted.
 
-1. TUF will open the repo assignment mechanism and identify the first set of
-mappings. In our example, this mapping would direct the user to repositories
-A, B, C.
+To complete a search using the mechanism that assigns targets to repositories,
+a TUF client will follow these steps:
 
-2. The software updater contacts the assigned repository (or repositories) and
-checks if the desired target path matches the associated paths or glob patterns
-in the mapping.
+1. Check each mapping, in the listed order, and identify the first mapping that
+matches the requested file.  In figure 1, the client should choose the second
+mapping for the requested file (`foo-1.0.tgz`), because the glob pattern
+(foo*.tgz) matches the file.
 
-3. If the path matches, metadata from each repository in the mapping is downloaded
-and verified. Verification means the length and hashes about
-the target match across a threshold of repositories (per element D).
-Custom targets metadata are exempt from this requirement.
+2. Once a mapping is identified for the requested file, metadata from the
+repositories in the mapping is downloaded and verified. Verification means the
+length and hashes about the target match across a threshold of repositories
+(per element D).  Custom targets metadata are exempt from this requirement.  In
+figure 1, repositories D and F can be contacted to download metadata, and both
+repositories must provide matching metadata about `foo-1.0.tgz` because the
+mapping's threshold is 2 (per element D).
 
 4. If the targets metadata is a match across a threshold of repositories,
 return this metadata.
 
-5. If the metadata is not a match, or if
-none of the repositories signed metadata about the desired target, then the
-client should take one of the following actions:
+5. If the metadata is not a match, or if none of the repositories signed
+metadata about the desired target, then the client should take one of the
+following actions:
 
     5.1. If the flag of the mapping mechanism in element (C) is set to true,
     either report that the repositories do not agree on the target, or that
     none of them have signed for the target.
 
-    5.2. Otherwise, go back to step 1 and process the next list of
-    repositories.
+    5.2. Otherwise, go back to step 1 and process the next mapping that is
+    a match for the request file.
 
 ## Example using the Reference Implementation's Map File
 
-To demonstrate the reference implementation's handling of multiple repository
+To demonstrate the refrence implementation's handling of multiple repository
 consensus on entrusted targets, we employ a file named `map.json.` This _map
 file_ comes into play when a TUF client requests targets and adheres to the
 four elements of the mapping mechanism.
 
-If the map file is to be used to assign targets to repositories, it will either be
-constructed by a user employing the TUF command-line tools, or distributed by
-an out-of-band bootstrap process. This file is not intended to be automatically
-available or refreshed from a repository. In fact, the map file is kept on the
-client, and is only modified by a user who is trusted to configure the updater
-instance.
+If the map file is to be used to assign targets to repositories, it will either
+be constructed by a user employing the TUF command-line tools, or distributed
+by an out-of-band bootstrap process. This file is not intended to be
+automatically available or refreshed from a repository. In fact, the map file
+is kept on the client, and is only modified by a user who is trusted to
+configure the updater instance.
 
 The map file contains a dictionary that holds two keys, "repositories" and
 "mapping." The value of the "repositories" key is another dictionary that
