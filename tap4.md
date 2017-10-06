@@ -159,15 +159,15 @@ a TUF client will follow these steps:
 1. Check each mapping, in the listed order, and identify the first mapping that
 matches the requested file.  In figure 1, the client should choose the second
 mapping for the requested file (`foo-1.0.tgz`), because the glob pattern
-(foo*.tgz) matches the file.
+(`foo*.tgz`) matches the file.
 
-2. Once a mapping is identified for the requested file, metadata from the
-repositories in the mapping is downloaded and verified. Verification means the
-length and hashes about the target match across a threshold of repositories
-(per element D).  Custom targets metadata are exempt from this requirement.  In
-figure 1, repositories D and F can be contacted to download metadata, and both
-repositories must provide matching metadata about `foo-1.0.tgz` because the
-mapping's threshold is 2 (per element D).
+2. Once a mapping is identified for the requested file, TUF metadata is
+downloaded and verified from the repositories in the mapping. Verification
+means the length and hashes about the target match across a threshold of
+repositories (per element D).  Custom targets metadata are exempt from this
+requirement.  In figure 1, repositories D and F can be contacted to download
+metadata, and both repositories must provide matching metadata about
+`foo-1.0.tgz` because the mapping's threshold is 2 (per element D).
 
 4. If the targets metadata is a match across a threshold of repositories,
 return this metadata.
