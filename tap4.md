@@ -37,7 +37,7 @@ instance (e.g., copy of ```pip```) for each repository.
 
 Extending the previous example, enterprise users may not wish to upload some
 metadata and targets to a public repository because doing so may reveal
-sensitive or proprietary information. Therefore, these users may host
+sensitive or proprietary information. These users may choose to host
 the sensitive metadata and targets on a private repository, while still
 employing a public repository for other files. However, in order to use both
 private and public repositories, TUF clients need to know how to search for
@@ -102,8 +102,8 @@ repository, targets may be securely assigned to one or more repositories.
 
 This TAP requires an additional step before a client can request metadata and
 target files from remote repositories.  Specifically, it requires that a client
-consult a mapping of repositories to file patterns that lists what repositories
-should be searched, and in what order, for particular files. By editing this
+consult a mapping of repositories to file patterns, which lists what repositories
+should be searched, and in what order, to find particular files. By editing this
 list of mappings, or assignment instructions, the client, or adopter, can
 precisely control which repositories are to be trusted for particular target
 paths.  Clients must also keep all of the metadata for each repository in a
@@ -154,17 +154,16 @@ In the figure above (figure 1), a request is made for `foo-1.0.tgz` and an
 ordered list of mappings is consulted to determine which repositories should be
 contacted.
 
-To complete a search using the mechanism that assigns targets to repositories,
-a TUF client will follow these steps:
+To complete a search using this mechanism, a TUF client will follow these steps:
 
 1. Check each mapping, in the listed order, and identify the first mapping that
 matches the requested file.  In figure 1, the client should choose the second
-mapping for the requested file (`foo-1.0.tgz`), because the glob pattern
+mapping because the glob pattern
 (`foo*.tgz`) matches the file.
 
 2. Once a mapping is identified for the requested file, TUF metadata is
-downloaded and verified from the repositories in the mapping. Verification
-means the length and hashes about the target match across a threshold of
+downloaded and verified from the assigned repositories it lists. Verification
+occurs if the length and hashes about the target match across a threshold of
 repositories (per element D).  Custom targets metadata are exempt from this
 requirement.  In figure 1, repositories D and F can be contacted to download
 metadata, and both repositories must provide matching metadata about
@@ -177,12 +176,12 @@ return this metadata.
 metadata about the desired target, then the client should take one of the
 following actions:
 
-    4.1. If the flag of element (C) is set to true, either report that the
+    4.1. If the flag of element (C) is set to true, report that either the
     repositories do not agree on the target, or that none of them have signed
     for the target.
 
     4.2. Otherwise, go back to step 1 and process the next mapping that is
-    a match for the request file.
+    a match for the requested file.
 
 ## Example using the Reference Implementation's Map File
 
@@ -213,7 +212,7 @@ containing metadata and target files.
 The value of the "mapping" key is a priority-ordered list that maps paths
 (i.e., target names) to specific repositories, like the mechanism described
 earlier in this document.  Every entry in this list is
-a dictionary the following keys:
+a dictionary containing the following keys:
 
 * "paths" specifies a list of target paths of patterns. A desired target must
   match a pattern in this list for this mapping to be consulted.
@@ -279,8 +278,8 @@ individual repository. Each repository will continue to be treated as it was
 previously, with TUF performing the necessary verification of repository metadata.
 
 In order to avoid accidental denial-of-service attacks when multiple
-repositories sign the same targets, these repositories should coordinate to be
-sure they are signing the same targets metadata (i.e., length and hashes).
+repositories sign the same targets, there must be a coordinated effort to ensure all
+are signing the same targets metadata (i.e., length and hashes).
 
 # Backwards Compatibility
 
