@@ -100,14 +100,14 @@ has its own root of trust (Root role, etc.) so a compromise of one repository
 does not impact others.  Using a scheme similar to targets delegations within a
 repository, targets may be securely assigned to one or more repositories.
 
-This TAP requires an extra step before a client can
-request metadata and target files from remote repositories.  Specifically,
-it requires that a client consult a mechanism that lists what
-repositories should be searched and in what order. By editing this list of
-mappings, or assignment instructions, the client, or adopter, can precisely
-control which repositories are to be trusted for particular target paths.
-Clients must also keep all of the metadata
-for each repository in a separate directory of their choice.
+This TAP requires an additional step before a client can request metadata and
+target files from remote repositories.  Specifically, it requires that a client
+consult a mapping of repositories to file patterns that lists what repositories
+should be searched, and in what order, for particular files. By editing this
+list of mappings, or assignment instructions, the client, or adopter, can
+precisely control which repositories are to be trusted for particular target
+paths.  Clients must also keep all of the metadata for each repository in a
+separate directory of their choice.
 
 The next two sections cover the two main components of this new "pre-update"
 step. The first explains the mechanism that assigns a target to the specific
@@ -123,30 +123,31 @@ Adopters must implement a mechanism that directs TUF to the specific repository
 Assignments of files to repositories are controlled by sets of instructions
 called mappings. Each mapping contains the following elements:
 
-A. An ordered list of one or more repositories. When it is instructed to
-download metadata or target files, the updater tries each repository in the order
+A. An ordered list of one or more repositories. When the updater is instructed
+to download metadata or target files, it tries each repository in the order
 listed.
 
-B. A list of target paths associated with each repository.
-This element supports implementations like the one outlined in use case 3,
-in which the user requires valid signatures from multiple repositories.
-The target paths may be condensed as [glob
-patterns](https://en.wikipedia.org/wiki/Glob_(programming)). For example,
-the updater can be instructed to download paths that resemble the glob pattern
-`foo-2.*.tgz` from only the first mapping.
+B. A list of file paths associated with the ordered list of one or more
+repositories.  This element supports implementations like the one outlined in
+use case 3, in which the user requires valid signatures from multiple
+repositories.  The file paths may be condensed as [glob
+patterns](https://en.wikipedia.org/wiki/Glob_(programming)). For example, the
+updater can be instructed to download paths that resemble the glob pattern
+`baz*.tgz` from only the third mapping.
 
 C. A flag that instructs the updater whether to continue searching subsequent
-repositories after failing to download requested target files from the
-repositories specified in the first mapping.  Any repository within a mapping can
-indicate/use this flag independent of other repositories on the list.
+mappings after failing to download requested target files from the repositories
+specified in the first mapping.  The list of repositories within a mapping can
+indicate/use this flag independent of other repositories in other mappings.
 
 D. A threshold that indicates the minimum number of repositories that are
-required to sign for the same length and hash of a requested target under (B).
+required to sign for the same length and hash of a requested target under
+element (B).
 
 The four elements above are all that is required to guide the updater in its
-search for requested target files.
+search for requested files.
 
-## Searching for Targets on Multiple Repositories
+## Searching for Files on Multiple Repositories
 
 ![Figure 1 - Mapping](images/figure-1-tap4.png)
 In the figure above (figure 1), a request is made for `foo-1.0.tgz` and an
@@ -167,7 +168,7 @@ means the length and hashes about the target match across a threshold of
 repositories (per element D).  Custom targets metadata are exempt from this
 requirement.  In figure 1, repositories D and F can be contacted to download
 metadata, and both repositories must provide matching metadata about
-`foo-1.0.tgz` because the mapping's threshold is 2 (per element D).
+`foo-1.0.tgz` because the mapping's threshold is 2.
 
 3. If the targets metadata is a match across a threshold of repositories,
 return this metadata.
@@ -176,16 +177,16 @@ return this metadata.
 metadata about the desired target, then the client should take one of the
 following actions:
 
-    4.1. If the flag of the mapping mechanism in element (C) is set to true,
-    either report that the repositories do not agree on the target, or that
-    none of them have signed for the target.
+    4.1. If the flag of element (C) is set to true, either report that the
+    repositories do not agree on the target, or that none of them have signed
+    for the target.
 
     4.2. Otherwise, go back to step 1 and process the next mapping that is
     a match for the request file.
 
 ## Example using the Reference Implementation's Map File
 
-To demonstrate the refrence implementation's handling of multiple repository
+To demonstrate the reference implementation's handling of multiple repository
 consensus on entrusted targets, we employ a file named `map.json.` This _map
 file_ comes into play when a TUF client requests targets and adheres to the
 four elements of the mapping mechanism.
