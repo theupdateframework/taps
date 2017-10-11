@@ -135,10 +135,11 @@ patterns](https://en.wikipedia.org/wiki/Glob_(programming)). For example, the
 updater can be instructed to download paths that resemble the glob pattern
 `baz*.tgz` from only the third mapping.
 
-C. A flag that instructs the updater whether to continue searching subsequent
-mappings after failing to download requested target files from the repositories
-specified in the first mapping.  The list of repositories within a mapping can
-indicate/use this flag independent of other repositories in other mappings.
+C. A "terminating" flag that instructs the updater whether to continue
+searching subsequent mappings after failing to download requested target files
+from the repositories specified in the first mapping.  The list of repositories
+within a mapping can indicate/use the terminating flag independent of
+repositories in other mappings.
 
 D. A threshold that indicates the minimum number of repositories that are
 required to sign for the same length and hash of a requested target under
@@ -158,8 +159,7 @@ To complete a search using this mechanism, a TUF client will follow these steps:
 
 1. Check each mapping, in the listed order, and identify the first mapping that
 matches the requested file.  In figure 1, the client should choose the second
-mapping because the glob pattern
-(`foo*.tgz`) matches the file.
+mapping because the glob pattern (`foo*.tgz`) matches the file.
 
 2. Once a mapping is identified for the requested file, TUF metadata is
 downloaded and verified from the assigned repositories it lists. Verification
@@ -176,12 +176,17 @@ return this metadata.
 metadata about the desired target, then the client should take one of the
 following actions:
 
-    4.1. If the flag of element (C) is set to true, report that either the
-    repositories do not agree on the target, or that none of them have signed
-    for the target.
+    4.1. If the terminating flag (per element C) is set to true, report that
+    either the repositories do not agree on the target, or that none of them
+    have signed for the target.  In figure 1, the terminating flag for the
+    first mapping is True, but since the mapping was not a match, the search
+    continued to the second mapping.
 
     4.2. Otherwise, go back to step 1 and process the next mapping that is
-    a match for the requested file.
+    a match for the requested file.  In figure 1, if the second mapping
+    were not a match, or if none of its repositories signed metadata about
+    foo-1.0.tgz, the third mapping is always matched because its glob
+    pattern is * (all requested files match).
 
 ## Example using the Reference Implementation's Map File
 
