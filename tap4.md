@@ -2,7 +2,7 @@
 * Title: Multiple repository consensus on entrusted targets
 * Version: 1
 * Last-Modified: 6-Oct-2017
-* Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
+* Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cusordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Draft
 * Content-Type: text/markdown
@@ -167,7 +167,7 @@ occurs if the length and hashes about the target match across a threshold of
 repositories (per element D).  Custom targets metadata are exempt from this
 requirement.  In figure 1, repositories D and F can be contacted to download
 metadata, and both repositories must provide matching metadata about
-`foo-1.0.tgz` because to meet the mapping's threshold of 2.
+`foo-1.0.tgz` to meet the mapping's threshold of 2.
 
 3. If the targets metadata is a match across the specified threshold of repositories,
 return this metadata.
