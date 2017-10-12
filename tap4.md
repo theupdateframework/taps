@@ -142,8 +142,8 @@ within a mapping can indicate/use the terminating flag independent of
 repositories in other mappings.
 
 D. A threshold that indicates the minimum number of repositories that are
-required to sign for the same length and hash of a requested target under
-element (B).
+required to sign for the same length and hash of a requested target as specified
+by element (B).
 
 The four elements above are all that is required to guide the updater in its
 search for requested files.
@@ -167,9 +167,9 @@ occurs if the length and hashes about the target match across a threshold of
 repositories (per element D).  Custom targets metadata are exempt from this
 requirement.  In figure 1, repositories D and F can be contacted to download
 metadata, and both repositories must provide matching metadata about
-`foo-1.0.tgz` because the mapping's threshold is 2.
+`foo-1.0.tgz` to meet the mapping's threshold of 2.
 
-3. If the targets metadata is a match across a threshold of repositories,
+3. If the targets metadata is a match across the specified threshold of repositories,
 return this metadata.
 
 4. If the metadata is not a match, or if none of the repositories signed
@@ -182,10 +182,10 @@ following actions:
     first mapping is True, but since the mapping was not a match, the search
     continued to the second mapping.
 
-    4.2. Otherwise, go back to step 1 and process the next mapping that is
-    a match for the requested file.  In figure 1, if the second mapping
-    were not a match, or if none of its repositories signed metadata about
-    foo-1.0.tgz, the third mapping is always matched because its glob
+    4.2. Otherwise, go back to step 1 and process the next mapping that
+    matches the requested file.  In figure 1, if the second mapping
+    was not a match, or if none of its repositories signed metadata about
+    foo-1.0.tgz, the third mapping will still match because its glob
     pattern is * (all requested files match).
 
 ## Example using the Reference Implementation's Map File
