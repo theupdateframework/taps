@@ -2,7 +2,7 @@
 * Title: Multiple repository consensus on entrusted targets
 * Version: 1
 * Last-Modified: 6-Oct-2017
-* Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cusordell,
+* Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Draft
 * Content-Type: text/markdown
