@@ -44,19 +44,7 @@ private and public repositories, TUF clients need to know how to search for
 selected targets on the private repository, and all other targets on the public
 repository.
 
-## Use case 3: verifying the same target against different repositories
-
-[TAP 3](tap3.md) allows metadata publishers to require multiple roles to sign
-off on targets, which forces clients to verify against all roles listed by the
-metadata. While this is desirable in some instances, other clients may prefer
-to require this step only for certain roles. For example, a [Continuous
-Integration](https://en.wikipedia.org/wiki/Continuous_integration) system may
-only care about developer signatures, while a staging environment may wish to
-verify both developer and CI signatures. In order to support this selective
-enforcement, TUF clients need to be able to require valid signatures from
-multiple repositories, each representing an interested signing group.
-
-## Use case 4: improving compromise-resilience given multiple repositories
+## Use case 3: improving compromise-resilience given multiple repositories
 
 To improve compromise-resilience, a user may wish to have multiple
 repositories, each with a different root of trust, sign for targets. This
