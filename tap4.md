@@ -253,7 +253,6 @@ The following is an example of a map file:
 
     },
     {
-      // Some paths need not have a URL.  Then those paths will not be updated.
       ...
     {
       // Map all other targets only to PyPI.
