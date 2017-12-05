@@ -160,9 +160,9 @@ metadata, and both repositories must provide matching metadata about
 3. If the targets metadata is a match across the specified threshold of repositories,
 return this metadata.
 
-4. If the metadata is not a match, or if none of the repositories signed
-metadata about the desired target, then the client should take one of the
-following actions:
+4. If the metadata is not a match, or if fewer than the threshold of
+repositories signed metadata about the desired target, then the client should
+take one of the following actions:
 
     4.1. If the terminating flag (per element C) is set to true, report that
     either the repositories do not agree on the target, or that none of them
