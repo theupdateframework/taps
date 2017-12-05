@@ -109,11 +109,14 @@ target files.
 Adopters must implement a mechanism that directs TUF to the specific repository
 (or repositories) from which metadata and target files should be downloaded.
 Assignments of files to repositories are controlled by sets of instructions
-called mappings. Each mapping contains the following elements:
+called mappings.
+
+Each mapping contains the following elements:
 
 A. An ordered list of one or more repositories. When the updater is instructed
 to download metadata or target files, it tries each repository in the order
-listed.
+listed until a threshold of repositories in agreement about the metadata has
+been reached.
 
 B. A list of file paths associated with the ordered list of one or more
 repositories.  This element supports implementations like the one outlined in
