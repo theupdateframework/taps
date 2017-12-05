@@ -238,18 +238,18 @@ The following is an example of a map file:
       // the priority of the delegation.  The entries listed first will be
       // considered first.
 
-      // Map any target matching *Django* to both Django and PyPI.
-      "paths":        ["*django*"],
+      // Map the target "/django/django-1.0.tgz" to both Django and PyPI.
+      "paths":        ["/django/django-1.0.tgz"],
       "repositories": ["Django", "PyPI"],
 
       // At least one repository must sign for the same length and hashes
-      // of a "*django*" target.
+      // of the "/django/django-1.0.tgz" target.
       "threshold": 1
 
       // In this case, the "terminating" attribute is set to false.
       "terminating":  false,
-      // Therefore, if this mapping has not signed for a *django* target,
-      // the following mapping will be consulted.
+      // Therefore, if this mapping has not signed for
+      // "/django/django-1.0.tgz", the following mapping will be consulted.
 
     },
     {
