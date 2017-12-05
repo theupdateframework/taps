@@ -113,10 +113,10 @@ called mappings.
 
 Each mapping contains the following elements:
 
-A. An ordered list of one or more repositories. When the updater is instructed
-to download metadata or target files, it tries each repository in the order
-listed until a threshold of repositories in agreement about the metadata has
-been reached.
+A. An ordered list of one or more repositories. If the updater is instructed to
+contact repositories from this mapping, it tries each repository
+in the order listed until a threshold of repositories in agreement about the
+metadata has been reached.
 
 B. A list of file paths associated with the ordered list of one or more
 repositories.  This element supports implementations like the one outlined in
