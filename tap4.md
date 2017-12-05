@@ -138,7 +138,7 @@ search for requested files.
 
 ## Searching for Files on Multiple Repositories
 
-![Figure 1 - Mapping](images/figure-1-tap4.png)
+![Figure 1 - Mapping](images/figure-1-tap4.svg)
 In the figure above (figure 1), a request is made for `foo-1.0.tgz` and an
 ordered list of mappings is consulted to determine which repositories should be
 contacted.
