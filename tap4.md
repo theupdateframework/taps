@@ -1,7 +1,7 @@
 * TAP: 4
 * Title: Multiple repository consensus on entrusted targets
 * Version: 1
-* Last-Modified: 3-Nov-2017
+* Last-Modified: 5-Dec-2017
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Draft
@@ -138,7 +138,7 @@ search for requested files.
 
 ## Searching for Files on Multiple Repositories
 
-![Figure 1 - Mapping](images/figure-1-tap4.png)
+![Figure 1 - Mapping](images/figure-1-tap4.svg)
 In the figure above (figure 1), a request is made for `foo-1.0.tgz` and an
 ordered list of mappings is consulted to determine which repositories should be
 contacted.
@@ -160,9 +160,9 @@ metadata, and both repositories must provide matching metadata about
 3. If the targets metadata is a match across the specified threshold of repositories,
 return this metadata.
 
-4. If the metadata is not a match, or if none of the repositories signed
-metadata about the desired target, then the client should take one of the
-following actions:
+4. If the metadata is not a match, or if fewer than the threshold of
+repositories signed metadata about the desired target, then the client should
+take one of the following actions:
 
     4.1. If the terminating flag (per element C) is set to true, report that
     either the repositories do not agree on the target, or that none of them
