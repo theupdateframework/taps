@@ -1,7 +1,7 @@
 * TAP: 4
 * Title: Multiple repository consensus on entrusted targets
 * Version: 1
-* Last-Modified: 5-Dec-2017
+* Last-Modified: 6-Dec-2017
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Draft
@@ -238,18 +238,18 @@ The following is an example of a map file:
       // the priority of the delegation.  The entries listed first will be
       // considered first.
 
-      // Map any target matching *Django* to both Django and PyPI.
-      "paths":        ["*django*"],
+      // Map the targets "/django/django-1.*.tgz" to both Django and PyPI.
+      "paths":        ["/django/django-1.*.tgz"],
       "repositories": ["Django", "PyPI"],
 
       // At least one repository must sign for the same length and hashes
-      // of a "*django*" target.
+      // of the "/django/django-1.*.tgz" targets.
       "threshold": 1
 
       // In this case, the "terminating" attribute is set to false.
       "terminating":  false,
-      // Therefore, if this mapping has not signed for a *django* target,
-      // the following mapping will be consulted.
+      // Therefore, if this mapping has not signed for "/django/django-1.*.tgz"
+      // targets, the following mapping will be consulted.
 
     },
     {
