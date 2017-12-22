@@ -1,10 +1,10 @@
 * TAP: 4
 * Title: Multiple repository consensus on entrusted targets
 * Version: 1
-* Last-Modified: 6-Dec-2017
+* Last-Modified: 15-Dec-2017
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
-* Status: Draft
+* Status: Accepted
 * Content-Type: text/markdown
 * Requires: [TAP 5](tap5.md)
 * Created: 09-Sep-2016
