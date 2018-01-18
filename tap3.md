@@ -1,7 +1,7 @@
 * TAP: 3
 * Title: Multi-role delegations
 * Version: 1
-* Last-Modified: 5-Oct-2017
+* Last-Modified: 18-Jan-2018
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Accepted
@@ -116,8 +116,7 @@ _multiple_ role names as required to sign, instead of a single one.
 {
   "signed": {
     <b>"keys_for_delegations": {KEYID: {"keytype: KEYTYPE, "keyval": KEYVAL}, ...},</b>
-    "delegations": {
-      "roles": [
+    "delegations": [
         {
           <b>"name": DELEGATION-NAME,</b>
           "paths": [PATHPATTERN-1, PATHPATTERN-2, ...],
@@ -133,10 +132,7 @@ _multiple_ role names as required to sign, instead of a single one.
         },
         // Multiple delegations can be specified here after the first one.
         ...
-      ],
-      ...
-    },
-    ...
+    ]
   },
 }
 </pre>
@@ -164,8 +160,7 @@ single role to sign some targets, but multiple roles to sign other targets:
         '498aeb...<snip>': {...}},</b>
 
     // "delegations" associates KEYIDs (of the keys above) with roles.
-    "delegations": {
-      "roles": [
+    "delegations": [
         // This is the first delegation.
         {
           <b>"name": "first_delegation",</b>
@@ -237,13 +232,11 @@ single role to sign some targets, but multiple roles to sign other targets:
                 "498aeb78523452123dce43434fff346678768676867bae345353453455432544"
               ],
               "threshold": 1
+            },
           ],
           ...
         }
-      ],
-      ...
-    },
-    ...
+    ]
   }
 }
 </pre>
