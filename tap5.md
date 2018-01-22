@@ -285,7 +285,7 @@ file.
 If R is not empty, then the client should be careful in interpreting the entries
 of the snapshot metadata file.
 Suppose that R is
-["https://pypi.python.org/metadata/targets/Django.json", "http://example.com/metadata/path/to/foo.json"].
+`["https://pypi.python.org/metadata/targets/Django.json", "http://example.com/metadata/path/to/foo.json"]`.
 If the the top-level targets metadata file is available from the first URL, then
 the client would look up the version number for "targets/Django.json", instead
 of "targets.json" (for the original top-level targets role), in the snapshot
