@@ -1,7 +1,7 @@
 * TAP: 5
 * Title: Setting URLs for roles in the root metadata file
 * Version: 1
-* Last-Modified: 29-Dec-2016
+* Last-Modified: 22-Jan-2018
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Draft
@@ -36,7 +36,7 @@ hosting and maintaining its own repository.
 Furthermore, suppose that there is group of enterprise users who trust PyPI only
 to install Django packages.
 These users must depend on PyPI administrators to
-[delegate]((https://isis.poly.edu/~jcappos/papers/kuppusamy_nsdi_16.pdf))
+[delegate](https://isis.poly.edu/~jcappos/papers/kuppusamy_nsdi_16.pdf)
 all Django packages to the correct public keys belonging to the project.
 Unfortunately, if the PyPI administrator keys have been compromised, then
 attackers can replace this delegation, and deceive these unsuspecting users into
@@ -285,7 +285,7 @@ file.
 If R is not empty, then the client should be careful in interpreting the entries
 of the snapshot metadata file.
 Suppose that R is
-["https://pypi.python.org/metadata/targets/Django.json", "http://example.com/metadata/path/to/foo.json"].
+`["https://pypi.python.org/metadata/targets/Django.json", "http://example.com/metadata/path/to/foo.json"]`.
 If the the top-level targets metadata file is available from the first URL, then
 the client would look up the version number for "targets/Django.json", instead
 of "targets.json" (for the original top-level targets role), in the snapshot
