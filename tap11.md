@@ -1,7 +1,7 @@
 * TAP: 11
-* Title: TUF Pre-release Schedule
+* Title: Pre-release schedule
 * Version: 1
-* Last-Modified: 15-June-2018
+* Last-Modified: 18-June-2018
 * Author: Vladimir Diaz
 * Status: Draft
 * Type: Informational
@@ -10,11 +10,12 @@
 
 # Abstract
 
-This TAP documents the release schedule for the pre-release of TUF.
+This TAP documents the release schedule for the pre-release versions of TUF
+(i.e., distributions that match the `0.X.Y` distribution identifier.
 
-The distribution version scheme of the TUF project follows the
-(major.minor.micro) format.  Pre-releases have a `major` number of 0.  The
-`minor` and `micro` segments can vary.
+Note: The distribution version scheme of the project follows the
+(major.minor.micro) format.  Pre-releases of the project have a fixed `major`
+number of 0, but the `minor` and `micro` segments can vary.
 
 # Release Manager
 Vladimir Diaz <vladimir.v.diaz@gmail.com, @vladimir-v-diaz>
