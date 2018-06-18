@@ -19,8 +19,8 @@ May
 Note: The distribution version scheme of the project follows the
 (major.minor.micro) format.  Pre-releases of the project have a fixed `major`
 of 0, while the `minor` and `micro` segments can vary.  On occassion,
-developmental releases are made for testing and follow the `0.X.Y.devZ` version
-scheme.
+developmental releases are made available on PyPI for testing and follow the
+`0.X.Y.devZ` version scheme.
 
 # Release manager for pre-releases
 Vladimir Diaz <vladimir.v.diaz@gmail.com, @vladimir-v-diaz>
@@ -54,8 +54,8 @@ release dates are as follows:
 # Features
 Implemented features:
 * Conformance with specification, as last modified on [10 May 2018](https://github.com/theupdateframework/specification/blob/409739f2b8601e28d9330eeabeb454d9ef188e7d/tuf-spec.md).
-* Support design covered in Diplomat.
-* Support design covered in Mercury.
+* Support design and features covered in [Diplomat](https://github.com/theupdateframework/tuf/blob/b7872e1fe42a2c33090659394ef1e8c1cfe854cc/docs/papers/protect-community-repositories-nsdi2016.pdf).
+* Support design and features covered in [Mercury](https://github.com/theupdateframework/tuf/blob/b7872e1fe42a2c33090659394ef1e8c1cfe854cc/docs/papers/prevention-rollback-attacks-atc2017.pdf).
 * [TAP 4: Multiple repository consensus on entrusted targets](tap4.md).
 * [TAP 6: Include specification version in metadata](tap6.md).
 * [TAP 9: Mandatory metadata signing schemes](tap9.md).
