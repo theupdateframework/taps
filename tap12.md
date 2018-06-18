@@ -78,4 +78,4 @@ Anticipated/implemented features:
   memory.
 
 # Copyright
-This documena has been placed in the public domain.
+This document has been placed in the public domain.
