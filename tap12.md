@@ -12,8 +12,9 @@
 
 This TAP covers the release schedule for the 1.0 release of the reference
 implementation.  1.0 releases match the `1.X.Y` distribution identifier, and
-conform with the official [1.0
-specification](https://github.com/theupdateframework/specification/blob/master/tuf-spec.md)
+conform with version
+[1.0](https://github.com/theupdateframework/specification/blob/master/tuf-spec.md)
+of the specification.
 
 Note: The distribution version scheme of the project follows the
 (major.minor.micro) format.  Pre-releases of the project have a fixed `major`
@@ -56,19 +57,15 @@ release dates are as follows:
 # Features
 Anticipated/implemented features:
 
-* Conformance with version 1.0 of the
-* [specification](https://github.com/theupdateframework/specification/blob/master/tuf-spec.md).
+* Conformance with version 1.0 of the [specification](https://github.com/theupdateframework/specification/blob/master/tuf-spec.md).
 
 * Support graph of delegations (requires refactor of API and client code).
 
-* [TAP 3: Multi-role
-* delegations](https://github.com/theupdateframework/taps/blob/master/tap3.md).
+* [TAP 3: Multi-role delegations](https://github.com/theupdateframework/taps/blob/master/tap3.md).
 
-* [TAP 5: Setting URLs for roles in the Root metadata
-* file](https://github.com/theupdateframework/taps/blob/master/tap5.md).
+* [TAP 5: Setting URLs for roles in the Root metadata file](https://github.com/theupdateframework/taps/blob/master/tap5.md).
 
-* [TAP 8: Key rotation and explicit
-* self-revocation](https://github.com/theupdateframework/taps/blob/master/tap8.md).
+* [TAP 8: Key rotation and explicit self-revocation](https://github.com/theupdateframework/taps/blob/master/tap8.md).
 
 * Generalize metadata format in specification.
 
