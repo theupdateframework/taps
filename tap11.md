@@ -18,7 +18,7 @@ May
 
 Note: The distribution version scheme of the project follows the
 (major.minor.micro) format.  Pre-releases of the project have a fixed `major`
-of 0, while the `minor` and `micro` segments can vary.  On occassion,
+of `0`, while the `minor` and `micro` segments can vary.  On occassion,
 developmental releases are made available on PyPI for testing and follow the
 `0.X.Y.devZ` version scheme.
 
