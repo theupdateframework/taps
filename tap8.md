@@ -1,7 +1,7 @@
 * TAP: 8
 * Title: Key rotation and explicit self-revocation
-* Version: 1
-* Last-Modified: 29-Sep-2017
+* Version: 2
+* Last-Modified: 19-Sep-2018
 * Author: Hannes Mehnert, Justin Cappos
 * Status: Draft
 * Content-Type: text/markdown
@@ -11,14 +11,14 @@
 # Abstract
 
 TAP 8 generalises the mechanism of key rotation.  Rotation is the process by
-which a role uses their old key to invalidate their old key and transfer
-trust in the old key to a new key.  Performing a key rotation does not
-require parties that delegated trust to the old key to change their
-delegation to the new key.  Conceptually, the rotation process says if
-you trusted key X (or threshold of keys X_0, ... X_n), now instead trust
-key Y (or threshold of keys Y_0, ... Y_n).  Rotation of a key may be
-performed any number of times, transferring trust from X to Y, then from
-Y to Z, etc.
+which a role uses their old key or set of keys to invalidate their old key set 
+and transfer trust in the old key set to a new key set with an associated 
+threshold.  Performing a key rotation does not require parties that delegated 
+trust to the old key set to change their delegation to the new key set.  
+Conceptually, the rotation process says if you trusted threshold of keys 
+X_0, ... X_n, now instead trust threshold of keys Y_0, ... Y_n.  Rotation of a 
+key may be performed any number of times, transferring trust from X to Y, then 
+from Y to Z, etc.
 
 The mechanism in this TAP has an additional use case:  if a rotation
 cycle (A to B, B to A) is detected, all delegations into the cycle are
@@ -88,13 +88,13 @@ thus is not intended to be handled by this TAP.
 # Rationale
 
 TUF is a framework for securing software update systems.  The trust
-is rooted in a quorum of root keys, which delegate trust to other keys.
-When the root keys delegate trust to a key t for all names, this can be
-used to delegate some names to key d, etc.  When the person who owns
-key d wants to renew their key, they have until now to ask the holder of
-key t to delegate to the new key d'.
+is rooted in a quorum of root keys, which delegate trust to other roles.
+When the root keys delegate trust to a role t for all names, this can be
+used to delegate some names to role d, etc.  When the person who owns
+role d wants to renew their key, they have until now to ask the holder of
+role t to delegate to the new keyset d'.
 
-With this proposal, the owner of key d can renew their own key, and also
+With this proposal, the owner of role d can renew their own key, and also
 revoke their key.  Combined with multi-role delegations this allows
 project teams to shrink and grow without delegation to a project key.
 
@@ -136,7 +136,7 @@ it is meant to be signed once and never modified.  The rotate
 file has to be signed with an old threshold of old keys.
 
 Let's consider a motivating example, project foo is delegated to Alice.
-Alice computer with the key material got stolen, but the disk was
+Alice's computer with the key material got stolen, but the disk was
 encrypted.  To be safe, she decides to get her key from her backup and
 roll over her key to a fresh one.  To do that, she creates a file
 `foo.rotate.ID`.  This file contains her new key, a threshold of 1, and
@@ -152,18 +152,15 @@ threshold value, encoded decimal as ASCII (0x31 for 1, 0x32 for 2,
 
 ## Client workflow
 
-A client who wants to install foo now fetches Alice targets file, and
-fails to verify the signature with Alice old key - since none of the
-keyids in the signatures match it.  The client fetches
-`foo.rotate.ID`, ID is explained above using Alice old keyid.  The
-client verifies this rotate file using the public key from the
-delegation.  This establishes trust in Alice new key, and the client can
-now verify the signature of Alice targets file using the new key.  If
-the new keyid is still not used in the signatures, another rotate file
-needs to be downloaded, `foo.rotate.ID'`, where ID' is constructed using
-Alice's new keyid, until either a valid chain is found, in which case
-the targets file is valid, or key data is missing or there is a cycle in
-the rotations, in both cases the targets file is invalid.
+A client who wants to install foo now fetches Alice's targets file, and
+during verification looks for a file named `foo.rotate.ID`, ID is 
+explained above using Alice's old keyid.  The client sees the file, fetches 
+it and verifies this rotate file using the public key from the delegation.  
+The client then looks for a rotate file with the new keyid, repeating until 
+there is no matching rotate file to ensure up to date key information. This 
+establishes trust in Alice's new key, and the client can now verify the 
+signature of Alice's targets file using the new key.  If key data is missing 
+or there is a cycle in the rotations the targets file is invalid.
 
 ## Root rotation
 
@@ -171,8 +168,8 @@ Root, timestamp and snapshot key rotation.  These keys can rotate as
 well, leading to ROLE.rotate.ID files, where ID is as described above.
 The value of T is the ASCII encoded old threshold value.  Each file is
 signed by a quorum of old keys, and contains the new keys.  A client
-can fetch the actual data, timestamp, and verify it.  If the keyids do
-not match, the client needs to fetch the ROLE.rotate.ID file
+can fetch the actual data, timestamp, and verify it.  During verification, 
+the client needs to fetch the ROLE.rotate.ID file
 where ID is as described above using the timestamp keyid, either from
 the root file or locally cached.  If the timestamp key is renewed by
 the root, all timestamp.rotate files can be safely removed from the
@@ -202,10 +199,10 @@ The new targets file foo is then signed by a new threshold (again 2) of
 Alice, Bob, Charlie, and Dan to complete the rotation.
 
 Let's assume Bob and Dan signed foo.  A client which encounters a
-delegation to foo notices that its metadata is not valid using
-Alice, Bob, and Charlies keys.  The client looks for a foo.rotate.ID
-file to fetch new keys.  This is properly signed by Alice and Bob, and
-the client can verify foo using Bob's and Dan's signature.
+delegation to foo first looks for a foo.rotate.ID file with the keyids and 
+threshold specified in the delegation file.  If this file exists and is 
+properly signed by Alice and Bob, the client uses it to fetch new keys.  
+The client can verify foo using Bob's and Dan's signature.
 
 When Evelyn joins, and the threshold is increased to 3,
 foo.rotate.ID' is created (ID' is the SHA256 of the concatenated keyids
@@ -221,8 +218,8 @@ Charlie, or Dan needs to rotate their own key (and re-sign all targets).
 ## Client cycle check
 
 Clients need to check for rotation cycles, and any delegation pointing
-into a cycle is invalid.  This enables a user to explicitly revoke their
-own key by introducing a self-loop.  For usability reasons, a repository
+into a cycle is invalid.  This enables a role to explicitly revoke their
+own key(s) by introducing a self-loop.  For usability reasons, a repository
 may want to check if an uploaded rotate file would lead to a loop and
 warn the user.
 
