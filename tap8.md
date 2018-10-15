@@ -58,12 +58,11 @@ the initial root is trusted (TOFU or by being distributed over a trusted
 channel), following the chain of key rotations leads to verified keys
 for the current root metadata.  This means that even if the keys are not
 changed, a client must download every version of the root metadata in
-order to follow the chain of delegations.  This could be an efficiency
-concern in some situations.
+order to follow the chain of delegations.  The root metadata contains
+additional information, like the spec-version that needs to be seen for
+each version of the file.
 
-TAP 8 provides a unified methodology for key rotations.  Using this
-mechanism, only those root files in which new root keys are added or
-old ones are removed need to be fetched and verified.
+TAP 8 provides a methodology for key rotations for other roles as well.
 
 ## Auto-rotation timestamp role
 
@@ -99,8 +98,8 @@ revoke their key.  Combined with multi-role delegations this allows
 project teams to shrink and grow without delegation to a project key.
 
 TUF already contains a key rotation mechanism, which is only specified
-and used for the root file.  This proposal generalises the rotation
-mechanism to all delegations, and extends it with self-revocation.
+and used for the root file.  This proposal allows the rotation
+mechanism to be used by other delegations, and extends it with self-revocation.
 
 
 # Specification
@@ -162,9 +161,9 @@ establishes trust in Alice's new key, and the client can now verify the
 signature of Alice's targets file using the new key.  If key data is missing 
 or there is a cycle in the rotations the targets file is invalid.
 
-## Root rotation
+## Timestamp and snapshot rotation
 
-Root, timestamp and snapshot key rotation.  These keys can rotate as
+Timestamp and snapshot key rotation.  These keys can rotate as
 well, leading to ROLE.rotate.ID files, where ID is as described above.
 The value of T is the ASCII encoded old threshold value.  Each file is
 signed by a quorum of old keys, and contains the new keys.  A client
@@ -174,15 +173,6 @@ where ID is as described above using the timestamp keyid, either from
 the root file or locally cached.  If the timestamp key is renewed by
 the root, all timestamp.rotate files can be safely removed from the
 repository.
-
-Initial root key provisioning.  The root keys are no longer part of the
-root files, but initially provided via other means (e.g. manually, via
-an URL, or within the repository as root0).  This keeps the root files
-more concise.  When root keys are rotated, a root.rotate.ID is
-generated, containing the new root keys, and signed with (a threshold
-of) the old root keys.  A client downloads the root file, and the chain
-of rotations, starting from its trusted root keys.
-
 
 ## Interoperability with TAP 3 (multi-role delegations)
 
@@ -285,9 +275,8 @@ roles do not contain any "." - which is used as separator.
 
 # Backwards compatibility
 
-TAP 8 is not backwards compatible since the root keys are no longer part
-of the root file.  Furthermore, clients have to download and verify the
-rotation chain.
+TAP 8 is not backwards compatible since clients have to download and 
+verify the rotation chain.
 
 # Augmented Reference Implementation
 
