@@ -216,8 +216,9 @@ warn the user.
 The rotate files should be listed in the snapshot metadata and should be
 downloaded as soon as they are available.
 
-Rotation files are immutable and should not be replaced or modified
-under any circumstances.  If a client wants to rotate to a different
+Rotation files are immutable unless replaced with a revocation (rotate 
+to null).  This is the only case in which they can be replaced or 
+modified.  If a client wants to rotate to a different
 key, without having access to their currently delegated private key,
 this requires a key revocation by the person one higher in the
 delegation chain.
