@@ -134,6 +134,9 @@ the old ones).  A rotate file does _not_ contain an expiration date,
 it is meant to be signed once and never modified.  The rotate
 file has to be signed with an old threshold of old keys.
 
+The rotate file will go into a repository in a 'rotate' folder that contains
+all rotate files for the repository.
+
 Let's consider a motivating example, project foo is delegated to Alice.
 Alice's computer with the key material got stolen, but the disk was
 encrypted.  To be safe, she decides to get her key from her backup and
@@ -156,8 +159,9 @@ rotation cycles.
 ## Client workflow
 
 A client who wants to install foo now fetches Alice's targets file, and
-during verification looks for a file named `foo.rotate.ID.PREV`, ID and PREV 
-are explained above using Alice's old keyid.  The client sees the file, fetches 
+during verification looks for a file named `foo.rotate.ID.PREV` in the 
+rotate folder, ID and PREV are explained above using Alice's old keyid.  
+The client sees the file, fetches 
 it and verifies this rotate file using the public key from the delegation.  
 The client then looks for a rotate file with the new keyid, repeating until 
 there is no matching rotate file to ensure up to date key information. This 
