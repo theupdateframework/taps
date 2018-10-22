@@ -145,7 +145,6 @@ signatures part as in tuf spec, not shown here):
     "keys" : {
         KEYID : KEY
         , ... } ,
-    "keyids" : [ KEYID , ... ] ,
     "threshold" : THRESHOLD }
 }
 ```
@@ -154,8 +153,8 @@ Where ROLE, KEYID, KEY, and THRESHOLD are as defined in the original
 tuf spec.  The value of ROLE has to be the same as the role for the
 delegation.  The value of THRESHOLD is its new value.  PREV_FILENAME is
 the name of the previous rotate file in the chain, or null if this is 
-the first rotate file for this role.  The keyids
-specify the new valid key ids (which may be a subset or superset of
+the first rotate file for this role.  The keys specify the new valid keys 
+and associated key ids (which may be a subset or superset of
 the old ones).  A rotate file does _not_ contain an expiration date,
 it is meant to be signed once and never modified.  The rotate
 file has to be signed with an old threshold of old keys.
