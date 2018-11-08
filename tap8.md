@@ -27,7 +27,7 @@ key may be performed any number of times, transferring trust from X to Y, then
 from Y to Z, etc. Trust can even be transfered back from Z to X, allowing a key
 to be added to a role, then later removed.
 
-The mechanism in this TAP has an additional use case:  if a rotation
+The mechanism in this TAP has an additional use case: if a rotation
 to a null key is detected, it causes the role to no longer be trusted.  
 A role could use a rotation to a null key if they suspect a compromised key
 (a lost hard drive, system breach, etc). The role is able to create a 
@@ -38,6 +38,12 @@ not specific keys, so all keys associated with the role will be invalid
 after a rotation to null. The client will detect a rotation to a null key 
 and treat it as if the delegation was missing a key. The rest of the 
 delegator's file would still be valid.
+
+The delegator is able to recover from a rotation to null by delegating
+to a new role. The role that has been self revoked can no longer be used.
+Additionally, a delegator can overrule a rotate file by delegating to a
+new role. This ensures that the delegator still has the root of trust,
+but allows the role to act independently.
 
 
 # Motivation
@@ -88,7 +94,6 @@ may wish to revoke trust in the prior key and sign a new key with the
 old.  This limits the ability for attackers to walk back the set of
 trusted keys.  Right now, there is no good way to do this within TUF,
 which may result in some keys being trusted more than they should be.
-
 
 Using TAP 8, the online key can rotate itself without a signature by the
 offline key.
@@ -152,7 +157,7 @@ signatures part as in tuf spec, not shown here):
 Where ROLE, KEYID, KEY, and THRESHOLD are as defined in the original
 tuf spec.  The value of ROLE has to be the same as the role for the
 delegation.  The value of THRESHOLD is its new value.  PREV_FILENAME is
-the name of the previous rotate file in the chain, or null if this is 
+the name of the previous rotate file in the chain, or the empty string if this is 
 the first rotate file for this role.  The keys specify the new valid keys 
 and associated key ids (which may be a subset or superset of
 the old ones).  A rotate file does _not_ contain an expiration date,
@@ -178,8 +183,8 @@ threshold value, encoded decimal as ASCII (0x31 for 1, 0x32 for 2,
 0x31 0x30 for 10).
 
 The second suffix, refered to as 'PREV' is a SHA256 hash of the previous
-rotate file, or of null if there is no previous rotate file (the same as 
-PREV_HASH in the file). This prevents rotation cycles.
+rotate file, or the empty string if there is no previous rotate file. 
+This prevents rotation cycles.
 
 ## Client workflow
 
@@ -216,7 +221,7 @@ Let's consider the project foo, initially delegated to a multi-role
 threshold (of 2) to keyids Alice, Bob, and Charlie.  When they want
 to add a keyid from Dan to the project, they create a foo.rotate.ID.PREV
 file, where ID is as described above (the SHA256 of the concatenated
-key ids of Alice, Bob, Charlie, and the character 0x32) This
+key ids of Alice, Bob, Charlie, and the character 0x32). This
 contains all four keys, and a new threshold (again 2).  PREV is the
 SHA256 of null as this is the first rotation for foo.  The file
 foo.rotate.ID.PREV is signed by at least 2 keyids of Alice, Bob, and Charlie.
@@ -240,7 +245,7 @@ is signed with at least 2 keys from Alice, Bob, Charlie, or Dan.
 ## Rotation to Null
 
 Clients need to check for rotations to a null key, and any delegation pointing
-to a null rotation is invalid.  This enables a role to explicitly revoke their
+to a null rotation is invalid.  The null key is a value This enables a role to explicitly revoke their
 own key(s) by introducing a rotation to null. 
 
 The rotate files will be listed in the snapshot metadata and shall be
