@@ -2,26 +2,26 @@
 * Title: Optional Profiles for Interoperability
 * Version: 1
 * Last-Modified: 9-November-2018
-* Author: Marina Moore
+* Author: Marina Moore, Santiago Torres, Trishank Kuppusamy, Sebastien Awwad, Justin Cappos
 * Status: Draft
 * Content-Type: text/markdown
-* Created: 8-November-2018
+* Created: 9-November-2018
 
 # Abstract
 
-TAP 11 allows the optional use of a wireline format of TUF. This optional formatting allows users to create a 'Profile' outlining the format of metadata. All clients and servers that implement a profile will be able to work together.
+This TAP clarifies the relation between wireline formats and the required behavior of the system.  TAP 11 clarifies that TUF does no mandate a wireline format and describes a mechanism for standarding wireline formats (through the use of a 'profile').  All clients and servers that implement a profile will have the same wireline format and will thus be able to work together.
 
 # Motivation
 
-TUF does not specify a wireline format. This TAP does not change this, but adds the ability to create Profiles. Profiles are defined wireline formats that allow any TUF users who implement the profile to be interoperable.
+Different TUF implementations may not be able to interoperate.  This is because TUF does not specify a wireline format.  However, not specifying a wireline format is a conscious choice.  It is necessary in many domains to allow adopters to have their own wireline format due to interactions with other technologies, legacy systems, etc.  
+
+This TAP clarifies that different wireline formats are expressly permitted.  However, this TAP also provides a mechanism for having publicly implementable, compatible wireline formats (called 'profiles').  Profiles are defined wireline formats that allow any TUF users who implement the profile to be interoperable.
 
 # Rationale
 
-TUF requires certain fields in the metadata to allow for security and consistency checks. These checks do not require a specific format. However, implementations of TUF need to have a consistent format so that the metadata can be understood and so that digests will be properly calculated.
+In order to allow profiles to be publicly found and implemented, they will be released as TAPs.  It is expected that each profile will have exactly one TAP number and that that future clarifications will fall under the same TAP.  
 
-The specification currently defines metadata using canonical JSON. This format allows the specification to clearly define all fields needed in the metadata, but is not required for the security of the system.
-
-This TAP allows implementations to choose a format that best suits their needs, and standardize these formats in Profiles for use by others. These profiles allow for flexibility while ensuring that implementations can work together when needed.
+...
 
 # Specification
 
