@@ -9,7 +9,7 @@
 
 # Abstract
 
-This TAP clarifies the relation between wireline formats and the required behavior of the system.  TAP 11 clarifies that TUF does no mandate a wireline format and describes a mechanism for standarding wireline formats (through the use of a 'profile').  All clients and servers that implement a profile will have the same wireline format and will thus be able to work together.
+This TAP clarifies the relation between wireline formats and the required behavior of the system.  TAP 11 clarifies that TUF does not mandate a wireline format and describes a mechanism for standardizing wireline formats (through the use of a 'profile').  All clients and servers that implement a profile will have the same wireline format and will thus be able to work together.
 
 # Motivation
 
@@ -19,13 +19,33 @@ This TAP clarifies that different wireline formats are expressly permitted.  How
 
 # Rationale
 
-In order to allow profiles to be publicly found and implemented, they will be released as TAPs.  It is expected that each profile will have exactly one TAP number and that that future clarifications will fall under the same TAP.  
+A profile should be created whenever a TUF implementor wants to communicate with other TUF implementations.  The profile will include all definitions necessary to create a compatible implementation, including all of the data types and metadata files.
 
-...
+The profile may be added to the TAP repository to be used by others.  If it is added to the repository, it will be available to the TUF community to allow for security audits and interoperability.
+
+Once a profile is created, it should get a security audit (described below) by a third party before it is used. this audit should happen even if the profile is not added to the TAP repository.
+
+## Storage in the TAP Repository
+
+In order to allow profiles to be publicly found and implemented, they may be released in the TAP repository.  There will be a folder in the TAP repository to store profiles. It is expected that each profile will have exactly one Profile number and that that future clarifications will fall under the same Profile.  Profiles in the TAP repository will be named 'profile1.md', 'profile2.md', etc.
+
+## Managing profiles
+
+Profiles can be shared with other developers to allow for the creation of compatible implementations.  Profiles will only need to be accessed during development of TUF compliant applications, and so can be stored online and securely accessed.
+
+Profiles may be stored in the TUF repository, or in a centralized place for an institution or usage.  In general, storing profiles on the TUF repository is recommended to allow the community to provide security audits.
+
+## Security Audit
+
+All profiles should be security audited to check for TUF compliance and other issues.  The audit will ensure that the profile is a valid implementation of TUF and check for security flaws.
+
+For most profiles, this security audit will consist of ensuring that all fields correspond with fields in the TUF specification.  For more complex profiles, any libraries or additional data structures should be audited for any added security flaws.
+
+The security audit will be written up and posted with the profile.  The write up will mark the profile as compliant to the current version of the TUF specification and include any relevant security concerns. The write up can be signed by the auditor.
 
 # Specification
 
-Profiles will include formatting for all metadata files and include all fields required by the TUF specification. The required files are:
+Profiles will include formatting for all metadata files and include all fields required by the TUF specification.  The required files are:
 * root
 * snapshot
 * targets
@@ -35,29 +55,13 @@ Profiles will include formatting for all metadata files and include all fields r
 
 In addition, the profile may include object definitions for types including signed files and keys.
 
-Filenames of the metadata files will also be specified. "root.json" would be replaced with "root.FORMAT" where FORMAT is the filetype for the format specified in the profile.
+Filenames of the metadata files will also be specified. For example "root.json" would be replaced with "root.FORMAT" where FORMAT is the filetype for the format specified in the profile.
 
-The canonical json profile currently in TUF (under "Document Formats") provides an example of type definitions.
-
-## Creation
-
-A profile should be created whenever a TUF implementor wants to communicate with other TUF implementations. The profile will include all definitions necessary to create a compatible implementation, including all of the data types and metadata files.
-
-## Managing profiles
-
-Profiles can be shared with other developers to allow for the creation of compatible implementations. Profiles will only need to be accessed during development of TUF compliant applications, and so can be stored online and securely accessed via TLS.
-
-## Security Audit
-
-All profiles should be security audited to check for TUF compliance and other issues. The audit will ensure that the profile is a valid implementation of TUF and check for security flaws.
-
-For most profiles, this security audit will consist of ensuring that all fields correspond with fields in the TUF specification. For more complex profiles, any libraries or additional data structures should be audited for any added security flaws.
+The canonical json profile currently in TUF (under "Document Formats") provides an example of type definitions that are required for a profile.
 
 # Security Analysis
 
-The security audit will ensure that the profiles do not compromise the security of an implementation.
-
-Profiles will be accessed via TLS, so accessors can ensure that they are downloading the audited version of the profile.
+Security audits and careful access of profiles ensure a minimal security impact. The security audit will ensure that the profiles do not compromise the security of a TUF implementation. Audits will be signed by the auditor so that users can ensure they are accessing the audited version of a profile.
 
 # Backwards Compatibility
 
