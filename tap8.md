@@ -237,7 +237,7 @@ to add a keyid from Dan to the project, they create a foo.rotate.ID.PREV
 file, where ID is as described above (the SHA256 of the concatenated
 key ids of Alice, Bob, Charlie, and the character 0x32). This
 contains all four keys, and a new threshold (again 2).  PREV is the
-SHA256 of null as this is the first rotation for foo.  The file
+SHA256 of "" as this is the first rotation for foo.  The file
 foo.rotate.ID.PREV is signed by at least 2 keyids of Alice, Bob, and Charlie.
 The new targets file foo is then signed by a new threshold (again 2) of
 Alice, Bob, Charlie, and Dan to complete the rotation.
@@ -245,7 +245,7 @@ Alice, Bob, Charlie, and Dan to complete the rotation.
 Let's assume Bob and Dan signed foo.  A client which encounters a
 delegation to foo first looks for a foo.rotate.ID.PREV file with the
 keyids and threshold specified in the delegation file and an initial
-value of null for the previous rotate file.  If this file exists and is
+value of "" for the previous rotate file.  If this file exists and is
 properly signed by Alice and Bob, the client uses it to fetch new keys.  
 The client can then verify foo using Bob's and Dan's signature.
 
@@ -259,8 +259,8 @@ is signed with at least 2 keys from Alice, Bob, Charlie, or Dan.
 ## Rotation to Null
 
 Clients need to check for rotations to a null key, and any delegation pointing
-to a null rotation is invalid.  The null key is a key that contains all 0's.
-This enables a role to explicitly revoke their
+to a null rotation is invalid.  The null key is a hard coded value used across
+tuf implementations. This enables a role to explicitly revoke their
 own key(s) by introducing a rotation to null.
 
 The rotate files will be listed in the snapshot metadata and shall be
