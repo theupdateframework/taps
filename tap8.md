@@ -10,7 +10,9 @@
 
 # Abstract
 
-TAP 8 allows roles to rotate trust from their current keys to a new key or keys.
+TAP 8 allows a role to change or revoke their key without requiring changes from
+parties that delegate to that role.  This involves a role rotating trust from their 
+current key(s) to a new key or keys.
 For example, if a project role has a single key, the owner of this key could
 create a rotate file to transfer trust for that role to a new key. The old key
 would no longer be trusted and the new key would be used for all subsequent
