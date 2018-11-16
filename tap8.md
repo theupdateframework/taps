@@ -2,7 +2,7 @@
 * Title: Key rotation and explicit self-revocation
 * Version: 2
 * Last-Modified: 19-Sep-2018
-* Author: Hannes Mehnert, Justin Cappos
+* Author: Hannes Mehnert, Justin Cappos, Marina Moore
 * Status: Draft
 * Content-Type: text/markdown
 * Created: 10-May-2017
@@ -11,7 +11,7 @@
 # Abstract
 
 TAP 8 allows a role to change or revoke their key without requiring changes from
-parties that delegate to that role.  This involves a role rotating trust from their 
+parties that delegate to that role.  This involves a role rotating trust from their
 current key(s) to a new key or keys.
 For example, if a project role has a single key, the owner of this key could
 create a rotate file to transfer trust for that role to a new key. The old key
@@ -22,6 +22,10 @@ list of trusted keys with an associated threshold during the rotate process.
 Performing a key rotation does not require parties that delegated trust to the
 role to change their delegation. Roles are thus able to rotate to new trusted
 keys independently, allowing keys to be changed more often.
+
+The key rotation mechanism is designed to be used by all roles except the
+root role. The root role will continue to use the root metadata to establish
+a trusted root key.
 
 Conceptually, the rotation process says if you trusted threshold of keys
 X_0, ... X_n, now instead trust threshold of keys Y_0, ... Y_n.  Rotation of a
@@ -81,18 +85,20 @@ In addition, this mechanism could be used to give each developer their own
 key, and rotate these keys in and out without going through the delegator.
 
 
-## Clarify root key rotation
+## Root key rotation
 
-The different root metadata versions build a chain of trust, where if
-the initial root is trusted (TOFU or by being distributed over a trusted
-channel), following the chain of key rotations leads to verified keys
-for the current root metadata.  This means that even if the keys are not
-changed, a client must download every version of the root metadata in
-order to follow the chain of delegations.  The root metadata contains
+TAP 8 provides a methodology for key rotations for roles other than root,
+leaving the root rotation mechanism in place.
+
+Root key rotation cannot use the TAP 8 rotation mechanism to establish a
+trusted key. The different root metadata versions build a chain of trust,
+where if the initial root is trusted (TOFU or by being distributed over a
+trusted channel), following the chain of key rotations leads to verified
+keys for the current root metadata. The root metadata contains
 additional information, like the spec-version that needs to be seen for
-each version of the file.
-
-TAP 8 provides a methodology for key rotations for other roles as well.
+each version of the file. This means that even if the keys are not
+changed, a client must download every version of the root metadata in
+order to follow the chain of delegations.
 
 ## Auto-rotation timestamp role
 
@@ -121,7 +127,7 @@ is rooted in a quorum of root keys, which delegate trust to other roles.
 When the root keys delegate trust to a role t for all names, this can be
 used to delegate some names to role d, etc.  When the person who owns
 role d wants to renew their key, they have until now had to ask the holder of
-role t to delegate to the new keyset d'. If one of role d's keys is
+role t to delegate to the new keyset d'. If one of role ds keys is
 compromised, they have to wait for role t to replace the key with a new,
 trusted key.
 
@@ -261,7 +267,7 @@ is signed with at least 2 keys from Alice, Bob, Charlie, or Dan.
 ## Rotation to Null
 
 Clients need to check for rotations to a null key, and any delegation pointing
-to a null rotation is invalid.  The null key is a hard coded value used across
+to a rotation to a null key is invalid.  The null key is a hard coded value used across
 tuf implementations. This enables a role to explicitly revoke their
 own key(s) by introducing a rotation to null.
 
@@ -292,7 +298,7 @@ provide a simple mechanism extending and shrinking projects by
 themselves without an individual with elevated privileges, but based
 on a threshold of signatures.
 
-Clients need to take care to check for null rotations (rotate
+Clients need to take care to check for rotation to a null key (rotate
 files that contain a null key).  This shall be handled in the
 same manner as an invalid metadata signature on by the role possessing
 the key. The role will be invalid until it is re-delegated to.
