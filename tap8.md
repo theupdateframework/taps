@@ -85,20 +85,17 @@ In addition, this mechanism could be used to give each developer their own
 key, and rotate these keys in and out without going through the delegator.
 
 
-## Root key rotation
+## Why root key rotation is not supported
 
 TAP 8 provides a methodology for key rotations for roles other than root,
 leaving the root rotation mechanism in place.
 
 Root key rotation cannot use the TAP 8 rotation mechanism to establish a
-trusted key. The different root metadata versions build a chain of trust,
-where if the initial root is trusted (TOFU or by being distributed over a
-trusted channel), following the chain of key rotations leads to verified
-keys for the current root metadata. The root metadata contains
-additional information, like the spec-version that needs to be seen for
-each version of the file. This means that even if the keys are not
-changed, a client must download every version of the root metadata in
-order to follow the chain of delegations.
+trusted key. The root metadata file contains information, like the
+spec-version, that needs to be seen for each version of the file. This
+means that even if the keys are not changed, a client must download every
+version of the root metadata in order to ensure the client spec-version is
+in line with the server spec-version.
 
 ## Auto-rotation timestamp role
 
@@ -127,7 +124,7 @@ is rooted in a quorum of root keys, which delegate trust to other roles.
 When the root keys delegate trust to a role t for all names, this can be
 used to delegate some names to role d, etc.  When the person who owns
 role d wants to renew their key, they have until now had to ask the holder of
-role t to delegate to the new keyset d'. If one of role ds keys is
+role t to delegate to the new keyset e. If one of role d's keys is
 compromised, they have to wait for role t to replace the key with a new,
 trusted key.
 
