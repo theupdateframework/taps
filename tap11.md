@@ -27,21 +27,29 @@ Once a profile is created, it should get a security audit (described below) by a
 
 ## Storage in the TAP Repository
 
-In order to allow profiles to be publicly found and implemented, they may be released in the TAP repository.  There will be a folder in the TAP repository to store profiles. It is expected that each profile will have exactly one Profile number and that that future clarifications will fall under the same Profile.  Profiles in the TAP repository will be named 'profile1.md', 'profile2.md', etc.
+In order to allow profiles to be publicly found and implemented, they may be released in the TAP repository.  There will be a folder in the TAP repository to store profiles. It is expected that each profile will have exactly one Profile number and that that future clarifications will fall under the same profile.  Profiles in the TAP repository will be named 'profile2.md', 'profile3.md', etc. profile1.md describes the format of a profile.
+
+Profiles may be submitted to the TAP repository using the pull request process. A profile will be labeled with a status of Draft, Proposal, Under Review, or Accepted. A profile will not be accepted until the security audit is complete and any issues identified in the security audit are addressed.
 
 ## Managing profiles
 
 Profiles can be shared with other developers to allow for the creation of compatible implementations.  Profiles will only need to be accessed during development of TUF compliant applications, and so can be stored online and securely accessed.
 
-Profiles may be stored in the TUF repository, or in a centralized place for an institution or usage.  In general, storing profiles on the TUF repository is recommended to allow the community to provide security audits.
+Profiles may be stored in the TUF repository, or in a centralized place for an organization.  In general, storing profiles on the TUF repository is recommended to allow the community to provide security audits.
+
+Profiles are designed to allow all implementations using that profile to be interoperable, it is not expected that different profiles are interoperable.
 
 ## Security Audit
 
-All profiles should be security audited to check for TUF compliance and other issues.  The audit will ensure that the profile is a valid implementation of TUF and check for security flaws.
+All profiles should be security audited to check for TUF compliance and other issues.  The security audit will ensure that the profile is a valid implementation of TUF and check for security flaws.
 
 For most profiles, this security audit will consist of ensuring that all fields correspond with fields in the TUF specification.  For more complex profiles, any libraries or additional data structures should be audited for any added security flaws.
 
-The security audit will be written up and posted with the profile.  The write up will mark the profile as compliant to the current version of the TUF specification and include any relevant security concerns. The write up can be signed by the auditor.
+The security audit will be written up and posted with the profile.  The write up will mark the profile as compliant to the current version of the TUF specification and include any relevant security concerns. The write up can be cryptographically signed by the auditor.
+
+If security issues are found after the security audit, the issue should be reported to the profile author and a TUF contributor. Initially reporting the issue privately allows the issue to be addressed without leaving existing implementations vulnerable to a publicly posted attack. Once resolved, the issue should be added to the security audit for the profile.
+
+The canonical json wireline format that is currently included in the spec has been audited as part of TUF security audits, and so does not need additional auditing.
 
 # Specification
 
@@ -61,7 +69,7 @@ The canonical json profile currently in TUF (under "Document Formats") provides 
 
 # Security Analysis
 
-Security audits and careful access of profiles ensure a minimal security impact. The security audit will ensure that the profiles do not compromise the security of a TUF implementation. Audits will be signed by the auditor so that users can ensure they are accessing the audited version of a profile.
+Security audits and careful access of profiles ensure a minimal security impact. The security audit will ensure that the profiles do not compromise the security of a TUF implementation. Audits can be signed by the auditor so that users can ensure they are accessing the audited version of a profile.
 
 # Backwards Compatibility
 
