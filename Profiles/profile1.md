@@ -1,9 +1,10 @@
 * Profile: 1
-* Title:
+* Title: Profile Template
 * Version: 1
 * Last-Modified: 25-November-2018
 * Author: Marina Moore, Santiago Torres, Trishank Kuppusamy, Sebastien Awwad, Justin Cappos
 * Status: Draft / Proposal / Under Review / Accepted
+* TUF Version Implemented:
 * Content-Type: text/markdown
 * Created: 25-November-2018
 
