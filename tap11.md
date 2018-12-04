@@ -37,7 +37,7 @@ Profiles can be shared with other developers to allow for the creation of compat
 
 Profiles may be stored in the TUF repository, or in a centralized place for an organization.  In general, storing profiles on the TUF repository is recommended to allow the community to provide security audits.
 
-Profiles are designed to allow all implementations using that profile to be interoperable, it is not expected that different profiles are interoperable.
+Profiles are designed to allow all implementations using that profile to be interoperable, it is not expected that different profiles are interoperable. Implementations should list the profile used in their documentation.
 
 ## Security Audit
 
@@ -64,6 +64,8 @@ Profiles will include formatting for all metadata files and include all fields r
 In addition, the profile may include object definitions for types including signed files and keys.
 
 Filenames of the metadata files will also be specified. For example "root.json" would be replaced with "root.FORMAT" where FORMAT is the filetype for the format specified in the profile.
+
+The profile will additionally specify which version of the TUF spec it supports. If a profile is updated to support a new version of TUF (or reviewed to ensure continued compliance), the TUF version number in the profile will be updated. The previous version of the profile should be copied into a file named 'profileX_VERSION.md' where X is the profile number and VERSION is the previous TUF version supported. If the updated profile contains significant changes, it may be copied into a new profile.
 
 The canonical json profile currently in TUF (under "Document Formats") provides an example of type definitions that are required for a profile.
 
