@@ -4,6 +4,7 @@
 * Last-Modified: 26-November-2018
 * Author: Marina Moore, Santiago Torres, Trishank Kuppusamy, Sebastien Awwad, Justin Cappos
 * Status: Draft
+* TUF Version Implemented: 1.0
 * Content-Type: text/markdown
 * Created: 25-November-2018
 
@@ -22,13 +23,14 @@ All signed metadata objects have the format:
             , ... ]
        }
 
+
    where:
 
-          ROLE is a dictionary whose "_type" field describes the role type.
+          * ROLE is a dictionary whose "_type" field describes the role type.
 
-          KEYID is the identifier of the key signing the ROLE dictionary.
+          * KEYID is the identifier of the key signing the ROLE dictionary.
 
-          SIGNATURE is a signature of the canonical JSON form of ROLE.
+          * SIGNATURE is a signature of the canonical JSON form of ROLE.
 
 
    All keys have the format:
@@ -40,13 +42,13 @@ All signed metadata objects have the format:
 
    where:
 
-          KEYTYPE is a string denoting a public key signature system, such
+          * KEYTYPE is a string denoting a public key signature system, such
           as RSA or ECDSA.
 
-          SCHEME is a string denoting a corresponding signature scheme.  For
+          * SCHEME is a string denoting a corresponding signature scheme.  For
           example: "rsassa-pss-sha256" and "ecdsa-sha2-nistp256".
 
-          KEYVAL is a dictionary containing the public portion of the key.
+          * KEYVAL is a dictionary containing the public portion of the key.
 
    The reference implementation defines three signature schemes, although TUF
    is not restricted to any particular signature scheme, key type, or
@@ -521,22 +523,22 @@ The mirrors.json file is signed by the mirrors role.  It indicates which
           , ... ]
       }
 
-   URLBASE is the URL of the mirror which METAPATH and TARGETSPATH are relative
-   to.  All metadata files will be retrieved from METAPATH and all target files
-   will be retrieved from TARGETSPATH.
+URLBASE is the URL of the mirror which METAPATH and TARGETSPATH are relative
+to.  All metadata files will be retrieved from METAPATH and all target files
+will be retrieved from TARGETSPATH.
 
-   The lists of PATHPATTERN for "metacontent" and "targetscontent" describe the
-   metadata files and target files available from the mirror.
+The lists of PATHPATTERN for "metacontent" and "targetscontent" describe the
+metadata files and target files available from the mirror.
 
-   The order of the list of mirrors is important.  For any file to be
-   downloaded, whether it is a metadata file or a target file, the framework on
-   the client will give priority to the mirrors that are listed first.  That is,
-   the first mirror in the list whose "metacontent" or "targetscontent" include
-   a path that indicate the desired file can be found there will the first
-   mirror that will be used to download that file.  Successive mirrors with
-   matching paths will only be tried if downloading from earlier mirrors fails.
-   This behavior can be modified by the client code that uses the framework to,
-   for example, randomly select from the listed mirrors.
+The order of the list of mirrors is important.  For any file to be
+downloaded, whether it is a metadata file or a target file, the framework on
+the client will give priority to the mirrors that are listed first.  That is,
+the first mirror in the list whose "metacontent" or "targetscontent" include
+a path that indicate the desired file can be found there will the first
+mirror that will be used to download that file.  Successive mirrors with
+matching paths will only be tried if downloading from earlier mirrors fails.
+This behavior can be modified by the client code that uses the framework to,
+for example, randomly select from the listed mirrors.
 
 
 
