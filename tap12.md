@@ -29,7 +29,7 @@ The root metadata already contains the TUF spec-version. The client shall compar
 
 If the server spec-version is lower than the client spec-version, the client shall terminate the update and report an error.
 
-If the major version (the first digit) of the spec-version has been incremented, the client must update before proceeding. This could be an automatic process or an error could be reported, requesting a manual client update.
+If the major version (the first digit) of the spec-version has been incremented, the client must update itself to a client supporting the same major version before proceeding. This could be an automatic process or an error could be reported, requesting a manual client update.
 
 If a minor version or patch number of the spec-version has been incremented, the client should report this and may update, but can chose to proceed without further action.
 
