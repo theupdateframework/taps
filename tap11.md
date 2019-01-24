@@ -61,6 +61,8 @@ Profiles will include formatting for all metadata files and include all fields r
 * timestamp
 * mirrors
 
+Note that delegated targets and mirrors may not be used by an implementation, but it is a good idea to set up a format for them so the profile can be used by implentations that do use delegated targets or mirrors.
+
 In addition, the profile may include object definitions for types including signed files and keys.
 
 Filenames of the metadata files will also be specified. For example "root.json" would be replaced with "root.FORMAT" where FORMAT is the filetype for the format specified in the profile.
