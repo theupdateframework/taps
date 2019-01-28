@@ -13,19 +13,19 @@ This TAP describes a mechanism called a profile that can be used to  standardize
 
 # Motivation
 
-The designers of TUF made a conscious choice not to specify a wireline format. This was done to accommodate adopters who needed to maintain their existing wireline format due to interactions with other technologies, the requirements of legacy systems, or other unique design parameters. However, without a shared wireline format, differing TUF implementations may not be able to interoperate.
+The designers of TUF made a conscious choice not to specify a wireline format. This was done to accommodate adopters who needed to maintain their existing wireline format due to interactions with other technologies, the requirements of legacy systems, or other unique design parameters. For example, it is possible to implement TUF with all of the data stored in JSON files, XML files, or a binary format.  The choice of file type or wireline format does not impact the ability to correctly respond to key compromise, so long as the TUF spec is followed.  However, without a shared wireline format, differing TUF implementations will not be able to interoperate.
 
-This TAP clarifies the point that, even though different wireline formats are expressly permitted, a mechanism is needed to allow systems to work together without issues. This is done by creating publicly implementable, compatible wireline formats, which are called profiles. These defined wireline formats allow TUF users with the same profile to be interoperable.
+This TAP clarifies the point that, even though different wireline formats are expressly permitted, a mechanism is needed to allow different implementations of TUF to work together. This is done by creating publicly implementable, compatible wireline formats, which are called profiles. These defined wireline formats allow TUF implementations with the same profile to use the same file and/or wireline formats in a way that will make them interoperate.
 
 # Rationale
 
-A profile is needed if a TUF implementer must communicate with other implementations.This profile will include all definitions necessary to create a compatible implementation, including all of the data types and metadata files.
+A profile is needed if a TUF implementation must communicate with other implementations.  This profile will include all definitions necessary to create a compatible implementation, including all of the data types and metadata files.
 
 Once created, these profiles should be added to the TAP repository to be used by others. This makes the profile available to the TUF community. All profiles should receive a security audit (described below) by a third party before it is used to ensure flaws are not propagated.
 
 ## Storage on the TAP Repository
 
-In order to allow profiles to be publicly found and implemented, they may be stored on the TAP repository. It is expected that each profile will have exactly one profile number and that any future clarifications will fall under that number. Profiles in the TAP repository will be named 'profile2.md', 'profile3.md', etc. profile1.md describes the format of a profile.
+In order to allow profiles to be publicly found and implemented, they should be stored on the TAP repository. It is expected that each profile will have exactly one profile number and that any future clarifications will fall under that number. Profiles in the TAP repository will be named 'profile2.md', 'profile3.md', etc. profile1.md describes the format of a profile.
 
 Profiles may be submitted to the TAP repository using the pull request process. All profiles will have a status label of either Draft, Proposal, Under Review, or Accepted. A profile will not be accepted until the security audit is complete and any issues identified by the audit are addressed.
 
@@ -35,7 +35,7 @@ Profiles should be shared with other developers to allow for the creation of com
 
 An organization may also choose to store these document in a central place. Yet it is recommended that profiles still be made available on the TAP repository to allow for community review.
 
-Profiles are not generic. While a given profile will allow all implementations that adopt it to work together, other profiles on the repository may not support interoperability. It is important that  Implementations list in their documentation the profile used.
+Profiles are not generic. While a given profile will allow all implementations that adopt it to work together, other profiles on the repository may not support interoperability. It is important that implementations list in their documentation the profile or profiles that are supported.
 
 ## Security Audit
 
