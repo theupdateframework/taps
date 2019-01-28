@@ -9,51 +9,47 @@
 
 # Abstract
 
-This TAP clarifies the relation between wireline formats and the required behavior of the system.  TAP 11 clarifies that TUF does not mandate a wireline format and describes a mechanism for standardizing wireline formats (through the use of a 'profile').  All clients and servers that implement a profile will have the same wireline format and will thus be able to work together.
+This TAP describes a mechanism called a profile that can be used to  standardize wireline formats for systems using TUF. If clients and servers implement the same  profile, they will have the same wireline format and thus be able to interoperate.
 
 # Motivation
 
-Different TUF implementations may not be able to interoperate.  This is because TUF does not specify a wireline format.  However, not specifying a wireline format is a conscious choice.  It is necessary in many domains to allow adopters to have their own wireline format due to interactions with other technologies, legacy systems, etc.  
+The designers of TUF made a conscious choice not to specify a wireline format. This was done to accommodate adopters who needed to maintain their existing wireline format due to interactions with other technologies, the requirements of legacy systems, or other unique design parameters. However, without a shared wireline format, differing TUF implementations may not be able to interoperate.
 
-This TAP clarifies that different wireline formats are expressly permitted.  However, this TAP also provides a mechanism for having publicly implementable, compatible wireline formats (called 'profiles').  Profiles are defined wireline formats that allow any TUF users who implement the profile to be interoperable.
+This TAP clarifies the point that, even though different wireline formats are expressly permitted, a mechanism is needed to allow systems to work together without issues. This is done by creating publicly implementable, compatible wireline formats, which are called profiles. These defined wireline formats allow TUF users with the same profile to be interoperable.
 
 # Rationale
 
-A profile should be created whenever a TUF implementor wants to communicate with other TUF implementations.  The profile will include all definitions necessary to create a compatible implementation, including all of the data types and metadata files.
+A profile is needed if a TUF implementer must communicate with other implementations.This profile will include all definitions necessary to create a compatible implementation, including all of the data types and metadata files.
 
-The profile may be added to the TAP repository to be used by others.  If it is added to the repository, it will be available to the TUF community to allow for security audits and interoperability.
+Once created, these profiles should be added to the TAP repository to be used by others. This makes the profile available to the TUF community. All profiles should receive a security audit (described below) by a third party before it is used to ensure flaws are not propagated.
 
-Once a profile is created, it should get a security audit (described below) by a third party before it is used. this audit should happen even if the profile is not added to the TAP repository.
+## Storage on the TAP Repository
 
-## Storage in the TAP Repository
+In order to allow profiles to be publicly found and implemented, they may be stored on the TAP repository. It is expected that each profile will have exactly one profile number and that any future clarifications will fall under that number. Profiles in the TAP repository will be named 'profile2.md', 'profile3.md', etc. profile1.md describes the format of a profile.
 
-In order to allow profiles to be publicly found and implemented, they may be released in the TAP repository.  There will be a folder in the TAP repository to store profiles. It is expected that each profile will have exactly one Profile number and that that future clarifications will fall under the same profile.  Profiles in the TAP repository will be named 'profile2.md', 'profile3.md', etc. profile1.md describes the format of a profile.
-
-Profiles may be submitted to the TAP repository using the pull request process. A profile will be labeled with a status of Draft, Proposal, Under Review, or Accepted. A profile will not be accepted until the security audit is complete and any issues identified in the security audit are addressed.
+Profiles may be submitted to the TAP repository using the pull request process. All profiles will have a status label of either Draft, Proposal, Under Review, or Accepted. A profile will not be accepted until the security audit is complete and any issues identified by the audit are addressed.
 
 ## Managing profiles
 
-Profiles can be shared with other developers to allow for the creation of compatible implementations.  Profiles will only need to be accessed during development of TUF compliant applications, and so can be stored online and securely accessed.
+Profiles should be shared with other developers to allow for the creation of compatible implementations. These profiles are to be securely stored online and accessed only when needed during the development of TUF compliant applications.
 
-Profiles may be stored in the TUF repository, or in a centralized place for an organization.  In general, storing profiles on the TUF repository is recommended to allow the community to provide security audits.
+An organization may also choose to store these document in a central place. Yet it is recommended that profiles still be made available on the TAP repository to allow for community review.
 
-Profiles are designed to allow all implementations using that profile to be interoperable, it is not expected that different profiles are interoperable. Implementations should list the profile used in their documentation.
+Profiles are not generic. While a given profile will allow all implementations that adopt it to work together, other profiles on the repository may not support interoperability. It is important that  Implementations list in their documentation the profile used.
 
 ## Security Audit
 
-All profiles should be security audited to check for TUF compliance and other issues.  The security audit will ensure that the profile is a valid implementation of TUF and check for security flaws.
+The security audit will ensure that the profile is a valid implementation of TUF and check for security flaws and vulnerabilities. For most profiles, this audit will consist of ensuring that all fields correspond to those in the TUF specification. For more complex profiles, any libraries or additional data structures should also be audited to be sure they do not add security flaws.
 
-For most profiles, this security audit will consist of ensuring that all fields correspond with fields in the TUF specification.  For more complex profiles, any libraries or additional data structures should be audited for any added security flaws.
+The security audit will be written up and posted with the profile and will certify that the profile is compliant to the current version of the TUF specification. Any relevant security concerns will also be noted. The write up should be cryptographically signed by the auditor to ensure authenticity.
 
-The security audit will be written up and posted with the profile.  The write up will mark the profile as compliant to the current version of the TUF specification and include any relevant security concerns. The write up can be cryptographically signed by the auditor.
+If security issues are found after the security audit, they should be promptly reported to both the profile author and a TUF contributor. By initially reporting the issue privately, it can be addressed without leaving existing implementations vulnerable to a publicly posted attack. Once resolved, the issue should be added to the security audit for the profile.
 
-If security issues are found after the security audit, the issue should be reported to the profile author and a TUF contributor. Initially reporting the issue privately allows the issue to be addressed without leaving existing implementations vulnerable to a publicly posted attack. Once resolved, the issue should be added to the security audit for the profile.
-
-The canonical json wireline format that is currently included in the spec has been audited as part of TUF security audits, and so does not need additional auditing.
+The canonical json wireline format that is currently included in the spec has been audited as part of TUF security audits. As such, additional auditing of this format is not necessary.
 
 # Specification
 
-Profiles will include formatting for all metadata files and include all fields required by the TUF specification.  The required files are:
+Profiles will provide  formatting for all metadata files and include all fields required by the TUF specification. The required files are:
 * root
 * snapshot
 * targets
@@ -61,19 +57,18 @@ Profiles will include formatting for all metadata files and include all fields r
 * timestamp
 * mirrors
 
-Note that delegated targets and mirrors may not be used by an implementation, but it is a good idea to set up a format for them so the profile can be used by implentations that do use delegated targets or mirrors.
+Note that though delegated targets and mirrors may not be used by an implementation, it is a good idea to set up a format for these files. This will allow the profile to be used by implementations that do use these fields.
 
-In addition, the profile may include object definitions for types including signed files and keys.
+In addition, the profile may include:
+* Object definitions for types, including signed files and keys
+* Filenames of the metadata files. For example "root.json" would be replaced with "root.FORMAT" where FORMAT is the filetype for the format specified in the profile.
+* The version number of the TUF spec it supports. If a profile is updated to support a new version of TUF (or reviewed to ensure continued compliance), the version number in the profile must be updated, and the previous version should be copied into a file named 'profileX_VERSION.md' where X is the profile number and VERSION is the previous TUF version supported. If the updated profile contains significant changes, it may be copied into a new profile.
 
-Filenames of the metadata files will also be specified. For example "root.json" would be replaced with "root.FORMAT" where FORMAT is the filetype for the format specified in the profile.
-
-The profile will additionally specify which version of the TUF spec it supports. If a profile is updated to support a new version of TUF (or reviewed to ensure continued compliance), the TUF version number in the profile will be updated. The previous version of the profile should be copied into a file named 'profileX_VERSION.md' where X is the profile number and VERSION is the previous TUF version supported. If the updated profile contains significant changes, it may be copied into a new profile.
-
-The canonical json profile currently in TUF (under "Document Formats") provides an example of type definitions that are required for a profile.
+The canonical json profile currently in TUF (under "Document Formats") provides an example of the type definitions required for a profile.
 
 # Security Analysis
 
-Security audits and careful access of profiles ensure a minimal security impact. The security audit will ensure that the profiles do not compromise the security of a TUF implementation. Audits can be signed by the auditor so that users can ensure they are accessing the audited version of a profile.
+Security audits ensure profiles have a minimal security impact on the TUF implementation. By having auditors sign their work, users have the reassurance that the profile versions they access have been audited.
 
 # Backwards Compatibility
 
