@@ -1,12 +1,12 @@
 * Profile: 1
-* Title: Profile Template
-* Version: 1
-* Last-Modified: 25-November-2018
-* Author: Marina Moore, Santiago Torres, Trishank Kuppusamy, Sebastien Awwad, Justin Cappos
-* Status: Draft / Proposal / Under Review / Accepted
+* Title: 
+* Version:
+* Last-Modified:
+* Author: <list of authors' real names and optionally, email addrs>
+* Status: <Draft / Proposal / Under Review / Accepted>
 * TUF Version Implemented:
-* Content-Type: text/markdown
-* Created: 25-November-2018
+* Content-Type: <text/markdown>
+* Created: <date created on, in dd-mmm-yyyy format>
 
 # Description
 This section contains a description of the profile including a rationale for design decisions, implementation details, or other useful information.
