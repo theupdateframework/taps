@@ -1,7 +1,7 @@
 * TAP: 11
 * Title: Optional Profiles for Interoperability
 * Version: 1
-* Last-Modified: 9-November-2018
+* Last-Modified: 29-January-2019
 * Author: Marina Moore, Santiago Torres, Trishank Kuppusamy, Sebastien Awwad, Justin Cappos
 * Status: Draft
 * Content-Type: text/markdown
@@ -25,7 +25,7 @@ Once created, these profiles should be added to the TAP repository to be used by
 
 ## Storage on the TAP Repository
 
-In order to allow profiles to be publicly found and implemented, they should be stored on the TAP repository. It is expected that each profile will have exactly one profile number and that any future clarifications will fall under that number. Profiles in the TAP repository will be named 'profile2.md', 'profile3.md', etc. profile1.md describes the format of a profile.
+In order to allow profiles to be publicly found and implemented, they should be stored on the TAP repository. It is expected that each profile will have exactly one profile number and that any future clarifications will fall under that number. The profile will contain a version number to keep track of changes to the profile. Profiles in the TAP repository will be named 'profile2.md', 'profile3.md', etc. profile1.md describes the format of a profile.
 
 Profiles may be submitted to the TAP repository using the pull request process. All profiles will have a status label of either Draft, Proposal, Under Review, or Accepted. A profile will not be accepted until the security audit is complete and any issues identified by the audit are addressed.
 
@@ -33,15 +33,15 @@ Profiles may be submitted to the TAP repository using the pull request process. 
 
 Profiles should be shared with other developers to allow for the creation of compatible implementations. These profiles are to be securely stored online and accessed only when needed during the development of TUF compliant applications.
 
-An organization may also choose to store these document in a central place. Yet it is recommended that profiles still be made available on the TAP repository to allow for community review.
+An organization may also choose to store these documents in a central place. Yet it is recommended that profiles still be made available on the TAP repository to allow for community review.
 
-Profiles are not generic. While a given profile will allow all implementations that adopt it to work together, other profiles on the repository may not support interoperability. It is important that implementations list in their documentation the profile or profiles that are supported.
+Profiles are not generic. While a given profile will allow all implementations that adopt it to work together, other profiles on the repository may not support interoperability. It is important that implementations list in their documentation the profile or profiles that are supported as well as the version numbers for these profile(s).
 
 ## Security Audit
 
 The security audit will ensure that the profile is a valid implementation of TUF and check for security flaws and vulnerabilities. For most profiles, this audit will consist of ensuring that all fields correspond to those in the TUF specification. For more complex profiles, any libraries or additional data structures should also be audited to be sure they do not add security flaws.
 
-The security audit will be written up and posted with the profile and will certify that the profile is compliant to the current version of the TUF specification. Any relevant security concerns will also be noted. The write up should be cryptographically signed by the auditor to ensure authenticity.
+The security audit will be written up and posted with the profile and will certify that the profile is compliant to the current version of the TUF specification. Any relevant security concerns will also be noted.
 
 If security issues are found after the security audit, they should be promptly reported to both the profile author and a TUF contributor. By initially reporting the issue privately, it can be addressed without leaving existing implementations vulnerable to a publicly posted attack. Once resolved, the issue should be added to the security audit for the profile.
 
@@ -49,7 +49,7 @@ The canonical json wireline format that is currently included in the spec has be
 
 # Specification
 
-Profiles will provide  formatting for all metadata files and include all fields required by the TUF specification. The required files are:
+Profiles will provide formatting for all metadata files and include all fields required by the TUF specification. The required files are:
 * root
 * snapshot
 * targets
@@ -68,7 +68,7 @@ The canonical json profile currently in TUF (under "Document Formats") provides 
 
 # Security Analysis
 
-Security audits ensure profiles have a minimal security impact on the TUF implementation. By having auditors sign their work, users have the reassurance that the profile versions they access have been audited.
+Security audits ensure profiles have a minimal security impact on the TUF implementation.
 
 # Backwards Compatibility
 
