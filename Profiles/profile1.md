@@ -1,5 +1,5 @@
 * Profile: 1
-* Title: 
+* Title: Profile Template
 * Version:
 * Last-Modified:
 * Author: <list of authors' real names and optionally, email addrs>
