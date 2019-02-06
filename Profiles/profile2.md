@@ -375,7 +375,7 @@ The root.json file is signed by the root role's keys.  It indicates
    The "paths" list describes paths that the role is trusted to provide.
    Clients MUST check that a target is in one of the trusted paths of all roles
    in a delegation chain, not just in a trusted path of the role that describes
-   the target file.  PATHPATTERN can include shell-style wildcards and supports
+   the target file.  PATHPATTERN can include bash shell-style wildcards and supports
    the Unix filename pattern matching convention.  Its format may either
    indicate a path to a single file, or to multiple paths with the use of
    shell-style wildcards.  For example, the path pattern "targets/*.tgz" would

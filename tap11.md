@@ -21,7 +21,7 @@ This TAP clarifies the point that, even though different wireline formats are ex
 
 A profile is needed if a TUF implementation must communicate with other implementations.  This profile will include all definitions necessary to create a compatible implementation, including all of the data types and metadata files.
 
-Once created, these profiles should be added to the TAP repository to be used by others. This makes the profile available to the TUF community. All profiles should receive a security audit (described below) by a third party before it is used to ensure flaws are not propagated.
+Once created, these profiles should be added to the TAP repository to be used by others. This makes the profile available to the TUF community. All profiles should receive a security audit (described below) by a third party before it is used to ensure flaws are not propagated. The security audit ensures that the profile contains all fields necessary for a TUF implementation and that the encoding method does not introduce ambiguity or an insecure implementation.
 
 ## Storage on the TAP Repository
 
