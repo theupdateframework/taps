@@ -1,7 +1,7 @@
 * TAP: 3
 * Title: Multi-role delegations
 * Version: 1
-* Last-Modified: 18-Jan-2018
+* Last-Modified: 12-Feb-2019
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
 * Status: Accepted
@@ -51,8 +51,8 @@ delegations sign for the same hashes and lengths.  The latter is needed in
 cases where it is not known which combination of delegations will eventually
 sign for targets.
 
-Although the reader might observe that the threshold feature allows an AND
-relation within a role that can in some simple cases lead to the same
+Although the reader might observe that the key threshold feature allows an AND
+relation within one role that can in some simple cases lead to the same
 functionality (a requirement of all of a set of keys signing off), this option
 is less versatile.  For one, the keys must sign the same piece of metadata and
 those signatures must sit in the same file. Secondly, existing functionality
@@ -245,8 +245,8 @@ single role to sign some targets, but multiple roles to sign other targets:
 
 As in the previous version of the specification, delegations continue to be
 searched in descending order of priority.  The only difference between the
-previous and current version of the specification is in how every delegation
-is processed.
+previous and current version of the specification is in the way that the
+delegations are processed.
 
 If a desired target matches a target path pattern in the "paths" attribute of a
 delegation, then all roles in the delegation's "roleinfo" attribute must
@@ -268,12 +268,38 @@ specified by the "release-engineering", "quality-assurance", and
 "continuous-integration" roles, an error occurs and the client is notified that
 "/baz/baz-1.0.pkg" is unavailable.
 
+Note that if the `min_roles_in_agreement` threshold is less than or equal to
+half the number of roles listed in the multi-role delegation, you can have
+competing target metadata for the same target.  A consistent resolution strategy
+across implementations is important, so the strategy to be used is this:
+- The most-prior (earliest) role in the list of roles, that specifies target
+metadata agreed to by enough roles to reach min_roles_in_agreement, wins.
+This means that it will often be necessary to check nearly all the roles in the
+multi-role delegation.  For example, consider the following case:
+
+Targets delegates to, in order, [A, B, C, and D] in a multi-role delegation with
+min_roles_in_agreement threshold of 2.  Those roles list the following target
+info for target 1.tgz:
+- A lists hash1 and length1
+- B lists hash2 and length2
+- C lists hash2 and length2
+- D lists hash1 and length1.
+
+The target info verified should be hash1 and length1, as they are listed by the
+most-prior role whose listed info meets the min_roles_in_agreement threshold.
+
+Note that this makes it especially important to abort if any role is missing
+or cannot be verified, as it is important not to allow a targeted denial of
+service to cause different results (hash2 and length2 in this case, if a
+verifiable role A is withheld by a middleman).
+
+
 # Security Analysis
 
 We argue that this TAP does not change existing security guarantees, because it
 uses essentially the same preorder depth-first search algorithm to resolve
 delegations.  The only difference between the previous and new search algorithm
-is that, in any multi-role delegation, all specified roles must provide the
+is that, in any multi-role delegation, a threshold of specified roles must provide the
 same hashes and length of that target.  This does not interfere with how
 prioritized and terminating delegations are used to support the OR relation.
 
