@@ -1,4 +1,4 @@
-* TAP: 12
+* TAP: 
 * Title: Managing TUF Versions
 * Version: 1
 * Last-Modified: 19-December-2018
