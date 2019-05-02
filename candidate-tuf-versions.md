@@ -1,4 +1,4 @@
-* TAP: 
+* TAP:
 * Title: Managing TUF Versions
 * Version: 1
 * Last-Modified: 19-December-2018
@@ -9,21 +9,21 @@
 
 # Abstract
 
-This TAP clarifies how to manage updates to the TUF spec that include non-backwards compatible (breaking) changes. This TAP will define a procedure for TUF clients to ensure that they are using a compatible version of the TUF spec before performing updates.
+This TAP clarifies how to manage updates to the TUF spec that include non-backwards compatible (breaking) changes. Breaking changes mean that a client and server must implement the changes at the same time in order to continue functioning as expected. This TAP will define a procedure for TUF clients to ensure that their version of the TUF spec is compatible with the metadata they download.
 
 # Motivation
 
-Various TAPs, including TAPs 3 and 8 include changes that will make clients using the old version of the spec incompatible with servers using the new version. This TAP defines a procedure to ensure that clients are not missing important features to ensure the security of updates.
+Various TAPs, including TAPs 3 and 8 include changes that will make clients using the old version of the spec incompatible with servers using the new version. This TAP defines a procedure to ensure that clients are not missing important features to ensure the security of updates. This TAP will need to be implemented by clients before they update to a version of TUF that is not backwards compatible.
 
 # Rationale
 
-Breaking changes should only occur during a major release of the TUF spec (1.x.x to 2.x.x). The client should check the major version when the root metadata is downloaded, and if a new version is found update the client before performing any software updates.
+This TAP clarifies that spec versions should be based on [semantic versioning](https://semver.org/), with version numbers in the format MAJOR.MINOR.PATCH. This is a standard format used in other open source projects, and makes the version numbers consistent and easily understood.
 
-Additionally, this TAP clarifies how TUF version numbers should be determined. For clarity, semantic versioning is used to determine version numbers that can be easily be understood.
+Breaking changes should only occur during a major release of the TUF spec (1.x.x to 2.x.x). The client should check the major version in the root metadata when the root metadata is downloaded. If a new major version is found the client must update to the new spec-version before performing any software updates.
 
 # Specification
 
-The root metadata already contains the TUF spec-version. The client shall compare the spec-version in the root metadata (server spec-version) with the spec-version of the local client (client spec-version). The client shall then proceed as described below.
+The root metadata already contains the TUF spec-version. After downloading the root metadata, the client shall compare the spec-version in the root metadata (server spec-version) with the spec-version of the local client (client spec-version). The client shall then proceed as described below.
 
 ## Procedure
 
@@ -35,7 +35,7 @@ If a minor version or patch number of the spec-version has been incremented, the
 
 ## Version Number format
 
-TUF version number shall be determined based on [semantic versioning](https://semver.org/). This format specifies versions in the format MAJOR.MINOR.PATCH. In this format, only major changes are non-backwards compatible.
+TUF version numbers shall be determined based on [semantic versioning](https://semver.org/). This specification describes version numbers in the format MAJOR.MINOR.PATCH. In semantic versioning, only major changes are non-backwards compatible.
 
 # Security Analysis
 
