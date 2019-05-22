@@ -25,6 +25,8 @@ Breaking changes should only occur during a major release of the TUF spec (1.x.x
 
 The root metadata already contains the TUF spec-version. After downloading the root metadata, the client shall compare the spec-version in the root metadata (server spec-version) with the spec-version of the local client (client spec-version). The client shall then proceed as described below.
 
+To allow for changes to the format of root metadata, an intermediate root metadata file will be used. This intermediate root metadata file will contain the new spec-version, but will be formatted according to the old specification. After a client updates to the new spec-version, they can download the root metadata file that follows the intermediate one, and continue with the update. This process will only be used for major spec-version updates.
+
 ## Procedure
 
 If the server spec-version is lower than the client spec-version, the client shall terminate the update and report an error.
