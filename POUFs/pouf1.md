@@ -1,22 +1,24 @@
 * POUF: 1
-* Title: Canonical JSON
+* Title: Reference Implementation Using Canonical JSON
 * Version: 1
-* Last-Modified: 23-May-2018
-* Author: Marina Moore, Santiago Torres, Trishank Kuppusamy, Sebastien Awwad, Justin Cappos
+* Last-Modified: 5-June-2019
+* Author: Marina Moore
 * Status: Draft
 * TUF Version Implemented: 1.0
 * Content-Type: text/markdown
 * Created: 25-November-2018
 
 # Abstract
-This POUF describes the protocol, operations, usage, and formats for the TUF reference implementation.
+This POUF describes the protocol, operations, usage, and formats for the TUF reference implementation written in Python by NYU.
+
+The reference implementation includes all required features of the TUF standard, as well as many of the optional features as a reference for anyone wishing to implement TUF. The implementation uses canonical JSON encoding.
 
 # Protocol
 
 This POUF uses a subset of the JSON object format, with floating-point numbers omitted. When calculating the digest of an object, we use the "canonical JSON" subdialect as described at http://wiki.laptop.org/go/Canonical_JSON.
 
 # Operations
-As this POUF describes the reference implementation, it mostly does not differ from the specification. However, this POUF supports mirrors and consistent snapshots, both of which are optional features of the specification. Mirrors are supported using map files as described in TAP 4. Consistent snapshots are implemented as described in the TUF specification.
+As this POUF describes the reference implementation, it mostly does not differ from the specification. In doing so, this POUF supports mirrors and consistent snapshots, both of which are optional features of the specification. Mirrors are supported using map files as described in TAP 4. Consistent snapshots are implemented as described in the TUF specification.
 
 In addition to these optional features, this POUF requires support for three signature schemes:
 
