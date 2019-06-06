@@ -25,7 +25,7 @@ The Backwards Compatibility section of a TAP can be used to determine whether th
 
 # Specification
 
-The root metadata already contains the TUF spec-version. After downloading and verifying the root metadata, the client shall compare the spec-version in the root metadata (repository spec-version) with the spec-version of the local client (client spec-version). The client shall then proceed as described in [Procedure]{#procedure}.
+The root metadata already contains the TUF spec-version. After downloading and verifying the root metadata, the client shall compare the spec-version in the root metadata (repository spec-version) with the spec-version of the local client (client spec-version). The client shall then proceed as described in [Procedure](#procedure).
 
 To allow for changes to the format of root metadata during a major update, an intermediate root metadata file will be used. This intermediate root metadata file will contain the new spec-version, but will be formatted according to the old specification. After a client updates to the new spec-version, they should download the root metadata file that follows the intermediate one, and continue with the update. If a client is multiple versions behind a repository, they will be able to access the root metadata files for each version during the root metadata download process. This will occur while the client is validating each of the root metadata files in the chain.
 
