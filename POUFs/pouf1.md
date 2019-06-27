@@ -1,7 +1,7 @@
 * POUF: 1
 * Title: Reference Implementation Using Canonical JSON
 * Version: 1
-* Last-Modified: 5-June-2019
+* Last-Modified: 27-June-2019
 * Author: Marina Moore
 * Status: Draft
 * TUF Version Implemented: 1.0
@@ -17,8 +17,18 @@ The reference implementation includes all required features of the TUF standard,
 
 This POUF uses a subset of the JSON object format, with floating-point numbers omitted. When calculating the digest of an object, we use the "canonical JSON" subdialect as described at http://wiki.laptop.org/go/Canonical_JSON.
 
+In this POUF, metadata files are hosted on the repository using HTTP. The filenames for these files are ROLE.json where ROLE is the associated role name (root, targets, snapshot, or timestamp). A client downloads these files by HTTP post request. The location of the repository is preloaded onto the clients.
+
+## Message Handler Table
+
+This table lists the message handlers supported by the reference implementation.
+
+| Name          | Sender | Receiver    | Data     | Response      |
+| ------------- | ------ | ----------- | -------- | ------------- |
+| Download file | Client | Repository  | filename | file contents |
+
 # Operations
-As this POUF describes the reference implementation, it mostly does not differ from the specification. In doing so, this POUF supports mirrors and consistent snapshots, both of which are optional features of the specification. Mirrors are supported using map files as described in TAP 4. Consistent snapshots are implemented as described in the TUF specification.
+As this POUF describes the reference implementation, it mostly does not differ from the specification. However, it also includes many of the optional features from the specification. To this end, this POUF supports mirrors and consistent snapshots, both of which are optional features of the specification. Mirrors are supported using map files as described in TAP 4. The file will be named 'mirrors.json' in the hosted repository. Consistent snapshots are implemented as described in the TUF specification.
 
 In addition to these optional features, this POUF requires support for three signature schemes:
 
@@ -34,26 +44,16 @@ In addition to these optional features, this POUF requires support for three sig
       with NIST P-256 curve signing and SHA-256 hashing.
       https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm
 
-## Repository Setup
-The TUF reference implementation does the following setup before any updates can be downloaded:
-
-* The repository is initialized with any online keys.
-
-* Databases for keys and roles are initialized.
-
-  * The role database contains the keys, threshold, paths, and delegations associated with a role.
-
-  * The key database contains the signature scheme, keyid, and key value.
-
-* The client must start with an initial root metadata file.
-
 # Usage
+The TUF reference implementation uses online keys for demonstration purposes. It is recommended that any implementers use a combination of online and offline keys as described in the TUF specification to reduce the risk of a compromise.
 
-## Message Handler Table
-| Name        | Sender        | Receiver    | Data    | Response |
-| ----------- | ------------- | ----------- | ------- | -------- |
-| Download file | Client | Repository | filename | file contents |
-
+## Repository Setup
+The following steps must be completed before any updates can be installed:
+* The repository is initialized with any online keys.
+* Databases for keys and roles are initialized.
+  * The role database contains the keys, threshold, paths, and delegations associated with a role.
+  * The key database contains the signature scheme, keyid, and key value.
+* The client come preloaded with an initial root metadata file and the location of the repository.
 
 ## Data Table
 | Location        | Data            |
