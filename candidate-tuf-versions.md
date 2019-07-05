@@ -1,7 +1,7 @@
 * TAP:
 * Title: Managing TUF Versions
 * Version: 1
-* Last-Modified: 04-July-2018
+* Last-Modified: 05-July-2018
 * Author: Marina Moore, Justin Cappos
 * Status: Draft
 * Content-Type: text/markdown
@@ -17,13 +17,13 @@ The goal of this TAP is to prevent compatibility issues while allowing breaking 
 
 # Rationale
 
-In order to allow for breaking changes, a client must compare its spec-version to the spec-version of the repository then report and error or update the client if these versions are not compatible. To allow for this functionality, this TAP clarifies how spec-versions should be formatted, defines a procedure for comparing versions, and describes how root metadata can be updated.
+In order to allow for breaking changes, a client must compare its spec-version to the spec-version of the repository then report an error or update the client if these versions are not compatible. To allow for this functionality, this TAP clarifies how spec-versions should be formatted, defines a procedure for comparing versions, and describes how root metadata can be updated.
 
 This TAP clarifies that the spec-versions field of root metadata shall be based on [Semantic Versioning](https://semver.org/), with version numbers in the format MAJOR.MINOR.PATCH. This is a standard format used in other open source projects, and makes the version numbers consistent and easily understood. In accordance with Semantic Versioning, breaking changes will only occur during a major release of the TUF spec (e.g. 1.x.x to 2.x.x). The Backwards Compatibility section of a TAP should be used to determine whether the TAP creates a breaking change. If the change is not backwards compatible, then it will be part of a new major version. Non backwards compatible versions add features that change the way that TUF processes updates, and need to be implemented on both the client and repository to maintain security and functionality. Examples of breaking changes are TAP 3 and TAP 8. If the change adds a new feature that is backwards compatible, for example in TAP 4 and TAP 10, it is not a breaking change and should be part of a new minor version. Patches are used to fix typos and make small changes to existing features. More details about what constitutes a major, minor, or patch change can be found at https://semver.org/.
 
 The consistent format of versions makes it possible for clients to reliably compare the spec version that they are using to the spec version found in TUF metadata. To do this comparison, the client will check the major version in the root metadata when the root metadata is downloaded. If a new major version is found the client must update to the new spec-version before performing any software updates. This ensures that the client and metadata are using the same version number before validation.
 
-As the client checks the metadata spec-version in the root metadata, the root metadata format will not be altered before this check takes place. In order to allow for updates to the root metadata format, an intermediate root metadata file will be created when the root metadata is updated. Root metadata updates will only occur as part of a major version. The intermediate root metadata file will contain the new spec-version, but will be formatted according to the old specification. After a client downloads the intermediate root metadata and updates to the new spec-version, they will download the root metadata file that follows the intermediate one, and continue with the update. If a client is multiple versions behind a repository, they will be able to access the root metadata files for each version during the root metadata download process. This will occur while the client is validating each of the root metadata files in the chain. The client already downloads root metadata until the most recent is found, so the intermediate root metadata will not be used to validate updates.
+As the client checks the metadata spec-version in the root metadata, the root metadata format will not be altered before this check takes place. In order to allow for updates to the root metadata format, an intermediate root metadata file will be created when the root metadata is updated. Root metadata updates will only occur as part of a major version. The intermediate root metadata file will contain the new spec-version, but will be formatted according to the old specification. After a client downloads the intermediate root metadata and updates to the new spec-version, they will download the root metadata file that follows the intermediate one, and continue with the update. If a client is multiple versions behind a repository, they will be able to access the root metadata files for each version during the root metadata download process. This will occur while the client is validating each of the root metadata files in the chain. The client already downloads root metadata until the most recent is found, so the intermediate root metadata will not be used to validate updates. This process is explained in more detail in [How a Repository updates to a new spec-version](#how-a-repository-updates-to-a-new-spec-version).
 
 # Specification
 
@@ -49,9 +49,9 @@ If a minor version or patch of the spec-version does not match, the client shoul
 
 The repository handles updating to a new spec-version in one of two ways, depending on whether there are any changes to the format of root metadata.
 
-For minor or fix version updates, or for any major version updates that do not affect root metadata, the repository simply creates and signs a new root metadata file that includes the new spec-version. To do this, the repository manager would create a new root metadata file and fill out all of the information, including the new spec-version. This file would then be signed by the root role and uploaded to the repository. Clients performing and update will download this root file and update to a new version as described in [Procedure](#procedure) before performing an update.
+For minor or fix version updates, or for any major version updates that do not affect root metadata, the repository simply creates and signs a new root metadata file that includes the new spec-version. To do this, the repository manager would create a new root metadata file and fill out all of the information, including the new spec-version. This file would then be signed by the root role and uploaded to the repository. Clients performing an update will download this root file and update to a new spec-version as described in [Procedure](#procedure) before performing an update.
 
-For major changes in which the root metadata format changes in any way, the repository must create two root metadata files. The first is formatted using the old specification, but includes the new spec-version. The second is formatted using the new specification and the new spec-version. More specifically if a repository is updating from version 2.5.1 to version 3.0.0 and the current root file is named 10.root.json (using consistent snapshots), the following steps must be performed:
+For major changes in which the root metadata format changes in any way, the repository must create two root metadata files. The first is formatted using the old specification, but includes the new spec-version. The second is formatted using the new specification and includes the new spec-version. More specifically if a repository is updating from spec-version 2.5.1 to spec-version 3.0.0 and the current root file is named 10.root.json (using consistent snapshots), the following steps must be performed:
 
 * Create a new root metadata file, 11.root.json, that includes all required fields and formatting for version 2.5.1, except that the spec-version field lists version 3.0.0. This file will not be used to perform updates.
 * Sign 11.root.json with the root key.
@@ -61,7 +61,7 @@ For major changes in which the root metadata format changes in any way, the repo
 
 After these steps are performed, a client performing an update will download 11.root.json and update to spec-version 3.0 as described in [Procedure](#procedure). The client will then download 12.root.json, and seeing that this is the last available root file, the client will proceed with the update.
 
-For both of these cases, all other metadata files and images are handled as described in the specification.
+For both of these cases, all other metadata files and images are handled as described in the TUF specification for the version of the specification listed in root metadata.
 
 ## Changes to TAPs
 TAPs shall be tied to a version of the TUF specification. Once a TAP is accepted the header should be updated to include the first TUF version that will include the TAP. The Preamble Header description in TAP 1 shall be updated to include this field.
