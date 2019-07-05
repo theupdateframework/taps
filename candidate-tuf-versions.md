@@ -47,7 +47,21 @@ If a minor version or patch of the spec-version does not match, the client shoul
 
 ## How a Repository updates to a new spec-version
 
-If there are no changes to the root metadata format or metadata encoding, the repository simply creates and signs a new root metadata file that includes the new spec-version. If the root metadata format changes in any way, the repository must create two root metadata files. The first is formatted using the old specification, but includes the new spec-version. The second Is formatted using the new specification and the new spec-version. All other metadata files and images are handled as described in the specification.
+The repository handles updating to a new spec-version in one of two ways, depending on whether there are any changes to the format of root metadata.
+
+For minor or fix version updates, or for any major version updates that do not affect root metadata, the repository simply creates and signs a new root metadata file that includes the new spec-version. To do this, the repository manager would create a new root metadata file and fill out all of the information, including the new spec-version. This file would then be signed by the root role and uploaded to the repository. Clients performing and update will download this root file and update to a new version as described in [Procedure](#procedure) before performing an update.
+
+For major changes in which the root metadata format changes in any way, the repository must create two root metadata files. The first is formatted using the old specification, but includes the new spec-version. The second is formatted using the new specification and the new spec-version. More specifically if a repository is updating from version 2.5.1 to version 3.0.0 and the current root file is named 10.root.json (using consistent snapshots), the following steps must be performed:
+
+* Create a new root metadata file, 11.root.json, that includes all required fields and formatting for version 2.5.1, except that the spec-version field lists version 3.0.0. This file will not be used to perform updates.
+* Sign 11.root.json with the root key.
+* Create a new root metadata file, 12.root.json, that includes all required fields and formatting for version 3.0.0, including a spec-version of 3.0.0.
+* Sign 12.root.json with the root key.
+* Upload the signed 11.root.json and 12.root.json to the repository at the same time.
+
+After these steps are performed, a client performing an update will download 11.root.json and update to spec-version 3.0 as described in [Procedure](#procedure). The client will then download 12.root.json, and seeing that this is the last available root file, the client will proceed with the update.
+
+For both of these cases, all other metadata files and images are handled as described in the specification.
 
 ## Changes to TAPs
 TAPs shall be tied to a version of the TUF specification. Once a TAP is accepted the header should be updated to include the first TUF version that will include the TAP. The Preamble Header description in TAP 1 shall be updated to include this field.
