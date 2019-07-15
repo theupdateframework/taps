@@ -1,7 +1,7 @@
 * TAP:
 * Title: Managing TUF Versions
 * Version: 1
-* Last-Modified: 05-July-2018
+* Last-Modified: 13-July-2018
 * Author: Marina Moore, Justin Cappos
 * Status: Draft
 * Content-Type: text/markdown
@@ -17,51 +17,94 @@ The goal of this TAP is to prevent compatibility issues while allowing breaking 
 
 # Rationale
 
-In order to allow for breaking changes, a client must compare its spec-version to the spec-version of the repository then report an error or update the client if these versions are not compatible. To allow for this functionality, this TAP clarifies how spec-versions should be formatted, defines a procedure for comparing versions, and describes how root metadata can be updated.
+In order to allow for breaking changes, a client must compare its spec version to the spec version of the repository then report an error or update the client if these versions are not compatible. To allow for this functionality, this TAP clarifies how spec versions should be formatted, defines a procedure for comparing versions, and describes some special cases.
 
-This TAP clarifies that the spec-versions field of root metadata shall be based on [Semantic Versioning](https://semver.org/), with version numbers in the format MAJOR.MINOR.PATCH. This is a standard format used in other open source projects, and makes the version numbers consistent and easily understood. In accordance with Semantic Versioning, breaking changes will only occur during a major release of the TUF spec (e.g. 1.x.x to 2.x.x). The Backwards Compatibility section of a TAP should be used to determine whether the TAP creates a breaking change. If the change is not backwards compatible, then it will be part of a new major version. Non backwards compatible versions add features that change the way that TUF processes updates, and need to be implemented on both the client and repository to maintain security and functionality. Examples of breaking changes are TAP 3 and TAP 8. If the change adds a new feature that is backwards compatible, for example in TAP 4 and TAP 10, it is not a breaking change and should be part of a new minor version. Patches are used to fix typos and make small changes to existing features. More details about what constitutes a major, minor, or patch change can be found at https://semver.org/.
+This TAP clarifies that the 'spec_version' field of root metadata shall be based on [Semantic Versioning](https://semver.org/), with version numbers in the format MAJOR.MINOR.PATCH. This is a standard format used in other open source projects, and makes the version numbers consistent and easily understood. In accordance with Semantic Versioning, breaking changes will only occur during a major release of the TUF spec (e.g. 1.x.x to 2.x.x). The Backwards Compatibility section of a TAP should be used to determine whether the TAP creates a breaking change. If the change is not backwards compatible, then it will be part of a new major version. Non backwards compatible versions add features that change the way that TUF processes updates, and need to be implemented on both the client and repository to maintain security and functionality. Examples of breaking changes are TAP 3 and TAP 8. If the change adds a new feature that is backwards compatible, for example in TAP 4 and TAP 10, it is not a breaking change and should be part of a new minor version. Patches are used to fix typos and make small changes to existing features. More details about what constitutes a major, minor, or patch change can be found at https://semver.org/.
 
-The consistent format of versions makes it possible for clients to reliably compare the spec version that they are using to the spec version found in TUF metadata. To do this comparison, the client will check the major version in the root metadata when the root metadata is downloaded. If a new major version is found the client must update to the new spec-version before performing any software updates. This ensures that the client and metadata are using the same version number before validation.
+The consistent format of versions makes it possible for clients to reliably compare the spec version that they are using to the spec version found in TUF metadata. To do this comparison, an additional field will be added to root metadata that lists the 'next_spec_version'. This field will list the spec version to be used for all future root metadata. The client will check this field, and if it is set the client will finish the current update cycle, then update to the new spec version when a next root file is available. So if 10.root.json specifies a spec_version of 5.6.1 and a next_spec_version of 6.0.0, the client will look for 11.root.json, and if it is available update to version 6.0.0 before downloading and verifying 11.root.json. This process ensures that the client and metadata are using the same version number before validation. If 11.root.json is invalid or deleted by an attacker, the client shall use the metadata in 10.root.json as the trusted root metadata until the repository corrects 11.root.json.
 
-As the client checks the metadata spec-version in the root metadata, the root metadata format will not be altered before this check takes place. In order to allow for updates to the root metadata format, an intermediate root metadata file will be created when the root metadata is updated. Root metadata updates will only occur as part of a major version. The intermediate root metadata file will contain the new spec-version, but will be formatted according to the old specification. After a client downloads the intermediate root metadata and updates to the new spec-version, they will download the root metadata file that follows the intermediate one, and continue with the update. If a client is multiple versions behind a repository, they will be able to access the root metadata files for each version during the root metadata download process. This will occur while the client is validating each of the root metadata files in the chain. The client already downloads root metadata until the most recent is found, so the intermediate root metadata will not be used to validate updates. This process is explained in more detail in [How a Repository updates to a new spec-version](#how-a-repository-updates-to-a-new-spec-version).
+In addition, there are are few special cases that must be considered. These include TUF setups with multiple repositories as described in [TAP 4](https://github.com/theupdateframework/taps/blob/master/tap4.md) and delegated targets that are unable to update simultaneously with the top level metadata.
+
+If there are multiple repositories in use the repositories should coordinate their major spec version updates to ensure clients are able to perform updates. The repository managers already must coordinate to ensure that the same targets metadata is signed by all relevant repositories, so the same communication channels can be used to ensure that the spec version is updated at the same time on all repositories.
+
+A client may choose to support delegated targets that comply with an old spec_version. This may be desirable if the targets are managed by many different individuals or organizations to allow the spec_version update to happen more quickly. To support this behavior, an additional field will be added to the delegation metadata. This field will include the spec_version of the delegation and will be used by the client to determine which client version to use when parsing the delegation metadata. To do this, the client should maintain any old client versions that will be supported for delegated targets.
+
 
 # Specification
 
-This TAP requires some setup on the client to ensure that the spec-versions are compatible before an update is performed. In addition, the repository needs to perform some configuration when the spec-version is updated. These processes are described in this section.
+This TAP requires an additional field in root metadata and delegations, as well as some setup on the client to ensure that the spec versions are compatible before an update is performed. In addition, the repository needs to perform some configuration when the spec version is updated. These processes are described in this section.
+
+## The new file format of root metadata
+
+A 'next_spec_version' field is added to root metadata. With this field, the "signed" portion of root metadata is:
+
+    { "_type" : "root",
+      "spec_version" : SPEC_VERSION,
+      "next_spec_version" : NEXT_SPEC_VERSION,
+      "consistent_snapshot": CONSISTENT_SNAPSHOT,
+      "version" : VERSION,
+      "expires" : EXPIRES,
+      "keys" : {
+          KEYID : KEY
+          , ... },
+      "roles" : {
+          ROLE : {
+            "keyids" : [ KEYID, ... ] ,
+            "threshold" : THRESHOLD }
+          , ... }
+    }
+
+  NEXT_SPEC_VERSION is the version number of the specification for the next root metadata file.
+
+## The new format of delegations
+
+A 'spec_version' field is added to delegations. With this field, the format of the delegations object is:
+
+      { "keys" : {
+             KEYID : KEY,
+             ... },
+         "roles" : [{
+             "name": ROLENAME,
+             "spec_version": DELEGATION_SPEC_VERSION
+             "keyids" : [ KEYID, ... ] ,
+             "threshold" : THRESHOLD,
+             ("path_hash_prefixes" : [ HEX_DIGEST, ... ] |
+              "paths" : [ PATHPATTERN, ... ]),
+             "terminating": TERMINATING,
+         }, ... ]
+       }
+  DELEGATION_SPEC_VERSION is the spec version used by the delegated targets metadata file.
 
 ## Client Setup
 
 The following steps must be implemented in the setup of a TUF client:
 
-* The client must keep track of its version of the TUF specification. To do so, a global variable or other local storage option should contain the client spec-version. For simplicity, this field should be formatted according to Semantic Versioning so that it can be directly compared to the spec-version in root metadata.
+* The client must keep track of its version of the TUF specification. To do so, a global variable or other local storage option should contain the client spec version. For simplicity, this field should be formatted according to Semantic Versioning so that it can be directly compared to the spec version in root metadata.
 
-* The root metadata already contains the TUF spec-version. After downloading and verifying the root metadata, the client shall compare the spec-version in the root metadata (repository spec-version) with the spec-version of the local client (client spec-version). The client shall then proceed as described in [Procedure](#procedure).
+* The client should check the next_spec_version field in root metadata. After downloading and verifying the root metadata, the client shall compare the next_spec_version in the root metadata (repository spec version) with the spec version of the local client (client spec version). If there is a next root file available on the repository, the client shall then proceed as described in [Procedure](#procedure). If the next root file is not available or cannot be downloaded, the client skips these steps and proceeds with the update using its current spec version.
 
 ### Procedure
 
-When the client compares their spec-version to the spec-version found in the root metadata, there are a few possible cases. If the versions are the same, nothing needs to be done. If the major versions differ, the update halts and cannot be completed until the major versions match. If the major versions match but the minor or patch versions differ, the client may choose to continue the update or to update to a new client. These cases are discussed in detail below.
+When the client compares their spec version to the 'next_spec_version' found in the root metadata, there are a few possible cases. If the versions are the same, nothing needs to be done. If the major versions differ, the update halts and cannot be completed until the major versions match. If the major versions match but the minor or patch versions differ, the client may choose to continue the update or to update to a new client. These cases are discussed in detail below.
 
-If the major versions on the client and repository do not match, the update cannot proceed until this discrepancy is resolved. If the repository spec-version is lower than the client spec-version, the client should terminate and report the mismatch to the user. The client's user may then choose to report this issue to the repository or take no action. The client will not be able to perform an update until the repository is updated or the client chooses to downgrade their TUF client. If the client spec-version is lower than the repository spec-version, the client should try to automatically update to a new TUF client. If an updated client is not available, the client shall report the mismatch to the user so that the user may manually update the client. Once the updated TUF client is installed, the client should proceed with the update.
+If the major versions on the client and repository do not match, the update cannot proceed until this discrepancy is resolved. If the repository spec version is lower than the client spec version, the client should terminate and report the mismatch to the user. The client's user may then choose to report this issue to the repository or take no action. The client will not be able to perform an update until the repository is updated or the client chooses to downgrade their TUF client. If the client spec version is lower than the repository spec version, the client should try to automatically update to a new TUF client. If an updated client is not available, the client shall report the mismatch to the user so that the user may manually update the client. Once the updated TUF client is installed, the client should proceed with the update.
 
-If a minor version or patch of the spec-version does not match, the client should report the mismatch to the user. However, the update can proceed without further action. A client may choose to update before proceeding with the update or simply log the error. Additionally, a client may act differently for minor version changes and patches. For example, a client may choose to require manual confirmation before proceeding with a mismatched minor version, but automatically continue with a mismatched patch.
+If a minor version or patch of the spec version does not match, the client should report the mismatch to the user. However, the update can proceed without further action. A client may choose to update itself before proceeding with the update or simply log the error. Additionally, a client may act differently for minor version changes and patches. For example, a client may choose to require manual confirmation before proceeding with a mismatched minor version, but automatically continue with a mismatched patch.
 
-## How a Repository updates to a new spec-version
+## How a Repository updates to a new specification
 
-The repository handles updating to a new spec-version in one of two ways, depending on whether there are any changes to the format of root metadata.
+A repository handles updating to a new spec version by updating the 'next_spec_version' field in root metadata, then creating root metadata with the new spec version. To do this, the repository manager would create a new root metadata file before updating versions and fill out all of the information including a next_spec_version for the updated version. This file would then be signed by the root role and uploaded to the repository. Then, the repository would update to the new spec version and create, sign, and upload a root metadata file with the new version. Clients performing an update will download the first root file, see the next root metadata file, and update to a new spec version as described in [Procedure](#procedure) before performing an update.
 
-For minor or fix version updates, or for any major version updates that do not affect root metadata, the repository simply creates and signs a new root metadata file that includes the new spec-version. To do this, the repository manager would create a new root metadata file and fill out all of the information, including the new spec-version. This file would then be signed by the root role and uploaded to the repository. Clients performing an update will download this root file and update to a new spec-version as described in [Procedure](#procedure) before performing an update.
+For example if a repository is updating from spec version 2.5.1 to spec version 3.0.0 and the current root file is named 10.root.json (using consistent snapshots), the following steps must be performed:
 
-For major changes in which the root metadata format changes in any way, the repository must create two root metadata files. The first is formatted using the old specification, but includes the new spec-version. The second is formatted using the new specification and includes the new spec-version. More specifically if a repository is updating from spec-version 2.5.1 to spec-version 3.0.0 and the current root file is named 10.root.json (using consistent snapshots), the following steps must be performed:
+* Create a new root metadata file, 11.root.json, that includes all required fields and formatting for version 2.5.1, with a next_spec_version of 3.0.0.
+* Sign 11.root.json with the root key and upload it to the repository.
+* Create a new root metadata file, 12.root.json, that includes all required fields and formatting for version 3.0.0, including a spec_version of 3.0.0 and a next_spec_version of 3.0.0.
+* Sign 12.root.json with the root key and upload it to the repository.
 
-* Create a new root metadata file, 11.root.json, that includes all required fields and formatting for version 2.5.1, except that the spec-version field lists version 3.0.0. This file will not be used to perform updates.
-* Sign 11.root.json with the root key.
-* Create a new root metadata file, 12.root.json, that includes all required fields and formatting for version 3.0.0, including a spec-version of 3.0.0.
-* Sign 12.root.json with the root key.
-* Upload the signed 11.root.json and 12.root.json to the repository at the same time.
+After these steps are performed, a client performing an update will download 11.root.json and update to spec version 3.0 as described in [Procedure](#procedure). The client will then download 12.root.json, and seeing that this is the last available root file, the client will proceed with the update.
 
-After these steps are performed, a client performing an update will download 11.root.json and update to spec-version 3.0 as described in [Procedure](#procedure). The client will then download 12.root.json, and seeing that this is the last available root file, the client will proceed with the update.
-
-For both of these cases, all other metadata files and images are handled as described in the TUF specification for the version of the specification listed in root metadata.
+All other metadata files and images are handled as described in the TUF specification for the version of the specification listed in root metadata.
 
 ## Changes to TAPs
 TAPs shall be tied to a version of the TUF specification. Once a TAP is accepted the header should be updated to include the first TUF version that will include the TAP. The Preamble Header description in TAP 1 shall be updated to include this field.
@@ -70,11 +113,17 @@ TAPs shall be tied to a version of the TUF specification. Once a TAP is accepted
 
 TUF version numbers shall be determined based on [semantic versioning](https://semver.org/). This specification describes version numbers in the format MAJOR.MINOR.PATCH. In semantic versioning, only major changes are non-backwards compatible.
 
+## Delegated Targets
+
+To support delegated targets with old spec versions, clients should maintain a version of the client from the previous major spec version. When delegation metadata indicates an old spec version in the spec_version field of the delegation, the client will determine if the spec version of the delegation is supported, and if so parse the metadata using the correct client version. For example if a client using spec version 3.0 sees a delegation that uses spec version 2.5, the client may parse this metadata using a 2.8 version of the client that is maintained on the system.
+
 ## Multiple Repositories
-If a client downloads metadata from multiple repositories as described in [TAP 4](https://github.com/theupdateframework/taps/blob/master/tap4.md), the client should check that the major version on all repositories and the client is the same. If any of the major versions do not match, the mismatch should be handled as discussed in [Procedure](#procedure). The client should not maintain multiple spec-versions for different repositories as this prevents the metadata from different repositories from being compared.
+
+If a client downloads metadata from multiple repositories as described in [TAP 4](https://github.com/theupdateframework/taps/blob/master/tap4.md), the client should check that the major version on all repositories and the client is the same. If any of the major versions do not match, the mismatch should be handled as discussed in [Procedure](#procedure). The client should not maintain multiple spec versions for different repositories as this prevents the metadata from different repositories from being compared.
 
 ## Updating Trusted Root Metadata
-After a major version change, the client must update their trusted root metadata to the root metadata that complies with the new spec-version. To do so, the client first downloads and verifies the intermediate root metadata file, then downloads and verifies the current version root metadata file. Once verified, this current version root metadata file must be stored as the trusted root metadata. In future updates, the client will start from the trusted root metadata when finding the next available update.
+
+After a major version change, the client must update their trusted root metadata to the root metadata that complies with the new spec version. To do so, the client first downloads and verifies the current version root metadata file. Once verified, this current version root metadata file must be stored as the trusted root metadata. In future updates, the client will start from the trusted root metadata when finding the next available update.
 
 # Security Analysis
 
@@ -82,7 +131,7 @@ There should be minimal security impact. Ensuring that the client is up to date 
 
 # Backwards Compatibility
 
-This TAP is backwards compatible, and should be implemented on all clients before any non-backwards compatible TAPs are released.
+This TAP adds additional fields to TUF metadata and so is not backwards compatible. In addition, this TAP should be implemented on all clients before any other non-backwards compatible TAPs are released.
 
 # Augmented Reference Implementation
 
