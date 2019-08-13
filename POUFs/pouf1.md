@@ -80,7 +80,7 @@ All signed metadata objects have the format:
 
           * KEYID is the identifier of the key signing the ROLE dictionary.
 
-          * SIGNATURE is a signature of the canonical JSON form of ROLE.
+          * SIGNATURE is a hex-encoded signature of the canonical JSON form of ROLE.
 
 
    All keys have the format:
@@ -122,7 +122,7 @@ All signed metadata objects have the format:
           "keyval" : {"public" : PUBLIC}
         }
 
-   where PUBLIC is a 32-byte string.
+   where PUBLIC is a 64 character hex string.
 
    The 'ecdsa' format is:
 
@@ -241,6 +241,11 @@ The "signed" portion of root.json is as follows:
 
    It is allowed to have a TARGETS object with no TARGETPATH elements.  This
    can be used to indicate that no target files are available.
+
+   HASHES is a dictionary that specifies one or more hashes, including
+   the cryptographic hash function.  For example: { "sha256": HASH, ... }. It
+   is required for delegated roles, and optional for all others. HASH is the
+   hexdigest of the cryptographic function computed on the target file.
 
    If defined, the elements and values of "custom" will be made available to the
    client application.  The information in "custom" is opaque to the framework
