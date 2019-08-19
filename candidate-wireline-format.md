@@ -29,9 +29,9 @@ Once created, POUFs should be added to the TAP repository to be used by others. 
 
 In order to allow POUFs to be publicly found and implemented, they should be stored on the TAP repository. POUFs may be submitted to the TAP repository using the pull request process. All POUFs will have a status label of either Draft, Proposal, Under Review, or Accepted. A POUF will not be accepted until the security audit is complete and any issues identified by the audit are addressed.
 
-POUFs will be assigned a POUF number when they are posted to the TUF repository. It is expected that each POUF will have exactly one POUF number and that any future clarifications will fall under that number. The POUF will contain a version number to keep track of changes to the POUF. In addition, the POUF will contain the version of the TUF specification implemented by that POUF. POUFs in the TAP repository will be named using their POUF number as 'pouf1.md', 'pouf2.md', etc. If a profile is updated to support a new version of TUF (or reviewed to ensure continued compliance), the version number in the profile must be updated, and the previous version should be copied into a file named 'profileX_VERSION.md' where X is the profile number and VERSION is the previous TUF version supported.
+POUFs will be assigned a POUF number when they are posted to the TUF repository. It is expected that each POUF will have exactly one POUF number and that any future clarifications will fall under that number. The POUF will contain a version number to keep track of changes to the POUF. In addition, the POUF will contain the version of the TUF specification implemented by that POUF. POUFs in the TAP repository will be named using their POUF number as 'pouf1.md', 'pouf2.md', etc. If a POUF is updated to support a new version of TUF (or reviewed to ensure continued compliance), the version number in the POUF must be updated, and the previous version should be copied into a file named 'poufX_VERSION.md' where X is the POUF number and VERSION is the previous TUF version supported.
 
-## Managing profiles
+## Managing POUFs
 
 A POUF should be based on a working TUF implementation. The implementation may be open or closed source, but the author of the POUF should attest that the POUF has been implemented. This will ensure that the formats and design decisions described in the POUF work in practice.
 
@@ -72,7 +72,7 @@ At a minimum, a POUF shall contain the following sections:
 
   Note that though delegated targets and mirrors may not be used by an implementation, it is a good idea to set up a format for these files. This will allow the POUF to be used by implementations that do use these fields.
 
-  The canonical json profile currently in TUF (under "Document Formats") provides an example of the type definitions required for the Formats section of a POUF.
+  The canonical json POUF currently in TUF (under "Document Formats") provides an example of the type definitions required for the Formats section of a POUF.
 * Security Audit: The third party security audit. For a POUF in Draft or Proposal stages, this section will be empty.
 
 ## Security Audit
