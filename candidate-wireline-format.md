@@ -72,14 +72,14 @@ At a minimum, a POUF shall contain the following sections:
 
   Note that though delegated targets and mirrors may not be used by an implementation, it is a good idea to set up a format for these files. This will allow the POUF to be used by implementations that do use these fields.
 
-  The canonical json POUF currently in TUF (under "Document Formats") provides an example of the type definitions required for the Formats section of a POUF.
+  The canonical json description currently in the TUF specification (under "Document Formats") provides an example of the type definitions required for the Formats section of a POUF.
 * Security Audit: The third party security audit. For a POUF in Draft or Proposal stages, this section will be empty.
 
 ## Security Audit
 
 The security audit will ensure that the POUF is a valid implementation of TUF and check for security flaws and vulnerabilities. For most POUFs, this audit will consist of ensuring that all fields correspond to those in the TUF specification. In addition, any libraries or added features should also be audited to be sure they do not add security flaws.
 
-The security audit will be written up and posted with the POUF and will certify that the POUF is compliant to the current version of the TUF specification. Any relevant security concerns will also be noted.
+The security audit will be written up and posted with the POUF and will certify that the POUF is compliant to the current version of the TUF specification. The audit should be done by a third party (someone who did not participate in the writing or implementation of the POUF). Any relevant security concerns will also be noted. The security audit ensures that POUFs have been reviewed by a third party, but do not guarantee security of an implementation.
 
 If security issues are found after the security audit, they should be promptly reported to both the POUF author and a TUF contributor. By initially reporting the issue privately, it can be addressed without leaving existing implementations vulnerable to a publicly posted attack. Once resolved, the issue should be added to the security audit for the POUF.
 
