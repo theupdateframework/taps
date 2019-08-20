@@ -39,7 +39,7 @@ Existing TUF clients will still expect to download and parse metadata that uses 
 
 # Rationale
 
-To allow for updates to the TUF specification while considering all of the above use cases, a client must be able to parse metadata from multiple repositories or roles that are using different versions of the TUF specification. However, secure and reliable verification of metadata requires that the TUF client is able to compare metadata from multiple sources.
+To allow for updates to the TUF specification while considering all of the above use cases, a client must be able to parse metadata from multiple repositories or roles that are using different versions of the TUF specification. However, secure and reliable verification of metadata requires that the TUF client is able to compare metadata from multiple sources. This comparison is not possible if changes to the TUF specification add or change metadata fields.
 
 Non-breaking changes may happen independently on clients and repositories. Any specification versions that do not contain breaking changes may be updated to without worrying about compatibility. This TAP clarifies how TUF version numbers are formatted so that breaking changes are distinct from non-breaking changes.
 
@@ -64,9 +64,9 @@ When a repository manager chooses to update the repository to a new major TUF sp
 
 If the repository is updated to a new minor or patch spec version, this may be done by uploading new metadata files in the new format to the proper directory. So if a repository updates from 2.0.0 to 2.1.0, the 2.1.0 metadata would go in the directory named 2.0.0. Minor version changes are backwards compatible, so clients using version 2.0.0 will still be able to parse metadata written using version 2.1.0.
 
-A repository may continue to support old major TUF spec versions by creating metadata both in the old location and in the new directory. The repository may maintain as many versions as the repository manager wishes. If there are security concerns with an old spec version, that version should be phased out as soon as possible.
+A repository may continue to support old major TUF spec versions by creating metadata both in the old location and in the new directory. The repository may maintain as many versions as the repository manager wishes. If there are security concerns with an old spec version, that version should be phased out as soon as possible. The version can be phased out by removing the directory containing that version from the repository.
 
-The version numbers used for consistent snapshots should be consistent across all supported spec versions. This means that there may be a file at 1.0.0/3.root.json as well as 2.0.0/3.root.json. These files must use the same keys so that a client can find the next root file in whichever spec version they support.
+The version numbers used for consistent snapshots should be consistent across all supported spec versions. This means that there may be a file at 1.0.0/3.root.json as well as 2.0.0/3.root.json. Root files with the same consistent snapshot number must additionally use the same keys so that a client can find the next root file in whichever spec version they support.
 
 For existing TUF clients to continue operation while this TAP is implemented, repositories should store metadata from before TUF 1.0.0 in the top level repository (there will be no directory named 0.0.0). This allows existing clients to continue downloading metadata from the repository.
 
@@ -82,10 +82,9 @@ In addition, TUF clients may maintain old versions of the client for compatibili
 
 When a TUF client downloads metadata from a repository, the client must determine which spec version to use for the download. To do this, the client looks for the highest supported numbered directory on the repository.
 
-
 * If the highest number on the repository is equal to the client spec version, the client will use this directory to download metadata.
 * If the highest number on the repository is less than the client spec version, the client may call functions from a previous spec version client to download the metadata. The client may support as many or as few versions as desired for the application. If a previous version is not available, the client shall report that an update is not possible due to an old spec version on the repository.
-* If the highest number on the repository is higher than the client spec version, the client should report that it is not using the most up to date TUF spec version then proceed with the directory that corresponds with the client spec version if available. If no such directory exists, the client terminates the update.
+* If the highest number on the repository is higher than the client spec version, the client should report to the user that it is not using the most up to date TUF spec version then proceed with the directory that corresponds with the client spec version if available. If no such directory exists, the client terminates the update.
 
 Once the supported directory is determined, the client shall attempt the update using the metadata in this directory.
 
@@ -95,7 +94,7 @@ Alternatively, if the same client downloads metadata from a repository with dire
 
 Once the supported directory is determined, the client must validate root metadata from this directory. If the currently trusted root file uses a version other than the supported version, the client will look for the next root file first in the supported version, then the previous versions until the next root file is found or the currently trusted root file's version is reached. All root files should be verified using the major version of the TUF client that corresponds with the major version of the root file.
 
-So, if the currently trusted root file is named 4.root.json and uses version 1.0.0 and the highest supported version is 3.0.0, the client will look for 5.root.json first in 3.0.0, then 2.0.0, then 1.0.0. If this file is found, the client will look for 6.root.json using the same process.
+So, if the currently trusted root file is named 4.root.json and uses version 1.0.0 and the highest supported version is 3.0.0, the client will look for 5.root.json first in 3.0.0, then 2.0.0, then 1.0.0. If this file is found, the client will look for 6.root.json using the same process. To facilitate this, the client should maintain functions to parse root files from previous spec versions. If the client does not support the spec version of a root file, the client shall terminate the update and report the spec version mismatch.
 
 ## Changes to map file procedure
 
