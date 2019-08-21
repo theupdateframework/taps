@@ -21,31 +21,35 @@ This TAP clarifies the point that, even though different wireline formats are ex
 
 # Rationale
 
-A POUF is needed if a TUF implementation needs to communicate with other implementations. The POUF will include all definitions necessary to create a compatible implementation, including all of the data types and metadata files.
+A POUF is needed if a TUF implementation needs to communicate with other implementations. The POUF will include all definitions necessary to create a compatible implementation, including all of the data types and metadata files. To facilitate the use of POUFs, we describe a standard format for the information to be provided in a POUF.
 
-Once created, POUFs should be added to the TAP repository to be used by others. This makes the POUF available to the TUF community. All POUFs should receive a security audit (described below) by a third party before it is used to ensure flaws are not propagated. The security audit ensures that the POUF contains all fields necessary for a TUF implementation and that the encoding method or design decisions do not introduce ambiguity or an insecure implementation.
+Once created, POUFs should be stored publicly to be available to any TUF implementer who wants to interoperate with that POUF. The TAP repository will contain links to POUFs to allow them to be centrally accessed. The TUF maintainers do not verify the accuracy or security of POUFs, and so only host links to POUFs.
 
-## Storage on the TAP Repository
-
-In order to allow POUFs to be publicly found and implemented, they should be stored on the TAP repository. POUFs may be submitted to the TAP repository using the pull request process. All POUFs will have a status label of either Draft, Proposal, Under Review, or Accepted. A POUF will not be accepted until the security audit is complete and any issues identified by the audit are addressed.
-
-POUFs will be assigned a POUF number when they are posted to the TUF repository. It is expected that each POUF will have exactly one POUF number and that any future clarifications will fall under that number. The POUF will contain a version number to keep track of changes to the POUF. In addition, the POUF will contain the version of the TUF specification implemented by that POUF. POUFs in the TAP repository will be named using their POUF number as 'pouf1.md', 'pouf2.md', etc. If a POUF is updated to support a new version of TUF (or reviewed to ensure continued compliance), the version number in the POUF must be updated, and the previous version should be copied into a file named 'poufX_VERSION.md' where X is the POUF number and VERSION is the previous TUF version supported.
-
-## Managing POUFs
-
-A POUF should be based on a working TUF implementation. The implementation may be open or closed source, but the author of the POUF should attest that the POUF has been implemented. This will ensure that the formats and design decisions described in the POUF work in practice.
-
-Developers should share POUFs to allow for the creation of compatible TUF implementations. The TAP repository provides a centralized storage location, but an organization may also choose to store POUFs locally. It is recommended that POUFs be made available on the TAP repository to allow for community review.
-
-POUFs are not generic. While a given POUF will allow all implementations that adopt it to work together, other POUFs on the repository may not support interoperability. For example, implementers a and b may implement POUF p1. This means that a and b will be able to interoperate, but they will not necessarily be able to interoperate with implementers of POUF p2. It is important that implementations list in their documentation the POUF(s) that are supported as well as the version numbers for these POUF(s).
-
-The POUF number does not need to be in the TUF metadata of an implementation. A POUF may choose to include the POUF version number in the root metadata to allow for breaking changes to be made to the POUF (see TAP x for how to handle breaking changes). However, it is expected that in most cases POUFs will not change frequently, so the decision of whether to include the POUF version number is left to the POUF author.
+We additionally describe an optional security audit process for POUFs that provides some additional oversight to ensure that a POUF does not violate the security guarantees of TUF. This audit is not required as security of implementation details is still left to implementers, but it provides a process for those interested in additional auditing.
 
 # Specification
 
-POUFs contain some metadata about the POUF, including the POUF number, POUF version, TUF version, and authors, followed by the Protocol, Operations, Usage, and Formats sections. These sections are described in more detail in [POUF format](#POUF-format). Together, the sections of a POUF should include enough information to create an interoperable TUF implementation.
+A POUF should be based on a working TUF implementation. The implementation may be open or closed source, but the author of the POUF should attest that the POUF has been implemented. This will ensure that the formats and design decisions described in the POUF work in practice and that the POUF provides a complete picture of a TUF implementation.
 
-## POUF format
+A POUF will have a status as Draft, Accepted, or Obsolete. A draft POUF is still in progress, an accepted POUF is a completed POUF, and an obsolete POUF is outdated, but maintained for backwards compatibility. These statuses allow POUFs in all stages to be made available while ensuring that the reader is aware of the document's current status.
+
+If a POUF changes over time, new version numbers may be assigned to the POUF. The version number will be stored in the POUF header as described in {#pouf-format}. New versions may be created to account for changes to the TUF specification or other design changes. Any changes that make a POUF not backwards compatible should result in a new version number. The format and management of version numbers is left to the POUF author, but standard formats like Semantic Versioning (https://semver.org/) are recommended for clarity and consistency with TUF.
+
+POUFs are not generic. While a given POUF will allow all implementations that adopt it to work together, other POUFs on the repository may not support interoperability. For example, implementers a and b may implement POUF p1. This means that a and b will be able to interoperate, but they will not necessarily be able to interoperate with implementers of POUF p2. This system allows a variety of wireline formats and implementation decisions to be made by different TUF implementations, while still providing a structure for interoperability. It is important that implementations list in their documentation the POUF(s) that are supported as well as the version numbers for these POUF(s) so that other implementers looking to interoperate may refer to the relevant POUF.
+
+The POUF number does not need to be in the TUF metadata of an implementation. A POUF may choose to include the POUF version number in the root metadata to ensure that breaking changes to the POUF may be managed. This change to root metadata, as well as how breaking POUF changes would be managed are left to the POUF author. However, it is expected that in most cases POUFs will not change frequently, so for simplicity any POUF information should be left out of TUF metadata unless otherwise specified in a POUF.
+
+We recommend a security audit for POUFs as described in {#security-audit}. This audit ensures that the POUF follows the TUF specification and that the encoding method or design decisions do not introduce ambiguity or an insecure implementation. This does not guarantee security, but provides some oversight.
+
+## POUF Storage
+
+The author of a POUF should store the POUF in a public location that can be accessed by other TUF implementers. Public storage also allows for community review. In addition to storing the current POUF, the author may maintain old versions of the POUF to allow existing implementations to continue to refer to them. Old versions will have a unique version number in the header as described in {#pouf-format}, and may additionally be named according to the POUF version. For example a POUF repository may contain two documents, POUFNAME-1.md and POUFNAME-2.md, that contain version 1 and 2 of the POUF respectively.
+
+A link to a public POUF can be added to the TAP repository through the pull request process. A document in the TAP repository at POUFs/POUF-links will contain a list of POUF numbers and a link to the associated POUF. The POUF number is assigned when the POUF link is added to the repository. POUF links may be a link to the POUF document, or a link to a repository or other location that contains the POUF. The latter allows POUF authors to maintain old versions of the POUF all in the same location.
+
+## POUF Format
+
+POUFs contain some metadata about the POUF, including the POUF number, POUF version, TUF version, and authors, followed by the Protocol, Operations, Usage, and Formats sections. Together, the sections of a POUF should include enough information to create an interoperable TUF implementation.
 
 At a minimum, a POUF shall contain the following sections:
 * Header: An RFC 822 style header preamble containing:
@@ -54,7 +58,7 @@ At a minimum, a POUF shall contain the following sections:
   * Version:
   * Last-Modified:
   * Author: optional list of authors' real names and email addrs
-  * Status: Draft / Proposal / Under Review / Accepted
+  * Status: Draft / Accepted / Obsolete
   * TUF Version Implemented:
   * Content-Type: text/markdown
   * Created: date created on, in dd-mmm-yyyy format
@@ -73,21 +77,21 @@ At a minimum, a POUF shall contain the following sections:
   Note that though delegated targets and mirrors may not be used by an implementation, it is a good idea to set up a format for these files. This will allow the POUF to be used by implementations that do use these fields.
 
   The canonical json description currently in the TUF specification (under "Document Formats") provides an example of the type definitions required for the Formats section of a POUF.
-* Security Audit: The third party security audit. For a POUF in Draft or Proposal stages, this section will be empty.
+* Security Audit: The third party security audit as described in {#security-audit}.
 
 ## Security Audit
 
-The security audit will ensure that the POUF is a valid implementation of TUF and check for security flaws and vulnerabilities. For most POUFs, this audit will consist of ensuring that all fields correspond to those in the TUF specification. In addition, any libraries or added features should also be audited to be sure they do not add security flaws.
+A security audit checks that the POUF is a valid implementation of TUF and check for security flaws and vulnerabilities. For most POUFs, this audit will consist of ensuring that all fields correspond to those in the TUF specification. In addition, any libraries or added features should also be audited to be sure they do not add security flaws.
 
-The security audit will be written up and posted with the POUF and will certify that the POUF is compliant to the current version of the TUF specification. The audit should be done by a third party (someone who did not participate in the writing or implementation of the POUF). Any relevant security concerns will also be noted. The security audit ensures that POUFs have been reviewed by a third party, but do not guarantee security of an implementation.
+The security audit should be written up and posted with the POUF to certify that the POUF is compliant to the current version of the TUF specification. The audit should be done by a third party (someone who did not participate in the writing or implementation of the POUF). Any relevant security concerns will also be noted. The security audit ensures that POUFs have been reviewed by a third party, but do not guarantee security of an implementation.
 
-If security issues are found after the security audit, they should be promptly reported to both the POUF author and a TUF contributor. By initially reporting the issue privately, it can be addressed without leaving existing implementations vulnerable to a publicly posted attack. Once resolved, the issue should be added to the security audit for the POUF.
+If security issues are found outside the security audit, they should be promptly reported to both the POUF author and a TUF contributor. By initially reporting the issue privately, it can be addressed without leaving existing implementations vulnerable to a publicly posted attack. Once resolved, the issue should be added to the security audit for the POUF.
 
 The canonical json wireline format that is currently included in the spec has been audited as part of TUF security audits. As such, additional auditing of this format is not necessary.
 
 # Security Analysis
 
-Security audits ensure POUFs have a minimal security impact on the TUF implementation. Implementations are still responsible for ensuring that they follow good secure programming practices and properly implement the TUF specification.
+This TAP does not affect the security of TUF. An implementation that uses a POUF will be able to refer to the security audit for that POUF for security analysis. Implementations using POUFs are still responsible for ensuring that they follow good secure programming practices and properly implement the TUF specification.
 
 # Backwards Compatibility
 
