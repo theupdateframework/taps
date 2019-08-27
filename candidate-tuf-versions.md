@@ -131,7 +131,7 @@ There should be minimal security impact. Ensuring that the client is up to date 
 
 # Backwards Compatibility
 
-This TAP is backwards compatible and should be implemented on all clients before any other non-backwards compatible TAPs are released.
+This TAP is backwards compatible and should be implemented on all repositories before any non-backwards compatible TAPs are released.
 
 # Augmented Reference Implementation
 
