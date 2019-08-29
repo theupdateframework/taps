@@ -18,12 +18,12 @@ The POUF format was inspired by [TAPs](https://github.com/theupdateframework/tap
 The designers of TUF made a conscious choice not to specify a wireline format.
 This was done to accommodate adopters who needed to maintain their existing wireline format due to interactions with other technologies, the requirements of legacy systems, or other unique design parameters.
 For example, it is possible to implement TUF with all of the data stored in JSON files, XML files, or a binary format.
-The choice of file type or wireline format does not impact the ability to correctly respond to key compromise, so long as the TUF spec is followed.
+The choice of file type or wireline format does not impact the ability to correctly respond to key compromise, so long as the TUF specification is followed.
 However, without a shared wireline format, differing TUF implementations will not be able to interoperate.
 
-This TAP clarifies the point that, even though different wireline formats are expressly permitted, a mechanism is needed to allow different implementations of TUF to work together.
-This is done by creating publicly implementable, compatible wireline formats, which are called POUFs.
-In addition, POUFs contain details of any design decisions including additional metadata fields, encodings, and encryption that affect the operation of the implementation on the wire. POUFs allow different TUF implementations with the same POUF to interoperate.
+Even though different wireline formats are expressly permitted, a mechanism is needed to allow different implementations of TUF to work together.
+This TAP describes a process for creating for publicly implementable, compatible wireline formats, which are called POUFs.
+In addition to wireline format, POUFs contain details of any design decisions including additional metadata fields, encodings, and encryption that affect the operation of the implementation on the wire. POUFs allow different TUF implementations with the same POUF to interoperate.
 
 # Rationale
 
@@ -53,14 +53,14 @@ In order for a POUF implementer to know if their implementation needs to be upda
 The format and management of version numbers is left to the POUF author, but standard formats like Semantic Versioning (https://semver.org/) are recommended for clarity and consistency with TUF. In addition, POUF authors may refer to how TUF manages updates to ensure that non backwards compatible POUFs do not interfere with TUF communication.
 
 When changes to a POUF are not backwards compatible, the POUF author can deal with this in a number of ways.
-If the breaking change is due to a breaking change to the TUF specification, the update can be handled through the breaking changes process for TUF.
+If the breaking change is due to a breaking change to the TUF specification, the update can be handled through the [breaking changes process for TUF](https://github.com/theupdateframework/taps/pull/107).
 Alternatively, if a breaking change is made to a POUF separate from a corresponding breaking change in the TUF specification, the POUF author should determine how to disseminate this update to clients and repositories that implement the POUF.
 If these breaking changes are anticipated at the time of POUF creation, the author may choose to include the POUF version number in Root metadata and require that clients check this POUF version number for compatibility using a similar process to how TUF handles breaking changes.
 Alternatively, a POUF author could create a new POUF that includes the breaking changes.
 All of these decisions about breaking changes to POUFs are left to the POUF author to allow for flexibility.
 
 Not all TUF implementations will use the same wireline format.
-To support this flexibility while still providing a structure for interoperability, POUFs are not generic. While a given POUF will allow all implementations that adopt it to work together, POUFs may or may not be able to interoperate with each other.
+To support this flexibility while still providing a structure for interoperability, each POUF is independent. While a given POUF will allow all implementations that adopt it to work together, POUFs may or may not be able to interoperate with each other.
 For example, implementers a and b may implement POUF p1.
 This means that a and b will be able to interoperate, but they will not necessarily be able to interoperate with implementers of POUF p2.
 It is important that implementations list in their documentation the POUF(s) that are supported as well as the version numbers for these POUF(s) so that other implementers looking to interoperate may refer to the relevant POUF.
@@ -118,7 +118,7 @@ At a minimum, a POUF shall contain the following sections:
 
 ## Security Audit
 
-A security audit checks that the POUF is a valid implementation of TUF and check for security flaws and vulnerabilities.
+An optional security audit checks that a POUF is a valid implementation of TUF and checks for security flaws and vulnerabilities.
 For most POUFs, this audit will consist of ensuring that all fields correspond to those in the TUF specification.
 In addition, any libraries or added features should also be audited to be sure they do not add security flaws.
 
@@ -126,13 +126,13 @@ To ensure the audit is available to all implementers of a POUF, it should be wri
 A public posting of the audit allows implementers to make informed decisions about what POUF they wish to use.
 The audit will state that the POUF is compliant to the current version of the TUF specification and note any relevant security concerns.
 It should be done by a third party (someone who did not participate in the writing or implementation of the POUF).
-Like any audit, this process ensures that POUFs have been reviewed by a third party, but does not guarantee security of an implementation.
+Like any audit this process ensures that POUFs have been reviewed by a third party, but does not guarantee security of an implementation.
 
 If security issues are found outside the security audit, they should be promptly reported to both the POUF author and a TUF contributor.
 By initially reporting the issue privately, it can be addressed without leaving existing implementations vulnerable to a publicly posted attack.
 Once resolved, the issue should be added to the security audit for the POUF.
 
-The canonical json wireline format that is currently included in the spec has been audited as part of TUF security audits.
+The canonical json wireline format that is currently included in the TUF specification has been audited as part of TUF security audits.
 As such, additional auditing of this format is not necessary.
 
 # Security Analysis
@@ -143,7 +143,7 @@ Implementations using POUFs are still responsible for ensuring that they follow 
 
 # Backwards Compatibility
 
-This TAP is backwards compatible as existing implementations may continue to use the canonical json in the original spec.
+This TAP is backwards compatible as existing implementations may continue to use the canonical json in the original TUF specification.
 
 # Augmented Reference Implementation
 
