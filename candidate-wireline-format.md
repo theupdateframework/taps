@@ -22,7 +22,7 @@ The choice of file type or wireline format does not impact the ability to correc
 However, without a shared wireline format, differing TUF implementations will not be able to interoperate.
 
 Even though different wireline formats are expressly permitted, a mechanism is needed to allow different implementations of TUF to work together.
-This TAP describes a process for creating for publicly implementable, compatible wireline formats, which are called POUFs.
+The mechanism described in this TAP, a POUF, is a publicly implementable and compatible wireline format.
 In addition to wireline format, POUFs contain details of any design decisions including additional metadata fields, encodings, and encryption that affect the operation of the implementation on the wire. POUFs allow different TUF implementations with the same POUF to interoperate.
 
 # Rationale
@@ -60,7 +60,8 @@ Alternatively, a POUF author could create a new POUF that includes the breaking 
 All of these decisions about breaking changes to POUFs are left to the POUF author to allow for flexibility.
 
 Not all TUF implementations will use the same wireline format.
-To support this flexibility while still providing a structure for interoperability, each POUF is independent. While a given POUF will allow all implementations that adopt it to work together, POUFs may or may not be able to interoperate with each other.
+Each different wireline format used by a TUF implementation can be represented by a POUF.
+While a given POUF will allow all implementations that adopt it to work together, POUFs may or may not be able to interoperate with each other.
 For example, implementers a and b may implement POUF p1.
 This means that a and b will be able to interoperate, but they will not necessarily be able to interoperate with implementers of POUF p2.
 It is important that implementations list in their documentation the POUF(s) that are supported as well as the version numbers for these POUF(s) so that other implementers looking to interoperate may refer to the relevant POUF.
