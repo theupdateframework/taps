@@ -1,5 +1,5 @@
 * TAP:
-* Title: Optional POUFs for Interoperability
+* Title: Using POUFs for Interoperability
 * Version: 1
 * Last-Modified: 26-June-2019
 * Author: Marina Moore, Santiago Torres, Trishank Kuppusamy, Sebastien Awwad, Justin Cappos
@@ -21,7 +21,7 @@ For example, it is possible to implement TUF with all of the data stored in JSON
 The choice of file type or wireline format does not impact the ability to correctly respond to key compromise, so long as the TUF specification is followed.
 However, without a shared wireline format, differing TUF implementations will not be able to interoperate.
 
-Even though different wireline formats are expressly permitted, a mechanism is needed to allow different implementations of TUF to work together.
+Even though different wireline formats are expressly permitted, it would be helpful to have a mechanism that allows different implementations of TUF to work together if they elect to do so.
 The mechanism described in this TAP, a POUF, is a publicly implementable and compatible wireline format.
 In addition to wireline format, POUFs contain details of any design decisions including additional metadata fields, encodings, and encryption that affect the operation of the implementation on the wire. POUFs allow different TUF implementations with the same POUF to interoperate.
 
@@ -42,13 +42,15 @@ This audit is not required as security of implementation details is still left t
 
 To ensure that the formats and design decisions described in a POUF work in practice, a POUF should be based on a working TUF implementation.
 The implementation may be open or closed source, but the author of the POUF should attest that the POUF has been implemented and that it provides a complete picture of a TUF implementation.
+This ensures that the POUF includes all elements for interoperability with the implementation.
 
-The current status of a POUF will be described with a status of Draft, Accepted, or Obsolete.
-A draft POUF is still in progress, an accepted POUF is a completed POUF, and an obsolete POUF is outdated, but maintained for backwards compatibility.
-These statuses allow POUFs in all stages to be made available while clarifying which are ready to be implemented.
+The current status of a POUF will be described with a status of Draft, In Use, or Obsolete.
+A draft POUF is still in progress, an in use POUF is a completed POUF, and an obsolete POUF is outdated, but maintained for backwards compatibility.
+These statuses are maintained by the POUF author and included in the header of the POUF.
+They allow POUFs in all stages to be made available while clarifying which are ready to be implemented.
 
 POUFs may be changed over time to account for changes to the TUF specification, updates to protocols, or other design changes.
-To indicate that a change has occurred, new version numbers may be assigned to the POUF. The version number will be stored in the POUF header as described in {#pouf-format}.
+To indicate that a change has occurred, new version numbers should be assigned to the POUF. The version number will be stored in the POUF header as described in {#pouf-format}.
 In order for a POUF implementer to know if their implementation needs to be updated, any changes that make a POUF not backwards compatible should result in a new version number.
 The format and management of version numbers is left to the POUF author, but standard formats like Semantic Versioning (https://semver.org/) are recommended for clarity and consistency with TUF. In addition, POUF authors may refer to how TUF manages updates to ensure that non backwards compatible POUFs do not interfere with TUF communication.
 
@@ -59,8 +61,7 @@ If these breaking changes are anticipated at the time of POUF creation, the auth
 Alternatively, a POUF author could create a new POUF that includes the breaking changes.
 All of these decisions about breaking changes to POUFs are left to the POUF author to allow for flexibility.
 
-Not all TUF implementations will use the same wireline format.
-Each different wireline format used by a TUF implementation can be represented by a POUF.
+Not all TUF implementations will use the same wireline format, so there will be multiple POUFs for TUF.
 While a given POUF will allow all implementations that adopt it to work together, POUFs may or may not be able to interoperate with each other.
 For example, implementers a and b may implement POUF p1.
 This means that a and b will be able to interoperate, but they will not necessarily be able to interoperate with implementers of POUF p2.
@@ -95,11 +96,11 @@ At a minimum, a POUF shall contain the following sections:
   * Version:
   * Last-Modified:
   * Author: optional list of authors' real names and email addrs
-  * Status: Draft / Accepted / Obsolete
+  * Status: Draft / In Use / Obsolete
   * TUF Version Implemented:
   * Content-Type: text/markdown
   * Created: date created on, in dd-mmm-yyyy format
-* Abstract: Description of the POUF including a rationale for design decisions, implementation details, or other useful information.
+* Abstract: Description of the POUF including an overview of design decisions. If the POUF version has been updated, the changes to the POUF should be described here.
 * Protocol: The protocol section describes the networking operations of the implementation. This includes the protocol used to transmit data, the location and filenames of any hosted files, and a Message Handler Table. The Message Handler Table will list all messages transmitted by the implementation. Each entry in the Message Handler Table will include the sender, receiver, data, and expected response. All messages in this table must be implemented by anyone using the POUF.
 * Operations: The operations section contains a description of any design elements or features that differ from the TUF specification. This section will describe any optional or additional features that are required for compatibility. The format of data does not need to be described here.
 * Usage: The usage section contains an overview of how data is managed by the implementation. This includes key management, key rotation, server setup, supply chain security, and device registration.
@@ -109,10 +110,11 @@ At a minimum, a POUF shall contain the following sections:
   * targets
   * delegated targets
   * timestamp
-  * mirrors
 
-  Note that though delegated targets and mirrors may not be used by an implementation, it is a good idea to set up a format for these files.
-  This will allow the POUF to be used by implementations that do use these fields.
+  Note that though delegated targets may not be used by an implementation, it is a good idea to set up a format for them.
+  This will allow the POUF to be used by implementations that do use delegated targets.
+
+  If mirrors are supported by the POUF, their format should be described here. Information about how mirrors are used may be included in the Operations section of the POUF.
 
   The canonical json description currently in the TUF specification (under "Document Formats") provides an example of the type definitions required for the Formats section of a POUF.
 * Security Audit: The third party security audit as described in {#security-audit}.
