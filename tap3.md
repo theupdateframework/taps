@@ -7,6 +7,7 @@
 * Status: Accepted
 * Content-Type: text/markdown
 * Created: 16-Sep-2016
+* TUF-Version: 1.0.0
 
 # Abstract
 

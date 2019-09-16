@@ -8,6 +8,7 @@
 * Content-Type: text/markdown
 * Requires: [TAP 5](tap5.md)
 * Created: 09-Sep-2016
+* TUF-Version: 1.0.0
 
 # Abstract
 This TAP offers guidance for conducting a secure search for particular targets

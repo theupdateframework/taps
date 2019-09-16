@@ -7,6 +7,7 @@
 * Content-Type: text/markdown
 * Created: 19-July-2017
 * Post-History: 25-July-2017
+* TUF-Version: 1.0.0
 
 # Abstract
 
