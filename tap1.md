@@ -105,7 +105,7 @@ The format of a TAP is specified with a Content-Type header. The acceptable valu
 
 The Created header records the date that the TAP was assigned a number, while Post-History is used to record the dates of when new versions of the TAP are posted to the TUF mailing list.  Both headers should be in dd-mmm-yyyy format, e.g. 14-Aug-2001.
 
-TAPs will typically have a TUF-Version header which indicates the version of TUF that the feature will be released with. TAPs without a TUF-Version header indicate interoperability standards that will initially be supported through external libraries and tools, and then supplemented by a later TAP to add support to the Reference Implementation.
+TAPs will typically have a TUF-Version header which indicates the version of TUF that the feature will be released with. TAPs that refer to processes or recommendations do not require a TUF-Version header.
 
 TAPs may have a Requires header, indicating the TAP numbers that this TAP depends on.
 
