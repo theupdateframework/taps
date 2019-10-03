@@ -43,7 +43,7 @@ To allow for updates to the TUF specification while considering all of the above
 
 As they do not affect compatibility, non-breaking changes may happen independently on clients and repositories. Any specification versions that do not contain breaking changes may be updated to at any time without worrying about compatibility. This TAP clarifies how TUF version numbers are formatted so that breaking changes are distinct from non-breaking changes.
 
-In this TAP, repositories support multiple versions by separating versions with breaking changes into different directories. These directories allow a client to choose the most recent metadata they support while allowing for flexibility in how long a client will take to update to a new spec version. Similarly, allowing the client to maintain multiple versions allows the client to use metadata from multiple directories that are not in communication and so do not coordinate an update to the most recent TUF specification.
+In order to allow clients to update independently of repositories, the repositories need to continue support for old TUF versions for some period of time after updating. In this TAP, repositories support multiple versions by separating versions with breaking changes into different directories. These directories allow a client to choose the most recent metadata they support while allowing for flexibility in how long a client will take to update to a new spec version. Similarly, allowing the client to maintain multiple versions allows the client to use metadata from multiple directories that are not in communication and so do not coordinate an update to the most recent TUF specification.
 
 The directory structure for breaking changes can also be used to identify the spec version used by a delegation. When parsing a delegation, a client can determine what spec versions are supported by the client and use a supported version to validate the metadata.
 
@@ -87,7 +87,7 @@ For existing TUF clients to continue operation while this TAP is implemented, re
 
 TUF clients must make a few changes to support changes to the TUF specification.
 
-A client must keep track of its version of the TUF specification. To do so, a global variable or other local storage option should contain the client spec version. For simplicity, this field should be formatted according to Semantic Versioning so that it can be directly compared to the spec version in root metadata.
+In order to find compatible updates on a repository, a client must keep track of its version of the TUF specification. To do so, a global variable or other local storage option should contain the client spec version. For simplicity, this field should be formatted according to Semantic Versioning so that it can be directly compared to the spec version in root metadata.
 
 For compatibility, TUF clients may maintain old versions of the client that support previous spec versions. These old versions can be used if the client downloads metadata from a repository or delegated role that does not support the current TUF specification. To allow for this behavior, when a new version of the TUF client is implemented it may contain the ability to call certain functions from the old TUF client for parsing and validating metadata.
 
