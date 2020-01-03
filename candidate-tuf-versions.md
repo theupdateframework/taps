@@ -21,7 +21,7 @@ To manage breaking changes without loss of functionality, this TAP requires two
 changes: one to the way the TUF specification manages versions, and the other to
 how it performs updates. The former is accomplished by having this TAP require
 that the specification use Semantic Versioning to separate breaking from
-non-breaking changes. And the latter is achieved by requiring both clients and
+non-breaking changes. The latter is achieved by requiring both clients and
 repositories to maintain support for older versions of the TUF specification so
 reliable updates can continue throughout the process of the specification
 upgrade. To do so, repositories will generate metadata for multiple TUF
@@ -128,7 +128,7 @@ number increase, while non-breaking changes would warrant only a MINOR version
 number increase. In addition, Semantic Versioning has a standard way to format
 version numbers so that they can be parsed and compared across implementations.
 
-To address the second issue, of accessing a compatible version, there are three
+To address the second issue of accessing a compatible version, there are three
 possible approaches. First, each repository could maintain multiple TUF versions
 while the clients only maintain one version. In this case, TUF clients could not
 use metadata from multiple repositories unless they all support the same TUF
@@ -145,7 +145,7 @@ changes on both clients and repositories. This requires both clients and
 repositories to maintain multiple versions of the TUF spec, as well as changes
 to the way repositories store metadata and clients parse this metadata.
 
-For the repositories this means continuing support for old TUF versions for some
+For repositories, this means continuing support for old TUF versions for some
 period of time after upgrading. This grace period gives the client time to
 upgrade to a new specification version. Versions with breaking changes are kept
 in separate directories that allow a client to choose the most recent metadata
@@ -316,7 +316,7 @@ version is not available, the client shall report that an update can not be
 performed due to an old spec version on the repository.
 * If the latest version on the repository is higher than the client spec
 version, the client should report to the user that it is not using the most up
-to date version then proceed with the directory that corresponds with the latest
+to date version, and then proceed with the directory that corresponds with the latest
 client spec version, if available. If no such directory exists, the client
 terminates the update.
 
