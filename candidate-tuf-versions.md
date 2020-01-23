@@ -11,13 +11,16 @@
 
 The TUF specification does not currently support breaking changes or changes
 that are not backwards compatible. If a repository and a client are not using
-the same version of the TUF specification, differences in metadata format may mean that metadata cannot be safely and
-reliably verified. This TAP addresses this clash of versions by allowing TUF
+the same version of the TUF specification, differences in metadata format may
+mean that metadata cannot be safely and reliably verified. Any changes that
+affect the metadata in this way are considered breaking changes. This TAP
+addresses this clash of versions by allowing TUF
 implementations to independently manage updates on clients and repositories.
 This in turn ensures that TUF will continue functioning after breaking changes
 are implemented.
 
-To manage breaking changes without loss of functionality, this TAP requires two
+To allow TUF implementers to adopt breaking changes without an interruption to
+providing and verifying updates, this TAP requires two
 changes: one to the way the TUF specification manages versions, and the other to
 how TUF implementations perform updates. The former is accomplished by having this TAP require
 that the specification use Semantic Versioning to separate breaking from
@@ -34,23 +37,27 @@ recent specification version supported by both the client and the repository.
 # Motivation
 
 Various TAPs, including TAPs 3 and 8, propose changes that are not backwards
-compatible. Because these changes are not compatible with previous TUF versions,
+compatible. These non backwards compatible, or breaking, changes add or change
+functionality such that the new version is not compatible with previous versions.
+Because these changes are not compatible with previous TUF versions,
 current implementations that use the existing specification can not access the
 new features in these TAPs. By creating a way to deal with non-backwards
-compatible (breaking) changes, TUF will be able to handle a variety of use
-cases, including those that appear below.
+compatible (breaking) changes, TUF will be able to continuously provide secure
+updates when non backwards compatible changes are made to the repository or
+client. The use cases addressed in this TAP are listed below.
 
 ## Use case 1: A repository updates to a new TUF spec version
 
 As new features become available in the TUF specification, repositories may wish
 to upgrade to a new version. This could include adding TAPs with breaking
 changes. When the repository upgrades, clients that use an older version of the
-TUF spec will no longer be able to safely parse metadata from the repository.
+TUF spec will no longer be able to provide the security properties of TUF when
+parsing metadata from the repository as the fields in the metadata may have changed.
 However, repositories and clients may be managed by different people with
 different interests who may not be able to coordinate the upgrade to a new TUF version.
 To resolve this problem, clients will first need a way to determine whether
 their version of TUF spec is compatible with the version used by the repository.
-This is to ensure that clients always parse metadata according to the version
+This is to ensure that clients always parse metadata according to the TUF version
 that generated that metadata. Then, they will need some way to process updates
 after this upgrade occurs on the repository to ensure reliable access to
 updates, even if they are not able to upgrade immediately due to development
@@ -62,8 +69,8 @@ Just as a repository may be upgraded, a TUF client may wish to upgrade to a new
 TUF spec version to use new features. When the client implements an upgrade that
 includes a breaking change, it cannot be sure that all repositories have also
 upgraded to the new specification version. Therefore, after the client upgrades
-they must ensure that any metadata downloaded from a repository was generated
-using the new version. If the repository is using an older version, the client
+they must ensure that any metadata downloaded from a repository is parsed using
+a compatible TUF version. If the repository is using an older version, the client
 should have some way to allow the update to proceed.
 
 ## Use case 3: A delegated targets role uses a different TUF spec version than the repository
@@ -84,11 +91,10 @@ be able to use multiple repositories that do not use the same version of TUF.
 For example, a client may download metadata from one repository that uses TUF
 version 1.0.0 and another repository that uses version 2.0.0.
 
-## Use case 5: Allowing Backwards Compatibility
+## Use case 5: Backwards compatibility for existing clients
 
-Existing TUF clients will still expect to download and parse metadata without
-knowledge of the supported TUF version, even after this TAP is implemented on
-repositories. Before this TAP there was no method for determining compatibility
+Existing TUF clients (written before this TAP is implemented) will still expect
+to download and parse metadata. Before this TAP there was no method for determining compatibility
 between a client and a repository, so existing TUF repositories should continue
 to distribute metadata using their existing method to support existing clients. This
 means that this mechanism for allowing backwards compatible updates must itself
@@ -167,6 +173,22 @@ recommended that clients maintain functions that can be used to validate
 metadata from previous TUF specification versions. These functions allow a
 client to maintain old versions of the specification while still supporting the
 most recent version.
+
+The top level TUF metadata (root, snapshot, timestamp, and top-level targets)
+used to install an update should all implement the same TUF specification
+version. A specification change may rely on more than one metadata file (for
+example a change in the signing process would affect all metadata types), so
+using the same specification version for top level metadata allows for these
+large changes to the specification. However, delegated targets may not be
+managed by the same parties as the top level metadata. For this reason, this TAP
+allows clients to use a different TUF specification version for delegated
+targets. This compromise allows TUF specification changes to affect multiple
+metadata files while allowing flexibility in how repositories and delegations
+are managed.
+
+So, during the course of an update a client could use 4.0.0_parse_root,
+4.0.0_parse_snapshot, 4.0.0_parse_timestamp, 4.0.0_parse_targets,
+4.0.0_parse_delegation, and 3.0.0_parse_delegation.
 
 
 # Specification
