@@ -9,7 +9,7 @@
 
 # Abstract
 
-The TUF specification does not currently support breaking changes or changes
+The TUF specification does not currently support changes
 that are not backwards compatible. If a repository and a client are not using
 the same version of the TUF specification, differences in metadata format may
 mean that metadata cannot be safely and reliably verified. Any changes that
@@ -36,14 +36,12 @@ recent specification version supported by both the client and the repository.
 
 # Motivation
 
-Various TAPs, including TAPs 3 and 8, propose changes that are not backwards
-compatible. These non backwards compatible, or breaking, changes add or change
-functionality such that the new version is not compatible with previous versions.
+Various TAPs, including TAPs 3 and 8, propose breaking changes.
 Because these changes are not compatible with previous TUF versions,
-current implementations that use the existing specification can not access the
-new features in these TAPs. By creating a way to deal with non-backwards
-compatible (breaking) changes, TUF will be able to continuously provide secure
-updates when non backwards compatible changes are made to the repository or
+current implementations that use the existing specification cannot access the
+new features in these TAPs. By creating a way to deal with
+breaking changes, TUF will be able to continuously provide secure
+updates when breaking changes are made to the repository or
 client. The use cases addressed in this TAP are listed below.
 
 ## Use case 1: A repository updates to a new TUF spec version
@@ -179,10 +177,12 @@ used to install an update should all implement the same TUF specification
 version. A specification change may rely on more than one metadata file (for
 example a change in the signing process would affect all metadata types), so
 using the same specification version for top level metadata allows for these
-large changes to the specification. However, delegated targets may not be
+large changes to the specification. For information about how this relates to
+url pinning and TAP 5, see [Special Cases](#tap-5). However, delegated targets may not be
 managed by the same parties as the top level metadata. For this reason, this TAP
 allows clients to use a different TUF specification version for delegated
-targets. This compromise allows TUF specification changes to affect multiple
+targets by maintaining functions to parse metadata that conforms to different
+specification versions. This compromise allows TUF specification changes to affect multiple
 metadata files while allowing flexibility in how repositories and delegations
 are managed.
 
@@ -247,13 +247,13 @@ shall be updated to include the TUF Version field.
 Repositories will add metadata for new TUF specification versions in new
 directories.
 
-As described in the [Rationale](#rationale), repositories must support multiple
+As described in the [Rationale](#rationale), repositories should support multiple
 TUF specification versions. In order to do so, this TAP proposes a new directory
 structure for repositories. When a repository manager chooses to upgrade to a
 new major TUF spec version, they create a new directory on the repository named
 for the major version (for example 2.0.0). This directory will contain all
 metadata files for the new spec version, but target files will remain in the
-parent directory to save space. The metadata files (in directories according to their spec
+parent directory to save space. In this case the metadata files (in directories according to their spec
 version) can point to target files relative to the parent directory. After creating
 the directory, the repository creates and signs root, snapshot, timestamp, and
 top level targets metadata using the new TUF spec version and places these
@@ -351,7 +351,7 @@ version is not available, the client shall report that an update can not be
 performed due to an old spec version on the repository.
 * If the latest version on the repository is higher than the client spec
 version, the client should report to the user that it is not using the most up
-to date version, and then proceed with the directory that corresponds with the latest
+to date version, and then perform the update with the directory that corresponds with the latest
 client spec version, if available. If no such directory exists, the client
 terminates the update.
 
@@ -408,6 +408,26 @@ from both repositories point to the same target file, and it matches the hashes
 provided by each repository. Note that different TUF versions may use different
 hashing algorithms. If this is the case, both hashes should be verified
 independently.
+
+### TAP 5
+
+A TUF client that supports TAP 5 may download top-level metadata from multiple
+sources. However, breaking changes may require that multiple top-level metadata
+files use the same TUF specification version. To manage this, a root metadata
+file that includes a list of urls for metadata as described in TAP 5 should
+only include links to metadata files using the same TUF specification version as
+the root metadata file.
+
+The owner of root metadata is responsible for ensuring that all metadata files
+linked in the root metadata use the same TUF specification version as the root
+metadata. If the repository that contains the root metadata supports multiple
+TUF specification versions, each root metadata file should list top-level
+metadata corresponding with its TUF specification version.
+
+Clients should verify that all top-level metadata use the same TUF specification
+version as the root metadata. If a metadata file linked in root metadata does
+not meet this criteria, it will be considered invalid and the client should
+use the next listed metadata file or terminate the update.
 
 ### Delegations
 
