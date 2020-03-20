@@ -11,50 +11,55 @@
 
 # Abstract
 
-The TUF specification requires that every keyid used in TUF metadata
-be calculated using a SHA-256 hash of the public key it represents. This
-algorithm is used elsewhere in the TUF specification and so provides an existing
-method for calculating unique keyids. Yet, such a rigid requirement may be
-challenging to support in a given programming language or system if no existing
-library supports SHA-256 or if the hashes are too long for bandwidth constrained
-applications. For these reasons, this TAP proposes a change to the TUF
-specification that would remove the requirement that all keyids be calculated
-using SHA-256. Instead, the specification will allow metadata owners to use any
-method for calculating keyids as long as each one is unique within the metadata
-file in which it is defined to ensure a fast lookup of trusted signing keys.
-This change will give metadata owners flexibility in how they determine keyids.
+Keyids are used in TUF metadata as shorthand references to identify keys. They
+are used in place of keys in metadata to assign keys to roles and to identify
+them in signature headers. The TUF specification requires that every keyid used
+in TUF metadata be calculated using a SHA2-256 hash of the public key it
+represents. This algorithm is used elsewhere in the TUF specification and so
+provides an existing method for calculating unique keyids. Yet, such a rigid
+requirement does not allow for the deprecation of SHA2-256. A security flaw in
+SHA2-256 may be discovered, so TUF implementers may choose to deprecate this
+algorithm. If SHA2-256 is deprecated in TUF, it should no longer be used to
+calculate keyids. Therefore this TAP proposes a change to the TUF specification
+that would remove the requirement that all keyids be calculated using SHA2-256.
+Instead, the specification will allow metadata owners to use any method for
+calculating keyids as long as each one is unique within the metadata file in
+which it is defined to ensure a fast lookup of trusted signing keys. This
+change will allow for the deprecation of SHA2-256 and will give metadata owners
+flexibility in how they determine keyids.
+
 
 # Motivation
 
-Currently, the TUF specification requires that keyids must be the SHA-256 hash
+Currently, the TUF specification requires that keyids must be the SHA2-256 hash
 of the public key they represent. This algorithm ensures that keyids are unique
 within a metadata file (and indeed, throughout the implementation) and creates a
-short, space-saving representation. SHA-256 also offers a number of secure
+short, space-saving representation. SHA2-256 also offers a number of secure
 hashing properties, though these are not necessary for these purposes. In this
-case SHA-256 is simply a way to calculate a unique identifier employing an
+case SHA2-256 is simply a way to calculate a unique identifier employing an
 algorithm that is already in use by the system.
 
 The specification sets the following requirements for keyid calculation:
-1. The KEYID of a key is the hexdigest of the SHA-256 hash of the canonical JSON form of the key.
+1. The KEYID of a key is the hexdigest of the SHA2-256 hash of the canonical JSON form of the key.
 2. Clients MUST calculate each KEYID to verify this is correct for the associated key.
-3. Clients MUST ensure that for any KEYID … only one unique key has that KEYID.
+3. Clients MUST ensure that for any KEYID only one unique key has that KEYID.
 
 ## Problems with this requirement
-Mandating that keyids be calculated using SHA-256 has created a number of issues
+Mandating that keyids be calculated using SHA2-256 has created a number of issues
 for some implementations, such as:
 * Lack of consistency in implementations that use other hash algorithms for
-  calculating file hashes and would prefer not to introduce SHA-256 for this one
+  calculating file hashes and would prefer not to introduce SHA2-256 for this one
   instance. For example, the PEP 458 implementation (https://python.zulipchat.com/#narrow/stream/223926-pep458-implementation)
-  will use the * Blake 2 hashing algorithm throughout the implementation.
+  will use the BLAKE2 hashing algorithm throughout the implementation.
 * Incompatibility with some smart cards and PGP implementations that have their
   own way of calculating keyids.
-* Inability to adapt if SHA-256 should be deprecated. In such a case, metadata
+* Inability to adapt if SHA2-256 should be deprecated. In such a case, metadata
   owners may decide that maintaining a deprecated algorithm for use in keyid
   calculation does not make sense.
-* Space concerns may require even shorter hashes than those SHA-256 can generate,
+* Space concerns may require even shorter hashes than those SHA2-256 can generate,
   such as an index.
 In these and other cases, TUF should provide a metadata file owner with the
-flexibility to use keyids that are not calculated using SHA-256.
+flexibility to use keyids that are not calculated using SHA2-256.
 
 # Rationale
 
@@ -95,7 +100,7 @@ to maliciously sign files.
 # Specification
 
 With just a few minor changes to the current TUF specification process, we can
-remove the requirement that keyids must be calculated using SHA-256. First, the
+remove the requirement that keyids must be calculated using SHA2-256. First, the
 specification wording should be updated to allow the metadata owner to calculate
 keyids using any method that produces a unique identifier within the metadata
 file. This means replacing requirements 1 and 2 above with a description of
@@ -137,11 +142,11 @@ calculation method.
 ## Keyid Deprecation
 With the proposed specification changes, the method used to determine keyids
 is not only more flexible, but it may be deprecated using the following process
-for each key K and keyid k in the root or delegating targets metadata file:
-* The owner of the metadata file determines a new keyid h for K using the new method.
-* In the next version of the metadata file, the metadata owner replaces k with h
+for each key K and keyid I in the root or delegating targets metadata file:
+* The owner of the metadata file determines a new keyid J for K using the new method.
+* In the next version of the metadata file, the metadata owner replaces I with J
   in the keyid definition for K.
-* Any files previously signed by K should list h as the keyid instead of k.
+* Any files previously signed by K should list J as the keyid instead of I.
   These files do not need to be resigned as only the signature header will be updated.
 Once this process is complete, the metadata owner is using a new method to
 determine the keyids used by that metadata file.
@@ -156,17 +161,17 @@ be unique for each delegated role. It is possible for different keyids to
 represent the same key in different metadata files, even if both metadata files
 delegate to the same role. Consider two delegated targets metadata files A and B
 that delegate to the same targets metadata file C. If A delegates to C with
-key k with keyid g and B delegates to C with key k with keyid h, both of these
+key k with keyid x and B delegates to C with key k with keyid y, both of these
 delegations can be processed during the preorder depth-first search of targets
 metadata as follows:
-* When the search reaches A, it will look for a signature with a keyid of g in C.
+* When the search reaches A, it will look for a signature with a keyid of x in C.
   If it finds this and validates it, the search will continue if a threshold of
   signatures has not been reached.
-* When the search reaches B, it will look for a signature with a keyid of h in C.
+* When the search reaches B, it will look for a signature with a keyid of y in C.
   If it finds this and validates it, the search will continue if a threshold of
   signatures has not been reached.
 Once the search is complete, if a threshold of signatures is reached the
-metadata in C will be used to continue the update process. Therefore, g and h
+metadata in C will be used to continue the update process. Therefore, x and y
 may be used as keyids for k in different metadata files. So that clients can
 validate signatures using each of these keyids, they both must be used to
 identify a valid signature using k in C’s header. As clients store keyids only
@@ -186,13 +191,13 @@ collisions and protects clients from privilege escalation attacks.
 
 # Backwards Compatibility
 
-Metadata files that are generated using SHA-256 will be compatible with clients
+Metadata files that are generated using SHA2-256 will be compatible with clients
 that implement this change. However, clients that continue to check that
-keyids are generated using SHA-256 will not be compatible with metadata that
+keyids are generated using SHA2-256 will not be compatible with metadata that
 uses a different method for calculating keyids.
 
 For backwards compatibility, metadata owners may choose to continue to use
-SHA-256 to calculate keyids.
+SHA2-256 to calculate keyids.
 
 # Augmented Reference Implementation
 
