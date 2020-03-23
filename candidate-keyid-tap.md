@@ -20,7 +20,8 @@ provides an existing method for calculating unique keyids. Yet, such a rigid
 requirement does not allow for the deprecation of SHA2-256. A security flaw in
 SHA2-256 may be discovered, so TUF implementers may choose to deprecate this
 algorithm. If SHA2-256 is deprecated in TUF, it should no longer be used to
-calculate keyids. Therefore this TAP proposes a change to the TUF specification
+calculate keyids. Therefore TUF should allow more flexibility in how keyids are
+determined. To this end, this TAP proposes a change to the TUF specification
 that would remove the requirement that all keyids be calculated using SHA2-256.
 Instead, the specification will allow metadata owners to use any method for
 calculating keyids as long as each one is unique within the metadata file in
@@ -77,14 +78,14 @@ in O(1) time by looking up the proper key for verification.
 
 Failing to provide unique keyids can have consequences for both functionality
 and security. These are a few attacks that are possible when keyids are not unique:
-* **Invalid Signature Verification**: A client may lookup the wrong key to use in
-  signature verification leading to an invalid signature verification error,
+* **Invalid Signature Verification**: A client may lookup the wrong key to use
+  in signature verification leading to an invalid signature verification error,
   even if the signature used the correct key.
-* **Keyid collision**: If root metadata listed the same keyid k for different
+* **Keyid collision**: If root metadata listed the same keyid K for different
   snapshot and root keys, an attacker with access to the snapshot key would also
   be able to sign valid root metadata. Using the snapshot key to sign root
-  metadata, the attacker could then list the signature in the header with k. A
-  client verifying the signature of this root metadata file, would use k to
+  metadata, the attacker could then list the signature in the header with K. A
+  client verifying the signature of this root metadata file, would use K to
   lookup a key trusted to sign root, and would find the snapshot key and
   continue the update with the malicious root metadata. To prevent this
   privilege escalation attack, metadata file owners should ensure that
@@ -123,11 +124,11 @@ from a metadata file only for all delegations defined in that metadata file. So
 if a targets metadata file T delegates to A and B, the client should verify the
 signatures of A and B using the trusted keyids in from T. When verifying
 signatures, clients should try all signatures that match their trusted keyid(s).
-If T trusts keyid k to sign A’s metadata, the client should check all
-signatures in A that list a keyid of k. This means that if another metadata file
+If T trusts keyid K to sign A’s metadata, the client should check all
+signatures in A that list a keyid of K. This means that if another metadata file
 M delegates to A, it would be able to use the same keyid with a different key.
 Once the signatures for A and B have been checked, the client no longer needs to
-store the keyid mapping from T. During the preorder depth-first search of
+store the keyid mapping listed in T. During the preorder depth-first search of
 targets metadata, the keyids from each targets metadata file should be used in
 only that stage of the depth-first search.
 
@@ -142,11 +143,11 @@ calculation method.
 ## Keyid Deprecation
 With the proposed specification changes, the method used to determine keyids
 is not only more flexible, but it may be deprecated using the following process
-for each key K and keyid I in the root or delegating targets metadata file:
-* The owner of the metadata file determines a new keyid J for K using the new method.
-* In the next version of the metadata file, the metadata owner replaces I with J
-  in the keyid definition for K.
-* Any files previously signed by K should list J as the keyid instead of I.
+for each key D and keyid K in the root or delegating targets metadata file:
+* The owner of the metadata file determines a new keyid L for D using the new method.
+* In the next version of the metadata file, the metadata owner replaces K with L
+  in the keyid definition for D.
+* Any files previously signed by D should list L as the keyid instead of K.
   These files do not need to be resigned as only the signature header will be updated.
 Once this process is complete, the metadata owner is using a new method to
 determine the keyids used by that metadata file.
@@ -161,20 +162,20 @@ be unique for each delegated role. It is possible for different keyids to
 represent the same key in different metadata files, even if both metadata files
 delegate to the same role. Consider two delegated targets metadata files A and B
 that delegate to the same targets metadata file C. If A delegates to C with
-key k with keyid x and B delegates to C with key k with keyid y, both of these
+key D with keyid K and B delegates to C with key D with keyid L, both of these
 delegations can be processed during the preorder depth-first search of targets
 metadata as follows:
-* When the search reaches A, it will look for a signature with a keyid of x in C.
+* When the search reaches A, it will look for a signature with a keyid of K in C.
   If it finds this and validates it, the search will continue if a threshold of
   signatures has not been reached.
-* When the search reaches B, it will look for a signature with a keyid of y in C.
+* When the search reaches B, it will look for a signature with a keyid of L in C.
   If it finds this and validates it, the search will continue if a threshold of
   signatures has not been reached.
 Once the search is complete, if a threshold of signatures is reached the
-metadata in C will be used to continue the update process. Therefore, x and y
-may be used as keyids for k in different metadata files. So that clients can
+metadata in C will be used to continue the update process. Therefore, K and L
+may be used as keyids for D in different metadata files. So that clients can
 validate signatures using each of these keyids, they both must be used to
-identify a valid signature using k in C’s header. As clients store keyids only
+identify a valid signature using D in C’s header. As clients store keyids only
 for use in the current delegation, this should not require a change to the
 client process described in this document.
 
@@ -186,8 +187,7 @@ new trusted keys to the system. However, a bad keyid scheme could allow a
 privilege escalation in which the client verifies one metadata file with a
 key from a role not trusted to sign that metadata file. This proposal prevents
 privilege escalation attacks by requiring that metadata owners use unique keyids
-within each metadata file. As described in the rationale, this prevents keyid
-collisions and protects clients from privilege escalation attacks.
+within each metadata file, as described in the rationale.
 
 # Backwards Compatibility
 
