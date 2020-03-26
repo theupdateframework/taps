@@ -41,9 +41,9 @@ case SHA2-256 is simply a way to calculate a unique identifier employing an
 algorithm that is already in use by the system.
 
 The specification sets the following requirements for keyid calculation:
-1. The KEYID of a key is the hexdigest of the SHA2-256 hash of the canonical JSON form of the key.
-2. Clients MUST calculate each KEYID to verify this is correct for the associated key.
-3. Clients MUST ensure that for any KEYID only one unique key has that KEYID.
+1. "The KEYID of a key is the hexdigest of the SHA-256 hash of the canonical JSON form of the key."
+2. "Clients MUST calculate each KEYID to verify this is correct for the associated key."
+3. "Clients MUST ensure that for any KEYID...only one unique key has that KEYID."
 
 ## Problems with this requirement
 Mandating that keyids be calculated using SHA2-256 has created a number of issues
@@ -114,7 +114,11 @@ signatures, the client would use the keyid(s) listed in the signature header to
 find the key(s) that are trusted for that role in the delegating metadata. This
 should be described in the specification by replacing requirement 3 above with
 “Clients MUST use the keyids from the delegating role to look up trusted signing
-keys to verify signatures.” All metadata definitions would remain the same, but
+keys to verify signatures.” To ensure that a client does not use the same key
+to verify a signature more than once, they must additionally check that all keys
+applied to a signature threshold are unique. So, the specification should
+additionally require that "Clients MUST use each key only once during a given
+signature verification." All metadata definitions would remain the same, but
 the client’s verification process would track keyids within each metadata file
 instead of globally.
 
@@ -127,13 +131,15 @@ signatures, clients should try all signatures that match their trusted keyid(s).
 If T trusts keyid K to sign A’s metadata, the client should check all
 signatures in A that list a keyid of K. This means that if another metadata file
 M delegates to A, it would be able to use the same keyid with a different key.
-Once the signatures for A and B have been checked, the client no longer needs to
-store the keyid mapping listed in T. During the preorder depth-first search of
-targets metadata, the keyids from each targets metadata file should be used in
-only that stage of the depth-first search.
+However, clients must ensure that duplicate keys are not applied to the same
+signature threshold. To do so, they must additionally keep track of the keys
+used to verify a signature. Once the signatures for A and B have been checked,
+the client no longer needs to store the keyid mapping listed in T. During the
+preorder depth-first search of targets metadata, the keyids from each targets
+metadata file should be used in only that stage of the depth-first search.
 
-These changes to the specification would allow the repository to use any scheme
-to determine keyids without needing to communicate it to clients. By making this
+These changes to the specification allow the repository to use any scheme to
+assign keyids (not just SHA2-256) without needing to communicate it to clients. By making this
 scheme independent of the client implementation, root and targets metadata may
 use different methods to determine keyids, especially if they are managed by
 different people (ie TAP 5). In addition, the repository may update the scheme
@@ -162,9 +168,26 @@ be unique for each delegated role. It is possible for different keyids to
 represent the same key in different metadata files, even if both metadata files
 delegate to the same role. Consider two delegated targets metadata files A and B
 that delegate to the same targets metadata file C. If A delegates to C with
-key D with keyid K and B delegates to C with key D with keyid L, both of these
-delegations can be processed during the preorder depth-first search of targets
-metadata as follows:
+key D with keyid K and B delegates to C with key D with keyid L, the signature
+header of C will contain the following:
+```
+  {
+    "sigs": [
+      {
+        "keyid": "K",
+        "sig": "abcd..."
+      },
+      {
+        "keyid": "L",
+        "sig": "abcd..."
+      },
+      ...
+    ],
+    ...
+  }
+```
+These delegations can be processed during the preorder depth-first search of
+targets metadata as follows:
 * When the search reaches A, it will look for a signature with a keyid of K in C.
   If it finds this and validates it, the search will continue if a threshold of
   signatures has not been reached.
@@ -173,11 +196,48 @@ metadata as follows:
   signatures has not been reached.
 Once the search is complete, if a threshold of signatures is reached the
 metadata in C will be used to continue the update process. Therefore, K and L
-may be used as keyids for D in different metadata files. So that clients can
-validate signatures using each of these keyids, they both must be used to
-identify a valid signature using D in C’s header. As clients store keyids only
-for use in the current delegation, this should not require a change to the
+may be used as keyids for D in different metadata files. As clients store keyids
+only for use in the current delegation, this should not require a change to the
 client process described in this document.
+
+It is also possible for the same keyid to represent different keys in different
+metadata files. Consider a targets metadata file A that delegates to C with key
+D and keyid K and a targets metadata file B that delegates to C with key E and
+keyid K. The signature header of C will contain the following:
+```
+  {
+    "sigs": [
+      {
+        "keyid": "K",
+        "sig": "abcd..."
+      },
+      {
+        "keyid": "K",
+        "sig": "efgh..."
+      },
+      ...
+    ],
+    ...
+  }
+```
+
+During the depth-first search of targets metadata, the client will process these
+delegations as follows:
+* When the search reaches A, it will look for a signature with a keyid of K in
+  C. It will discover two signatures with the given keyid, and will check each
+  using the key D. If either passes the verification, the search will continue
+  if a threshold of signatures has not been reached.
+* When the search reaches B, it will look for a signature with a keyid of K in
+  C. It will discover two signatures with the given keyid, and will check each
+  using the key E. If either passes the verification, the search will continue
+  if a threshold of signatures has not been reached.
+Using this process, the same keyid may be used across metadata files without
+being associated with the same key.
+
+In both of these cases, the client must ensure that signatures using the same
+key are not applied to the same threshold. To do so, clients must keep track
+of the keys used during signature verification to ensure that there is a
+threshold of unique keys that have signed the metadata.
 
 # Security Analysis
 
