@@ -1,13 +1,13 @@
 * TAP: TBD
 * Title: Improving keyid flexibility
 * Version: 1.0.0
-* Last-Modified: 19-03-2020
+* Last-Modified: 30-03-2020
 * Author: Marina Moore
 * Status: Draft
 * Content-Type: markdown
 * Created: 18-03-2020
 * TUF-Version: 1.1.0
-* Post-History: <dates of postings to the TUF mailing list>
+* Post-History: 25-03-2020
 
 # Abstract
 
