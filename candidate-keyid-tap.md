@@ -200,6 +200,13 @@ may be used as keyids for D in different metadata files. As clients store keyids
 only for use in the current delegation, this should not require a change to the
 client process described in this document.
 
+In this case, the same key D is used to verify C twice, once when A delegates to
+C and once when B delegates to C. As the key is only used once during each
+delegation, this does not violate the client verification of key uniqueness
+described in this TAP. If the keyids L and K were both used in the same
+delegation (say A delegating to C), then these signatures would only contribute
+a single valid signature to the threshold due to the client verification.
+
 It is also possible for the same keyid to represent different keys in different
 metadata files. Consider a targets metadata file A that delegates to C with key
 D and keyid K and a targets metadata file B that delegates to C with key E and
