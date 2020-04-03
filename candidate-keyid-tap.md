@@ -19,7 +19,7 @@ represents. This algorithm is used elsewhere in the TUF specification and so
 provides an existing method for calculating unique keyids. Yet, such a rigid
 requirement does not allow for the deprecation of SHA2-256. A security flaw in
 SHA2-256 may be discovered, so TUF implementers may choose to deprecate this
-algorithm. If SHA2-256 is deprecated in TUF, it should no longer be used to
+algorithm. If SHA2-256 is deprecated in a TUF implementation, it should no longer be used to
 calculate keyids. Therefore TUF should allow more flexibility in how keyids are
 determined. To this end, this TAP proposes a change to the TUF specification
 that would remove the requirement that all keyids be calculated using SHA2-256.
@@ -126,7 +126,7 @@ In order for TUF clients to adhere to these specification changes, they may have
 to change the way they store and process keyids. Clients will use the keyids
 from a metadata file only for all delegations defined in that metadata file. So
 if a targets metadata file T delegates to A and B, the client should verify the
-signatures of A and B using the trusted keyids in from T. When verifying
+signatures of A and B using the trusted keyids from T. When verifying
 signatures, clients should try all signatures that match their trusted keyid(s).
 If T trusts keyid K to sign A’s metadata, the client should check all
 signatures in A that list a keyid of K. This means that if another metadata file
