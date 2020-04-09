@@ -1,7 +1,7 @@
 * TAP: TBD
 * Title: Improving keyid flexibility
 * Version: 1.0.0
-* Last-Modified: 30-03-2020
+* Last-Modified: 09-04-2020
 * Author: Marina Moore
 * Status: Draft
 * Content-Type: markdown
@@ -49,8 +49,8 @@ The specification sets the following requirements for keyid calculation:
 Mandating that keyids be calculated using SHA2-256 has created a number of issues
 for some implementations, such as:
 * Lack of consistency in implementations that use other hash algorithms for
-  calculating file hashes and would prefer not to introduce SHA2-256 for this one
-  instance. For example, the PEP 458 implementation (https://python.zulipchat.com/#narrow/stream/223926-pep458-implementation)
+  calculating file hashes and would prefer not to introduce SHA2-256 for this
+  one instance. For example, the PEP 458 implementation
   will use the BLAKE2 hashing algorithm throughout the implementation.
 * Incompatibility with some smart cards and PGP implementations that have their
   own way of calculating keyids.
@@ -106,8 +106,8 @@ specification wording should be updated to allow the metadata owner to calculate
 keyids using any method that produces a unique identifier within the metadata
 file. This means replacing requirements 1 and 2 above with a description of
 required keyid properties, ie “The KEYID is an identifier for the key that is
-determined by the metadata owner and MUST be unique within the root or
-delegating targets metadata file.” Once this keyid is determined by the metadata
+determined by the metadata owner and MUST be unique within the delegating metadata file (either root or
+delegating targets metadata).” Once this keyid is determined by the metadata
 owner using their chosen method, it will be listed in the delegating metadata
 file and in all signatures that use the corresponding key. When parsing metadata
 signatures, the client would use the keyid(s) listed in the signature header to
