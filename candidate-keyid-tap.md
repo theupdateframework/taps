@@ -118,7 +118,10 @@ keys to verify signatures.” To ensure that a client does not use the same key
 to verify a signature more than once, they must additionally check that all keys
 applied to a signature threshold are unique. So, the specification should
 additionally require that "Clients MUST use each key only once during a given
-signature verification." All metadata definitions would remain the same, but
+signature verification." During this de-duplication check, the client should use
+a standardized format for keys, like the [modulus and exponent for RSA](https://cryptography.io/en/latest/hazmat/primitives/asymmetric/rsa/#numbers)
+or the [point and curve for ECC](https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ec/#cryptography.hazmat.primitives.asymmetric.ec.EllipticCurvePublicNumbers).
+All metadata definitions would remain the same, but
 the client’s verification process would track keyids within each metadata file
 instead of globally.
 
@@ -133,7 +136,8 @@ signatures in A that list a keyid of K. This means that if another metadata file
 M delegates to A, it would be able to use the same keyid with a different key.
 However, clients must ensure that duplicate keys are not applied to the same
 signature threshold. To do so, they must additionally keep track of the keys
-used to verify a signature. Once the signatures for A and B have been checked,
+used to verify a signature using a standardized format as discussed above. Once
+the signatures for A and B have been checked,
 the client no longer needs to store the keyid mapping listed in T. During the
 preorder depth-first search of targets metadata, the keyids from each targets
 metadata file should be used in only that stage of the depth-first search.
