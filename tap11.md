@@ -97,7 +97,7 @@ At a minimum, a POUF shall contain the following sections:
   * Last-Modified:
   * Author: optional list of authors' real names and email addresses
   * Status: Draft / In Use / Obsolete
-  * TUF Version Implemented:
+  * TUF Version(s) Implemented: the release version of the TUF specification versions covered by the POUF
   * Implementation Version(s) Covered: release version information of the implementation versions covered by this Version of the POUF
   * Content-Type: text/markdown
   * Created: date created on, in dd-mmm-yyyy format
