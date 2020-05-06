@@ -101,7 +101,7 @@ At a minimum, a POUF shall contain the following sections:
   * Implementation Version(s) Covered: release version information of the implementation versions covered by this Version of the POUF
   * Content-Type: text/markdown
   * Created: date created on, in dd-mmm-yyyy format
-* Abstract: Description of the POUF including an overview of design decisions. If the POUF version has been updated, the changes to the POUF should be described here.
+* Abstract: Description of the POUF including an overview of design decisions. If the POUF version has been updated, a summary of high-level changes to the POUF should be described here.
 * Protocol: The protocol section describes the networking operations of the implementation. This includes the protocol used to transmit data, the location and filenames of any hosted files, and a Message Handler Table. The Message Handler Table will list all messages transmitted by the implementation. Each entry in the Message Handler Table will include the sender, receiver, data, and expected response. All messages in this table must be implemented by anyone using the POUF.
 * Operations: The operations section contains a description of any design elements or features that differ from the TUF specification. This section will describe any optional or additional features that are required for compatibility. The format of data does not need to be described here.
 * Usage: The usage section contains an overview of how data is managed by the implementation. This includes key management, key rotation, server setup, supply chain security, and device registration.
@@ -119,6 +119,7 @@ At a minimum, a POUF shall contain the following sections:
 
   The canonical json description currently in the TUF specification (under "Document Formats") provides an example of the type definitions required for the Formats section of a POUF.
 * Security Audit: The third party security audit as described in [Security Audit](#security-audit).
+* Version History: For versions beyond the initial release this should be a list of changes introduced in each new version of the POUF. This section could also map POUF versions to releases of the implementation.
 
 ## Security Audit
 
