@@ -1,21 +1,24 @@
 * POUF: 1
 * Title: Reference Implementation Using Canonical JSON
-* Version: 1
-* Last-Modified: 27-June-2019
-* Author: Marina Moore
+* Version: 2
+* Last-Modified: 06-May-2020
+* Author: Marina Moore, Joshua Lock
 * Status: Draft
 * TUF Version Implemented: 1.0
+* Implementation Version(s) Covered: v0.12.*
 * Content-Type: text/markdown
 * Created: 25-November-2018
 
 # Abstract
 This POUF describes the protocol, operations, usage, and formats for the TUF reference implementation written in Python by NYU.
 
-The reference implementation includes all required features of the TUF standard, as well as many of the optional features as a reference for anyone wishing to implement TUF. The implementation uses canonical JSON encoding.
+The reference implementation includes all required features of the TUF standard, as well as many of the optional features as a reference for anyone wishing to implement TUF. The implementation uses Canonical JSON encoding.
+
+This version of the POUF covers v0.12.* of the reference implementation and has been updated to reflect that: snapshot.json only lists targets metadata (top-level and delegated), and timestamp.json includes hashes and length in METAFILES.
 
 # Protocol
 
-This POUF uses a subset of the JSON object format, with floating-point numbers omitted. When calculating the digest of an object, we use the "canonical JSON" subdialect as described at http://wiki.laptop.org/go/Canonical_JSON.
+This POUF uses a subset of the JSON object format, with floating-point numbers omitted. When calculating the digest of an object, we use the "canonical JSON" subdialect as described at http://wiki.laptop.org/go/Canonical_JSON and implemented in [securesystemslib](https://github.com/secure-systems-lab/securesystemslib/blob/master/securesystemslib/formats.py#L666).
 
 In this POUF, metadata files are hosted on the repository using HTTP. The filenames for these files are ROLE.json where ROLE is the associated role name (root, targets, snapshot, or timestamp). A client downloads these files by HTTP post request. The location of the repository is preloaded onto the clients.
 
@@ -163,6 +166,9 @@ The "signed" portion of root.json is as follows:
        }
 
    SPEC_VERSION is the version number of the specification using semantic versioning.
+   For purposes of ensuring the spec_version matches during an update, the reference
+   implementation considers all  spec_version's with the same major version number to
+   be a match.
 
    CONSISTENT_SNAPSHOT is a boolean indicating whether the repository supports
    consistent snapshots.
@@ -190,9 +196,8 @@ The "signed" portion of root.json is as follows:
 
   ### snapshot.json
   The snapshot.json file is signed by the snapshot role.  It lists the version
-     numbers of all metadata on the repository, excluding timestamp.json and
-     mirrors.json.  For the root role, the hash(es), size, and version number
-     are listed.
+     numbers of the top-level targets metadata and all delegated targets
+     metadata on the repository.
 
      The "signed" portion of snapshot.json is as follows:
 
@@ -213,8 +218,8 @@ The "signed" portion of root.json is as follows:
      METAPATH is the the metadata file's path on the repository relative to the
      metadata base URL.
 
-     VERSION is listed for the root file
-     and all other roles available on the repository.
+     VERSION is the integer version number listed in the metdata file at
+     METAPATH.
 
   ### targets.json and delegated target roles
   The "signed" portion of targets.json is as follows:
@@ -241,6 +246,9 @@ The "signed" portion of root.json is as follows:
 
    It is allowed to have a TARGETS object with no TARGETPATH elements.  This
    can be used to indicate that no target files are available.
+
+   LENGTH is an integer that specifies the size in bytes of the file at
+   TARGETPATH.
 
    HASHES is a dictionary that specifies one or more hashes, including
    the cryptographic hash function.  For example: { "sha256": HASH, ... }. It
@@ -331,9 +339,27 @@ The timestamp file is signed by a timestamp key.  It indicates the
          "meta" : METAFILES
        }
 
-   METAFILES is the same is described for the snapshot.json file.  In the case
-   of the timestamp.json file, this will commonly only include a description of
-   the snapshot.json file.
+   METAFILES is an object whose format is the following:
+
+         { METAPATH : {
+               "version" : VERSION,
+               "length" : LENGTH,
+               "hashes" : HASHES }
+           , ...
+         }
+
+     METAPATH is the the snapshot metadata file's path on the repository
+     relative to the metadata base URL.
+
+     VERSION is the integer version number listed in snapshot.json.
+
+     LENGTH is an integer that specifies the size in bytes of the snapshot.json
+     metadata file.
+
+     HASHES is a dictionary that specifies one or more hashes, including
+     the cryptographic hash function.  For example: { "sha256": HASH, ... }.
+     HASH is the hexdigest of the cryptographic function computed on the
+     snapshot.json metadata file.
 
 ### mirrors.json
 The mirrors.json file is signed by the mirrors role.  It indicates which
@@ -377,3 +403,10 @@ for example, randomly select from the listed mirrors.
 
 # Security Audit
 This profile was included in TUF security audits available at https://theupdateframework.github.io/audits.html.
+
+# Version History
+
+## 2
+Updated to reflect the latest (v0.12.2) reference implementation.
+* snapshot.json lists only the top-level and delegated targets metadata
+* timestamp.json includes hashes and length of snapshot.json
