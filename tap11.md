@@ -1,4 +1,4 @@
-* TAP:
+* TAP: 11
 * Title: Using POUFs for Interoperability
 * Version: 1
 * Last-Modified: 26-June-2019
@@ -50,7 +50,7 @@ These statuses are maintained by the POUF author and included in the header of t
 They allow POUFs in all stages to be made available while clarifying which are ready to be implemented.
 
 POUFs may be changed over time to account for changes to the TUF specification, updates to protocols, or other design changes.
-To indicate that a change has occurred, new version numbers should be assigned to the POUF. The version number will be stored in the POUF header as described in {#pouf-format}.
+To indicate that a change has occurred, new version numbers should be assigned to the POUF. The version number will be stored in the POUF header as described in [POUF Format](#pouf-format).
 In order for a POUF implementer to know if their implementation needs to be updated, any changes that make a POUF not backwards compatible should result in a new version number.
 The format and management of version numbers is left to the POUF author, but standard formats like Semantic Versioning (https://semver.org/) are recommended for clarity and consistency with TUF. In addition, POUF authors may refer to how TUF manages updates to ensure that non backwards compatible POUFs do not interfere with TUF communication.
 
@@ -67,7 +67,7 @@ For example, implementers a and b may implement POUF p1.
 This means that a and b will be able to interoperate, but they will not necessarily be able to interoperate with implementers of POUF p2.
 It is important that implementations list in their documentation the POUF(s) that are supported as well as the version numbers for these POUF(s) so that other implementers looking to interoperate may refer to the relevant POUF.
 
-To ensure that a POUF follows the TUF specification and that it does not introduce new security issues, we recommend a security audit for POUFs as described in {#security-audit}.
+To ensure that a POUF follows the TUF specification and that it does not introduce new security issues, we recommend a security audit for POUFs as described in [Security Audit](#security-audit).
 In addition to checking the POUF against the specification, this audit ensures that the encoding method or design decisions do not introduce ambiguity or an insecure implementation.
 The security audit does not guarantee security, but provides some oversight.
 
@@ -75,7 +75,7 @@ The security audit does not guarantee security, but provides some oversight.
 
 If a POUF author wants their POUF to be publicly accessed and reviewed, it should be stored in a public location that can be accessed by other TUF implementers.
 In addition to storing the current POUF, the author may maintain old versions of the POUF to allow existing implementations to continue to refer to them.
-Old versions will have a unique version number in the header as described in {#pouf-format}, and may additionally be named according to the POUF version.
+Old versions will have a unique version number in the header as described in [POUF Format](#pouf-format), and may additionally be named according to the POUF version.
 For example a POUF repository may contain two documents, POUFNAME-1.md and POUFNAME-2.md, that contain version 1 and 2 of the POUF respectively.
 
 A link to a public POUF can be added to the TAP repository through the pull request process.
@@ -95,7 +95,7 @@ At a minimum, a POUF shall contain the following sections:
   * Title:
   * Version:
   * Last-Modified:
-  * Author: optional list of authors' real names and email addrs
+  * Author: optional list of authors' real names and email addresses
   * Status: Draft / In Use / Obsolete
   * TUF Version Implemented:
   * Content-Type: text/markdown
@@ -117,7 +117,7 @@ At a minimum, a POUF shall contain the following sections:
   If mirrors are supported by the POUF, their format should be described here. Information about how mirrors are used may be included in the Operations section of the POUF.
 
   The canonical json description currently in the TUF specification (under "Document Formats") provides an example of the type definitions required for the Formats section of a POUF.
-* Security Audit: The third party security audit as described in {#security-audit}.
+* Security Audit: The third party security audit as described in [Security Audit](#security-audit).
 
 ## Security Audit
 
