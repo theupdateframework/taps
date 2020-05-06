@@ -165,7 +165,7 @@ The "signed" portion of root.json is as follows:
              , ... }
        }
 
-   SPEC_VERSION is the version number of the specification using semantic versioning.
+   SPEC_VERSION is the version number of the specification using [semantic versioning](https://semver.org/spec/v2.0.0.html).
    For purposes of ensuring the spec_version matches during an update, the reference
    implementation considers all  spec_version's with the same major version number to
    be a match.
