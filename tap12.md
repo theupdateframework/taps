@@ -1,4 +1,4 @@
-* TAP: TBD
+* TAP: 12
 * Title: Improving keyid flexibility
 * Version: 1.0.0
 * Last-Modified: 09-04-2020
