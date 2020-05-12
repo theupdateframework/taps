@@ -15,6 +15,7 @@
 * [TAP 5: Setting URLs for roles in the root metadata file](tap5.md)
 * [TAP 8: Key rotation and explicit self-revocation](tap8.md)
 * [TAP 11: Using POUFs for Interoperability](tap11.md)
+* [TAP 12: Improving keyid flexibility](tap12.md)
 
 ## Rejected
 
