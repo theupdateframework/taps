@@ -34,7 +34,7 @@ insufficient to execute arbitrary software attacks.
 
 We introduce this TAP because there is no mechanism in place to support use
 case 1.  TUF uses [prioritized and terminating
-delegations](http://isis.poly.edu/~jcappos/papers/kuppusamy_nsdi_16.pdf) to
+delegations](https://theupdateframework.io/papers/protect-community-repositories-nsdi2016.pdf) to
 search for metadata about a desired target in a controlled manner.
 
 Using multiple delegations, one can delegate the same target to multiple roles,
