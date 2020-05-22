@@ -36,7 +36,7 @@ hosting and maintaining its own repository.
 Furthermore, suppose that there is group of enterprise users who trust PyPI only
 to install Django packages.
 These users must depend on PyPI administrators to
-[delegate](https://isis.poly.edu/~jcappos/papers/kuppusamy_nsdi_16.pdf)
+[delegate](https://theupdateframework.io/papers/protect-community-repositories-nsdi2016.pdf)
 all Django packages to the correct public keys belonging to the project.
 Unfortunately, if the PyPI administrator keys have been compromised, then
 attackers can replace this delegation, and deceive these unsuspecting users into
