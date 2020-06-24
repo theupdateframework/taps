@@ -128,10 +128,10 @@ updater can be instructed to download paths that resemble the glob pattern
 `baz*.tgz` from only the third mapping.
 
 C. A "terminating" flag that instructs the updater whether to continue
-searching subsequent mappings after failing to download requested target files
-from the repositories specified in the first mapping.  The list of repositories
-within a mapping can indicate/use the terminating flag independent of
-repositories in other mappings.
+searching subsequent matching mappings for the requested targets file when it
+has not been found in the current matching mapping.  The list of
+repositories within a mapping can indicate/use the terminating flag
+independent of repositories in other mappings.
 
 D. A threshold that indicates the minimum number of repositories in (A) that
 are required to sign for the same length and hash of any matching target, as
@@ -215,7 +215,8 @@ a dictionary containing the following keys:
   match a pattern in this list for this mapping to be consulted.
 * "repositories" specifies a list of one or more repository names.
 * "terminating" is a Boolean attribute indicating whether or not
-  this mapping terminates [backtracking](#interpreting-the-map-file).
+  subsequent mappings should be consulted if the target isn't found in this
+  mapping.
 * "threshold" is the minimum number of roles that must sign for any given
   target under "paths".
 
