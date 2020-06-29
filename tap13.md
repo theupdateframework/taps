@@ -145,8 +145,9 @@ parameterize the top-level targets role.  We feel that implementation errors
 with adding this TAP are unlikely to occur.  However, the ability to better 
 control trust should help users to better secure important operational use 
 cases.  We are also unaware of plausible scenarios where this feature would
-lead to insecurity due to abuse or misconfiguration.  Hence our belief is that 
-this TAP will be a security positive change.
+lead to insecurity due to abuse or misconfiguration except the inability to
+have the root role rotate the targets key.  However, selectively removing this
+capability from the root role is the purpose of this TAP.
 
 # Backwards Compatibility
 
