@@ -128,8 +128,10 @@ From an operational standpoint, a lost targets key for a delegated target could 
 remedied before by the repository but this no longer works.  If the repository delegated to 
 a target from the top-level targets role, that file could be updated if Alice’s key changed or 
 was lost.  However, as the repository’s root role is no longer trusted, any clients using this
-TAP must take more care if it is operationally difficult to touch clients in the case of key
-loss, perhaps first using a targets role with a threshold of offline keys before delegating to 
+TAP must take more care because the root metadata may not be used to revoke trust in 
+the targets key.  Thus, a user should take into account the operational difficultly to touch 
+clients in the case of key loss for the top level targets file.  If it is operationally difficult to
+touch the clients, then the client may perhaps use a threshold of offline keys before delegating to 
 a developer’s key.  TAP 8 also provides support for cases where the key need to be rotated
 or changed and the key is still accessible to the developer.
 
@@ -160,4 +162,3 @@ client implementation.  The repository metadata does not change in any way.
 # Copyright
 
 This document has been placed in the public domain.
-
