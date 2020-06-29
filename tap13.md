@@ -31,7 +31,7 @@ These different views could be defined by either different users on the
 repository, made available by the repository administrator, or be created by
 some other third party.  One likely use is to have a repository where the signing
 authority for namespaced collections of targets are delegated to more granular
-roles, such as in the proposed PyPI Maximum Security Model where developers
+roles, such as in the proposed [PyPI Maximum Security Model](https://www.python.org/dev/peps/pep-0480/) where developers
 sign for the targets produced by their projects. A client can curate a list of
 trusted projects which is a subset of the targets on the repository by using
 mapping metadata per [TAP 4](tap4.md) to only include roles they trust in their 
@@ -160,5 +160,4 @@ client implementation.  The repository metadata does not change in any way.
 # Copyright
 
 This document has been placed in the public domain.
-
 
