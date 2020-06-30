@@ -132,7 +132,7 @@ TAP must take more care because the root metadata may not be used to revoke trus
 the targets key.  Thus, a user should take into account the operational difficultly to touch 
 clients in the case of key loss for the top level targets file.  If it is operationally difficult to
 touch the clients, then the client may perhaps use a threshold of offline keys before delegating to 
-a developer’s key.  TAP 8 also provides support for cases where the key need to be rotated
+a developer’s key.  [TAP 8](tap8.md) also provides support for cases where the key need to be rotated
 or changed and the key is still accessible to the developer.
 
 
