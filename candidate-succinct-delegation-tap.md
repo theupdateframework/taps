@@ -1,7 +1,7 @@
 * TAP:
 * Title: Succinct hash bin delegations
 * Version: 1
-* Last-Modified: 02-07-2020
+* Last-Modified: 06-07-2020
 * Author: Marina Moore, Justin Cappos
 * Status: Draft
 * Created: 23-06-2020
@@ -10,7 +10,7 @@
 
 # Abstract
 
-TUF delegating metadata contains the keyid and path for each delegation, so when a single metadata file delegates to many others the delegating metadata’s size increases proportional to the number of delegations. Clients must download this large delegating metadata file when they update any image it delegates to, therefore large delegating metadata increases the client’s metadata overhead. To reduce the metadata overhead for targets metadata that contains many delegations, TUF supports hashed bin delegations. Hashed bin delegations use targets files that delegate to ‘bin’ roles that delegate to the actual targets. Targets are distributed to bins using the hash of the target filename. Using hashed bin delegations, the delegating metadata only delegates to the bins, and so contain less data. Thus, hashed bin delegations reduce the client’s metadata overhead.
+TUF delegating metadata contains the keyid and path for each delegation, so when a single metadata file delegates to many others the delegating metadata’s size increases proportional to the number of delegations. Clients must download this large delegating metadata file when they update any target it delegates to, therefore large delegating metadata increases the client’s metadata overhead. To reduce the metadata overhead for targets metadata that contains many delegations, TUF supports hashed bin delegations. Hashed bin delegations use targets files that delegate to ‘bin’ roles that delegate to the actual targets. Targets are distributed to bins using the hash of the target filename. Using hashed bin delegations, the delegating metadata only delegates to the bins, and so contain less data. Thus, hashed bin delegations reduce the client’s metadata overhead.
 
 Currently, hashed bin delegations function much like standard TUF delegations, so the delegating metadata lists the keyid and path for each bin. In practice, most hashed bin delegations use the same keyid for each bin and these bins are hashed in a predictable pattern, stored in files with predictable names, and stored in a common location. Furthermore the delegating metadata contains duplicate keyid and path information for each bin. This duplicate information adds to the metadata overhead without providing useful information to the client.
 
@@ -21,12 +21,12 @@ This TAP proposes adding a field to delegating metadata to describe hashed bin d
 This TAP supports the following use case:
 
 Suppose a single targets file contains a very large number of delegations or targets. The owner of this targets file wishes to reduce the metadata overhead for clients, and so uses hashed bin delegations. They will use the same key to sign each bin delegation. They would like to list this key a single time in the delegation to prevent repetition and a large targets metadata filesize. Currently, the delegating metadata will list the keyid for this key in every bin delegation, potentially repeating the same 32-bit value thousands of times. The first four delegations in the resulting metadata would include:
-```
+```Markdown
 “delegations”:{ "keys" : {
        abc123 : abcdef123456,
        },
    "roles" : [{
-       "name": alice.hbd-00,
+       "name": **alice.hbd-00**,
        "keyids" : [ abc123 ] ,
        "threshold" : 1,
        "path_hash_prefixes" : [ 00* ],
@@ -59,7 +59,7 @@ Suppose a single targets file contains a very large number of delegations or tar
    },... ]
  }
  ```
-Every client will then have to download this large delegating metadata file. Note that all of the information in italics above is exactly the same in each delegation. The only data that differs between these delegations are the bolded fields, the name and path_hash_prefix. The name has a common prefix (underlined), so only differs by a count and the path_hash_prefix is generated using the hash algorithm and number of bins.
+Every client will then have to download this large delegating metadata file. Note that most of the data is the same in each delegation. The only data that differs between these delegations are the bolded fields, the name and path_hash_prefix. The name has a common prefix (underlined), so only differs by a count and the path_hash_prefix is generated using the hash algorithm and number of bins.
 
 # Rationale
 
@@ -112,7 +112,7 @@ This TAP will not negatively affect the security of TUF. The succinct_hash_deleg
 
 Repositories that use access control for file uploading should take hashed bin delegations into consideration. Upload access for the name DELEGATING_ROLENAME.hbd-* should have the same permissions as DELEGATING_ROLENAME.
 
-If a repository has multiple delegations to an image, clients will resolve these using prioritized delegations. So if a delegation uses succinct hash bins and another role delegates to DELEGATING_ROLENAME.hbd-\*, the client will use the delegation with a higher priority.
+If a repository has multiple delegations to a target, clients will resolve these using prioritized delegations. So if a delegation uses succinct hash bins and another role delegates to DELEGATING_ROLENAME.hbd-\*, the client will use the delegation with a higher priority.
 
 # Backwards Compatibility
 
