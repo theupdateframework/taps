@@ -1,5 +1,5 @@
 * TAP:
-* Title: Succinct hash bin delegations
+* Title: Succinct hashed bin delegations
 * Version: 1
 * Last-Modified: 06-07-2020
 * Author: Marina Moore, Justin Cappos
@@ -36,7 +36,7 @@ client.
 
 This TAP proposes adding a field to delegating metadata to describe
 hashed bin delegations that allows a delegating party to succinctly
-describe the bins it will delegate to when the hash bin delegation
+describe the bins it will delegate to when the hashed bin delegation
 follows a common pattern.
 
 # Motivation
@@ -133,7 +133,7 @@ When a delegation contains this field, it represents delegations to
 status from this delegation. The path_hash_prefixes and name for each
 bin will be determined using the BIT_LENGTH.
 
-As in the current use of hash bin delegations, target files will be
+As in the current use of hashed bin delegations, target files will be
 distributed to bins based on the SHA2-256 hash of the target path and
 the path_hash_prefixes associated with each bin. The
 path_hash_prefixes will be computed by the repository and client to
@@ -149,7 +149,7 @@ values 001), the third “4*”, then “6*”, “8*”, “a*”, “c*”, an
 The names of each bin will be determined by the bin number and the
 name of the delegating entity. It will be structured as
 DELEGATING_ROLENAME.hbd-COUNT where DELEGATING_ROLENAME is the name of
-the role that delegated to the hash bins and COUNT is a value 0
+the role that delegated to the hashed bins and COUNT is a value 0
 2^BIT_LENGTH-1 that represents the bin number.
 
 The `succinct_hash_delegations` will be prioritized over
@@ -162,7 +162,7 @@ If a delegation contains a succinct hash delegation, all metadata
 files represented by this delegation must exist on the repository,
 even if they do not contain any targets or delegations. These bin
 files should be uploaded before the metadata that delegates to them.
-With the addition of succinct hash bins, the delegation will contain:
+With the addition of succinct hashed bins, the delegation will contain:
 
 ```
 { "keys" : {
@@ -188,7 +188,7 @@ This TAP will not negatively affect the security of TUF. The
 succinct_hash_delegations field provides a shorter way to describe an
 existing feature when it follows a predictable pattern. If the hashed
 bin delegations do not follow this pattern (they use different keys
-for different bins, etc), they may instead use the existing hash bin
+for different bins, etc), they may instead use the existing hashed bin
 mechanism.
 
 Repositories that use access control for file uploading should take
@@ -198,7 +198,7 @@ DELEGATING_ROLENAME.
 
 If a repository has multiple delegations to a target, clients will
 resolve these using prioritized delegations. So if a delegation uses
-succinct hash bins and another role delegates to
+succinct hashed bins and another role delegates to
 DELEGATING_ROLENAME.hbd-\*, the client will use the delegation with a
 higher priority.
 
@@ -213,11 +213,11 @@ The repository must ensure that the correct access control mechanisms
 are applied to filenames of the form DELEGATING_ROLENAME.hbd-\*. As
 discussed in the security analysis, this metadata file should only be
 uploaded by DELEGATING_ROLENAME. The repository should handle this
-access control before succinct hash bin delegations are used so that
+access control before succinct hashed bin delegations are used so that
 other uploaders are not able to use the DELEGATING_ROLENAME.hbd-*
 filename for targets.
 
-In order for succinct hash bin delegations to be used, both the
+In order for succinct hashed bin delegations to be used, both the
 delegation and the client must understand the succint_hash_delegations
 field. Consider a client Bob who wants to download a target J and an
 uploader Alice who is responsible for delegating to J. This is what
