@@ -85,6 +85,8 @@ As in the current use of hash bin delegations, target files will be distributed 
 
 The names of each bin will be determined by the bin number and the name of the delegating entity. It will be structured as DELEGATING_ROLENAME.hbd-COUNT where DELEGATING_ROLENAME is the name of the role that delegated to the hash bins and COUNT is a value 0-2^BIT_LENGTH-1 that represents the bin number.
 
+The `succinct_hash_delegations` will be prioritized over `path_hash_prefixes`. If both of these fields appear in a delegation, the `path_hash_prefixes` should be ignored in favor of the `succinct_hash_delegations`. If a user wishes to use both of these fields, they may do so in separate delegations.
+
 If a delegation contains a succinct hash delegation, all metadata files represented by this delegation must exist on the repository, even if they do not contain any targets or delegations. These bin files should be uploaded before the metadata that delegates to them.
 With the addition of succinct hash bins, the delegation will contain:
 
