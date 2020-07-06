@@ -54,44 +54,44 @@ delegation, potentially repeating the same 32-bit value thousands of
 times. The first four delegations in the resulting metadata would
 include:
 
-```Markdown
+<pre><code>
 “delegations”:{ "keys" : {
        abc123 : abcdef123456,
        },
    "roles" : [{
-       "name": __*alice.hbd*-00__,
+       "name": <b><i>alice.hbd</i>-00</b>,
        "keyids" : [ abc123 ] ,
        "threshold" : 1,
-       "path_hash_prefixes" : [ __00*__ ],
+       "path_hash_prefixes" : [ <b>00*</b> ],
         "paths" : [ “path/to/directory/” ],
        "terminating": false,
    },
 {
-       "name": __*alice.hbd*-01__,
+       "name": <b><i>alice.hbd</i>-01</b>,
        "keyids" : [ abc123 ] ,
        "threshold" : 1,
-       "path_hash_prefixes" : [ __01*__ ],
+       "path_hash_prefixes" : [ <b>01*</b> ],
         "paths" : [ “path/to/directory/” ],
        "terminating": false,
    },
 {
-       "name": __*alice.hbd*-02__,
+       "name": <b><i>alice.hbd</i>-02</b>,
        "keyids" : [ abc123 ] ,
        "threshold" : 1,
-       "path_hash_prefixes" : [ __02*__ ],
+       "path_hash_prefixes" : [ <b>02*</b> ],
         "paths" : [ “path/to/directory/” ],
        "terminating": false,
    },
 {
-       "name": __*alice.hbd*-03__,
+       "name": <b><i>alice.hbd</i>-03</b>,
        "keyids" : [ abc123 ] ,
        "threshold" : 1,
-       "path_hash_prefixes" : [ __03*__],
+       "path_hash_prefixes" : [ <b>03*</b>],
         "paths" : [ “path/to/directory/” ],
        "terminating": false,
    },... ]
  }
- ```
+</code></pre>
 
 Every client will then have to download this large delegating metadata
 file. Note that most of the data is the same in each delegation. The
