@@ -26,40 +26,40 @@ Suppose a single targets file contains a very large number of delegations or tar
        abc123 : abcdef123456,
        },
    "roles" : [{
-       "name": **alice.hbd-00**,
+       "name": __*alice.hbd*-00__,
        "keyids" : [ abc123 ] ,
        "threshold" : 1,
-       "path_hash_prefixes" : [ 00* ],
+       "path_hash_prefixes" : [ __00*__ ],
         "paths" : [ “path/to/directory/” ],
        "terminating": false,
    },
 {
-       "name": alice.hbd-01,
+       "name": __*alice.hbd*-01__,
        "keyids" : [ abc123 ] ,
        "threshold" : 1,
-       "path_hash_prefixes" : [ 01*],
+       "path_hash_prefixes" : [ __01*__ ],
         "paths" : [ “path/to/directory/” ],
        "terminating": false,
    },
 {
-       "name": alice.hbd-02,
+       "name": __*alice.hbd*-02__,
        "keyids" : [ abc123 ] ,
        "threshold" : 1,
-       "path_hash_prefixes" : [ 02* ],
+       "path_hash_prefixes" : [ __02*__ ],
         "paths" : [ “path/to/directory/” ],
        "terminating": false,
    },
 {
-       "name": alice.hbd-03,
+       "name": __*alice.hbd*-03__,
        "keyids" : [ abc123 ] ,
        "threshold" : 1,
-       "path_hash_prefixes" : [ 03*],
+       "path_hash_prefixes" : [ __03*__],
         "paths" : [ “path/to/directory/” ],
        "terminating": false,
    },... ]
  }
  ```
-Every client will then have to download this large delegating metadata file. Note that most of the data is the same in each delegation. The only data that differs between these delegations are the bolded fields, the name and path_hash_prefix. The name has a common prefix (underlined), so only differs by a count and the path_hash_prefix is generated using the hash algorithm and number of bins.
+Every client will then have to download this large delegating metadata file. Note that most of the data is the same in each delegation. The only data that differs between these delegations are the bolded fields, the name and path_hash_prefix. The name has a common prefix (in italics), so only differs by a count and the path_hash_prefix is generated using the hash algorithm and number of bins.
 
 # Rationale
 
@@ -85,7 +85,7 @@ As in the current use of hash bin delegations, target files will be distributed 
 
 The names of each bin will be determined by the bin number and the name of the delegating entity. It will be structured as DELEGATING_ROLENAME.hbd-COUNT where DELEGATING_ROLENAME is the name of the role that delegated to the hash bins and COUNT is a value 0-2^BIT_LENGTH-1 that represents the bin number.
 
-If a delegation contains a succinct hash delegation, all files represented by this delegation must exist on the repository, even if they do not contain any targets or delegations. These bin files should be uploaded before the metadata that delegates to them.
+If a delegation contains a succinct hash delegation, all metadata files represented by this delegation must exist on the repository, even if they do not contain any targets or delegations. These bin files should be uploaded before the metadata that delegates to them.
 With the addition of succinct hash bins, the delegation will contain:
 
 ```
@@ -120,13 +120,13 @@ This TAP is not backwards compatible, and will need to be included in a major ve
 
 The repository must ensure that the correct access control mechanisms are applied to filenames of the form DELEGATING_ROLENAME.hbd-\*. As discussed in the security analysis, this metadata file should only be uploaded by DELEGATING_ROLENAME. The repository should handle this access control before succinct hash bin delegations are used so that other uploaders are not able to use the DELEGATING_ROLENAME.hbd-* filename for targets.
 
-In order for succinct hash bin delegations to be used, both the delegation and the client must understand the succint_hash_delegations field. Consider a client Bob who wants to download an image J and an uploader Alice who is responsible for delegating to J. This is what would happen if one or both of them supports succinct_hash_delegations.
+In order for succinct hash bin delegations to be used, both the delegation and the client must understand the succint_hash_delegations field. Consider a client Bob who wants to download a target J and an uploader Alice who is responsible for delegating to J. This is what would happen if one or both of them supports succinct_hash_delegations.
 
 | Parties that support succinct_hash_delegations | Result |
 | --- | --- |
-| Neither Alice nor Bob support succinct_hash_delegations | Alice would not use succinct_hash_delegations to delegate to J, and so Bob would be able to download and verify the image using the existing mechanisms. |
-| Alice supports succint_hash_delegations, Bob does not | Alice may use succinct_hash_delegations to delegate to any of her images, including J. Bob will download metadata that has the succinct_hash_delegations field and will not be able to find the delegation that points to J. |
+| Neither Alice nor Bob support succinct_hash_delegations | Alice would not use succinct_hash_delegations to delegate to J, and so Bob would be able to download and verify the target using the existing mechanisms. |
+| Alice supports succint_hash_delegations, Bob does not | Alice may use succinct_hash_delegations to delegate to any of her targets, including J. Bob will download metadata that has the succinct_hash_delegations field and will not be able to find the delegation that points to J. |
 | Bob supports succinct_hash_delegation, Alice does not | Alice will not use succinct_hash_delegations to delegate to J. Bob will not see this field in the targets metadata, and so will look for the delegation using the existing mechanisms |
-| Both Alice and Bob support succinct_hash_delegations | Alice may use succinct_hash_delegations to delegate to her images, including J. Bob will see the succinct_hash_delegations field in targets metadata and will download the alice.hdb-x bin metadata file that corresponds to J. |
+| Both Alice and Bob support succinct_hash_delegations | Alice may use succinct_hash_delegations to delegate to her targets, including J. Bob will see the succinct_hash_delegations field in targets metadata and will download the alice.hdb-x bin metadata file that corresponds to J. |
 
 As you can see, if Alice supports succinct_hash_delegations and Bob does not, Bob will not be able to verify J.
