@@ -114,7 +114,12 @@ that these metadata files are stored.
 
 The delegating metadata could significantly reduce the client’s
 metadata overhead by providing a succinct description of the keyid and
-prefix instead of repeating these for each delegation.
+prefix instead of repeating these for each delegation. For a repository
+with 10,000,000 images using the existing hashed bin delegation
+technique, the snapshot and targets metadata overhead would be around
+2,200,000 bytes for each target. Using succinct hashed bin delegations,
+the snapshot and targets metadata overhead for a target can be reduced
+to about 170,000 bytes.
 
 # Specification
 
