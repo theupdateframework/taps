@@ -160,7 +160,7 @@ the role that delegated to the hashed bins and COUNT is a value 0
 
 The `succinct_hash_delegations` will be prioritized over
 `path_hash_prefixes`. If both of these fields appear in a delegation,
-the `path_hash_prefixes` should be ignored in favor of the
+the `path_hash_prefixes` MUST (as per RFC 2119) be ignored in favor of the
 `succinct_hash_delegations`. If a user wishes to use both of these
 fields, they may do so in separate delegations.
 
