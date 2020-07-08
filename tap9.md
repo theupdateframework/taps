@@ -3,7 +3,7 @@
 * Version: 1
 * Last-Modified: 25-July-2017
 * Author: heartsucker
-* Status: Accepted
+* Status: Final
 * Content-Type: text/markdown
 * Created: 20-Jan-2017
 * TUF-Version: 1.0.0
