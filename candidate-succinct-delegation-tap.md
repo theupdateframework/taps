@@ -12,13 +12,14 @@
 
 TUF delegating metadata contains the keyid and path for each
 delegation, so when a single metadata file delegates to many others
-the delegating metadata’s size increases proportional to the number of delegations. Clients must download this large delegating metadata file
+the delegating metadata’s size increases proportionally to the number of
+delegations. Clients must download this large delegating metadata file
 when they update any target it delegates to, therefore large
 delegating metadata increases the client’s metadata overhead. To
 reduce the metadata overhead for targets metadata that contains many
-delegations, TUF supports hashed bin delegations. Hashed bin
-delegations use targets files that delegate to ‘bin’ roles that
-delegate to the actual targets. Targets are distributed to bins using
+delegations, TUF supports hashed bin delegations. Hashed bin delegations
+use a targets role that delegates to ‘bin’ roles, which sign metadata
+for the actual targets in the bin. Targets are distributed to bins using
 the hash of the target filename. Using hashed bin delegations, the
 delegating metadata only delegates to the bins, and so contain less
 data. Thus, hashed bin delegations reduce the client’s metadata
@@ -115,7 +116,7 @@ that these metadata files are stored.
 The delegating metadata could significantly reduce the client’s
 metadata overhead by providing a succinct description of the keyid and
 prefix instead of repeating these for each delegation. For a repository
-with 50,000,000 images using the existing hashed bin delegation
+with 50,000,000 targets using the existing hashed bin delegation
 technique, the snapshot and targets metadata overhead would be around
 1,600,000 bytes for each target. Using succinct hashed bin delegations,
 the snapshot and targets metadata overhead for a target can be reduced
