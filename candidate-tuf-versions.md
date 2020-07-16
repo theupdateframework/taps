@@ -128,7 +128,7 @@ happen at any time without affecting TUF's operation. Therefore, clients and
 repositories can still coordinate after a non-breaking change occurs. One common
 framework used to separate versions by type is Semantic Versioning. Semantic
 Versioning is a versioning scheme popular across open source projects that
-categorizes specification versions by the scope and criticality of their
+categorizes project versions by the scope and criticality of their
 changes. Breaking changes in the specification would warrant a MAJOR version
 number increase, while non-breaking changes would warrant only a MINOR version
 number increase. In addition, Semantic Versioning has a standard way to format
@@ -298,17 +298,17 @@ also use the same keys so that a client can find the next root file in whichever
 spec version they support.
 
 For existing TUF clients to continue operation after this TAP is implemented,
-repositories may store metadata from before TUF 1.0.0 in the top level
-repository (with no directory named 0.0.0). This allows existing clients to
+repositories may store metadata from before TUF 2.0.0 in the top level
+repository (with no directory named 1.0.0). This allows existing clients to
 continue downloading metadata from the repository. So a TUF repository that
-upgrades from version 0.12.0 to version 1.0.0 may look like:
+upgrades from version 1.12.0 to version 2.0.0 may look like:
 
 
 ```
 - Targets files
-- 0.12.0 metadata files
-- 1.0.0
-  |- 1.0.0 metadata files
+- 1.12.0 metadata files
+- 2.0.0
+  |- 2.0.0 metadata files
 ```
 
 ## Changes to TUF clients
