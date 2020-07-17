@@ -142,16 +142,19 @@ bin will be determined using the BIT_LENGTH.
 
 As in the current use of hashed bin delegations, target files will be
 distributed to bins based on the SHA2-256 hash of the target path and
-the path_hash_prefixes associated with each bin. The
-path_hash_prefixes will be computed by the repository and client to
-determine which bin each target belongs to. This field will include
+a prefix associated with each bin. The
+prefix will be computed by the repository and client to
+determine which bin each target belongs to. The prefix field will include
 the first BIT_LENGTH bits of the hash and will be determined for each
-bin i by computing i \* BIT_LENGTH. Once computed, the
-path_hash_prefixes must be represented as the first BIT_LENGTH bits of
+bin i by computing i \* BIT_LENGTH. The prefix relates to the
+path_hash_prefixes field as follows. The
+path_hash_prefixes could be represented as the first BIT_LENGTH bits of
 the hash represented in base16, followed by a "\*". So for a BIT_LENGTH
 of 3, the path_hash_prefix of the first bin would be "0\*" (binary
-values starting with 000) , the second bin would be "2\*" (binary
-values 001), the third "4\*", then "6\*", "8\*", "a\*", "c\*", and "e\*".
+values starting with 0000 and 0001) , the second bin would be "2\*"
+(binary values 0010 and 0011), the third "4\*" (0100 and 0101), then
+"6\*" (0110 and 0111), "8\*" (1000 and 1001), "a\*" (1010 and 1011),
+"c\*" (1100 and 1101), and "e\*" (1110 and 1111).
 
 The names of each bin will be determined by the bin number and the
 name of the delegating entity. It will be structured as
