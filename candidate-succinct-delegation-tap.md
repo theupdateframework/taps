@@ -159,8 +159,8 @@ values starting with 0000 and 0001) , the second bin would be "2\*"
 The names of each bin will be determined by the bin number and the
 name of the delegating entity. It will be structured as
 DELEGATING_ROLENAME.hbd-COUNT where DELEGATING_ROLENAME is the name of
-the role that delegated to the hashed bins and COUNT is a value 0
-2^BIT_LENGTH-1 that represents the bin number.
+the role that delegated to the hashed bins and COUNT is a value between 0 and
+2^BIT_LENGTH-1 (inclusive) that represents the bin number.
 
 The `succinct_hash_delegations` will be prioritized over
 `path_hash_prefixes`. If both of these fields appear in a delegation,
