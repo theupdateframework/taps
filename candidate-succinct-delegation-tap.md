@@ -19,7 +19,7 @@ delegating metadata increases the client’s metadata overhead. To
 reduce the metadata overhead for targets metadata that contains many
 delegations, TUF supports hashed bin delegations. Hashed bin delegations
 use a targets role that delegates to ‘bin’ roles, which sign metadata
-for the actual targets in the bin. Targets are distributed to bins using
+for the actual target files in the bin. Targets files are distributed to bins using
 the hash of the target filename. Using hashed bin delegations, the
 delegating metadata only delegates to the bins, and so contain less
 data. Thus, hashed bin delegations reduce the client’s metadata
@@ -44,8 +44,8 @@ follows a common pattern.
 
 This TAP supports the following use case:
 
-Suppose a single targets file contains a very large number of
-delegations or targets. The owner of this targets file wishes to
+Suppose a single targets metadata file contains a very large number of
+delegations or target files. The owner of this targets metadata file wishes to
 reduce the metadata overhead for clients, and so uses hashed bin
 delegations. They will use the same key to sign each bin delegation.
 They would like to list this key a single time in the delegation to
@@ -104,7 +104,7 @@ generated using the hash algorithm and number of bins.
 # Rationale
 
 Hashed bin delegations commonly use the same key for each bin in order
-to allow for automated signing of targets files. If the same key is
+to allow for automated signing of target files. If the same key is
 used for all bins, this key should only need to be listed once in the
 delegating metadata.
 
@@ -116,12 +116,12 @@ that these metadata files are stored.
 The delegating metadata could significantly reduce the client’s
 metadata overhead by providing a succinct description of the keyid and
 prefix instead of repeating these for each delegation. For a repository
-with 50,000,000 targets using the existing hashed bin delegation
+with 50,000,000 target files using the existing hashed bin delegation
 technique, the snapshot and targets metadata overhead would be around
 1,600,000 bytes for each target. Using succinct hashed bin delegations,
 the snapshot and targets metadata overhead for a target can be reduced
 to about 550,000 bytes. For more detail about how these overheads were
-calculated, see [this spreadsheet](https://docs.google.com/spreadsheets/d/10AKDsHsM2mmh45CWCNFxihJ9f-SP6gXYv7WcWpt-fDQ/edit#gid=0). 
+calculated, see [this spreadsheet](https://docs.google.com/spreadsheets/d/10AKDsHsM2mmh45CWCNFxihJ9f-SP6gXYv7WcWpt-fDQ/edit#gid=0).
 
 # Specification
 
@@ -167,7 +167,7 @@ fields, they may do so in separate delegations.
 
 If a delegation contains a succinct hash delegation, all metadata
 files represented by this delegation must exist on the repository,
-even if they do not contain any targets or delegations. These bin
+even if they do not contain any target files or delegations. These bin
 files should be uploaded before the metadata that delegates to them.
 With the addition of succinct hashed bins, the delegation will contain:
 
@@ -222,7 +222,7 @@ discussed in the security analysis, this metadata file should only be
 uploaded by DELEGATING_ROLENAME. The repository should handle this
 access control before succinct hashed bin delegations are used so that
 other uploaders are not able to use the DELEGATING_ROLENAME.hbd-*
-filename for targets.
+filename for target files.
 
 In order for succinct hashed bin delegations to be used, both the
 delegation and the client must understand the succint_hash_delegations
@@ -233,9 +233,9 @@ would happen if one or both of them supports succinct_hash_delegations.
 | Parties that support succinct_hash_delegations | Result |
 | --- | --- |
 | Neither Alice nor Bob support succinct_hash_delegations | Alice would not use succinct_hash_delegations to delegate to J, and so Bob would be able to download and verify the target using the existing mechanisms. |
-| Alice supports succint_hash_delegations, Bob does not | Alice may use succinct_hash_delegations to delegate to any of her targets, including J. Bob will download metadata that has the succinct_hash_delegations field and will not be able to find the delegation that points to J. |
+| Alice supports succint_hash_delegations, Bob does not | Alice may use succinct_hash_delegations to delegate to any of her target files, including J. Bob will download metadata that has the succinct_hash_delegations field and will not be able to find the delegation that points to J. |
 | Bob supports succinct_hash_delegation, Alice does not | Alice will not use succinct_hash_delegations to delegate to J. Bob will not see this field in the targets metadata, and so will look for the delegation using the existing mechanisms |
-| Both Alice and Bob support succinct_hash_delegations | Alice may use succinct_hash_delegations to delegate to her targets, including J. Bob will see the succinct_hash_delegations field in targets metadata and will download the alice.hdb-x bin metadata file that corresponds to J. |
+| Both Alice and Bob support succinct_hash_delegations | Alice may use succinct_hash_delegations to delegate to her target files, including J. Bob will see the succinct_hash_delegations field in targets metadata and will download the alice.hdb-x bin metadata file that corresponds to J. |
 
 As you can see, if Alice supports succinct_hash_delegations and Bob
 does not, Bob will not be able to verify J.
