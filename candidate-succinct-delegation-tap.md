@@ -206,12 +206,6 @@ hashed bin delegations into consideration. Upload access for the name
 DELEGATING_ROLENAME.hbd-\* should have the same permissions as
 DELEGATING_ROLENAME.
 
-If a repository has multiple delegations to a target, clients will
-resolve these using prioritized delegations. So if a delegation uses
-succinct hashed bins and another role delegates to
-DELEGATING_ROLENAME.hbd-\*, the client will use the delegation with a
-higher priority.
-
 # Backwards Compatibility
 
 This TAP is not backwards compatible, and will need to be included in
