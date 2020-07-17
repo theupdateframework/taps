@@ -56,7 +56,7 @@ times. The first four delegations in the resulting metadata would
 include:
 
 <pre><code>
-“delegations”:{ "keys" : {
+"delegations":{ "keys" : {
        abc123 : abcdef123456,
        },
    "roles" : [{
@@ -64,7 +64,7 @@ include:
        "keyids" : [ abc123 ] ,
        "threshold" : 1,
        "path_hash_prefixes" : [ <b>00*</b> ],
-        "paths" : [ “path/to/directory/” ],
+        "paths" : [ "path/to/directory/" ],
        "terminating": false,
    },
 {
@@ -72,7 +72,7 @@ include:
        "keyids" : [ abc123 ] ,
        "threshold" : 1,
        "path_hash_prefixes" : [ <b>01*</b> ],
-        "paths" : [ “path/to/directory/” ],
+        "paths" : [ "path/to/directory/" ],
        "terminating": false,
    },
 {
@@ -80,7 +80,7 @@ include:
        "keyids" : [ abc123 ] ,
        "threshold" : 1,
        "path_hash_prefixes" : [ <b>02*</b> ],
-        "paths" : [ “path/to/directory/” ],
+        "paths" : [ "path/to/directory/" ],
        "terminating": false,
    },
 {
@@ -88,7 +88,7 @@ include:
        "keyids" : [ abc123 ] ,
        "threshold" : 1,
        "path_hash_prefixes" : [ <b>03*</b>],
-        "paths" : [ “path/to/directory/” ],
+        "paths" : [ "path/to/directory/" ],
        "terminating": false,
    },... ]
  }
@@ -128,8 +128,8 @@ calculated, see [this spreadsheet](https://docs.google.com/spreadsheets/d/10AKDs
 This TAP adds the following extension to delegations:
 
 ```
-(“succinct_hash_delegations” : {
-    “prefix_bit_length” : BIT_LENGTH
+("succinct_hash_delegations" : {
+    "prefix_bit_length" : BIT_LENGTH
 })
 ```
 Where 2^BIT_LENGTH is the number of bins. BIT_LENGTH must be an
@@ -146,12 +146,12 @@ the path_hash_prefixes associated with each bin. The
 path_hash_prefixes will be computed by the repository and client to
 determine which bin each target belongs to. This field will include
 the first BIT_LENGTH bits of the hash and will be determined for each
-bin i by computing i * BIT_LENGTH. Once computed, the
+bin i by computing i \* BIT_LENGTH. Once computed, the
 path_hash_prefixes must be represented as the first BIT_LENGTH bits of
-the hash represented in base16, followed by a “*”. So for a BIT_LENGTH
-of 3, the path_hash_prefix of the first bin would be “0*” (binary
-values starting with 000) , the second bin would be “2*” (binary
-values 001), the third “4*”, then “6*”, “8*”, “a*”, “c*”, and “e*”.
+the hash represented in base16, followed by a "\*". So for a BIT_LENGTH
+of 3, the path_hash_prefix of the first bin would be "0\*" (binary
+values starting with 000) , the second bin would be "2\*" (binary
+values 001), the third "4\*", then "6\*", "8\*", "a\*", "c\*", and "e\*".
 
 The names of each bin will be determined by the bin number and the
 name of the delegating entity. It will be structured as
@@ -161,7 +161,7 @@ the role that delegated to the hashed bins and COUNT is a value 0
 
 The `succinct_hash_delegations` will be prioritized over
 `path_hash_prefixes`. If both of these fields appear in a delegation,
-the `path_hash_prefixes` MUST (as per RFC 2119) be ignored in favor of the
+the `path_hash_prefixes` MUST be ignored in favor of the
 `succinct_hash_delegations`. If a user wishes to use both of these
 fields, they may do so in separate delegations.
 
@@ -180,8 +180,8 @@ With the addition of succinct hashed bins, the delegation will contain:
        "keyids" : [ KEYID, ... ] ,
        "threshold" : THRESHOLD,
        ("path_hash_prefixes" : [ HEX_DIGEST, ... ] |
-       (“succinct_hash_delegations” : {
-    “prefix_bit_length” : BIT_LENGTH
+       ("succinct_hash_delegations" : {
+    "prefix_bit_length" : BIT_LENGTH
         })
         "paths" : [ PATHPATTERN, ... ]),
        "terminating": TERMINATING,
@@ -200,7 +200,7 @@ mechanism.
 
 Repositories that use access control for file uploading should take
 hashed bin delegations into consideration. Upload access for the name
-DELEGATING_ROLENAME.hbd-* should have the same permissions as
+DELEGATING_ROLENAME.hbd-\* should have the same permissions as
 DELEGATING_ROLENAME.
 
 If a repository has multiple delegations to a target, clients will
@@ -221,7 +221,7 @@ are applied to filenames of the form DELEGATING_ROLENAME.hbd-\*. As
 discussed in the security analysis, this metadata file should only be
 uploaded by DELEGATING_ROLENAME. The repository should handle this
 access control before succinct hashed bin delegations are used so that
-other uploaders are not able to use the DELEGATING_ROLENAME.hbd-*
+other uploaders are not able to use the DELEGATING_ROLENAME.hbd-\*
 filename for target files.
 
 In order for succinct hashed bin delegations to be used, both the
