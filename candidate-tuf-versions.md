@@ -1,7 +1,7 @@
 * TAP:
 * Title: Managing TUF Versions
 * Version: 1
-* Last-Modified: 22-July-2019
+* Last-Modified: 20-July-2020
 * Author: Marina Moore, Justin Cappos
 * Status: Draft
 * Content-Type: text/markdown
@@ -503,7 +503,8 @@ before any non-backwards compatible TAPs are released.
 
 # Augmented Reference Implementation
 
-TODO
+Semantic Versioning was added to the TUF Reference Implementation in [#914](https://github.com/theupdateframework/tuf/pull/914).
+The rest of this proposal has not yet been implemented.
 
 # Copyright
 
