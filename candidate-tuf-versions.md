@@ -12,7 +12,7 @@
 The TUF specification does not currently support changes
 that are not backwards compatible. If a repository and a client are not using
 the same version of the TUF specification, differences in metadata format may
-mean that metadata cannot be safely and reliably verified. Any changes that
+mean that metadata cannot be safely and reliably verified. Any changes to the specification that
 affect the metadata in this way are considered breaking changes. This TAP
 addresses this clash of versions by allowing TUF
 implementations to independently manage updates on clients and repositories.
@@ -24,12 +24,12 @@ providing and verifying updates, this TAP requires two
 changes: one to the way the TUF specification manages versions, and the other to
 how TUF implementations perform updates. The former is accomplished by having this TAP require
 that the specification use Semantic Versioning to separate breaking from
-non-breaking changes. The latter is achieved by requiring both clients and
+non-breaking changes. The latter is achieved by allowing both clients and
 repositories to maintain sets of TUF metadata that follow different versions of the TUF specification
 so that reliable updates can continue throughout the process of the specification
-upgrade. To do so, repositories will generate metadata for multiple TUF
+upgrade. To do so, repositories can generate metadata for multiple TUF
 specification versions and maintain them in an accessible directory. In
-addition, clients will include support for metadata from previous TUF versions.
+addition, clients can include support for metadata from previous TUF versions.
 To determine the version to use for an update, clients will select the most
 recent specification version supported by both the client and the repository.
 
@@ -44,38 +44,38 @@ breaking changes, TUF will be able to continuously provide secure
 updates when breaking changes are made to the repository or
 client. The use cases addressed in this TAP are listed below.
 
-## Use case 1: A repository updates to a new TUF spec version
+## Use case 1: A repository updates to a new TUF specification version
 
 As new features become available in the TUF specification, repositories may wish
 to upgrade to a new version. This could include adding TAPs with breaking
 changes. When the repository upgrades, clients that use an older version of the
-TUF spec will no longer be able to provide the security properties of TUF when
+TUF specification will no longer be able to provide the security properties of TUF when
 parsing metadata from the repository as the fields in the metadata may have changed.
 However, repositories and clients may be managed by different people with
 different interests who may not be able to coordinate the upgrade to a new TUF version.
 To resolve this problem, clients will first need a way to determine whether
-their version of TUF spec is compatible with the version used by the repository.
+their version of TUF specification is compatible with the version used by the repository.
 This is to ensure that clients always parse metadata according to the TUF version
 that generated that metadata. Then, they will need some way to process updates
 after this upgrade occurs on the repository to ensure reliable access to
 updates, even if they are not able to upgrade immediately due to development
 time or other constraints.
 
-## Use case 2: A client updates to a new TUF spec version
+## Use case 2: A client updates to a new TUF specification version
 
 Just as a repository may be upgraded, a TUF client may wish to upgrade to a new
-TUF spec version to use new features. When the client implements an upgrade that
+TUF specification version to use new features. When the client implements an upgrade that
 includes a breaking change, it cannot be sure that all repositories have also
 upgraded to the new specification version. Therefore, after the client upgrades
 they must ensure that any metadata downloaded from a repository is parsed using
 a compatible TUF version. If the repository is using an older version, the client
 should have some way to allow the update to proceed.
 
-## Use case 3: A delegated targets role uses a different TUF spec version than the repository
+## Use case 3: A delegated targets role uses a different TUF specification version than the repository
 
 A delegated role may make and sign metadata using a different version of the TUF
-specification than the repository hosting the top level roles. Delegated roles
-and the top level repository may be managed by people in different organizations
+specification than the repository hosting the top-level roles. Delegated roles
+and the top-level repository may be managed by people in different organizations
 who are not able to coordinate upgrading to a new version of the TUF
 specification. In this case, a client should be able to parse delegations that
 generate metadata with a different TUF specification version than the repository.
@@ -103,18 +103,18 @@ be backwards compatible.
 We propose this TAP because as TUF continues to evolve, the need for TUF clients
 and repositories to upgrade their TUF metadata format will grow. This sets up the potential for clients
 that are no longer able to perform updates because they cannot parse the
-metadata generated by repositories, or for clients to install the wrong targets
+metadata generated by repositories, or for clients to install the wrong target files
 due to changes in TUF. Both of these issues prevent clients from installing the
-targets intended by repository managers, and could lead to critical security or
+targets intended by repository managers, and in extreme cases could lead to critical security or
 functionality problems. TUF clients and repositories need to be able to upgrade
 to new versions without preventing secure and reliable access to software
 updates.
 
 In trying to create more flexible functionality between servers and clients when
-it comes to dealing with different versions of TUF, we identified two main
+it comes to dealing with different versions of the TUF specification, we identified two main
 issues that need to be addressed. First, clients need to be able to determine
 whether the TUF specification version they implement is compatible with the TUF
-version of the metadata they receive. This ensures that clients parse
+specification version of the metadata they receive. This ensures that clients parse
 metadata according to the correct version to prevent errors from any changes to
 the metadata in the new version. Second, clients need a way to use this
 information to determine how to access metadata that is compatible with the
@@ -122,7 +122,7 @@ version of the TUF specification they implement.
 
 To address the first issue, this TAP proposes standardizing the specification
 version field to separate breaking changes from non-breaking changes and
-ensure that the field can be compared across clients and repositories.
+ensure that the field can be compared across TUF clients and repositories.
 Separating out non-breaking changes allows these backwards compatible changes to
 happen at any time without affecting TUF's operation. Therefore, clients and
 repositories can still coordinate after a non-breaking change occurs. One common
@@ -172,21 +172,21 @@ metadata from previous TUF specification versions. These functions allow a
 client to maintain old versions of the specification while still supporting the
 most recent version.
 
-The top level TUF metadata (root, snapshot, timestamp, and top-level targets)
+The top-level TUF metadata (root, snapshot, timestamp, and top-level targets)
 used to install an update should all implement the same TUF specification
 version. A specification change may rely on more than one metadata file (for
 example a change in the signing process would affect all metadata types), so
-using the same specification version for top level metadata allows for these
+using the same specification version for top-level metadata allows for these
 large changes to the specification. For information about how this relates to
-url pinning and TAP 5, see [Special Cases](#tap-5). However, delegated targets may not be
-managed by the same parties as the top level metadata. For this reason, this TAP
+url pinning and TAP 5, see [Special Cases](#tap-5). However, delegated targets metadata may not be
+managed by the same parties as the top-level metadata. For this reason, this TAP
 allows clients to use a different TUF specification version for delegated
 targets by maintaining functions to parse metadata that conforms to different
 specification versions. This compromise allows TUF specification changes to affect multiple
 metadata files while allowing flexibility in how repositories and delegations
 are managed.
 
-So, during the course of an update a client could use 4.0.0_parse_root,
+For example, during the course of an update a client could use 4.0.0_parse_root,
 4.0.0_parse_snapshot, 4.0.0_parse_timestamp, 4.0.0_parse_targets,
 4.0.0_parse_delegation, and 3.0.0_parse_delegation.
 
@@ -194,9 +194,9 @@ So, during the course of an update a client could use 4.0.0_parse_root,
 # Specification
 
 As stated above, this TAP defines a variety of procedures to be added to the
-update process on both clients and repos. These changes include the way in which
-version numbers are determined, the addition of new directories on repositories,
-new metadata parsing functions on clients, and a new process for finding
+update process on both clients and repositories. These changes include the way in which
+version numbers are determined, the addition of new directories on repositories
+and new metadata parsing functions on clients, and a new process for finding
 compatible metadata.
 
 For clarity, throughout this TAP *upgrading* refers to the process of moving
@@ -209,13 +209,13 @@ TAP.
 ## Version Number Format
 
 Using [Semantic Versioning](https://semver.org/), breaking changes will only
-occur during a major release of the TUF spec (e.g. 1.x.x to 2.x.x). The
+occur during a major release of the TUF specification (e.g. 1.x.x to 2.x.x). The
 'spec_version' field of root metadata will follow this convention, with version
 numbers in the format MAJOR.MINOR.PATCH. This is a standard format used in other
 open source projects that makes the meaning of a TUF version number change
 consistent and easily understood. The Backwards Compatibility section of a TAP
 should be used to determine whether the TAP creates a breaking change. If the
-change is not backwards compatible, such as those in TAP 3 and 8, then it will
+change is not backwards compatible, such as those in TAPs 3 and 8, then it will
 be part of a new major version of the TUF specification. Non backwards
 compatible versions add features that change the way that TUF processes updates
 and so clients and repositories need to use code that supports the same major
@@ -250,17 +250,17 @@ directories.
 As described in the [Rationale](#rationale), repositories should support multiple
 TUF specification versions. In order to do so, this TAP proposes a new directory
 structure for repositories. When a repository manager chooses to upgrade to a
-new major TUF spec version, they create a new directory on the repository named
+new major TUF specification version, they create a new directory on the repository named
 for the major version (for example 2.0.0). This directory will contain all
-metadata files for the new spec version, but target files will remain in the
+metadata files for the new specification version, but target files will remain in the
 parent directory to save space. In this case the metadata files (in directories according to their spec
 version) can point to target files relative to the parent directory. After creating
 the directory, the repository creates and signs root, snapshot, timestamp, and
-top level targets metadata using the new TUF spec version and places these
+top-level targets metadata using the new TUF specification version and places these
 metadata files in the directory. The root file should be signed by both the new
 root key and the current root key (the root key from the most recent metadata in
-the previous major spec version). Clients will now be able to use the new
-metadata files once their TUF spec versions are also updated. After an update to
+the previous major specification version). Clients will now be able to use the new
+metadata files once their TUF specification versions are also updated. After an update to
 version 2.0.0, the repository structure may look like:
 
 
@@ -279,7 +279,7 @@ directory named 2.0.0. Minor and patch version changes are backwards compatible,
 so clients using version 2.0.0 will still be able to parse metadata written
 using version 2.1.0.
 
-A repository may continue to support old major TUF spec versions by creating
+A repository may continue to support old major TUF specification versions by creating
 metadata in both the old location and the new directory. A repository manager
 may maintain as many versions as desired, though any version with security
 concerns should be phased out as soon as possible. This can be done by stopping
@@ -291,14 +291,14 @@ A repository should generate all TUF metadata, including root metadata, for all
 TUF versions that the repository supports. Any update should be reflected across
 all of these versions. For clarity, version numbers used for consistent
 snapshots should be consistent across all
-supported spec versions or a client might have difficulty finding the current
+supported specification versions so that a client can find the current
 metadata files. This means that there may be a file at 1.0.0/3.root.json as well
-as 2.0.0/3.root.json. Root files with the same consistent snapshot number must
-also use the same keys so that a client can find the next root file in whichever
-spec version they support.
+as 2.0.0/3.root.json. Root metadata files with the same consistent snapshot number must
+also use the same keys so that a client can find the next root metadata file in whichever
+specification version they support.
 
 For existing TUF clients to continue operation after this TAP is implemented,
-repositories may store metadata from before TUF 2.0.0 in the top level
+repositories may store metadata from before TUF 2.0.0 in the top-level
 repository (with no directory named 1.0.0). This allows existing clients to
 continue downloading metadata from the repository. So a TUF repository that
 upgrades from version 1.12.0 to version 2.0.0 may look like:
@@ -317,9 +317,9 @@ TUF clients must store the TUF specification versions they support and may add
 functions to maintain old versions. In order to find compatible updates on a
 repository, a client must keep track of the TUF specification versions it
 supports. To do so, a global variable or other local storage option should
-contain the client spec version, or spec version range. For simplicity, this
+contain the client specification version, or specification version range. For simplicity, this
 field should be formatted according to Semantic Versioning so that it can be
-directly compared to the spec version in root metadata.
+directly compared to the specification version in root metadata.
 
 There may be multiple versions of the specification supported by each TUF
 client. This allows metadata downloads from a repository or delegated role that
@@ -344,23 +344,23 @@ following procedure:
 looking for the directory with the largest version number.
 * If the latest version on the repository is equal to that of the client, it
 will use this directory to download metadata.
-* If the latest version pre-dates the client spec version, it may call functions
+* If the latest version pre-dates the client specification version, it may call functions
 from a previous client version to download the metadata. The client may support
 as many or as few versions as desired for the application. If the previous
 version is not available, the client shall report that an update can not be
-performed due to an old spec version on the repository.
+performed due to an old specification version on the repository.
 * If the latest version on the repository is higher than the client spec
 version, the client should report to the user that it is not using the most up
 to date version, and then perform the update with the directory that corresponds with the latest
-client spec version, if available. If no such directory exists, the client
+client specification version, if available. If no such directory exists, the client
 terminates the update.
 
 Once the supported directory is determined, the client shall attempt the update
 using the metadata in this directory.
 
-For example, if a client has a spec version of 3.5 and a repository has
+For example, if a client has a specification version of 3.5 and a repository has
 directories for 2.0.0, 3.0.0, and 4.0.0, the client will report that spec
-version 4.0 is available, then download metadata from 3.0.0. This reporting is
+version 4.x is available, then download metadata from the 3.0.0 directory. This reporting is
 up to the discretion of an implementer, but it should be used to encourage
 updating the client to the most recent specification version.
 
@@ -371,12 +371,12 @@ will report that it is unable to perform an update.
 
 Once the supported directory is determined, the client must validate root
 metadata from this directory. If the currently trusted root file saved on the
-client uses a spec version other than the supported version, the client will
+client uses a specification version other than the supported version, the client will
 look for the next root file. The next root file may have been generated using
 the supported version, or it may have been generated using a previous TUF
 version. The client will look for the root file first in the supported version,
 then move to the previous versions until the next root file is found, or until
-the currently trusted root file's version is reached. All root files should be
+the currently trusted root file's version is reached. All root files must be
 verified using the major version of the TUF client that corresponds with the
 major version of the root file.
 
@@ -385,8 +385,8 @@ So, if the currently trusted root file is named 4.root.json and uses version
 5.root.json first in 3.0.0, then 2.0.0, then 1.0.0. If this file is found, the
 client will look for 6.root.json using the same process. To facilitate this, the
 client should maintain functions to parse root files from previous spec
-versions. If the client does not support the spec version of a root file, the
-client shall terminate the update and report the spec version mismatch.
+versions. If the client does not support the specification version of a root file, the
+client shall terminate the update and report the specification version mismatch.
 
 
 ## Special Cases
@@ -402,7 +402,7 @@ validation for each repository independently, and then compare the results.
 To do so, the client needs to ensure that the metadata from each repository is
 valid for the given targets file. If the repositories use different versions of
 the TUF specification, the client should use the version that corresponds to
-each repository to validate its metadata. Results from all repositories, could
+each repository to validate its metadata. Results from all repositories could
 then be compared. The update will only be considered valid if valid metadata
 from both repositories point to the same target file, and it matches the hashes
 provided by each repository. Note that different TUF versions may use different
@@ -432,7 +432,7 @@ use the next listed metadata file or terminate the update.
 ### Delegations
 
 The TUF specification version(s) supported by a delegation does not need to
-match the version(s) supported by the top level metadata. A delegation may use
+match the version(s) supported by the top-level metadata. A delegation may use
 the directory structure described above to indicate which TUF specification
 versions it supports. The TUF client is responsible for parsing the metadata
 from delegations using code that implements the appropriate specification
