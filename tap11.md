@@ -1,9 +1,9 @@
 * TAP: 11
 * Title: Using POUFs for Interoperability
 * Version: 1
-* Last-Modified: 06-May-2020
+* Last-Modified: 17-Jul-2020
 * Author: Marina Moore, Santiago Torres, Trishank Kuppusamy, Sebastien Awwad, Justin Cappos
-* Status: Draft
+* Status: Accepted
 * Content-Type: text/markdown
 * Created: 9-November-2018
 
