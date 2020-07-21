@@ -287,12 +287,12 @@ the creation of new metadata files in the directory for the phased out version.
 In order to allow clients to parse the root metadata chain, root metadata files
 shall not be deleted even once a version is deprecated.
 
-A repository may indicate the planned phase out of a major version using an
-optional `deprecation_timestamp` field in targets metadata. This field can be
-added to targets metadata once a date is set for deprecation of a TUF
-specification version by the repository and will include the timestamp after
-which the metadata for the current specification version will no longer be
-maintained. Inclusion of this field will signal to clients both that they will
+A repository may indicate the planned phase out of metadata conforming to a major version
+of the TUF specification using an optional `deprecation_timestamp` field in targets metadata.
+This field can be added to targets metadata once a date is set for deprecation of metadata
+adhering to a TUF specification version by the repository and will include the timestamp after
+which the metadata for the current specification version will no longer be maintained. 
+Inclusion of this field will signal to clients both that they will
 need to upgrade to the next specification version before the timestamp, and
 that there will not be metadata available in the current directory after this
 point. Both top-level and delegated targets metadata may use this field to
@@ -325,12 +325,12 @@ For existing TUF clients to continue operation after this TAP is implemented,
 repositories may store metadata from before TUF 2.0.0 in the top-level
 repository (with no directory named 1.0.0). This allows existing clients to
 continue downloading metadata from the repository. So a TUF repository that
-upgrades from version 1.12.0 to version 2.0.0 may look like:
+upgrades from version 1.0.0 to version 2.0.0 may look like:
 
 
 ```
 - Targets files
-- 1.12.0 metadata files
+- 1.0.0 metadata files
 - 2.0.0
   |- 2.0.0 metadata files
 ```
