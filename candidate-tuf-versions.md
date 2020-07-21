@@ -288,10 +288,10 @@ In order to allow clients to parse the root metadata chain, root metadata files
 shall not be deleted even once a version is deprecated.
 
 A repository may indicate the planned phase out of metadata conforming to a major version
-of the TUF specification using an optional `deprecation_timestamp` field in targets metadata.
+of the TUF specification using an optional `becomes_obsolete` field in targets metadata.
 This field can be added to targets metadata once a date is set for deprecation of metadata
 adhering to a TUF specification version by the repository and will include the timestamp after
-which the metadata for the current specification version will no longer be maintained. 
+which the metadata for the current specification version will no longer be maintained.
 Inclusion of this field will signal to clients both that they will
 need to upgrade to the next specification version before the timestamp, and
 that there will not be metadata available in the current directory after this
@@ -306,7 +306,7 @@ targets metadata will include the following:
   "version" : VERSION,
   "expires" : EXPIRES,
   "targets" : TARGETS,
-  ("deprecation_timestamp": DEPRECATION_TIMESTAMP),
+  ("becomes_obsolete": BECOMES_OBSOLETE),
   ("delegations" : DELEGATIONS)
 }
 ```
@@ -413,14 +413,14 @@ versions. If the client does not support the specification version of a root fil
 client shall terminate the update and report the specification version mismatch.
 
 When a client validates targets metadata, they may check for the
-`deprecation_timestamp` field. If this field is present, the client should do
+`becomes_obsolete` field. If this field is present, the client should do
 the following:
-* If the current time is after the time listed in `deprecation_timestamp`, the
+* If the current time is after the time listed in `becomes_obsolete`, the
 client should report to the user that the update is not available due to a
 version mismatch and consider the current targets metadata file invalid. If
 this is the top-level targets file, the update should be terminated.
 * Otherwise, the client should warn the user that the TUF specification version
-they are using will be deprecated at the time indicated by `deprecation_timestamp`
+they are using will be deprecated at the time indicated by `becomes_obsolete`
 and proceed with the update.
 
 
