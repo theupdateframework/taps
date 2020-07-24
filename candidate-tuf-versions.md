@@ -289,42 +289,49 @@ shall not be deleted even once a version is deprecated.
 
 A repository may indicate the planned phase out of metadata conforming to a
 major version of the TUF specification using an optional `becomes_obsolete`
-field in targets and timestamp metadata. This field can be added to targets and
-timestamp metadata once a date is set for deprecation of metadata adhering to a
+field in root and targets metadata. This field can be added to root and targets
+metadata once a date is set for deprecation of metadata adhering to a
 TUF specification version by the repository and will include the timestamp after
 which the metadata for the current specification version will no longer be
 maintained. Inclusion of this field will signal to clients both that they will
 need to upgrade to the next specification version before the timestamp, and
 that there will not be metadata available in the current directory after this
-point. The client can check the `becomes_obsolete` field in timestamp metadata
+point. The client can check the `becomes_obsolete` field in root metadata
 before checking the metadata expiration. This allows them to differentiate
 between metadata that is expired due to deprecation and metadata that is expired
-due to an attack. Both timestamp and delegated targets metadata may use this
-field to indicate the point after which the given TUF specification version will
-no longer be supported. This means that delegated targets may include this field
-independent of top-level metadata. With the addition of this field, the "signed"
-portion of targets metadata will include the following:
+due to an attack. Delegated targets may include this field independent of
+top-level metadata to indicate when the metadata they are responsible for will
+no longer support a given TUF specification version. With the addition of this
+field, the "signed" portion of targets metadata will include the following:
 
 ```
 { "_type" : "targets",
   "spec_version" : SPEC_VERSION,
   "version" : VERSION,
   "expires" : EXPIRES,
-  "targets" : TARGETS,
   ("becomes_obsolete": BECOMES_OBSOLETE),
+  "targets" : TARGETS,
   ("delegations" : DELEGATIONS)
 }
 ```
 
-And the "signed" portion of timestamp will include:
+And the "signed" portion of root will include:
 
 ```
-{ "_type" : "timestamp",
+{ "_type" : "root",
   "spec_version" : SPEC_VERSION,
+  "consistent_snapshot": CONSISTENT_SNAPSHOT,
   "version" : VERSION,
   "expires" : EXPIRES,
   ("becomes_obsolete": BECOMES_OBSOLETE),
-  "meta" : METAFILES
+  "keys" : {
+      KEYID : KEY
+      , ... },
+  "roles" : {
+      ROLE : {
+        "keyids" : [ KEYID, ... ] ,
+        "threshold" : THRESHOLD }
+      , ... }
 }
 ```
 
@@ -429,13 +436,13 @@ client should maintain functions to parse root files from previous spec
 versions. If the client does not support the specification version of a root file, the
 client shall terminate the update and report the specification version mismatch.
 
-When a client validates timestamp and targets metadata, they may check for the
+When a client validates root and targets metadata, they may check for the
 `becomes_obsolete` field. If this field is present, the client should do
 the following:
 * If the current time is after the time listed in `becomes_obsolete`, the
 client should report to the user that the update is not available due to a
-version mismatch and consider the current targets metadata file invalid. If
-this is the timestamp or top-level targets file, the update should be terminated.
+version mismatch and consider the current metadata file invalid. If
+this is the root or top-level targets file, the update should be terminated.
 * Otherwise, the client should warn the user that the TUF specification version
 they are using will be deprecated at the time indicated by `becomes_obsolete`
 and proceed with the update.
