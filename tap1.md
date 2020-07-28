@@ -74,7 +74,7 @@ Each TAP should have the following parts:
 
 3. *Motivation* -- The motivation is critical for TAPs that want to change TUF. It should clearly explain why the existing framework specification is inadequate to address the problem that the TAP solves.  TAP submissions without sufficient motivation may be rejected outright.
 
-4. *Rationale* -- The rationale fleshes out the specification by describing what motivated the design and why particular design decisions were made. It should describe alternate designs that were considered and related work, e.g. how the feature is supported in other frameworks. The rationale should provide evidence of consensus within the community and discuss important objections or concerns raised during discussion.
+4. *Rationale* -- The rationale fleshes out the proposal by describing what motivated the design and why particular design decisions were made. It should describe alternate designs that were considered and related work, e.g. how the feature is supported in other frameworks. The rationale should provide evidence of consensus within the community and discuss important objections or concerns raised during discussion.
 
 5. *Specification* -- The technical specification should describe the syntax and semantics of any new feature.  The specification should be detailed enough to allow competing, interoperable implementations for at least the current major TUF platforms (TUF, Notary, go-tuf).
 
@@ -82,7 +82,7 @@ Each TAP should have the following parts:
 
 7. *Backwards Compatibility* -- All TAPs that introduce backwards incompatibilities must include a section describing these incompatibilities and their severity.  The TAP must explain how the author proposes to deal with these incompatibilities. TAP submissions without a sufficient backwards compatibility treatise may be rejected outright.
 
-8. *Augmented Reference Implementation* -- The augmented reference implementation must be completed before any TAP is given status "Final", but it need not be completed before the TAP is accepted. While there is merit to the approach of reaching consensus on the specification and rationale before writing code, the principle of "rough consensus and running code" is still useful when it comes to resolving many discussions of API details. The final implementation must include test code and documentation appropriate for the TUF reference.
+8. *Augmented Reference Implementation* -- The augmented reference implementation must be completed before any TAP is given status "Final", but it need not be completed before the TAP is accepted as "Draft". While there is merit to the approach of reaching consensus on the specification and rationale before writing code, the principle of "rough consensus and running code" is still useful when it comes to resolving many discussions of API details. The final implementation must include test code and documentation appropriate for the TUF reference.
 
 9. *Copyright* -- Each TAP must either be explicitly labeled as placed in the public domain (see this TAP as an example) or licensed under the [Open Publication License](https://opencontent.org/openpub/).
 
@@ -113,8 +113,6 @@ Each TAP must begin with an RFC 822 style header preamble. The headers must appe
 
 The Author header lists the names, and optionally the email addresses of all the authors/owners of the TAP.  The format of the Author header value must be "Random J. User <address@dom.ain>".
 
-If there are multiple authors, each should be on a separate line following RFC 2822 continuation line conventions.  Note that personal email addresses in TAPs will be obscured as a defense against spam harvesters.
-
 The format of a TAP is specified with a Content-Type header. The acceptable values are"text/markdown" for Markdown TAPs (see [TAP 2](https://github.com/theupdateframework/taps/blob/master/tap2.md)). Markdown ("text/markdown") is the default if no Content-Type header is present.
 
 The Created header records the date that the TAP was assigned a number and should be in dd-mmm-yyyy format, e.g. 14-Aug-2001.
@@ -127,7 +125,7 @@ TAPs may also have a Superseded-By header indicating that a TAP has been rendere
 
 # Auxiliary Files
 
-TAPs may include auxiliary files such as diagrams. Such files must be named ``pep-XXXX-Y.ext``, where "XXXX" is the TAP number, "Y" is a serial number (starting at 1), and "ext" is replaced by the actual file extension (e.g. "png").
+TAPs may include auxiliary files such as diagrams. Such files must be named ``tap-XXXX-Y.ext``, where "XXXX" is the TAP number, "Y" is a serial number (starting at 1), and "ext" is replaced by the actual file extension (e.g. "png").
 
 # Reporting TAP Bugs, or Submitting TAP Updates
 
