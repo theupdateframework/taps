@@ -77,7 +77,11 @@ Each TAP should have the following parts:
 
 # TAP Formats and Templates
 
-TAPs are UTF-8 encoded text files using the [Markdown](https://daringfireball.net/projects/markdown/) format. Markdown allows for rich markup that is still quite easy to read, but also results in good-looking and functional HTML. [TAP 2](https://github.com/theupdateframework/taps/blob/master/tap2.md) contains instructions and a template for MarkDown TAPs.
+TAPs are UTF-8 encoded text files using the [Markdown](https://daringfireball.net/projects/markdown/) format. Markdown allows for rich markup that is still quite easy to read, but also results in good-looking and functional HTML.
+
+In-line with the Specification, the keywords "MUST," "MUST NOT," "REQUIRED," "SHALL," "SHALL NOT," "SHOULD," "SHOULD NOT," "RECOMMENDED," "MAY," and "OPTIONAL" in a TAP are to be interpreted as described in [RFC 2119](https://tools.ietf.org/html/rfc2119).
+
+[TAP 2](https://github.com/theupdateframework/taps/blob/master/tap2.md) contains a template for MarkDown TAPs.
 
 # TAP Header Preamble
 
