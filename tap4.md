@@ -291,8 +291,8 @@ A TUF repository does not need to change in any way to support this TAP.
 
 # Augmented Reference Implementation
 
-This [branch](https://github.com/theupdateframework/tuf/tree/tap4) demonstrates
-how TAP 4 can be implemented without modifying an existing TUF repository.
+Pull Request [#504](https://github.com/theupdateframework/tuf/pull/504)
+implements multiple repository consensus on entrusted targets via a map file.
 
 # Copyright
 
