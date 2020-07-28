@@ -8,7 +8,7 @@
 * +Requires: <TAP numbers>
 * Created: <date created on, in dd-mmm-yyyy format>
 * +TUF-Version: <version number>
-* Post-History: <dates of postings to the TUF mailing list>
+* +Post-History: <dates of postings to the TUF mailing list>
 * +Replaces: <TAP number>
 * +Superseded-By: <TAP number>
 

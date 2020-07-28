@@ -19,39 +19,50 @@ Because the TAPs are maintained as text files in a versioned repository, their r
 
 # TAP Workflow
 
+## Consensus Builder
+
+The consensus builder for the TUF specification is Prof. Justin Cappos of the NYU's Secure Systems Lab.
+Ultimate authority for changes to the TUF specification, including changes proposed through this TAP process, falls to the specification's consensus builder.
+
+## TAP Editors
+
+The TAP Editors are a team of core contributors to the TUF project who are responsible for reviewing and approving or rejecting any proposed TAPs.
+
+## Start with an Idea
+
+The TAP process begins with a new idea for TUF.  It is highly recommended that each TAP contain a single key proposal or new idea. Small enhancements or patches often don't need a TAP and can be injected into the TUF development workflow with a patch submission to the TUF specification [issue tracker](https://github.com/theupdateframework/specification/issues).
+
+The more focused the TAP, the more successful it tends to be.  The [TAP Editors](#tap-editors) reserve the right to reject TAP proposals if they appear too unfocused or too broad.  If in doubt, split your TAP into several well-focused ones.
+
+Each TAP must have a champion -- someone who writes the TAP using the style and format described below, shepherds the discussions in the appropriate forums, and attempts to build community consensus around the idea.  The TAP champion (a.k.a. Author) should first attempt to ascertain whether the idea is TAP-able. Posting to the TUF [issue tracker](https://github.com/theupdateframework/specification/issues) or the TUF mailing list are good ways to go about this.
+
 ## Submitting a TAP
 
-The TAP process begins with a new idea for TUF.  It is highly recommended that each TAP contain a single key proposal or new idea. Small enhancements or patches often don't need a TAP and can be injected into the TUF development workflow with a patch submission to the TUF [issue tracker](https://github.com/theupdateframework/tuf/issues).
+Once the champion has asked the TUF community whether an idea has any chance of acceptance, a draft TAP should be presented as a [Pull Request](https://github.com/theupdateframework/taps/pulls) to the TAPs repository.  The draft must be written in TAP style as described below and in [TAP 2](tap2.md), else it will fail review immediately.
 
-The more focused the TAP, the more successful it tends to be.  The TUF team reserves the right to reject TAP proposals if they appear too unfocused or too broad.  If in doubt, split your TAP into several well-focused ones.
+Once the TAP submission is accepted, the TAP Editors will assign the TAP a number, give it status "Draft", and merge the initial draft of the TAP.  The [TAP Editors](#tap-editors) will not unreasonably deny a TAP.  Reasons for denying TAP status include duplication of effort, being technically unsound, not providing proper motivation or addressing backwards compatibility, or not in keeping with the TUF philosophy.  [TAP Editors](#tap-editors) may be consulted during the approval phase, with the [Consensus Builder](#consensus-builder) as the final arbiter of the draft's TAP-ability.
 
-Each TAP must have a champion -- someone who writes the TAP using the style and format described below, shepherds the discussions in the appropriate forums, and attempts to build community consensus around the idea.  The TAP champion (a.k.a. Author) should first attempt to ascertain whether the idea is TAP-able. Posting to the TUF mailing list is the best way to go about this.
+As updates are necessary, the TAP author can submit new versions by opening additional Pull Requests against the TAPs repository.
 
-Once the champion has asked the TUF community whether an idea has any chance of acceptance, a draft TAP should be presented to the TUF mailing list.  Following a discussion on the TUF mailing list, the proposal should be sent as a draft TAP to the TUF mailing list <theupdateframework@googlegroups.com>.  The draft must be written in TAP style as described below, else it will be sent back without further regard until proper formatting rules are followed.
+Most TAPs consist of two parts, a design document and an augmented reference implementation. It is generally recommended that at least a prototype implementation be co-developed with the TAP, as ideas that sound good in principle sometimes turn out to be impractical when subjected to the test of implementation. No TAP will be marked as Final until an augmented reference implementation is available.
 
-Once the TAP is accepted, the TUF team will assign the TAP a number, give it status "Draft", and create and check-in the initial draft of the TAP.  The TUF team will not unreasonably deny a TAP.  Reasons for denying TAP status include duplication of effort, being technically unsound, not providing proper motivation or addressing backwards compatibility, or not in keeping with the TUF philosophy.  The TUF Team can be consulted during the approval phase, with Justin Cappos as the final arbiter of the draft's TAP-ability.
-
-As updates are necessary, the TAP author can check in new versions by emailing new TAP versions to the TUF team for publication.
-
-Most TAPs consist of two parts, a design document and an augmented reference implementation. It is generally recommended that at least a prototype implementation be co-developed with the TAP, as ideas that sound good in principle sometimes turn out to be impractical when subjected to the test of implementation.
-
-TAP authors are responsible for collecting community feedback on a TAP before submitting it for review. All comments should be gathered on a GitHub issue specific to the TAP.
+TAP authors are responsible for collecting community feedback on a TAP before submitting it for review. All comments should be gathered on a [GitHub issue](https://github.com/theupdateframework/taps/issues) specific to the TAP. It is recommended that feedback be solicited via the TUF mailing list.
 
 ## TAP Review & Resolution
 
-The content and final acceptance of the TAP must be requested via an email to the TUF mailing list.  TAPs are reviewed by the TUF team, who may accept or reject a TAP or send it back to the author(s) for revision. For a TAP that is predetermined to be acceptable (e.g., it is an obvious win as-is and/or its implementation has already been checked in) the TUF team may also initiate a TAP review, first notifying the TAP author(s) and giving them a chance to make revisions.
+Once feedback has been gathered, the final acceptance of the TAP must be requested via the TAPs [issue tracker](https://github.com/theupdateframework/taps/issues) or a [pull request](https://github.com/theupdateframework/taps/pulls).  TAPs are reviewed by the [TAP Editors](#tap-editors), who may accept or reject a TAP or send it back to the author(s) for revision. For a TAP that is predetermined to be acceptable (e.g., it is an obvious win as-is and/or its implementation has already been checked in) the TUF team may also initiate a TAP review, first notifying the TAP author(s) and giving them a chance to make revisions.
 
-Once a TAP has been accepted, the augmented reference implementation must be completed.  When the augmented reference implementation is complete and incorporated into the main source code repository, the status will be changed to "Final."
+Once a TAP has been marked as Accepted, the augmented reference implementation must be completed and any proposed specification changes must be integrated into the specification.  When the augmented reference implementation is complete and changes have been incorporated into the specification, the status will be changed to "Final."
 
 A TAP can also be "Rejected".  Perhaps after all is said and done it was not a good idea.  It is still important to have a record of this fact. The "Withdrawn" status is similar - it means that the TAP author themselves has decided that the TAP is actually a bad idea, or has accepted that a competing proposal is a better alternative.
 
 When a TAP is Accepted, Rejected, or Withdrawn, the TAP should be updated accordingly.
 
-TAPs can also be superseded by a different TAP, rendering the original obsolete. 
+TAPs can also be Superseded by a different TAP, rendering the original obsolete.
 
 ## TAP Maintenance
 
-In general, TAPs are no longer modified after they have reached the Final state. Once a TAP has been completed, the Reference Implementation become the formal documentation of the expected behavior.
+In general, TAPs are no longer modified after they have reached the Final state. Once a TAP has been completed, the Specification becomes the formal documentation of the expected behavior.
 
 # What belongs in a successful TAP?
 
@@ -97,7 +108,6 @@ Each TAP must begin with an RFC 822 style header preamble. The headers must appe
 * +Requires: <pep numbers>
 * Created: <date created on, in dd-mmm-yyyy format>
 * +TUF-Version: <version number>
-* Post-History: <dates of postings to the TUF mailing list>
 * +Replaces: <TAP number>
 * +Superseded-By: <TAP number>
 
@@ -107,7 +117,7 @@ If there are multiple authors, each should be on a separate line following RFC 2
 
 The format of a TAP is specified with a Content-Type header. The acceptable values are"text/markdown" for Markdown TAPs (see [TAP 2](https://github.com/theupdateframework/taps/blob/master/tap2.md)). Markdown ("text/markdown") is the default if no Content-Type header is present.
 
-The Created header records the date that the TAP was assigned a number, while Post-History is used to record the dates of when new versions of the TAP are posted to the TUF mailing list.  Both headers should be in dd-mmm-yyyy format, e.g. 14-Aug-2001.
+The Created header records the date that the TAP was assigned a number and should be in dd-mmm-yyyy format, e.g. 14-Aug-2001.
 
 TAPs will typically have a TUF-Version header which indicates the version of TUF that the feature will be released with. TAPs that refer to processes or recommendations do not require a TUF-Version header.
 
@@ -121,7 +131,8 @@ TAPs may include auxiliary files such as diagrams. Such files must be named ``pe
 
 # Reporting TAP Bugs, or Submitting TAP Updates
 
-How you report a bug, or submit a TAP update depends on several factors, such as the maturity of the TAP, the preferences of the TAP author, and the nature of your comments.  For the early draft stages of the TAP, it's probably best to send your comments and changes directly to the TAP author.  For more mature, or finished TAPs you may want to submit corrections to the TUF [issue tracker](https://github.com/theupdateframework/tuf/issues) so that your changes don't get lost.  
+How you report a bug, or submit a TAP update depends on several factors, such as the maturity of the TAP, the preferences of the TAP author, and the nature of your comments.  For Draft or Accepted TAPs, feedback should be via the TAPs [issue tracker](https://github.com/theupdateframework/taps/issues) or as a pull request against the TAP in question.
+Once a TAP has been marked Final, bugs or corrections should be submitted to the TUF [issue tracker](https://github.com/theupdateframework/tuf/issues) so that your changes don't get lost.
 
 # Transferring TAP Ownership
 
