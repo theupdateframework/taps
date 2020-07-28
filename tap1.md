@@ -16,12 +16,17 @@ We intend TAPs to be the primary mechanisms for proposing major new features, fo
 
 Because the TAPs are maintained as text files in a versioned repository, their revision history is the historical record of the feature proposal.
 
+# TAP Types
+
+There are two kinds of TAP:
+1. A **Standardization** TAP proposes new features for, or changes to existing behavior of, the TUF specification.
+2. An **Informational** TAP describes a design issue, general guideline or information for TUF implementers.
 
 # TAP Workflow
 
 ## Consensus Builder
 
-The consensus builder for the TUF specification is Prof. Justin Cappos of the NYU's Secure Systems Lab.
+The consensus builder for the TUF specification is Prof. Justin Cappos of the NYU Secure Systems Lab.
 Ultimate authority for changes to the TUF specification, including changes proposed through this TAP process, falls to the specification's consensus builder.
 
 ## TAP Editors
@@ -30,7 +35,7 @@ The TAP Editors are a team of core contributors to the TUF project who are respo
 
 ## Start with an Idea
 
-The TAP process begins with a new idea for TUF.  It is highly recommended that each TAP contain a single key proposal or new idea. Small enhancements or patches often don't need a TAP and can be injected into the TUF development workflow with a patch submission to the TUF specification [issue tracker](https://github.com/theupdateframework/specification/issues).
+The TAP process begins with a new idea for TUF.  It is highly recommended that each TAP contain a single key proposal or new idea. Small enhancements or patches often don't need a TAP and can be injected into the TUF development workflow with a patch submission to the [TUF specification](https://github.com/theupdateframework/specification).
 
 The more focused the TAP, the more successful it tends to be.  The [TAP Editors](#tap-editors) reserve the right to reject TAP proposals if they appear too unfocused or too broad.  If in doubt, split your TAP into several well-focused ones.
 
@@ -38,31 +43,36 @@ Each TAP must have a champion -- someone who writes the TAP using the style and 
 
 ## Submitting a TAP
 
-Once the champion has asked the TUF community whether an idea has any chance of acceptance, a draft TAP should be presented as a [Pull Request](https://github.com/theupdateframework/taps/pulls) to the TAPs repository.  The draft must be written in TAP style as described below and in [TAP 2](tap2.md), else it will fail review immediately.
+Once the champion has asked the TUF community whether an idea has any chance of acceptance, a draft TAP should be presented as a [pull request](https://github.com/theupdateframework/taps/pulls) to the TAPs repository.  The draft must be written in TAP style as described below and in [TAP 2](tap2.md), else it will fail review immediately.
 
-Once the TAP submission is accepted, the TAP Editors will assign the TAP a number, give it status "Draft", and merge the initial draft of the TAP.  The [TAP Editors](#tap-editors) will not unreasonably deny a TAP.  Reasons for denying TAP status include duplication of effort, being technically unsound, not providing proper motivation or addressing backwards compatibility, or not in keeping with the TUF philosophy.  [TAP Editors](#tap-editors) may be consulted during the approval phase, with the [Consensus Builder](#consensus-builder) as the final arbiter of the draft's TAP-ability.
+Once the TAP submission is accepted, the TAP Editors will assign the TAP a number, give it status "Draft", and merge the initial draft of the TAP.  The [TAP Editors](#tap-editors) will not unreasonably deny a TAP.  Reasons for denying a TAP include duplication of effort, being technically unsound, not providing proper motivation or addressing backwards compatibility, or not in keeping with the TUF philosophy.  [TAP Editors](#tap-editors) may be consulted during the approval phase, with the [Consensus Builder](#consensus-builder) as the final arbiter of the draft's TAP-ability.
 
-As updates are necessary, the TAP author can submit new versions by opening additional Pull Requests against the TAPs repository.
+As updates are necessary, the TAP author can submit new versions by opening additional [pull requests](https://github.com/theupdateframework/taps/pulls) against the TAPs repository.
 
-Most TAPs consist of two parts, a design document and an augmented reference implementation. It is generally recommended that at least a prototype implementation be co-developed with the TAP, as ideas that sound good in principle sometimes turn out to be impractical when subjected to the test of implementation. No TAP will be marked as Final until an augmented reference implementation is available.
+Standardization TAPs consist of two parts, a design document and an augmented reference implementation. It is generally recommended that at least a prototype implementation be co-developed with the TAP, as ideas that sound good in principle sometimes turn out to be impractical when subjected to the test of implementation. However, a prototype is not required by the TAP process until the TAP is in the "Accepted" status. No TAP will be marked as "Final" until an augmented reference implementation is available.
 
 TAP authors are responsible for collecting community feedback on a TAP before submitting it for review. All comments should be gathered on a [GitHub issue](https://github.com/theupdateframework/taps/issues) specific to the TAP. It is recommended that feedback be solicited via the TUF mailing list.
 
 ## TAP Review & Resolution
 
-Once feedback has been gathered, the final acceptance of the TAP must be requested via the TAPs [issue tracker](https://github.com/theupdateframework/taps/issues) or a [pull request](https://github.com/theupdateframework/taps/pulls).  TAPs are reviewed by the [TAP Editors](#tap-editors), who may accept or reject a TAP or send it back to the author(s) for revision. For a TAP that is predetermined to be acceptable (e.g., it is an obvious win as-is and/or its implementation has already been checked in) the TUF team may also initiate a TAP review, first notifying the TAP author(s) and giving them a chance to make revisions.
+Once feedback has been gathered, a change of the TAP to "Accepted" status must be requested via the TAPs [issue tracker](https://github.com/theupdateframework/taps/issues) or a [pull request](https://github.com/theupdateframework/taps/pulls).  TAPs are reviewed by the [TAP Editors](#tap-editors), who may accept or reject a TAP or send it back to the author(s) for revision. For a TAP that is predetermined to be acceptable (e.g., it is an obvious win as-is and/or its implementation has already been checked in) the TUF team may also initiate a TAP review, first notifying the TAP author(s) and giving them a chance to make revisions. In order for a Standardization TAP to be "Accepted" it should have a corresponding prototype implementation for the reference implementation.
 
-Once a TAP has been marked as Accepted, the augmented reference implementation must be completed and any proposed specification changes must be integrated into the specification.  When the augmented reference implementation is complete and changes have been incorporated into the specification, the status will be changed to "Final."
+In order to move a Standardization TAP from "Accepted" to "Final" status, the augmented reference implementation must be completed and merged, and any proposed specification changes must be integrated into the specification.
+
+For an Informational TAP, no changes to the augmented reference implementation or specification are expected and the TAP may move to "Final" status, without moving through the "Accepted" status, once it is deemed ready by the TAP editors.
+
+Some informational TAPs may have a status of "Active" if they are not meant to be completed, for example TAP 1 (this TAP).
 
 A TAP can also be "Rejected".  Perhaps after all is said and done it was not a good idea.  It is still important to have a record of this fact. The "Withdrawn" status is similar - it means that the TAP author themselves has decided that the TAP is actually a bad idea, or has accepted that a competing proposal is a better alternative.
 
 When a TAP is Accepted, Rejected, or Withdrawn, the TAP should be updated accordingly.
 
-TAPs can also be Superseded by a different TAP, rendering the original obsolete.
+TAPs can also be "Superseded" by a different TAP, rendering the original obsolete.
 
 ## TAP Maintenance
 
-In general, TAPs are no longer modified after they have reached the Final state. Once a TAP has been completed, the Specification becomes the formal documentation of the expected behavior.
+In general, TAPs are no longer modified after they have reached the "Final" state. Once a TAP has been completed, the Specification becomes the formal documentation of the expected behavior.
+Informational TAPs in the "Active" state may continue to be updated via pull request to the taps repository.
 
 # What belongs in a successful TAP?
 
