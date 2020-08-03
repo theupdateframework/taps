@@ -22,6 +22,19 @@ There are two kinds of TAP:
 1. A **Standardization** TAP proposes new features for, or changes to existing behavior of, the TUF specification.
 2. An **Informational** TAP describes a design issue, general guideline or information for TUF implementers.
 
+# TAP Status
+
+The status of a TAP indicates its progress through the TAP development process. The different status are defined below.
+
+* A **Draft** TAP is one that has been proposed and is actively being worked on.
+* **Active** TAPs are Informational TAPs which are not ever meant to be completed.
+* An **Accepted** Standardization TAP is deemed ready to be integrated into the specification and augmented reference implementation.
+* **Deferred** TAPs are potentially good ideas which are not being actively developed, or where progress is not being made.
+* A **Rejected** TAP is one which the [TAP editors](#tap-editors) have decided is ultimately not a good idea.
+* **Withdrawn** TAPs are submissions which the champion, or lead author, of the TAP has decided is no longer worth pursuing.
+* **Final** TAPs are complete and will no longer change. For Standardization TAPs the proposed changes will have been merged into the augmented reference implementation and the specification.
+* A **Superseded** TAP is one which has been rendered obsolete by a newer TAP.
+
 # TAP Workflow
 
 ## Consensus Builder
