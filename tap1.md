@@ -24,7 +24,7 @@ There are two kinds of TAP:
 
 # TAP Status
 
-The status of a TAP indicates its progress through the TAP development process. The different status are defined below.
+The status of a TAP indicates its progress through the TAP development process. The different status are defined below. Unless otherwise specified, each status applies to both kinds of TAP.
 
 * A **Draft** TAP is one that has been proposed and is actively being worked on.
 * **Active** TAPs are Informational TAPs which are not ever meant to be completed.
@@ -68,7 +68,7 @@ TAP authors are responsible for collecting community feedback on a TAP before su
 
 ## TAP Review & Resolution
 
-Once feedback has been gathered, a change of the TAP to "Accepted" status must be requested via the TAPs [issue tracker](https://github.com/theupdateframework/taps/issues) or a [pull request](https://github.com/theupdateframework/taps/pulls).  TAPs are reviewed by the [TAP Editors](#tap-editors), who may accept or reject a TAP or send it back to the author(s) for revision. For a TAP that is predetermined to be acceptable (e.g., it is an obvious win as-is and/or its implementation has already been checked in) the TUF team may also initiate a TAP review, first notifying the TAP author(s) and giving them a chance to make revisions. In order for a Standardization TAP to be "Accepted" it should have a corresponding prototype implementation for the reference implementation.
+Once feedback has been gathered, a change of the TAP to "Accepted" status must be requested via the TAPs [issue tracker](https://github.com/theupdateframework/taps/issues) or a [pull request](https://github.com/theupdateframework/taps/pulls).  TAPs are reviewed by the [TAP Editors](#tap-editors), who may accept or reject a TAP or send it back to the author(s) for revision. For a TAP that is predetermined to be acceptable (e.g., it is an obvious win as-is and/or its implementation has already been checked in) the TUF team may also initiate a TAP review, first notifying the TAP author(s) and giving them a chance to make revisions. In order for a Standardization TAP to be "Accepted", it should have a corresponding prototype implementation for the reference implementation.
 
 In order to move a Standardization TAP from "Accepted" to "Final" status, the augmented reference implementation must be completed and merged, and any proposed specification changes must be integrated into the specification.
 
