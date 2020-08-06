@@ -52,7 +52,7 @@ The TAP process begins with a new idea for TUF.  It is highly recommended that e
 
 The more focused the TAP, the more successful it tends to be.  The [TAP Editors](#tap-editors) reserve the right to reject TAP proposals if they appear too unfocused or too broad.  If in doubt, split your TAP into several well-focused ones.
 
-Each TAP must have a champion -- someone who writes the TAP using the style and format described below, shepherds the discussions in the appropriate forums, and attempts to build community consensus around the idea.  The TAP champion (a.k.a. Author) should first attempt to ascertain whether the idea is TAP-able. Posting to the TUF [issue tracker](https://github.com/theupdateframework/specification/issues) or the TUF mailing list are good ways to go about this.
+Each TAP must have a champion -- someone who writes the TAP using the style and format described below, shepherds the discussions in the appropriate forums, and attempts to build community consensus around the idea.  The TAP champion (a.k.a. Author) should first attempt to ascertain whether the idea is TAP-able. Posting to the TUF [issue tracker](https://github.com/theupdateframework/specification/issues), the [#tuf channel](https://cloud-native.slack.com/archives/C8NMD3QJ3) on CNCF Slack, or the [TUF mailing list](https://groups.google.com/forum/?fromgroups#!forum/theupdateframework) are good ways to go about this.
 
 ## Submitting a TAP
 
@@ -64,7 +64,7 @@ As updates are necessary, the TAP author can submit new versions by opening addi
 
 Standardization TAPs consist of two parts, a design document and an augmented reference implementation. It is generally recommended that at least a prototype implementation be co-developed with the TAP, as ideas that sound good in principle sometimes turn out to be impractical when subjected to the test of implementation. However, a prototype is not required by the TAP process until the TAP is in the "Accepted" status. No TAP will be marked as "Final" until an augmented reference implementation is available.
 
-TAP authors are responsible for collecting community feedback on a TAP before submitting it for review. All comments should be gathered on a [GitHub issue](https://github.com/theupdateframework/taps/issues) specific to the TAP. It is recommended that feedback be solicited via the TUF mailing list.
+TAP authors are responsible for collecting community feedback on a TAP before submitting it for review. All comments should be gathered on a [GitHub issue](https://github.com/theupdateframework/taps/issues) specific to the TAP. It is recommended that feedback be solicited via the [TUF mailing list](https://groups.google.com/forum/?fromgroups#!forum/theupdateframework).
 
 ## TAP Review & Resolution
 
@@ -160,7 +160,7 @@ Once a TAP has been marked Final, bugs or corrections should be submitted to the
 
 It occasionally becomes necessary to transfer ownership of TAPs to a new champion. In general, it is preferable to retain the original author as a co-author of the transferred TAP, but that's really up to the original author.  A good reason to transfer ownership is because the original author no longer has the time or interest in updating it or following through with the TAP process, or is unreachable (or not responding to email).  A bad reason to transfer ownership is because the author doesn't agree with the direction of the TAP.  One aim of the TAP process is to try to build consensus around a TAP, but if that's not possible, an author can always submit a competing TAP.
 
-If you are interested in assuming ownership of a TAP, send a message asking to take over, addressed to both the original author and the TUF mailing list.  If the original author doesn't respond to email in a timely manner, the TUF team will make a unilateral decision (such decisions may be reversible).
+If you are interested in assuming ownership of a TAP, send a message asking to take over, addressed to both the original author and the [TUF mailing list](https://groups.google.com/forum/?fromgroups#!forum/theupdateframework).  If the original author doesn't respond to email in a timely manner, the TUF team will make a unilateral decision (such decisions may be reversible).
 
 # Copyright
 
