@@ -125,7 +125,8 @@ Each TAP must begin with an RFC 822 style header preamble. The headers must appe
 * Title: <TAP title>
 * Version: <version string>
 * Last-Modified: <date string>
-* Author: <list of authors' real names and optionally, email addrs>
+* Author: <list of authors' real names and optionally, email addresses>
+* Type: <Standardization | Informational>
 * Status: <Draft | Active | Accepted | Deferred | Rejected | Withdrawn | Final | Superseded>
 * +Content-Type: <text/markdown>
 * +Requires: <pep numbers>
