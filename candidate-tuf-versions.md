@@ -165,10 +165,10 @@ directories, a client is able to choose the most recent metadata they support.
 More details about this directory structure are contained in the [specification](#how-a-repository-updates).
 
 On the client side, this TAP also requires maintenance of multiple versions that
-support different TUF specification
+support different major TUF specification
 versions to allow for communication with various repositories. To do so, it is
 recommended that clients maintain functions that can be used to validate
-metadata from previous TUF specification versions. These functions allow a
+metadata from previous major TUF specification versions. These functions allow a
 client to maintain old versions of the specification while still supporting the
 most recent version.
 
@@ -307,9 +307,9 @@ field, the "signed" portion of targets metadata will include the following:
 ```
 { "_type" : "targets",
   "spec_version" : SPEC_VERSION,
+  ("becomes_obsolete": BECOMES_OBSOLETE),
   "version" : VERSION,
   "expires" : EXPIRES,
-  ("becomes_obsolete": BECOMES_OBSOLETE),
   "targets" : TARGETS,
   ("delegations" : DELEGATIONS)
 }
@@ -320,10 +320,10 @@ And the "signed" portion of root will include:
 ```
 { "_type" : "root",
   "spec_version" : SPEC_VERSION,
+  ("becomes_obsolete": BECOMES_OBSOLETE),
   "consistent_snapshot": CONSISTENT_SNAPSHOT,
   "version" : VERSION,
   "expires" : EXPIRES,
-  ("becomes_obsolete": BECOMES_OBSOLETE),
   "keys" : {
       KEYID : KEY
       , ... },
@@ -334,6 +334,8 @@ And the "signed" portion of root will include:
       , ... }
 }
 ```
+
+where `BECOMES_OBSOLETE` is a timestamp.
 
 A repository should generate all TUF metadata, including root metadata, for all
 TUF versions that the repository supports. Any update should be reflected across
@@ -364,8 +366,8 @@ upgrades from version 1.0.0 to version 2.0.0 may look like:
 TUF clients must store the TUF specification versions they support and may add
 functions to maintain old versions. In order to find compatible updates on a
 repository, a client must keep track of the TUF specification versions it
-supports. To do so, a global variable or other local storage option should
-contain the client specification version, or specification version range. For simplicity, this
+supports. To do so, local storage on the client should contain the client
+specification version, or specification version range. For simplicity, this
 field should be formatted according to Semantic Versioning so that it can be
 directly compared to the specification version in root metadata.
 
@@ -447,7 +449,6 @@ this is the root or top-level targets file, the update should be terminated.
 they are using will be deprecated at the time indicated by `becomes_obsolete`
 and proceed with the update.
 
-
 ## Special Cases
 
 ### Multiple Repositories
@@ -492,9 +493,9 @@ use the next listed metadata file or terminate the update.
 
 The TUF specification version(s) supported by a delegation does not need to
 match the version(s) supported by the top-level metadata. A delegation may use
-the directory structure described above to indicate which TUF specification
+the directory structure described above to indicate which major TUF specification
 versions it supports. The TUF client is responsible for parsing the metadata
-from delegations using code that implements the appropriate specification
+from delegations using code that implements the appropriate major specification
 version (found using the same procedure as described in
 [Changes to the update process](#changes-to-the-update-process)). If there is no
 compatible specification version between the client and delegation, the client
@@ -559,6 +560,10 @@ for an attacker on the network with the ability to alter network traffic.
 
 This TAP is backwards compatible and should be implemented on all repositories
 before any non-backwards compatible TAPs are released.
+
+Existing TUF implementations should continue to store TUF 1.0.0 metadata
+using their existing method to maintain backwards compatibility as described
+in the specification section.
 
 # Augmented Reference Implementation
 
