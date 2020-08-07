@@ -82,6 +82,10 @@ When a TAP is Accepted, Rejected, or Withdrawn, the TAP should be updated accord
 
 TAPs can also be "Superseded" by a different TAP, rendering the original obsolete.
 
+Possible paths for a TAP are:
+
+![Diagram of TAP status flow](tap1-flow.png)
+
 ## TAP Maintenance
 
 In general, TAPs are no longer modified after they have reached the "Final" state. Once a TAP has been completed, the Specification becomes the formal documentation of the expected behavior.

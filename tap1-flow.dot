@@ -1,0 +1,14 @@
+// Converted into a png with: dot -Tpng -o tap1-flow.png tap1-flow.dot
+digraph {
+    node[shape=box, style=rounded]
+
+    {rank=same; Accepted, Draft, "Final/Active"}
+
+    Draft -> Accepted 
+    Accepted -> "Final/Active"
+    Draft -> Rejected
+    Draft -> Withdrawn
+    Draft -> Deferred
+    Deferred -> Draft
+    "Final/Active" -> Superseded
+}
