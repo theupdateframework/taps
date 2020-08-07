@@ -52,11 +52,11 @@ The TAP process begins with a new idea for TUF.  It is highly recommended that e
 
 The more focused the TAP, the more successful it tends to be.  The [TAP Editors](#tap-editors) reserve the right to reject TAP proposals if they appear too unfocused or too broad.  If in doubt, split your TAP into several well-focused ones.
 
-Each TAP must have a champion -- someone who writes the TAP using the style and format described below, shepherds the discussions in the appropriate forums, and attempts to build community consensus around the idea.  The TAP champion (a.k.a. Author) should first attempt to ascertain whether the idea is TAP-able. Posting to the TUF [issue tracker](https://github.com/theupdateframework/specification/issues), the [#tuf channel](https://cloud-native.slack.com/archives/C8NMD3QJ3) on CNCF Slack, or the [TUF mailing list](https://groups.google.com/forum/?fromgroups#!forum/theupdateframework) are good ways to go about this.
+Each TAP MUST have a champion -- someone who writes the TAP using the style and format described below, shepherds the discussions in the appropriate forums, and attempts to build community consensus around the idea.  The TAP champion (a.k.a. Author) SHOULD first attempt to ascertain whether the idea is TAP-able. Posting to the TUF [issue tracker](https://github.com/theupdateframework/specification/issues), the [#tuf channel](https://cloud-native.slack.com/archives/C8NMD3QJ3) on CNCF Slack, or the [TUF mailing list](https://groups.google.com/forum/?fromgroups#!forum/theupdateframework) are good ways to go about this.
 
 ## Submitting a TAP
 
-Once the champion has asked the TUF community whether an idea has any chance of acceptance, a draft TAP should be presented as a [pull request](https://github.com/theupdateframework/taps/pulls) to the TAPs repository.  The draft must be written in TAP style as described below and in [TAP 2](tap2.md), else it will fail review immediately.
+Once the champion has asked the TUF community whether an idea has any chance of acceptance, a draft TAP SHALL be presented as a [pull request](https://github.com/theupdateframework/taps/pulls) to the TAPs repository.  The draft MUST be written in TAP style as described below and in [TAP 2](tap2.md), else it will fail review immediately.
 
 Once the TAP submission is approved for inclusion in the TAP repository, the TAP Editors will assign the TAP a number, give it status "Draft", and merge the initial draft of the TAP.  The [TAP Editors](#tap-editors) will not unreasonably deny a TAP.  Reasons for denying a TAP include duplication of effort, being technically unsound, not providing proper motivation or addressing backwards compatibility, or not in keeping with the TUF philosophy.  [TAP Editors](#tap-editors) may be consulted during the approval phase, with the [Consensus Builder](#consensus-builder) as the final arbiter of the draft's TAP-ability.
 
@@ -68,9 +68,9 @@ TAP authors are responsible for collecting community feedback on a TAP before su
 
 ## TAP Review & Resolution
 
-Once feedback has been gathered, a change of the TAP to "Accepted" status must be requested via the TAPs [issue tracker](https://github.com/theupdateframework/taps/issues) or a [pull request](https://github.com/theupdateframework/taps/pulls).  TAPs are reviewed by the [TAP Editors](#tap-editors), who may accept or reject a TAP or send it back to the author(s) for revision. For a TAP that is predetermined to be acceptable (e.g., it is an obvious win as-is and/or its implementation has already been checked in) the TUF team may also initiate a TAP review, first notifying the TAP author(s) and giving them a chance to make revisions. In order for a Standardization TAP to be "Accepted", it should have a corresponding prototype implementation for the reference implementation.
+Once feedback has been gathered, a change of the TAP to "Accepted" status MUST be requested via the TAPs [issue tracker](https://github.com/theupdateframework/taps/issues) or a [pull request](https://github.com/theupdateframework/taps/pulls).  TAPs are reviewed by the [TAP Editors](#tap-editors), who may accept or reject a TAP or send it back to the author(s) for revision. For a TAP that is predetermined to be acceptable (e.g., it is an obvious win as-is and/or its implementation has already been checked in) the TUF team may also initiate a TAP review, first notifying the TAP author(s) and giving them a chance to make revisions. In order for a Standardization TAP to be "Accepted", it MUST have a corresponding prototype implementation for the reference implementation.
 
-In order to move a Standardization TAP from "Accepted" to "Final" status, the augmented reference implementation must be completed and merged, and any proposed specification changes must be integrated into the specification.
+In order to move a Standardization TAP from "Accepted" to "Final" status, the augmented reference implementation MUST be completed and merged, and any proposed specification changes MUST be integrated into the specification.
 
 For an Informational TAP, no changes to the augmented reference implementation or specification are expected and the TAP may move to "Final" status, without moving through the "Accepted" status, once it is deemed ready by the TAP editors.
 
@@ -93,7 +93,7 @@ Informational TAPs in the "Active" state may continue to be updated via pull req
 
 # What belongs in a successful TAP?
 
-Each TAP should have the following parts:
+Each TAP SHOULD have the following parts:
 
 1. *Preamble* -- [RFC 822](https://tools.ietf.org/html/rfc822) style headers containing meta-data about the TAP, including the TAP number, a short descriptive title (limited to a maximum of 44 characters), the names, and optionally the contact info for each author, etc.
 
@@ -123,7 +123,7 @@ In-line with the Specification, the keywords "MUST," "MUST NOT," "REQUIRED," "SH
 
 # TAP Header Preamble
 
-Each TAP must begin with an RFC 822 style header preamble. The headers must appear in the following order. Headers marked with "+" are optional and are described below. All other headers are required.
+Each TAP MUST begin with an RFC 822 style header preamble. The headers MUST appear in the following order. Headers marked with "+" are OPTIONAL and are described below. All other headers are required.
 
 * TAP: <TAP number>
 * Title: <TAP title>
@@ -139,26 +139,26 @@ Each TAP must begin with an RFC 822 style header preamble. The headers must appe
 * +Replaces: <TAP number>
 * +Superseded-By: <TAP number>
 
-The Author header lists the names, and optionally the email addresses of all the authors/owners of the TAP.  The format of the Author header value must be "Random J. User <address@dom.ain>".
+The Author header lists the names, and optionally the email addresses of all the authors/owners of the TAP.  The format of the Author header value SHOULD be "Random J. User <address@dom.ain>".
 
-The format of a TAP is specified with a Content-Type header. The acceptable values are"text/markdown" for Markdown TAPs (see [TAP 2](https://github.com/theupdateframework/taps/blob/master/tap2.md)). Markdown ("text/markdown") is the default if no Content-Type header is present.
+The format of a TAP is specified with a Content-Type header. The acceptable values are "text/markdown" for Markdown TAPs (see [TAP 2](https://github.com/theupdateframework/taps/blob/master/tap2.md)). Markdown ("text/markdown") is the default if no Content-Type header is present.
 
-The Created header records the date that the TAP was assigned a number and should be in dd-mmm-yyyy format, e.g. 14-Aug-2001.
+The Created header records the date that the TAP was assigned a number and SHOULD be in dd-mmm-yyyy format, e.g. 14-Aug-2001.
 
 TAPs will typically have a TUF-Version header which indicates the version of TUF that the feature will be released with. TAPs that refer to processes or recommendations do not require a TUF-Version header.
 
-TAPs may have a Requires header, indicating the TAP numbers that this TAP depends on.
+TAPs MAY have a Requires header, indicating the TAP numbers that this TAP depends on.
 
-TAPs may also have a Superseded-By header indicating that a TAP has been rendered obsolete by a later document; the value is the number of the TAP that replaces the current document.  The newer TAP must have a Replaces header containing the number of the TAP that it rendered obsolete.
+TAPs MAY also have a Superseded-By header indicating that a TAP has been rendered obsolete by a later document; the value is the number of the TAP that replaces the current document.  The newer TAP must have a Replaces header containing the number of the TAP that it rendered obsolete.
 
 # Auxiliary Files
 
-TAPs may include auxiliary files such as diagrams. Such files must be named ``tap-XXXX-Y.ext``, where "XXXX" is the TAP number, "Y" is a serial number (starting at 1), and "ext" is replaced by the actual file extension (e.g. "png").
+TAPs MAY include auxiliary files such as diagrams. Such files MUST be named ``tap-XXXX-Y.ext``, where "XXXX" is the TAP number, "Y" is a serial number (starting at 1), and "ext" is replaced by the actual file extension (e.g. "png").
 
 # Reporting TAP Bugs, or Submitting TAP Updates
 
 How you report a bug, or submit a TAP update depends on several factors, such as the maturity of the TAP, the preferences of the TAP author, and the nature of your comments.  For Draft or Accepted TAPs, feedback should be via the TAPs [issue tracker](https://github.com/theupdateframework/taps/issues) or as a pull request against the TAP in question.
-Once a TAP has been marked Final, bugs or corrections should be submitted to the TUF [issue tracker](https://github.com/theupdateframework/tuf/issues) so that your changes don't get lost.
+Once a TAP has been marked Final, bugs or corrections SHOULD be submitted to the TUF [issue tracker](https://github.com/theupdateframework/tuf/issues) so that your changes don't get lost.
 
 # Transferring TAP Ownership
 
