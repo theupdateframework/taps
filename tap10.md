@@ -3,10 +3,11 @@
 * Version: 1
 * Last-Modified: 25-August-2017
 * Author: Vladimir Diaz
-* Status: Accepted
+* Status: Final
 * Content-Type: text/markdown
 * Created: 19-July-2017
 * Post-History: 25-July-2017
+* TUF-Version: 1.0.0
 
 # Abstract
 

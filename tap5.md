@@ -1,10 +1,10 @@
 * TAP: 5
 * Title: Setting URLs for roles in the root metadata file
 * Version: 1
-* Last-Modified: 22-Jan-2018
+* Last-Modified: 20-Jul-2020
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
-* Status: Draft
+* Status: Rejected
 * Content-Type: text/markdown
 * Created: 24-Sep-2016
 
@@ -36,7 +36,7 @@ hosting and maintaining its own repository.
 Furthermore, suppose that there is group of enterprise users who trust PyPI only
 to install Django packages.
 These users must depend on PyPI administrators to
-[delegate](https://isis.poly.edu/~jcappos/papers/kuppusamy_nsdi_16.pdf)
+[delegate](https://theupdateframework.io/papers/protect-community-repositories-nsdi2016.pdf)
 all Django packages to the correct public keys belonging to the project.
 Unfortunately, if the PyPI administrator keys have been compromised, then
 attackers can replace this delegation, and deceive these unsuspecting users into
