@@ -1,7 +1,7 @@
-* TAP:
+* TAP: 14
 * Title: Managing TUF Versions
 * Version: 1
-* Last-Modified: 20-July-2020
+* Last-Modified: 07-August-2020
 * Author: Marina Moore, Justin Cappos
 * Status: Draft
 * Content-Type: text/markdown

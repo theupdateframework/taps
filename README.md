@@ -14,6 +14,7 @@
 
 * [TAP 5: Setting URLs for roles in the root metadata file](tap5.md)
 * [TAP 8: Key rotation and explicit self-revocation](tap8.md)
+* [TAP 14: Managing TUF Versions](tap14.md)
 
 ## Rejected
 
