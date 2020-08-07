@@ -10,7 +10,7 @@
 
 # What is a TAP?
 
-TAP stands for TUF Augmentation Proposal (heavily modeled on the [Python Enhancement Proposal](https://www.python.org/dev/peps/pep-0001/) process).  A TAP is a design document providing information to the TUF community, or describing a new feature for TUF or its processes or environment.  The TAP should provide a concise technical specification of the feature and a rationale for the feature.
+TAP stands for TUF Augmentation Proposal (heavily modeled on the [Python Enhancement Proposal](https://www.python.org/dev/peps/pep-0001/) process).  A TAP is a design document providing information to the TUF community, or describing a new feature for TUF or its processes or environment.  The TAP should provide both a concise technical specification of the feature and a rationale for the feature's inclusion.
 
 We intend TAPs to be the primary mechanisms for proposing major new features, for collecting community input on an issue, and for documenting the design decisions that have gone into TUF.  The TAP author is responsible for building consensus within the community and documenting dissenting opinions.
 
@@ -84,7 +84,7 @@ TAPs can also be "Superseded" by a different TAP, rendering the original obsolet
 
 Possible paths for a TAP are:
 
-![Diagram of TAP status flow](tap1-flow.png)
+![Diagram of TAP status flow](tap1-1.png)
 
 ## TAP Maintenance
 
