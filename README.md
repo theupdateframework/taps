@@ -15,6 +15,7 @@
 
 * [TAP 8: Key rotation and explicit self-revocation](tap8.md)
 * [TAP 12: Improving keyid flexibility](tap12.md)
+* [TAP 14: Managing TUF Versions](tap14.md)
 
 ## Rejected
 
