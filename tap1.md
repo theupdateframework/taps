@@ -74,7 +74,7 @@ In order to move a Standardization TAP from "Accepted" to "Final" status, the au
 
 For an Informational TAP, no changes are expected to the augmented reference implementation or specification. Therefore, a TAP may move to "Final" status, without moving through the "Accepted" status, once it is deemed ready by the TAP editors.
 
-Some informational TAPs may have a status of "Active" if they are not meant to be completed, for example TAP 1 (this TAP).
+Informational TAPs may take the status of "Active" if, like this TAP, it is expected to change as the specification and the processes around it evolve.
 
 A TAP can also be "Rejected,"  if it becomes evident to the TAP editors that the proposed change was not a good idea.  In this case, the "Rejected" status serves as a record of this decision. The "Withdrawn" status serves a similar function. In this case, it is the author who has decided that the TAP is actually a bad idea, or has accepted that a competing proposal is a better alternative.
 
