@@ -3,12 +3,13 @@
 * Version: <version string>
 * Last-Modified: <date string>
 * Author: <list of authors' real names and optionally, email addrs>
+* Type: <Standardization | Informational>
 * Status: <Draft | Active | Accepted | Deferred | Rejected | Withdrawn | Final | Superseded>
 * +Content-Type: <text/markdown>
 * +Requires: <TAP numbers>
 * Created: <date created on, in dd-mmm-yyyy format>
 * +TUF-Version: <version number>
-* Post-History: <dates of postings to the TUF mailing list>
+* +Post-History: <dates of postings to the TUF mailing list>
 * +Replaces: <TAP number>
 * +Superseded-By: <TAP number>
 
