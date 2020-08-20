@@ -27,7 +27,7 @@ There are two kinds of TAPs:
 The status of a TAP indicates its progress through the development process. The different status classifications are defined below. Unless otherwise specified, each status applies to both kinds of TAP.
 
 * A **Draft** TAP is one that has been proposed and is actively being worked on.
-* **Active** TAPs are Informational TAPs which are not ever meant to be completed.
+* **Active** TAPs are Informational TAPs that are expected to change as the specification and the processes around it evolve.
 * An **Accepted** Standardization TAP is deemed ready to be integrated into the specification and augmented reference implementation.
 * **Deferred** TAPs are potentially good ideas which are not being actively developed, or where progress is not being made.
 * A **Rejected** TAP is one which the [TAP editors](#tap-editors) have decided is ultimately not a good idea.
