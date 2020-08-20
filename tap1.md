@@ -60,7 +60,7 @@ Once the champion has asked the TUF community whether an idea has any chance of 
 
 Once a submission is approved for inclusion in the TAP repository, the TAP Editors will assign it a number, mark its status as "Draft", and merge the initial draft.  The [TAP Editors](#tap-editors) will not unreasonably deny Draft status to a TAP.  Reasons for denying a TAP include duplication of effort, being technically unsound, not providing proper motivation or addressing backwards compatibility, or not in keeping with the TUF philosophy.  [TAP Editors](#tap-editors) may be consulted during the approval phase, with the [Consensus Builder](#consensus-builder) as the final arbiter of the  draft's viability as a TAP.
 
-As updates are necessary, the TAP author can submit new versions by opening additional [pull requests](https://github.com/theupdateframework/taps/pulls) against the TAPs repository.
+As updates are necessary, the TAP author can submit new versions by opening additional [pull requests](https://github.com/theupdateframework/taps/pulls) against the repository.
 
 Standardization TAPs consist of two parts, a design document and an augmented reference implementation. It is generally recommended that at least a prototype implementation be co-developed with the TAP, as ideas that sound good in principle sometimes turn out to be impractical when subjected to the test of implementation. However, a prototype is not required by the TAP process until the TAP is in the "Accepted" status. No TAP will be marked as "Final" until an augmented reference implementation is available.
 
