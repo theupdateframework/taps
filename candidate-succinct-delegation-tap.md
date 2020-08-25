@@ -128,9 +128,8 @@ calculated, see [this spreadsheet](https://docs.google.com/spreadsheets/d/10AKDs
 This TAP adds the following extension to delegations:
 
 ```
-("succinct_hash_delegations" : {
-    "prefix_bit_length" : BIT_LENGTH
-})
+("delegation_hash_prefix_len" : BIT_LENGTH)
+
 ```
 Where 2^BIT_LENGTH is the number of bins. BIT_LENGTH must be an
 integer between 1 and 32 (inclusive).
@@ -152,9 +151,10 @@ values starting with 000, the second bin would include binary values starting
 with 001, the third 010, then 011, 100, 101, 110, 111.
 
 The names of each bin will be determined by the bin number and the
-name of the delegating entity. It will be structured as
-DELEGATING_ROLENAME.hbd-COUNT where DELEGATING_ROLENAME is the name of
-the role that delegated to the hashed bins and COUNT is a value between 0 and
+PREFIX listed in the `name` field of the delegation. By default, the PREFIX
+will be DELEGATING_ROLENAME.hbd where DELEGATING_ROLENAME is the name of
+the role that delegated to the hashed bins. The name will be structured as
+PREFIX-COUNT where COUNT is a value between 0 and
 2^BIT_LENGTH-1 (inclusive) that represents the bin number.
 
 The `succinct_hash_delegations` will be prioritized over
@@ -174,13 +174,11 @@ With the addition of succinct hashed bins, the delegation will contain:
        KEYID : KEY,
        ... },
    "roles" : [{
-       "name": DELEGATING_ROLENAME,
+       "name": PREFIX,
        "keyids" : [ KEYID, ... ] ,
        "threshold" : THRESHOLD,
        ("path_hash_prefixes" : [ HEX_DIGEST, ... ] |
-       ("succinct_hash_delegations" : {
-    "prefix_bit_length" : BIT_LENGTH
-        })
+       ("delegation_hash_prefix_len" : BIT_LENGTH)
         "paths" : [ PATHPATTERN, ... ]),
        "terminating": TERMINATING,
    }, ... ]
@@ -198,8 +196,8 @@ mechanism.
 
 Repositories that use access control for file uploading should take
 hashed bin delegations into consideration. Upload access for the name
-DELEGATING_ROLENAME.hbd-\* should have the same permissions as
-DELEGATING_ROLENAME.
+PREFIX-\* should have the same permissions as
+the delegating role.
 
 # Backwards Compatibility
 
@@ -209,11 +207,11 @@ control that must be supported on the repository, as well as
 compatibility between the client and the repository.
 
 The repository must ensure that the correct access control mechanisms
-are applied to filenames of the form DELEGATING_ROLENAME.hbd-\*. As
+are applied to filenames of the form PREFIX-\*. As
 discussed in the security analysis, this metadata file should only be
-uploaded by DELEGATING_ROLENAME. The repository should handle this
+uploaded by the delegating role. The repository should handle this
 access control before succinct hashed bin delegations are used so that
-other uploaders are not able to use the DELEGATING_ROLENAME.hbd-\*
+other uploaders are not able to use the PREFIX-\*
 filename for target files.
 
 In order for succinct hashed bin delegations to be used, both the
