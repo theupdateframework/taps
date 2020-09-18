@@ -192,14 +192,26 @@ attacks that are mitigated by snapshot metadata in TUF.
 
 ## Rollback attack
 
-In the event that the timestamp key is compromised, an attacker may provide an
-invalid Merkle tree that contains a previous version of a target. This attack
-is prevented by both the client’s verification and by auditors. When the client
-verifies previous versions of the snapshot Merkle metadata for a target, they
-ensure that the version number of that target has not decreased. However, if
-the attacker controls the timestamp key(s) and the repository, the previous
-snapshot Merkle metadata downloaded by the client may also be invalid. To
-protect against this case, third party auditors store the previous version of
+A rollback attack provides a client with an old, previously valid view of
+the repository. Using this attack, an attacker could convince a client to
+install a version from before a security patch was released.
+
+TUF currently protects against rollback attacks by checking the current time
+signed by timestamp and ensuring that no version information provided by
+snapshot has decreased since the last update. With both of these protections,
+the client is secure against a rollback attack to any version released
+before the previous update cycle, even if the timestamp and snapshot keys
+are compromised.
+
+Using snapshot Merkle trees, rollback attacks are prevented by both the
+client verification and by third party auditors. If no keys are compromised,
+the timestamp keys protect against a rollback attack by ensuring a valid
+snapshot Merkle tree. If the timestamp key is compromised, the client
+verification of previous Merkle trees provides rollback protection for the
+individual targets metadata files that are verified. However, if the attacker
+controls the repository and timestamp keys, they may provide malicious previous
+Merkle trees. For full rollback protection, clients rely on third party
+auditors. Third party auditors store the previous version of
 all metadata, and will detect when the version number decreases in a new
 Merkle tree. As long as the client checks for an auditor’s verification, the
 client will not install the rolled-back version of the target.
@@ -210,19 +222,37 @@ If an attacker is able to compromise the timestamp key, they may arbitrarily
 increase the version number of a target in the snapshot Merkle metadata. If
 they increase it to a sufficiently large number (say the maximum integer value),
 the client will not accept any future version of the target as the version
-number will be below the previous version. To recover from this attack,
-auditors and clients should not check version information from before a
-timestamp key replacement. This allows a timestamp key replacement to be used
-as a reset after a fast forward attack. The existing system handles fast
-forward attack recovery in a similar manner, by instructing clients to delete
-stored version information after a timestamp key replacement.
+number will be below the previous version.
+
+In the current specification, repositories can recover from a fast forward
+attack by replacing a threshold of timestamp keys. If the client sees that
+a threshold of timestamp keys were replaced, it deletes the currently trusted
+version information.
+
+Snapshot Merkle trees also reset snapshot information after a replacement of
+a threshold of timestamp keys in order to recover from fast forward attacks.
+Auditors and clients should not check version information from before a
+timestamp key replacement when verifying the Merkle tree.
 
 ## Mix and match attack
+
+In a mix and match attack, an attacker combines images from the current
+snapshot with images from other snapshots, potentially introducing
+vulnerabilities.
+
+Currently, TUF protects against mix and match attacks by providing a snapshot
+metadata file that contains all targets metadata files available on the
+repository. Therefore, a mix and match attack is only possible in an
+attacker is able to compromise the timestamp and snapshot keys to create
+a malicious snapshot metadata file.
 
 A snapshot Merkle tree prevents mix and match attacks by ensuring that all
 targets files installed come from the same snapshot Merkle tree. If all targets
 have version information in the same snapshot Merkle tree, the properties of
 secure hash functions ensure that these versions were part of the same snapshot.
+As in the existing specification, a mix and match attack would be possible
+if an attacker was able to replace the snapshot Merkle tree using compromised
+timestamp keys.
 
 
 # Backwards Compatibility
