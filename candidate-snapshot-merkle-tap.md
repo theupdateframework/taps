@@ -39,8 +39,8 @@ with fewer target files.
 For very large repositories, the snapshot metadata file could get very large.
 This snapshot metadata file must be downloaded on every update cycle, and so
 could significantly impact the metadata overhead. For example, if a repository
-has 50,000,000 targets, the snapshot metadata will be about 380,000,000 bytes
-(https://docs.google.com/spreadsheets/d/18iwWnWvAAZ4In33EWJBgdAWVFE720B_z0eQlB4FpjNc/edit?ts=5ed7d6f4#gid=0).
+has 50,000,000 targets metadata files, the snapshot metadata will be about
+380,000,000 bytes (https://docs.google.com/spreadsheets/d/18iwWnWvAAZ4In33EWJBgdAWVFE720B_z0eQlB4FpjNc/edit?ts=5ed7d6f4#gid=0).
 For this reason, it is necessary to create a more scalable solution for snapshot
 metadata that does not significantly impact the security properties of TUF.
 
@@ -53,12 +53,12 @@ achieving similar security properties to the existing snapshot metadata
 Snapshot metadata provides a consistent view of the repository in order to
 protect against mix-and-match attacks and rollback attacks. In order to provide
 these protections, snapshot metadata is responsible for keeping track of the
-version number of each target file, ensuring that all targets downloaded are
+version number of each targets metadata file, ensuring that all targets downloaded are
 from the same snapshot, and ensuring that no target file decreases its version
 number (except in the case of fast forward attack recovery). Any new solution
 we develop must provide these same protections.
 
-A snapshot Merkle tree manages version information for each target by including
+A snapshot Merkle tree manages version information for each targets metadata file by including
 this information in each leaf node. By using a Merkle tree to store these nodes,
 this proposal can cryptographically verify that different targets are from the
 same snapshot by ensuring that the Merkle tree roots match. Due to the
@@ -69,16 +69,17 @@ In order to prevent rollback attacks between Merkle trees, this proposal
 introduces third-party auditors. These auditors are responsible for downloading
 all nodes of each Merkle tree to ensure that no version numbers have decreased
 between generated trees. This achieves rollback protection without every client
-having to store the version information for every target.
+having to store the version information for every targets metadata file.
 
 # Specification
 
 This proposal replaces the single snapshot metadata file with a snapshot Merkle
-metadata file for each target. The repository generates these snapshot Merkle
-metadata files by building a Merkle tree using all target files and storing the
-path to each target in the snapshot Merkle metadata. The root of this Merkle
-tree is stored in timestamp metadata to allow for client verification. The
-client uses the path stored in the snapshot Merkle metadata for a target, along
+metadata file for each targets metadata file. The repository generates these
+snapshot Merkle metadata files by building a Merkle tree using all target
+metadata files and storing the path to each targets metadata file in the
+snapshot Merkle metadata. The root of this Merkle tree is stored in timestamp
+metadata to allow for client verification. The client uses the path stored in
+the snapshot Merkle metadata for a targets metadata file, along
 with the root of the Merkle tree, to ensure that metadata is from the given
 Merkle tree. The details of these files and procedures are described in
 this section.
@@ -88,8 +89,8 @@ this section.
 ## Merkle tree generation
 
 When the repository generates snapshot metadata, instead of putting the version
-information for all targets into a single file, it instead uses the version
-information to generate a Merkle tree.  Each target’s version information forms
+information for all targets metadata file into a single file, it instead uses the version
+information to generate a Merkle tree.  Each targets metadata file's version information forms
 a leaf of the tree, then these leaves are used to build a Merkle tree. The
 internal nodes of a Merkle tree contain the hash of the leaf nodes. The exact
 algorithm for generating this Merkle tree (ie the order of leaves in the hash,
@@ -144,7 +145,7 @@ savings for clients.
 If a client sees the `merkle_root` field in timestamp metadata, they will use
 the snapshot Merkle metadata to check version information. If this field is
 present, the client will download the snapshot Merkle metadata file only for
-the target the client is attempting to update. The client will verify the
+the targets metadata the client is attempting to update. The client will verify the
 snapshot Merkle metadata file by reconstructing the Merkle tree and comparing
 the computed root hash to the hash provided in timestamp metadata. If the
 hashes do not match, the snapshot Merkle metadata is invalid. Otherwise, the
@@ -152,7 +153,7 @@ client will use the version information in the verified snapshot Merkle
 metadata to proceed with the update.
 
 For additional rollback protection, the client may download previous versions
-of the snapshot Merkle metadata for the given target file. After verifying
+of the snapshot Merkle metadata for the given targets metadata file. After verifying
 these files, the client should compare the version information in the previous
 Merkle trees to the information in the current Merkle tree to ensure that the
 version numbers have never decreased. In order to allow for fast forward attack
@@ -161,11 +162,11 @@ download previous versions that were signed with the same timestamp key.
 
 ## Auditing Merkle trees
 
-In order to ensure the validity of all target version information in the
+In order to ensure the validity of all targets metadata version information in the
 Merkle tree, third-party auditors should validate the entire tree each time it
 is updated. Auditors should download every snapshot Merkle file, verify the
 paths, check the root hash against the hash provided in timestamp metadata,
-and ensure that the version information has not decreased for each target.
+and ensure that the version information has not decreased for each leaf.
 Alternatively, the repository may provide auditors with information about the
 contents and ordering of leaf nodes so that the auditors can more efficiently
 verify the entire tree.
@@ -176,6 +177,7 @@ is in that timestamp file. Using this signature, clients can check whether a
 particular third party has approved the Merkle tree.
 
 ## Garbage collection
+
 When a threshold of timestamp keys are revoked and replaced, the repository no
 longer needs to store snapshot Merkle files signed by the previous timestamp
 key. Replacing the timestamp key is an opportunity for fast forward attack
