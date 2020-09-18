@@ -10,24 +10,23 @@
 * +TUF-Version:
 * +Post-History:
 
- # Abstract
+# Abstract
 
- To optimize the snapshot metadata file size for large repositories, repositories
- can use a snapshot Merkle tree to conceptually store version information about
- all images in a single snapshot without needing to distribute this entire
- snapshot to all clients. First, the client retrieves only a timestamp file,
- which changes according to some period p (such as every day or week). Second,
- the snapshot file is itself kept as a Merkle tree, with the root stored in
- timestamp metadata. This snapshot file is broken into a file for each target
- that contains the Merkle tree leaf with information about that target and a
- path to the root of the Merkle tree. A new snapshot Merkle tree is generated
- every time a new timestamp is generated. To prove that there has not been a
- reversion of the snapshot Merkle tree when downloading an image, the client
- and third-party auditors download the prior snapshot Merkle trees and check
- that the version numbers did not decrease at any point. To make this scalable
- as the number of timestamps increases, the client will only download version
- information signed by the current timestamp file. Thus, rotating this key
- enables the repository to discard old snapshot Merkle tree data.
+To optimize the snapshot metadata file size for large repositories, repositories
+can use a snapshot Merkle tree to conceptually store version information about
+all images in a single snapshot without needing to distribute this entire
+snapshot to all clients. To do so, it puts version information for each targets
+metadata file into a leaf of the Merkle tree, and distributes snapshot Merkle
+files containing this leaf information and a path to the root of the Merkle tree.
+Clients can then compare this information with a Merkle root provided in the
+timestamp metadata. To prove that there has not been a reversion of the
+snapshot Merkle tree when downloading an image, the client and third-party
+auditors download the prior snapshot Merkle trees and check that the version
+numbers did not decrease at any point.
+
+By replacing a single snapshot metadata file with individual snapshot Merkle
+metadata files, this TAP reduces the metadata overhead for repositories with
+large numbers of targets metadata files.
 
 The feature described in this TAP does not need to be implemented by all TUF
 implementations. It is an option for any adopter who is interested in the
