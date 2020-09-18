@@ -27,7 +27,7 @@
  that the version numbers did not decrease at any point. To make this scalable
  as the number of timestamps increases, the client will only download version
  information signed by the current timestamp file. Thus, rotating this key
- enables the registry to discard old snapshot Merkle tree data.
+ enables the repository to discard old snapshot Merkle tree data.
 
 The feature described in this TAP does not need to be implemented by all TUF
 implementations. It is an option for any adopter who is interested in the
@@ -94,7 +94,8 @@ a leaf of the tree, then these leaves are used to build a Merkle tree. The
 internal nodes of a Merkle tree contain the hash of the leaf nodes. The exact
 algorithm for generating this Merkle tree (ie the order of leaves in the hash,
 how version information is encoded), is left to the implementer, but this
-algorithm should be documented in a POUF so that implementations can be
+algorithm should be documented in a [POUF](https://github.com/theupdateframework/taps/blob/master/tap11.md)
+so that implementations can be
 compatible and correctly verify Merkle tree data. However, all implementations
 should meet the following requirements:
 * Leaf nodes must be unique. A unique identifier of the target, such as the
