@@ -12,7 +12,7 @@
 
  # Abstract
 
- To optimize the snapshot metadata file size for large registries, registries
+ To optimize the snapshot metadata file size for large repositories, repositories
  can use a snapshot Merkle tree to conceptually store version information about
  all images in a single snapshot without needing to distribute this entire
  snapshot to all clients. First, the client retrieves only a timestamp file,
