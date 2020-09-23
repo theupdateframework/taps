@@ -26,7 +26,9 @@ numbers did not decrease at any point.
 
 By replacing a single snapshot metadata file with individual snapshot Merkle
 metadata files, this TAP reduces the metadata overhead for repositories with
-large numbers of targets metadata files.
+large numbers of targets metadata files. It maintains the security protections
+of the single snapshot metadata file in part through the use of third party
+auditors that check for rollback attacks anywhere in the Merkle tree.
 
 The feature described in this TAP does not need to be implemented by all TUF
 implementations. It is an option for any adopter who is interested in the
@@ -53,12 +55,13 @@ Snapshot metadata provides a consistent view of the repository in order to
 protect against mix-and-match attacks and rollback attacks. In order to provide
 these protections, snapshot metadata is responsible for keeping track of the
 version number of each targets metadata file, ensuring that all targets downloaded are
-from the same snapshot, and ensuring that no target file decreases its version
+from the same snapshot, and ensuring that no targets metadata file decreases its version
 number (except in the case of fast forward attack recovery). Any new solution
 we develop must provide these same protections.
 
-A snapshot Merkle tree manages version information for each targets metadata file by including
-this information in each leaf node. By using a Merkle tree to store these nodes,
+A snapshot Merkle tree manages version information for each targets metadata
+file by including this information in a leaf node for each targets metadata
+file. By using a Merkle tree to store these nodes,
 this proposal can cryptographically verify that different targets are from the
 same snapshot by ensuring that the Merkle tree roots match. Due to the
 properties of secure hash functions, any two leaves of a Merkle tree with the
@@ -115,7 +118,7 @@ tree.
 This information will be included in the following metadata format:
 ```
 { “leaf_contents”: {METAFILES},
-  “Merkle_path”: {INDEX:HASH}
+  “merkle_path”: {INDEX:HASH}
   “path_directions”:{INDEX:DIR}
 }
 ```
@@ -139,6 +142,11 @@ key because the path information will be verified based on the Merkle root
 provided in timestamp. Removing these signatures will provide additional space
 savings for clients.
 
+Previous versions of snapshot Merkle metadata files using the current timestamp
+key must remain available to clients and auditors. The repository may store
+snapshot Merkle metadata files using consistent snapshots to facilitate
+access to previous Merkle trees.
+
 ## Merkle tree verification
 
 If a client sees the `merkle_root` field in timestamp metadata, they will use
@@ -152,7 +160,8 @@ client will use the version information in the verified snapshot Merkle
 metadata to proceed with the update.
 
 For additional rollback protection, the client may download previous versions
-of the snapshot Merkle metadata for the given targets metadata file. After verifying
+of the snapshot Merkle metadata for the given targets metadata file. The client
+should perform this check immediately after verifying the current Merkle tree. After verifying
 these files, the client should compare the version information in the previous
 Merkle trees to the information in the current Merkle tree to ensure that the
 version numbers have never decreased. In order to allow for fast forward attack
@@ -174,6 +183,13 @@ Auditors may provide an additional signature for timestamp metadata that
 indicates that they have verified the contents of the Merkle tree whose root
 is in that timestamp file. Using this signature, clients can check whether a
 particular third party has approved the Merkle tree.
+
+An auditor should validate all versions of the Merkle tree signed by the
+current timestamp key. For fast-forward attack recovery, the auditor should
+not check for a rollback attack after the timestamp key
+has been replaced. This means that all new auditors should check the Merkle
+trees signed with the current timestamp keys before attesting to the validity
+of the current Merkle tree.
 
 ## Garbage collection
 
@@ -198,7 +214,8 @@ install a version from before a security patch was released.
 TUF currently protects against rollback attacks by checking the current time
 signed by timestamp and ensuring that no version information provided by
 snapshot has decreased since the last update. With both of these protections,
-the client is secure against a rollback attack to any version released
+a client that has a copy of trusted metadata is secure against a rollback
+attack to any version released
 before the previous update cycle, even if the timestamp and snapshot keys
 are compromised.
 
