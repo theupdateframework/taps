@@ -128,7 +128,10 @@ calculated, see [this spreadsheet](https://docs.google.com/spreadsheets/d/10AKDs
 This TAP adds the following extension to delegations:
 
 ```
-("delegation_hash_prefix_len" : BIT_LENGTH)
+("succinct_hash_delegations" : {
+  "delegation_hash_prefix_len" : BIT_LENGTH,
+  "bin_name_prefix" : NAME_PREFIX
+})
 
 ```
 Where 2^BIT_LENGTH is the number of bins. BIT_LENGTH must be an
@@ -137,7 +140,7 @@ integer between 1 and 32 (inclusive).
 When a delegation contains this field, it represents delegations to
 2^BIT_LENGTH bins that use the keyid, threshold, path, and termination
 status from this delegation. The path_hash_prefixes and name for each
-bin will be determined using the BIT_LENGTH.
+bin will be determined using the BIT_LENGTH and NAME_PREFIX.
 
 As in the current use of hashed bin delegations, target files will be
 distributed to bins based on the SHA2-256 hash of the target path and
@@ -151,10 +154,9 @@ values starting with 000, the second bin would include binary values starting
 with 001, the third 010, then 011, 100, 101, 110, 111.
 
 The names of each bin will be determined by the bin number and the
-PREFIX listed in the `name` field of the delegation. By default, the PREFIX
-will be DELEGATING_ROLENAME.hbd where DELEGATING_ROLENAME is the name of
-the role that delegated to the hashed bins. The name will be structured as
-PREFIX-COUNT where COUNT is a value between 0 and
+NAME_PREFIX listed in the `bin_name_prefix` field of the delegation.
+The name will be structured as
+NAME_PREFIX-COUNT where COUNT is a value between 0 and
 2^BIT_LENGTH-1 (inclusive) that represents the bin number.
 
 The `succinct_hash_delegations` will be prioritized over
@@ -174,11 +176,14 @@ With the addition of succinct hashed bins, the delegation will contain:
        KEYID : KEY,
        ... },
    "roles" : [{
-       "name": PREFIX,
+       "name": ROLENAME,
        "keyids" : [ KEYID, ... ] ,
        "threshold" : THRESHOLD,
        ("path_hash_prefixes" : [ HEX_DIGEST, ... ] |
-       ("delegation_hash_prefix_len" : BIT_LENGTH)
+       ("succinct_hash_delegations" : {
+         "delegation_hash_prefix_len" : BIT_LENGTH,
+         "bin_name_prefix" : NAME_PREFIX
+       })
         "paths" : [ PATHPATTERN, ... ]),
        "terminating": TERMINATING,
    }, ... ]
@@ -196,7 +201,7 @@ mechanism.
 
 Repositories that use access control for file uploading should take
 hashed bin delegations into consideration. Upload access for the name
-PREFIX-\* should have the same permissions as
+NAME_PREFIX-\* should have the same permissions as
 the delegating role.
 
 # Backwards Compatibility
@@ -207,11 +212,11 @@ control that must be supported on the repository, as well as
 compatibility between the client and the repository.
 
 The repository must ensure that the correct access control mechanisms
-are applied to filenames of the form PREFIX-\*. As
+are applied to filenames of the form NAME_PREFIX-\*. As
 discussed in the security analysis, this metadata file should only be
 uploaded by the delegating role. The repository should handle this
 access control before succinct hashed bin delegations are used so that
-other uploaders are not able to use the PREFIX-\*
+other uploaders are not able to use the NAME_PREFIX-\*
 filename for target files.
 
 In order for succinct hashed bin delegations to be used, both the
