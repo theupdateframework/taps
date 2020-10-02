@@ -153,11 +153,13 @@ of 3, the first bin would include binary
 values starting with 000, the second bin would include binary values starting
 with 001, the third 010, then 011, 100, 101, 110, 111.
 
-The names of each bin will be determined by the bin number and the
+The rolename of each bin will be determined by the bin number and the
 NAME_PREFIX listed in the `bin_name_prefix` field of the delegation.
 The name will be structured as
 NAME_PREFIX-COUNT where COUNT is a value between 0 and
-2^BIT_LENGTH-1 (inclusive) that represents the bin number.
+2^BIT_LENGTH-1 (inclusive) that represents the bin number. If the
+`succinct_hash_delegations` field is present in a delegation, the `name`
+field will not be used as a rolename, and so is not required.
 
 The `succinct_hash_delegations` will be prioritized over
 `path_hash_prefixes`. If both of these fields appear in a delegation,
@@ -176,7 +178,7 @@ With the addition of succinct hashed bins, the delegation will contain:
        KEYID : KEY,
        ... },
    "roles" : [{
-       "name": ROLENAME,
+       ("name": ROLENAME,)
        "keyids" : [ KEYID, ... ] ,
        "threshold" : THRESHOLD,
        ("path_hash_prefixes" : [ HEX_DIGEST, ... ] |
