@@ -64,7 +64,6 @@ include:
        "keyids" : [ abc123 ] ,
        "threshold" : 1,
        "path_hash_prefixes" : [ <b>00*</b> ],
-        "paths" : [ "path/to/directory/" ],
        "terminating": false,
    },
 {
@@ -72,7 +71,6 @@ include:
        "keyids" : [ abc123 ] ,
        "threshold" : 1,
        "path_hash_prefixes" : [ <b>01*</b> ],
-        "paths" : [ "path/to/directory/" ],
        "terminating": false,
    },
 {
@@ -80,7 +78,6 @@ include:
        "keyids" : [ abc123 ] ,
        "threshold" : 1,
        "path_hash_prefixes" : [ <b>02*</b> ],
-        "paths" : [ "path/to/directory/" ],
        "terminating": false,
    },
 {
@@ -88,7 +85,6 @@ include:
        "keyids" : [ abc123 ] ,
        "threshold" : 1,
        "path_hash_prefixes" : [ <b>03*</b>],
-        "paths" : [ "path/to/directory/" ],
        "terminating": false,
    },... ]
  }
@@ -156,7 +152,7 @@ with 001, the third 010, then 011, 100, 101, 110, 111.
 The rolename of each bin will be determined by the bin number and the
 NAME_PREFIX listed in the `bin_name_prefix` field of the delegation.
 The name will be structured as
-NAME_PREFIX-COUNT where COUNT is a value between 0 and
+NAME_PREFIX-COUNT where COUNT is a hexadecimal value between 0 and
 2^BIT_LENGTH-1 (inclusive) that represents the bin number. If the
 `succinct_hash_delegations` field is present in a delegation, the `name`
 field will not be used as a rolename, and so is not required.
@@ -191,6 +187,25 @@ With the addition of succinct hashed bins, the delegation will contain:
    }, ... ]
  }
  ```
+
+ Using succinct hashed bin delegations, the delegating metadata from the
+ motivating example will contain:
+
+ <pre><code>
+ "delegations":{ "keys" : {
+        abc123 : abcdef123456,
+        },
+    "roles" : [{
+        "keyids" : [ abc123 ] ,
+        "succinct_hash_delegations" : {
+          "delegation_hash_prefix_len" : 16,
+          "bin_name_prefix" : alice.hbd-
+        },
+        "threshold" : 1,
+        "terminating": false,
+    },
+  }
+ </code></pre>
 
 # Security Analysis
 
