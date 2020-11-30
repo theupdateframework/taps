@@ -1,7 +1,7 @@
 * TAP: 1
 * Title: TAP Purpose and Guidelines
 * Version: 2
-* Last-Modified: 28-Jul-2020
+* Last-Modified: 30-Nov-2020
 * Author: Trishank Karthik Kuppusamy, Lois Anne DeLong, Justin Cappos, Joshua Lock
 * Status: Active
 * Content-Type: text/markdown
@@ -111,7 +111,7 @@ Each TAP SHOULD have the following parts:
 
 8. *Augmented Reference Implementation* -- The augmented reference implementation must be completed before any TAP is given "Final" status, but it need not be completed before the TAP is accepted as "Draft". While there is merit to the approach of reaching consensus on the specification and rationale before writing code, the principle of "rough consensus and running code" is still useful when it comes to resolving many discussions of API details. The final implementation must include test code and documentation appropriate for the TUF reference.
 
-9. *Copyright* -- Each TAP must either be explicitly labeled as placed in the public domain (see this TAP as an example) or licensed under the [Open Publication License](https://opencontent.org/openpub/).
+9. *Copyright* -- Each TAP must either be explicitly labeled as placed in the public domain (see this TAP as an example) or licensed under the [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/).
 
 # TAP Formats and Templates
 

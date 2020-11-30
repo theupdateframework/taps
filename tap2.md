@@ -43,4 +43,4 @@ The augmented reference implementation must be completed before any TAP is given
 
 # Copyright
 
-Each TAP must either be explicitly labeled as placed in the public domain (see this TAP as an example) or licensed under the [Open Publication License](https://opencontent.org/openpub/).
+Each TAP must either be explicitly labeled as placed in the public domain or licensed under the [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/).
