@@ -1,4 +1,4 @@
-* TAP:
+* TAP: 15
 * Title: Succinct hashed bin delegations
 * Version: 1
 * Last-Modified: 06-07-2020
