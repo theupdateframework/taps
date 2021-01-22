@@ -169,17 +169,31 @@ Alternatively, the repository may provide auditors with information about the
 contents and ordering of leaf nodes so that the auditors can more efficiently
 verify the entire tree.
 
-Auditors may provide an additional signature for timestamp metadata that
-indicates that they have verified the contents of the Merkle tree whose root
-is in that timestamp file. Using this signature, clients can check whether a
-particular third party has approved the Merkle tree.
-
 An auditor should validate all versions of the Merkle tree signed by the
 current timestamp key. For fast-forward attack recovery, the auditor should
 not check for a rollback attack after the timestamp key
 has been replaced. This means that all new auditors should check the Merkle
 trees signed with the current timestamp keys before attesting to the validity
 of the current Merkle tree.
+
+## Client interaction with auditors
+
+Clients must ensure that snapshot Merkle trees have been verified by an auditor.
+To do so, implementations may use a few different mechanisms:
+
+* Auditors may provide an additional signature for timestamp metadata that
+indicates that they have verified the contents of the Merkle tree whose root
+is in that timestamp file. Using this signature, clients can check whether a
+particular third party has approved the Merkle tree. To use this mechanism,
+the auditor's key should be included in the root metadata.
+
+* Auditors may host a list of verified Merkle roots for a given repository,
+signed by the auditor's key. Clients may be configured with the auditor's key,
+or get it from the root metadata.
+
+* Clients may use a secure API to verify that a given Merkle root has been
+verified by an auditor. This API should provide compromise resilience similar to
+TUF's root metadata.
 
 ## Garbage collection
 
