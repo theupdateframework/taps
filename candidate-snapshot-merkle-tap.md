@@ -46,7 +46,9 @@ For this reason, it is necessary to create a more scalable solution for snapshot
 metadata that does not significantly impact the security properties of TUF.
 
 We designed a new approach to snapshot that improves scalability while
-achieving similar security properties to the existing snapshot metadata
+achieving similar security properties to the existing snapshot metadata.
+Using this new approach, a repository with 50,000,000 targets metadata files
+would only require the user to download about 800 bytes of snapshot metadata (https://docs.google.com/spreadsheets/d/18iwWnWvAAZ4In33EWJBgdAWVFE720B_z0eQlB4FpjNc/edit?ts=5ed7d6f4#gid=924553486).
 
 
 # Rationale
@@ -110,9 +112,10 @@ includes both child nodes.
 Once the Merkle tree is generated, the repository must create a snapshot Merkle
 metadata file for each targets metadata file. This file must contain the leaf contents and
 the path to the root of the Merkle tree. This path must contain the hashes of
-sibling nodes needed to reconstruct the tree during verification (see diagram).
+nodes needed to reconstruct the tree during verification, including the leaf's
+sibling (see diagram).
 In addition the path should contain direction information so that the client
-will know whether each node is a left or right sibling when reconstructing the
+will know whether each listed node is a left or right sibling when reconstructing the
 tree.
 
 This information will be included in the following metadata format:
@@ -166,7 +169,7 @@ these files, the client should compare the version information in the previous
 Merkle trees to the information in the current Merkle tree to ensure that the
 version numbers have never decreased. In order to allow for fast forward attack
 recovery (discussed further in Security Analysis), the client should only
-download previous versions that were signed with the same timestamp key.
+download previous versions whose root hashes were signed for with the same timestamp key.
 
 ## Auditing Merkle trees
 
