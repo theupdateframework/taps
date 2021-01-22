@@ -235,6 +235,10 @@ all metadata, and will detect when the version number decreases in a new
 Merkle tree. As long as the client checks for an auditor’s verification, the
 client will not install the rolled-back version of the target.
 
+In summary, without auditors, a client is vulnerable to rollback attacks when an attacker
+controls the timestamp key. With auditors, the client has the same rollback
+protection as the existing TUF specification.
+
 ## Fast forward attack
 
 If an attacker is able to compromise the timestamp key, they may arbitrarily
@@ -252,6 +256,10 @@ Snapshot Merkle trees also reset snapshot information after a replacement of
 a threshold of timestamp keys in order to recover from fast forward attacks.
 Auditors and clients should not check version information from before a
 timestamp key replacement when verifying the Merkle tree.
+
+Thus, fast forward attack recovery with snapshot Merkle trees is the same
+as in the existing specification, but must be performed by both clients and
+auditors.
 
 ## Mix and match attack
 
@@ -272,6 +280,9 @@ secure hash functions ensure that these versions were part of the same snapshot.
 As in the existing specification, a mix and match attack would be possible
 if an attacker was able to replace the snapshot Merkle tree using compromised
 timestamp keys.
+
+Snapshot Merkle trees provide the same protection against mix and match attacks
+as the existing specification.
 
 
 # Backwards Compatibility
