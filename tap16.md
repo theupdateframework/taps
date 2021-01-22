@@ -1,7 +1,7 @@
-* TAP:
+* TAP: 16
 * Title: Snapshot Merkle Trees
 * Version: 0
-* Last-Modified: 17/09/2020
+* Last-Modified: 22/01/2021
 * Author: Marina Moore, Justin Cappos
 * Type: Standardization
 * Status: Draft
