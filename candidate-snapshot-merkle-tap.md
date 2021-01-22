@@ -77,7 +77,7 @@ having to store the version information for every targets metadata file.
 
 This proposal replaces the single snapshot metadata file with a snapshot Merkle
 metadata file for each targets metadata file. The repository generates these
-snapshot Merkle metadata files by building a Merkle tree using all target
+snapshot Merkle metadata files by building a Merkle tree using all targets
 metadata files and storing the path to each targets metadata file in the
 snapshot Merkle metadata. The root of this Merkle tree is stored in timestamp
 metadata to allow for client verification. The client uses the path stored in
@@ -91,24 +91,24 @@ this section.
 ## Merkle tree generation
 
 When the repository generates snapshot metadata, instead of putting the version
-information for all targets metadata file into a single file, it instead uses the version
+information for all targets metadata files into a single file, it instead uses the version
 information to generate a Merkle tree.  Each targets metadata file's version information forms
 a leaf of the tree, then these leaves are used to build a Merkle tree. The
-internal nodes of a Merkle tree contain the hash of the leaf nodes. The exact
-algorithm for generating this Merkle tree (ie the order of leaves in the hash,
-how version information is encoded), is left to the implementer, but this
+internal nodes of a Merkle tree contain the hash of their child nodes. The exact
+algorithm for generating this Merkle tree (ie the order of nodes in the hash,
+how version information is encoded, etc.), is left to the implementer, but this
 algorithm should be documented in a [POUF](https://github.com/theupdateframework/taps/blob/master/tap11.md)
 so that implementations can be
 compatible and correctly verify Merkle tree data. However, all implementations
 should meet the following requirements:
-* Leaf nodes must be unique. A unique identifier of the target, such as the
-filepath or hash must be included in the leaf data to ensure that no two leaf
+* Leaf nodes must be unique. A unique identifier of the targets metadata – such as the
+filepath, filename, or the hash of the content – must be included in the leaf data to ensure that no two leaf
 node hashes are the same.
 * The tree must be a Merkle tree. Each internal node must contain a hash that
-includes both leaf nodes.
+includes both child nodes.
 
 Once the Merkle tree is generated, the repository must create a snapshot Merkle
-metadata file for each target. This file must contain the leaf contents and
+metadata file for each targets metadata file. This file must contain the leaf contents and
 the path to the root of the Merkle tree. This path must contain the hashes of
 sibling nodes needed to reconstruct the tree during verification (see diagram).
 In addition the path should contain direction information so that the client
@@ -135,7 +135,7 @@ verify updates instead:
 ("merkle_root": ROOT_HASH)
 ```
 
-Where `ROOT_HASH` is the hash of the Merkle tree root.
+Where `ROOT_HASH` is the hash of the Merkle tree's root node.
 
 Note that snapshot Merkle metadata files do not need to be signed by a snapshot
 key because the path information will be verified based on the Merkle root
@@ -195,7 +195,7 @@ of the current Merkle tree.
 
 When a threshold of timestamp keys are revoked and replaced, the repository no
 longer needs to store snapshot Merkle files signed by the previous timestamp
-key. Replacing the timestamp key is an opportunity for fast forward attack
+keys. Replacing the timestamp keys is an opportunity for fast forward attack
 recovery, and so all version information from before the replacement is no
 longer valid. At this point, the repository may garbage collect all snapshot
 Merkle metadata files.
