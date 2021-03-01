@@ -17,6 +17,7 @@
 * [TAP 12: Improving keyid flexibility](tap12.md)
 * [TAP 14: Managing TUF Versions](tap14.md)
 * [TAP 15: Succinct hashed bin delegations](tap15.md)
+* [TAP 16: Snapshot Merkle Trees](tap16.md)
 
 ## Rejected
 
