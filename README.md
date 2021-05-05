@@ -18,6 +18,7 @@
 * [TAP 14: Managing TUF Versions](tap14.md)
 * [TAP 15: Succinct hashed bin delegations](tap15.md)
 * [TAP 16: Snapshot Merkle Trees](tap16.md)
+* [TAP 17: Replace signature envelope with SSL signing-spec](tap17.md)
 
 ## Rejected
 
