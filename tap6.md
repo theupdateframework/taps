@@ -3,7 +3,7 @@
 * Version: 1
 * Last-Modified: 29-Aug-2017
 * Author: David Lawrence, Vladimir Diaz, Justin Cappos
-* Status: Accepted
+* Status: Final
 * Content-Type: text/markdown
 * Created: 19-Jan-2017
 * Post-History: 06-Oct-2016

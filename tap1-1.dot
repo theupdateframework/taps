@@ -1,0 +1,17 @@
+// Converted into a png with: dot -Tpng -o tap1-1.png tap1-1.dot
+digraph {
+    node[shape=box, style=rounded]
+
+    {rank=same; Accepted, Draft, Final}
+    {rank=same; Superseded, Rejected, Withdrawn}
+
+    Draft -> Accepted 
+    Accepted -> Final
+    Draft -> Deferred
+    Deferred -> Draft
+    Draft -> Rejected
+    Draft -> Withdrawn
+    Final -> Superseded
+    Draft -> Active
+    Active -> Superseded
+}

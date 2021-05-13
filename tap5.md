@@ -1,10 +1,10 @@
 * TAP: 5
 * Title: Setting URLs for roles in the root metadata file
 * Version: 1
-* Last-Modified: 22-Jan-2018
+* Last-Modified: 20-Jul-2020
 * Author: Trishank Karthik Kuppusamy, Sebastien Awwad, Evan Cordell,
           Vladimir Diaz, Jake Moshenko, Justin Cappos
-* Status: Draft
+* Status: Rejected
 * Content-Type: text/markdown
 * Created: 24-Sep-2016
 

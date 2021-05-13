@@ -3,12 +3,13 @@
 * Version: <version string>
 * Last-Modified: <date string>
 * Author: <list of authors' real names and optionally, email addrs>
+* Type: <Standardization | Informational>
 * Status: <Draft | Active | Accepted | Deferred | Rejected | Withdrawn | Final | Superseded>
 * +Content-Type: <text/markdown>
 * +Requires: <TAP numbers>
 * Created: <date created on, in dd-mmm-yyyy format>
 * +TUF-Version: <version number>
-* Post-History: <dates of postings to the TUF mailing list>
+* +Post-History: <dates of postings to the TUF mailing list>
 * +Replaces: <TAP number>
 * +Superseded-By: <TAP number>
 
@@ -42,4 +43,4 @@ The augmented reference implementation must be completed before any TAP is given
 
 # Copyright
 
-Each TAP must either be explicitly labeled as placed in the public domain (see this TAP as an example) or licensed under the [Open Publication License](https://opencontent.org/openpub/).
+Each TAP must either be explicitly labeled as placed in the public domain (see TAP 1 as an example) or licensed under the [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/).
