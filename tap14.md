@@ -382,6 +382,12 @@ download new targets from delegations that use the old specification version.
 TUF implementers should decide how many old specification versions to support
 based on the expected usage of their implementation.
 
+Additionally, TUF clients should keep track of the last used specification
+version for each repository they connect to. They should use this version
+number to ensure that the repository or an attacker on the network does not
+remove the higher version and force the client to use a lower versioned,
+potentially less secure specification version.
+
 
 ## Changes to the update process
 
@@ -392,6 +398,9 @@ following procedure:
 
 * The client determines the latest version available on the repository by
 looking for the directory with the largest version number.
+* If the latest version on the repository is lower than the previous
+specification version the client used from this repository, the client
+should report an error and terminate the update.
 * If the latest version on the repository is equal to that of the client, it
 will use this directory to download metadata.
 * If the latest version pre-dates the client specification version, it may call functions
@@ -521,7 +530,16 @@ A downgrade attack on the TUF specification version may be possible if an
 attacker is able to block access to a directory on the repository. This would
 mean that a client would use metadata from a previous specification version when
 performing an update. However, the metadata would still have to be current and
-properly signed. To mitigate the damage from a downgrade attack in case a
+properly signed.
+
+Clients that have previously used a repository will store the specification
+version used to communicate with that repository, so a downgrade attack will
+be limited by the previous specification version used by the client. So, if
+the client previously updated from repository A using version 2.1.0, they would
+only accept future updates using specification version 2.1.0 or a later from
+repository A.
+
+In addition, to mitigate the damage from a downgrade attack in case a
 security flaw is found in a version of the TUF specification, the vulnerable
 version should no longer be supported on the repository (the metadata files
 should be revoked or allowed to expire). In addition, clients should be upgraded
