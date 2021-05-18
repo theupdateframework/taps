@@ -13,18 +13,29 @@
 This TAP discusses a means by which different users of the same repository
 may elect to use different, repository-hosted, top-level targets metadata.  This effectively
 enables different namespaces to exist on a repository and also provides
-additional resilience to attack in the case that the root keys on the 
+additional resilience to attack in the case that the root keys on the
 repository are compromised.
 
 
 
 # Motivation
 
+In TUF, the root and targets roles on the repository are responsible for
+delegating the correct key to each delegated targets. A third party that controls
+a delegated targets role gives their keys to the delegating role on the
+repository, then has to trust that the repository will correctly list the
+trusted keys for their role. This means that a malicious repository maintainer
+can overwrite delegated keys in order to sign arbitrary software.
 
-In TUF, it is not possible for different users to have different namespaces on
-the same repository.  That is, if Alice and Bob both use repository X and ask
-for package foo, they will both receive the same package.  
-This proposal enables clients to restrict the targets they consume to 
+In the case of some public repositories, the repository is considered an untrusted
+distribution mechanism, and should not be trusted with this key management.
+For these repositories, the owner of a delegated targets role needs a mechanism
+to ensure that their users can pin keys.
+
+To allow for these untrusted repositories, we propose adding namespaces to TUF
+repositories. That is, if Alice and Bob both use repository X and ask
+for package foo, they may get different results based on their trusted namespaces.
+This proposal enables clients to restrict the targets they consume to
 filtered views of the repository.  
 
 These different views could be defined by either different users on the
@@ -34,36 +45,36 @@ authority for namespaced collections of targets are delegated to more granular
 roles, such as in the proposed [PyPI Maximum Security Model](https://www.python.org/dev/peps/pep-0480/) where developers
 sign for the targets produced by their projects. A client can curate a list of
 trusted projects which is a subset of the targets on the repository by using
-mapping metadata per [TAP 4](tap4.md) to only include roles they trust in their 
+mapping metadata similar to [TAP 4](tap4.md) to only include roles they trust in their
 targets metadata.  One could imagine that other users (perhaps those at the 
-same organization) would also like to use the same curated list.  These use 
+same organization) would also like to use the same curated list.  These use
 cases are all supported by this proposal.
 
-There are several reasons why it may be important to let Alice and Bob's view of 
+There are several reasons why it may be important to let Alice and Bob's view of
 the repository differ.  
 
-First, Alice and Bob may each curate different lists of packages that they 
+First, Alice and Bob may each curate different lists of packages that they
 trust.  For example, the security team at Alice's company has only blessed
 specific packages and Alice wishes to install only those packages.  Every other
 user clearly should not be subject to those constraints.
 
 Second, Alice may be concerned that a full repository compromise may include
 the root role.  Since the root role in TUF indicates the top-level target's
-role key, this compromise can enable the attacker full control of Alice's 
+role key, this compromise can enable the attacker full control of Alice's
 namespace.  Alice may want to require that the security team at her company
 still be used to decide which packages to trust.  
 
 Finally, in fact, Alice's company may have dictated that references to a
 specific tag name should all (transparently) refer to a specific in-house
-version, which may not match the result of 
+version, which may not match the result of
 resolving foo using the repository's top-level targets metadata.  
-Instead foo should refer to the name that is resolved using Alice’s 
-company’s targets metadata file as the top-level targets metadata file. This may 
-also enable Alice to install software which is available on the repository 
+Instead foo should refer to the name that is resolved using Alice’s
+company’s targets metadata file as the top-level targets metadata file. This may
+also enable Alice to install software which is available on the repository
 but would not be trusted by other users.
 
-Note that in all of the above cases, Alice and Bob still want to use the 
-repository as a means to coordinate and obtain new versions of targets 
+Note that in all of the above cases, Alice and Bob still want to use the
+repository as a means to coordinate and obtain new versions of targets
 metadata.  They however 1) want control of what packages would be installed
 and 2) want to limit the damage caused by a root key compromise on the
 repository.
@@ -73,33 +84,33 @@ repository.
 We introduce this TAP because the alternative is slightly onerous.  One could
 technically achieve the first and second use cases (different curated lists of
 packages and additional protection against a compromise of the repository’s
-root key) by using delegations to multiple repositories.  The way in which this 
-would work would be to have the security team at Alice's company run their 
-own repository and for Alice to use a mapping [TAP 4](tap4.md) that indicates 
-that both the security team and the original repository must be trusted for an 
-installation to happen.  In this way, only software blessed by the security team 
+root key) by using delegations to multiple repositories.  The way in which this
+would work would be to have the security team at Alice's company run their
+own repository and for Alice to use a mapping [TAP 4](tap4.md) that indicates
+that both the security team and the original repository must be trusted for an
+installation to happen.  In this way, only software blessed by the security team
 may be installed.
 
-However, this does not support the final use case above of transparently 
+However, this does not support the final use case above of transparently
 referring to an in-house version.  The reason is that
 the original repository must also indicate that software is trustworthy, which it
-would not in this case.  This TAP allows the user to override (i.e., ignore) the 
+would not in this case.  This TAP allows the user to override (i.e., ignore) the
 top-level targets metadata.  The repository's separate namespace will not
 match with Alice's in this case.
 
 # Specification
 
-In order to support this situation, we propose a change to the mapping 
+In order to support this situation, we propose a change to the mapping
 metadata to enable the name and key(s) for a targets metadata file to be specified.
 This targets metadata file will be uploaded to the repository and will be used as though
-it is the top-level targets metadata file by the  client instead of the top-level targets 
-metadata file listed in the repository's root metadata.  As is true in all TUF repositories, 
-all targets metadata files are listed in the snapshot file and benefit from the usual 
+it is the top-level targets metadata file by the  client instead of the top-level targets
+metadata file listed in the repository's root metadata.  As is true in all TUF repositories,
+all targets metadata files are listed in the snapshot file and benefit from the usual
 rollback and similar protections provided.
 
 Note that both the name and the key MUST be specified.  If the name
 were permitted to be specified without the key, then the repository
-would be trusted to serve the correct file, without any offline key attesting 
+would be trusted to serve the correct file, without any offline key attesting
 to which keys indicate the targets role.
 
 As such, we add to the [Mechanisms that Assigns Targets to Repositories](https://github.com/theupdateframework/taps/blob/master/tap4.md#mechanism-that-assigns-targets-to-repositories)
@@ -109,29 +120,29 @@ However, additionally, the file name must be specified as this is no longer
 targets.json.
 
 Note that the TUF specification's discussions about metadata storage, writing,
-and retrieval are not changed by this TAP.  The description about how to 
+and retrieval are not changed by this TAP.  The description about how to
 (optionally) write consistent snapshots is not changed by this TAP.  Consistent
-snapshots already require versioned metadata to be available for all targets metadata 
-files.  All targets metadata files (top-level and otherwise) are also stored in the 
+snapshots already require versioned metadata to be available for all targets metadata
+files.  All targets metadata files (top-level and otherwise) are also stored in the
 same METAPATH location listed in snapshot.json.
 
 The changes in the client application workflow are fairly minor from this
-TAP.  Steps 4.0 and 4.4.0 should refer to the specified target's metadata file instead 
+TAP.  Steps 4.0 and 4.4.0 should refer to the specified target's metadata file instead
 of the top-level targets metadata file.  Additionally, instead of verifying the targets metadata
-file using the key in the root metadata in step 4.0, verification must use the 
+file using the key in the root metadata in step 4.0, verification must use the
 keys listed in the mapping metadata.
 
 There likely also needs to be a clarity pass throughout to make this potential
 use mode clearer in the specification.
 
-From an operational standpoint, a lost targets key for a delegated target could have been 
-remedied before by the repository but this no longer works.  If the repository delegated to 
-a target from the top-level targets role, that file could be updated if Alice’s key changed or 
+From an operational standpoint, a lost targets key for a delegated target could have been
+remedied before by the repository but this no longer works.  If the repository delegated to
+a target from the top-level targets role, that file could be updated if Alice’s key changed or
 was lost.  However, as the repository’s root role is no longer trusted to provide top-level targets keys, any clients using this
-TAP must take more care because the root metadata may not be used to revoke trust in 
-the targets key.  Thus, a user should take into account the operational difficultly to touch 
+TAP must take more care because the root metadata may not be used to revoke trust in
+the targets key.  Thus, a user should take into account the operational difficultly to touch
 clients in the case of key loss for the top level targets file.  If it is operationally difficult to
-touch the clients, then the client may perhaps use a threshold of offline keys before delegating to 
+touch the clients, then the client may perhaps use a threshold of offline keys before delegating to
 a developer’s key.  [TAP 8](tap8.md) also provides support for cases where the key need to be rotated
 or changed and the key is still accessible to the developer.
 
@@ -139,11 +150,11 @@ or changed and the key is still accessible to the developer.
 # Security Analysis
 
 Our overall belief is that this is a security positive change to TUF.
-The added complexity from this change is fairly small.  The mapping metadata 
-itself already exists in TUF and this TAP merely makes a small addition to 
-parameterize the top-level targets role.  We feel that implementation errors 
-with adding this TAP are unlikely to occur.  However, the ability to better 
-control trust should help users to better secure important operational use 
+The added complexity from this change is fairly small.  The mapping metadata
+itself already exists in TUF and this TAP merely makes a small addition to
+parameterize the top-level targets role.  We feel that implementation errors
+with adding this TAP are unlikely to occur.  However, the ability to better
+control trust should help users to better secure important operational use
 cases.  We are also unaware of plausible scenarios where this feature would
 lead to insecurity due to abuse or misconfiguration except the inability to
 have the root role rotate the targets key.  However, selectively removing this
