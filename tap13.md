@@ -20,17 +20,20 @@ repository are compromised.
 
 # Motivation
 
-In TUF, the root and targets roles on the repository are responsible for
-delegating the correct key to each delegated targets. A third party that controls
+Currently if a user trusts a TUF repository, a compromise of the targets role
+for that repository enables an attacker to install arbitrary malicious software.
+The targets role on the repository is responsible for delegating to the correct
+key for each delegated targets, and so may also arbitrarily replace these keys.
+A third party that controls
 a delegated targets role gives their keys to the delegating role on the
 repository, then has to trust that the repository will correctly list the
-trusted keys for their role. This means that a malicious repository maintainer
-can overwrite delegated keys in order to sign arbitrary software.
+trusted keys for their role. In some cases, the user may wish to reduce trust
+in the repository by maintaining control of key distribution.
 
-In the case of some public repositories, the repository is considered an untrusted
-distribution mechanism, and should not be trusted with this key management.
+For users of some public repositories, the repository is considered an untrusted
+distribution mechanism, and should not be trusted with this key distribution.
 For these repositories, the owner of a delegated targets role needs a mechanism
-to ensure that their users can pin keys.
+to ensure that their users can define and pin keys.
 
 To allow for these untrusted repositories, we propose adding namespaces to TUF
 repositories. That is, if Alice and Bob both use repository X and ask
@@ -46,7 +49,7 @@ roles, such as in the proposed [PyPI Maximum Security Model](https://www.python.
 sign for the targets produced by their projects. A client can curate a list of
 trusted projects which is a subset of the targets on the repository by using
 mapping metadata similar to [TAP 4](tap4.md) to only include roles they trust in their
-targets metadata.  One could imagine that other users (perhaps those at the 
+targets metadata.  One could imagine that other users (perhaps those at the
 same organization) would also like to use the same curated list.  These use
 cases are all supported by this proposal.
 
