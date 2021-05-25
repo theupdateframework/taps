@@ -43,15 +43,20 @@ filtered views of the repository.
 
 These different views could be defined by either different users on the
 repository, made available by the repository administrator, or be created by
-some other third party.  One likely use is to have a repository where the signing
-authority for namespaced collections of targets are delegated to more granular
-roles, such as in the proposed [PyPI Maximum Security Model](https://www.python.org/dev/peps/pep-0480/) where developers
-sign for the targets produced by their projects. A client can curate a list of
-trusted projects which is a subset of the targets on the repository by using
-mapping metadata similar to [TAP 4](tap4.md) to only include roles they trust in their
-targets metadata.  One could imagine that other users (perhaps those at the
-same organization) would also like to use the same curated list.  These use
-cases are all supported by this proposal.
+some other third party. Some likely uses include:
+* Limiting packages on a repository to those that have been signed by their
+developer. For example, in the proposed [PyPI Maximum Security Model](https://www.python.org/dev/peps/pep-0480/),
+packages that are only signed by the repository are listed under the 'unclaimed'
+targets role, while packages that are signed by developers are delegated
+from the 'claimed' targets role. A user may wish to restrict packages to those
+that have been end-to-end signed, and so only use packages delegated from
+'claimed'.
+* Curating a list of verified packages. A company may curate a subset of
+packages available on a container registry that have been validated for use
+by their customers. This curated list may include packages that the company
+signs, as well as trusted third-party dependencies. They may then
+distribute this curated list to users, who want to ensure that only
+validated packages are installed.
 
 There are several reasons why it may be important to let Alice and Bob's view of
 the repository differ.  
@@ -67,8 +72,8 @@ role key, this compromise can enable the attacker full control of Alice's
 namespace.  Alice may want to require that the security team at her company
 still be used to decide which packages to trust.  
 
-Finally, in fact, Alice's company may have dictated that references to a
-specific tag name should all (transparently) refer to a specific in-house
+Finally, in fact, Alice's company may have dictated that references to
+'foo' should all (transparently) refer to a specific in-house
 version, which may not match the result of
 resolving foo using the repository's top-level targets metadata.  
 Instead foo should refer to the name that is resolved using Alice’s
