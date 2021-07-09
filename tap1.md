@@ -133,7 +133,7 @@ Each TAP MUST begin with an RFC 822 style header preamble. The headers MUST appe
 * Type: <Standardization | Informational>
 * Status: <Draft | Active | Accepted | Deferred | Rejected | Withdrawn | Final | Superseded>
 * +Content-Type: <text/markdown>
-* +Requires: <pep numbers>
+* +Requires: <tap numbers>
 * Created: <date created on, in dd-mmm-yyyy format>
 * +TUF-Version: <version number>
 * +Replaces: <TAP number>
@@ -147,7 +147,7 @@ The Created header records the date that the TAP was assigned a number and SHOUL
 
 TAPs will typically have a TUF-Version header which indicates the version of TUF that the feature will be released with. TAPs that refer to processes or recommendations do not require a TUF-Version header.
 
-TAPs MAY have a Requires header, indicating the TAP numbers on which this TAP depends. 
+TAPs MAY have a Requires header, indicating the TAP numbers on which this TAP depends.
 
 TAPs MAY also have a Superseded-By header indicating that it has been rendered obsolete by a later document; the value is the number of the TAP that replaces the current document.  The newer TAP must have a Replaces header containing the number of the TAP that it rendered obsolete.
 
