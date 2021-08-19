@@ -1,5 +1,5 @@
 * TAP:
-* Title: Fulcio for TUF developer key management
+* Title: Ephemeral identity verification using Sigstore's Fulcio for TUF developer key management
 * Version: 0
 * Last-Modified: 27/07/2021
 * Author: Marina Moore, Joshua Lock, Asra Ali, Luke Hinds, Jussi Kukkonen, Trishank Kuppusamy, axel simon
@@ -7,23 +7,22 @@
 * Status: Draft
 * Content-Type: markdown
 * Created: 27/07/2021
-* +TUF-Version:
-* +Post-History:
+* TUF-Version:
 
 # Abstract
-In order to achieve end-to-end software update security, TUF requires developers to sign updates with a private key. However, this has proven challenging for some implementers as developers then have to create, store, and secure these private keys in order to ensure they remain private. This TAP proposes using Sigstore’s Fulcio project to simplify developer key management by allowing developers to use existing accounts to verify their identity when signing updates. Targets roles may delegate to Fulcio identities instead of private keys, and these identities, and the corresponding certificates can be used for verification.
+In order to achieve end-to-end software update security, TUF requires developers to sign updates with a private key. However, this has proven challenging for some implementers as developers then have to create, store, and secure these private keys in order to ensure they remain private. This TAP proposes using Sigstore’s Fulcio project to simplify developer key management by allowing developers to use existing accounts to verify their identity when signing updates. TUF targets roles may delegate to Fulcio identities instead of private keys, and these identities, and the corresponding certificates can be used for verification.
 
 # Motivation
 Developer key management has been a major concern for TUF adoptions, especially for projects with a small number of developers or limited resources. TUF currently requires that every targets metadata signer creates and manages a private key. However, many developers in large TUF adoptions, including PyPI, do not want the extra burden of protecting a private key for use in deployment.
 
-Protecting a private key from loss or compromise is no simple matter. [Several](https://blog.npmjs.org/post/185397814280/plot-to-steal-cryptocurrency-foiled-by-the-npm) [attacks](https://jsoverson.medium.com/how-two-malicious-npm-packages-targeted-sabotaged-one-other-fed7199099c8) on software update systems have been achieved through the use of a compromised key, as securing private keys can be challenging and sometimes expensive (yubikeys etc).  
+Protecting a private key from loss or compromise is no simple matter. [Several](https://blog.npmjs.org/post/185397814280/plot-to-steal-cryptocurrency-foiled-by-the-npm) [attacks](https://jsoverson.medium.com/how-two-malicious-npm-packages-targeted-sabotaged-one-other-fed7199099c8) on software update systems have been achieved through the use of a compromised key, as securing private keys can be challenging and sometimes expensive (using hardware tokens such as Yubikeys etc), especially over a period of time.  
 
 This TAP proposes a way for developers to use their existing OpenID Connect (OIDC) accounts – such as an email account – to verify their identity, so that they do not have to manage any additional keys or passwords.
 
 # Rationale
-In a previous draft of [PEP 480](https://www.python.org/dev/peps/pep-0480/), the authors proposed using [MiniLock](https://www.minilock.io) - a tool which derives ed25519 keys from a user-chosen passphrase –  to simplify developer key management. However, this requires developers to remember a new and additional passphrase for use when uploading packages. Furthermore, the MiniLock project is no longer maintained.
+In a previous draft of [PEP 480](https://www.python.org/dev/peps/pep-0480/), the authors proposed using [MiniLock](https://www.minilock.io) - a tool which derives ed25519 keys from a user-chosen passphrase - to simplify developer key management. However, this requires developers to remember a new and additional passphrase for use when uploading packages. Furthermore, the MiniLock project is [no longer maintained](https://github.com/kaepora/miniLock).
 
-In this TAP, we instead propose use of the Sigstore project. Sigstore has a growing number of adoptions, and provides a simple mechanism for developers to verify their identity using short-lived keys and ad-hoc certificates issued on the basis of OIDC. Sigstore provides two services, Fuclio (a WebPKI) and Rekor (a transparency log). With sigstore, short-lived keys do not need to be secured as they are only valid for a small window. Fulcio certificates and client generated signatures are published to a timestamped transparency log managed by Rekor so that verifiers can ensure that the certificates were valid at the time of the signature.
+In this TAP, we instead propose use of the sigstore project. Sigstore has a growing number of adoptions, and provides a simple mechanism for developers to verify their identity using short-lived keys and ad-hoc certificates issued on the basis of OIDC. Sigstore provides two services, [Fulcio](https://github.com/sigstore/fulcio) (a WebPKI) and [Rekor](https://github.com/sigstore/rekor) (a transparency log). With sigstore, short-lived keys do not need to be secured as they are only valid for a small window of time. Fulcio certificates and client generated signatures are published to a timestamped transparency log managed by Rekor so that verifiers can ensure that the certificates were valid at the time of the signature.
 
 # Specification
 In addition to supporting existing TUF targets delegations, this TAP adds support for delegations to developer email addresses, to be verified by Fulcio. These delegations MAY replace ed25519 keys for developers in order to simplify their key management. Fulcio generates short-lived signing certificates backed by OIDC authentication of a developer’s email address. Because the certificates are short-lived, the developer will not be responsible for protecting this key in the long term and in practice SHOULD discard them immediately after signing. Fulcio certificates are automatically uploaded to the timestamped Rekor transparency log, so repositories and clients can verify that the certificate was valid at the time of signing.
