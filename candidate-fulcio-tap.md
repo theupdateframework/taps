@@ -22,7 +22,7 @@ This TAP proposes a way for developers to use their existing OpenID Connect (OID
 # Rationale
 In a previous draft of [PEP 480](https://www.python.org/dev/peps/pep-0480/), the authors proposed using [MiniLock](https://www.minilock.io) - a tool which derives ed25519 keys from a user-chosen passphrase - to simplify developer key management. However, this requires developers to remember a new and additional passphrase for use when uploading packages. Furthermore, the MiniLock project is [no longer maintained](https://github.com/kaepora/miniLock).
 
-In this TAP, we instead propose use of the sigstore project. Sigstore has a growing number of adoptions, and provides a simple mechanism for developers to verify their identity using short-lived keys and ad-hoc certificates issued on the basis of OIDC. Sigstore provides two services, [Fulcio](https://github.com/sigstore/fulcio) (a WebPKI) and [Rekor](https://github.com/sigstore/rekor) (a transparency log). With sigstore, short-lived keys do not need to be secured as they are only valid for a small window of time. Fulcio certificates and client generated signatures are published to a timestamped transparency log managed by Rekor so that verifiers can ensure that the certificates were valid at the time of the signature.
+In this TAP, we instead propose use of the sigstore project. Sigstore has a growing number of adoptions, and provides a simple mechanism for developers to verify their identity using short-lived keys and ad-hoc certificates issued on the basis of OIDC. Sigstore provides two services, [Fulcio](https://github.com/sigstore/fulcio) (a WebPKI) and [Rekor](https://github.com/sigstore/rekor) (a transparency log). With sigstore, long-term efforts to keep private keys secure are not necessary, as short-lived keys are only valid for a small window of time. Fulcio certificates and client generated signatures are published to a timestamped transparency log managed by Rekor so that verifiers can ensure that the certificates were valid at the time of the signature.
 
 # Specification
 In addition to supporting existing TUF targets delegations, this TAP adds support for delegations to developer email addresses, to be verified by Fulcio. These delegations MAY replace ed25519 keys for developers in order to simplify their key management. Fulcio generates short-lived signing certificates backed by OIDC authentication of a developer’s email address. Because the certificates are short-lived, the developer will not be responsible for protecting this key in the long term and in practice SHOULD discard them immediately after signing. Fulcio certificates are automatically uploaded to the timestamped Rekor transparency log, so repositories and clients can verify that the certificate was valid at the time of signing.
@@ -41,9 +41,9 @@ In order to facilitate use of Fulcio, delegations may list an email address and 
 }
 ```
 
-Where SERVER is the Fulcio server used to generate the certificate, EMAIL is the identity of the party who is authorized to sign, and ISSUER is the OIDC entity used by Fulcio for verification. The client MUST establish trust in the Fulcio server using a trusted channel before using it for verification (see Verification)
+Where SERVER is the Fulcio server used to generate the certificate, EMAIL is the identity of the party who is authorized to sign, and ISSUER is the OIDC entity used by Fulcio for verification. The client MUST establish trust in the Fulcio server using a trusted channel before using it for verification (see Verification).
 
-Using this mechanism, the developer requests a certificate from Fulcio, verifies their identity using OIDC, uses the certificate to sign their targets metadata, and uploads the signed metadata. This signature, and the associated Rekor timestamp obtained by querying the Rekor server, MUST be verified by the repository and MAY be verified by the end user by verifying the certificate through Fulcio and the timestamp through Rekor. The verifier MUST obtain the Fulcio root key using a secure offline method.
+Using this mechanism, the developer requests a certificate from Fulcio, verifies their identity using OIDC, uses the certificate to sign their targets metadata, and uploads the signed metadata. This signature, and the associated Rekor timestamp obtained by querying the Rekor server, MUST be verified by the repository and MAY be verified by the end user by verifying the certificate through Fulcio and the timestamp through Rekor. The verifier MUST obtain the Fulcio root key using a secure offline method prior to verifying the signature and associated certificate.
 
 
 ## Signature format
@@ -71,7 +71,7 @@ In order to sign metadata using Fulcio, a developer would:
 The repository would:
 * automatically perform verification (see below) with Fulcio and the transparency log to ensure that the certificate is current and valid.
 
-Most of these steps SHOULD be done automatically using a tool, to simplify operations for developers.
+Most of these steps SHOULD be done automatically using a tool, to simplify operations for developers and minimise the risk of human errors.
 
 
 ## Verification
@@ -80,7 +80,7 @@ While performing the steps in the [TUF client workflow](https://theupdateframewo
 In addition, the repository MUST, and clients SHOULD additionally query the transparency log to ensure that the Fulcio certificate is valid at the time that it was used.
 
 ## Auditors
-Developers should monitor the TL for certificates associated with their OIDC accounts to look for unauthorized activity. If they see a certificate on the TL that they did not issue, the developer should replace any compromised metadata, and report the compromise to the maintainers of the Fulcio server and any targets metadata owners who delegate to the compromised account.
+Developers should monitor the transparency log (TL) for certificates associated with their OIDC accounts to look for unauthorized activity. If they see a certificate on the TL that they did not issue, the developer should replace any compromised metadata, and report the compromise to the maintainers of the Fulcio server and any targets metadata owners who delegate to the compromised account.
 
 In addition to developer monitoring, the TL should have auditors that watch the log for any suspicious activity. If something bad is found in the TL, then auditors must indicate this to clients to ensure they don’t use bad certificates. Clients SHOULD have a way to ensure that the transparency log has been audited. For example, auditors may upload signed targets metadata to the repository upon valid completion of an audit. Clients can look for the auditor signature on targets metadata before verifying any Fulcio-signed delegated targets. The auditor only signs metadata if all signatures in the TL look good. If the auditor detects a problem, they may revoke the auditor-signed metadata.
 
