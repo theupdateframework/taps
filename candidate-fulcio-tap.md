@@ -28,20 +28,20 @@ In this TAP, we instead propose use of the sigstore project. Sigstore has a grow
 In addition to supporting existing TUF targets delegations, this TAP adds support for delegations to developer email addresses, to be verified by Fulcio. These delegations MAY replace ed25519 keys for developers in order to simplify their key management. Fulcio generates short-lived signing certificates backed by OIDC authentication of a developer’s email address. Because the certificates are short-lived, the developer will not be responsible for protecting this key in the long term and in practice SHOULD discard them immediately after signing. Fulcio certificates are automatically uploaded to the timestamped Rekor transparency log, so repositories and clients can verify that the certificate was valid at the time of signing.
 
 ## Delegation format
-In order to facilitate use of Fulcio, delegations may list an email address and location of a Fulcio server instead of a public key. So, this TAP adds a “sigstore-oidc" keytype for a KEY with the following format:
+In order to facilitate use of Fulcio, delegations may list an OIDC identity, such as an email address, and location of a Fulcio server instead of a public key. So, this TAP adds a “sigstore-oidc" keytype for a KEY with the following format:
 
 ```
 {
   “keytype”: “sigstore-oidc",
   “scheme”: SERVER,
   “keyval”: {
-    “email”: EMAIL,
+    “identity”: IDENTITY,
     “issuer”: ISSUER
   }
 }
 ```
 
-Where SERVER is the Fulcio server used to generate the certificate, EMAIL is the identity of the party who is authorized to sign, and ISSUER is the OIDC entity used by Fulcio for verification. The client MUST establish trust in the Fulcio server using a trusted channel before using it for verification (see Verification).
+Where SERVER is the Fulcio server used to generate the certificate, IDENTITY is the OIDC identity of the party who is authorized to sign, and ISSUER is the OIDC entity used by Fulcio for verification. The client MUST establish trust in the Fulcio server using a trusted channel before using it for verification (see Verification).
 
 Using this mechanism, the developer requests a certificate from Fulcio, verifies their identity using OIDC, uses the certificate to sign their targets metadata, and uploads the signed metadata. This signature, and the associated Rekor timestamp obtained by querying the Rekor server, MUST be verified by the repository and MAY be verified by the end user by verifying the certificate through Fulcio and the timestamp through Rekor. The verifier MUST obtain the Fulcio root key using a secure offline method prior to verifying the signature and associated certificate.
 
