@@ -58,7 +58,7 @@ behavior as intended by the designers of TUF,
 and, most importantly, ensure that an updater is secure against
 the types of attacks and weaknesses listed in
 Section 1.5.2 of the
-[TUF Specification](https://github.com/theupdateframework/tuf/blob/develop/docs/tuf-spec.txt).
+[TUF Specification](https://theupdateframework.github.io/specification/latest/#goals-to-protect-against-specific-attacks).
 
 
 # Rationale
@@ -93,8 +93,8 @@ available so that anyone can use them to test their updater implementation.
 # Specification
 
 The client updater implementation to be tested should operate as described in
-the Client Workflow in Section 5.1 of the
-[TUF Specification](https://github.com/theupdateframework/tuf/blob/develop/docs/tuf-spec.txt).
+the Client Workflow in Section 5 of the
+[TUF Specification](https://theupdateframework.github.io/specification/latest/#detailed-client-workflow).
 Tests will verify this behavior, determining whether or not the updater defends
 against attacks described in Section 1.5.2 of the TUF Specification.
 
