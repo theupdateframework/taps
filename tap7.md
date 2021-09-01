@@ -18,7 +18,7 @@ specification.  At this point, no tool or set of data exists to help developers
 and users affirm
 that an implementation of an update system behaves according to the TUF
 specification. Although the reference implementation contains
-[unit tests](https://github.com/theupdateframework/tuf/tree/develop/tests)
+[unit tests](https://github.com/theupdateframework/python-tuf/tree/develop/tests)
 that verify correct behavior (such as updating metadata in the expected order
 and blocking known updater attacks) these unit tests only work within the
 parameters of the reference implementation. This is problematic due to the
@@ -106,7 +106,7 @@ Tests will attempt endless data attacks, indefinite freeze attacks, replay
 attacks, and a variety of others discussed in the TUF Specification. The full
 listing of conformance tests and expected results will be provided in
 documentation
-[alongside the TUF Specification](https://github.com/theupdateframework/tuf/blob/develop/docs).
+[alongside the TUF Specification](https://github.com/theupdateframework/python-tuf/blob/develop/docs).
 
 
 ## Test Case Elements
@@ -190,7 +190,7 @@ format.
 
 The format of this dictionary of keys represented in `keys.json` is as follows.
 (Note that the individual keys resemble ANYKEY_SCHEMA in the
-[TUF format definitions](https://github.com/theupdateframework/tuf/blob/develop/tuf/formats.py))
+[TUF format definitions](https://github.com/theupdateframework/python-tuf/blob/develop/tuf/formats.py))
   ```javascript
   {
     <rolename_1>: [ // This role should be signed by these two keys:

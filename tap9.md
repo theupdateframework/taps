@@ -11,7 +11,7 @@
 # Abstract
 
 This was started by the discussion about standardizing signatures in [this
-GitHub issue](https://github.com/theupdateframework/tuf/issues/425#issuecomment-300792546)
+GitHub issue](https://github.com/theupdateframework/python-tuf/issues/425#issuecomment-300792546)
 in the main TUF repository. Most of the information and arguments that arose
 from that discussion have been captured in this document.
 
@@ -378,7 +378,7 @@ the TAP would be fully implemented.
 
 The reference implementation incorporates TAP 9
 [here](https://github.com/secure-systems-lab/securesystemslib/pull/48) and
-[here](https://github.com/theupdateframework/tuf/pull/484).
+[here](https://github.com/theupdateframework/python-tuf/pull/484).
 
 # Copyright
 

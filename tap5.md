@@ -60,7 +60,7 @@ files itself.
 In this manner, it can always serve the latest versions of metadata, instead of
 depending on the mirror, which may be more easily compromised, to do so.
 Unfortunately, there is no way to implement this use case using the
-[previous specification](https://github.com/theupdateframework/tuf/blob/70fc8dce367cf09563915afa40cffee524f5b12b/docs/tuf-spec.txt#L766-L776).
+[previous specification](https://github.com/theupdateframework/python-tuf/blob/70fc8dce367cf09563915afa40cffee524f5b12b/docs/tuf-spec.txt#L766-L776).
 
 PyPI can solve the problem, if it is somehow able to specify that the snapshot
 and targets metadata files should be downloaded from the mirror, but that the
@@ -83,7 +83,7 @@ to the root metadata file format.
 ## The previous root metadata file format
 
 In the
-[previous specification](https://github.com/theupdateframework/tuf/blob/70fc8dce367cf09563915afa40cffee524f5b12b/docs/tuf-spec.txt#L766-L776),
+[previous specification](https://github.com/theupdateframework/python-tuf/blob/70fc8dce367cf09563915afa40cffee524f5b12b/docs/tuf-spec.txt#L766-L776),
 there was no list of URLs associated with each top-level role.
 
 ```Javascript
