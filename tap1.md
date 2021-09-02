@@ -158,7 +158,7 @@ TAPs MAY include auxiliary files such as diagrams. These files MUST be named ``t
 # Reporting TAP Bugs, or Submitting TAP Updates
 
 The procedure for reporting a bug, or submitting a TAP update depends on several factors, such as the maturity of the TAP, the preferences of the TAP author, and the nature of the comments.  For Draft or Accepted TAPs, feedback should be via the TAPs [issue tracker](https://github.com/theupdateframework/taps/issues) or as a pull request against the TAP in question.
-Once a TAP has been marked Final, bugs or corrections SHOULD be submitted to the TUF [issue tracker](https://github.com/theupdateframework/tuf/issues) so that changes do not get lost.
+Once a TAP has been marked Final, bugs or corrections SHOULD be submitted to the TUF [issue tracker](https://github.com/theupdateframework/specification/issues) so that changes do not get lost.
 
 # Transferring TAP Ownership
 

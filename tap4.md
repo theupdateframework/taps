@@ -291,7 +291,7 @@ A TUF repository does not need to change in any way to support this TAP.
 
 # Augmented Reference Implementation
 
-Pull Request [#504](https://github.com/theupdateframework/tuf/pull/504)
+Pull Request [#504](https://github.com/theupdateframework/python-tuf/pull/504)
 implements multiple repository consensus on entrusted targets via a map file.
 
 # Copyright

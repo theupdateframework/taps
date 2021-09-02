@@ -70,7 +70,7 @@ file format of targets metadata.
 ## The previous file format of targets metadata
 
 In the [previous
-version](https://github.com/theupdateframework/tuf/blob/70fc8dce367cf09563915afa40cffee524f5b12b/docs/tuf-spec.txt#L766-L776)
+version](https://github.com/theupdateframework/python-tuf/blob/70fc8dce367cf09563915afa40cffee524f5b12b/docs/tuf-spec.txt#L766-L776)
 of the specification, each delegation could specify only a _single_ role as
 required to sign the given set of targets.
 

@@ -300,7 +300,7 @@ compatibility for clients and repositories.
 
 # Augmented Reference Implementation
 
-https://github.com/theupdateframework/tuf/pull/1113/
+https://github.com/theupdateframework/python-tuf/pull/1113/
 TODO: auditor implementation
 
 # Copyright

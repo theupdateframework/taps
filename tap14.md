@@ -585,7 +585,7 @@ in the specification section.
 
 # Augmented Reference Implementation
 
-Semantic Versioning was added to the TUF Reference Implementation in [#914](https://github.com/theupdateframework/tuf/pull/914).
+Semantic Versioning was added to the TUF Reference Implementation in [#914](https://github.com/theupdateframework/python-tuf/pull/914).
 The rest of this proposal has not yet been implemented.
 
 # Copyright

@@ -19,7 +19,7 @@ metadata.
 
 As the TUF specification evolves there are likely to be breaking changes.  For
 example, commit 5d2c8fdc7658a9f7648c38b0c79c0aa09d234fe2 in
-github.com/theupdateframework/tuf removes the "private" field, which would
+github.com/theupdateframework/python-tuf removes the "private" field, which would
 break key ID calculations for older clients. Specifying the specification
 version a repository is operating under allows clients to determine
 whether they are compatible, rather than breaking in undefined ways.
@@ -80,7 +80,7 @@ of concrete types with defined fields to parse retrieved metadata data.
 
 # Augmented Reference Implementation
 
-Pull request [#487](https://github.com/theupdateframework/tuf/pull/487) adds
+Pull request [#487](https://github.com/theupdateframework/python-tuf/pull/487) adds
 "spec_version" to metadata.
 
 # Copyright
