@@ -56,7 +56,7 @@ A signature using a Fulcio key should include the Fulcio certificate for use in 
       “cert”:  CERTIFICATE }
       , ... ]
 ```
-Where CERTIFICATE is a Fulcio signing certificate in PEM format. CERTIFICATE MUST be uploaded to a timestamped transparency log upon creation.
+Where CERTIFICATE is a Fulcio x509 signing certificate in PEM format. CERTIFICATE MUST be uploaded to a timestamped transparency log upon creation.
 
 ## Signing
 In order to sign metadata using Fulcio, a developer would:
@@ -90,7 +90,9 @@ If the bad certificates are due to a compromised Fulcio server, the Fulcio serve
 
 This TAP improves security by eliminating the risk of developers losing their keys if they chose to use Fulcio instead of a traditional public key cryptosystem. However, it adds 2 additional services that may be compromised: the Fulcio server and the transparency log. In this section, we will analyze the impact and recovery in each of these cases.
 
-If the Fulcio server is compromised, it may issue certificates on behalf of any developer who uses Fulcio to verify their identity. However, the Fulcio server is backed by offline keys that are signed by TUF root keys, and so it is possible to recover from any server compromise. Additionally, all Fulcio certificates are published to a transparency log, so auditors will notice if the Fulcio server is misbehaving and indicate this to users, for example through the use of auditor-signed metadata.
+If a developer's OIDC credentials are compromised, the developer should use existing TUF processes for revocation. Specifically they should ask the delegator to replace any metadata that includes the compromised OIDC account.
+
+If the Fulcio server is compromised, it may issue certificates on behalf of any developer who uses Fulcio to verify their identity. However, the Fulcio server is backed by offline keys that are signed by TUF root keys, and so it is possible to recover from any server compromise. Additionally, all Fulcio certificates are published to a transparency log, so auditors will notice if the Fulcio server is misbehaving and indicate this to users, for example through the use of [multi-role delegations](https://github.com/theupdateframework/taps/blob/master/tap3.md) to a threshold of both auditor-signed metadata and developer-signed metadata.
 
 If only the transparency log is compromised, the attacker will not be able to do anything without cooperation from the Fulcio server. However, if the attacker compromises both the Fulcio server and the transparency log, they would be able to issue fake Fulcio certificates that also appear valid on the transparency log. If this happens, developers auditing the transparency log would notice the mis-issued certificates, and the Fulcio server and transparency log could both be recovered using offline root keys. Implementations using this TAP SHOULD ensure that there are active auditors watching the transparency log.
 
