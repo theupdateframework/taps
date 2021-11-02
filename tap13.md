@@ -36,11 +36,12 @@ distribution mechanism, and should not be trusted with this key distribution.
 For these repositories, the owner of a delegated targets role needs a mechanism
 to ensure that their users can define and pin keys.
 
-To allow for these untrusted repositories, we propose adding namespaces to TUF
-repositories. That is, if Alice and Bob both use repository X and ask
-for package foo, they may get different results based on their trusted namespaces.
-This proposal enables clients to restrict the targets they consume to
-filtered views of the repository.  
+To allow for safer use of these untrusted repositories, we propose adding
+namespaces to TUF repositories which enable explicit trust decisions. In This
+mode, if Alice and Bob both use repository X and ask for package foo, they may
+get different results based on their trusted namespaces.
+In summary; this proposal enables clients to restrict the targets they consume
+to filtered views of the repository.  
 
 These different views could be defined by either different users on the
 repository, made available by the repository administrator, or be created by
