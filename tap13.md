@@ -45,14 +45,15 @@ filtered views of the repository.
 These different views could be defined by either different users on the
 repository, made available by the repository administrator, or be created by
 some other third party. Some likely uses include:
-* Limiting packages on a repository to those that have been signed by their
-developer. For example, in the proposed [PyPI Maximum Security Model](https://www.python.org/dev/peps/pep-0480/),
+* **Limiting packages on a repository to those that have been signed by their
+developer.** For example, in the proposed 
+[PyPI Maximum Security Model](https://www.python.org/dev/peps/pep-0480/),
 packages that are only signed by the repository are listed under the 'unclaimed'
 targets role, while packages that are signed by developers are delegated
 from the 'claimed' targets role. A user may wish to restrict packages to those
 that have been end-to-end signed, and so only use packages delegated from
 'claimed'.
-* Curating a list of verified packages. A company may curate a subset of
+* **Curating a list of verified packages.** A company may curate a subset of
 packages available on a container registry that have been validated for use
 by their customers. This curated list may include packages that the company
 signs, as well as trusted third-party dependencies. They may then
