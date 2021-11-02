@@ -11,8 +11,9 @@
 # Abstract
 
 This TAP discusses a means by which different users of the same repository
-may elect to use different, repository-hosted, top-level targets metadata.  This effectively
-enables different namespaces to exist on a repository and also provides
+may elect to use different, repository-hosted, top-level targets metadata.  This
+effectively enables different namespaces to exist on a repository which a client
+may choose to trust -- or not -- in a granular fashion, and also provides
 additional resilience to attack in the case that the root keys on the
 repository are compromised.
 
