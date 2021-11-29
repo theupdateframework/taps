@@ -47,7 +47,7 @@ Using this mechanism, the developer requests a certificate from Fulcio, verifies
 
 
 ## Signature format
-A signature using a Fulcio key should include the Fulcio certificate for use in verification. For this verification, this TAP adds a ‘cert’ field to ‘signatures’. With this field, signatures would look like:
+A signature using a Fulcio key MUST include the Fulcio certificate for use in verification. For this verification, this TAP adds a ‘cert’ field to ‘signatures’. With this field, signatures would look like:
 
 ```
 "signatures" : [
@@ -75,22 +75,22 @@ Most of these steps SHOULD be done automatically using a tool, to simplify opera
 
 
 ## Verification
-While performing the steps in the [TUF client workflow](https://theupdateframework.github.io/specification/latest/#detailed-client-workflow), if the client encounters a signature that uses a Fulcio certificate, the client MUST verify the certificate chain up to SERVER. Additionally, they must ensure that SERVER is a known, trusted Fulcio root. The trusted Fulcio root MUST be communicated to the client using a secure channel before the update process, such as metadata signed by an offline root key or during initial client configuration.
+While performing the steps in the [TUF client workflow](https://theupdateframework.github.io/specification/latest/#detailed-client-workflow), if the client encounters a signature that uses a Fulcio certificate, the client MUST verify the certificate chain up to SERVER. Additionally, they MUST ensure that SERVER is a known, trusted Fulcio root. The trusted Fulcio root MUST be communicated to the client using a secure channel before the update process, such as metadata signed by an offline root key or during initial client configuration.
 
 In addition, the repository MUST, and clients SHOULD additionally query the transparency log to ensure that the Fulcio certificate is valid at the time that it was used.
 
 ## Auditors
-Developers should monitor the transparency log (TL) for certificates associated with their OIDC accounts to look for unauthorized activity. If they see a certificate on the TL that they did not issue, the developer should replace any compromised metadata, and report the compromise to the maintainers of the Fulcio server and any targets metadata owners who delegate to the compromised account.
+Developers SHOULD monitor the transparency log (TL) for certificates associated with their OIDC accounts to look for unauthorized activity. If they see a certificate on the TL that they did not issue, the developer SHOULD replace any compromised metadata, and report the compromise to the maintainers of the Fulcio server and any targets metadata owners who delegate to the compromised account.
 
-In addition to developer monitoring, the TL should have auditors that watch the log for any suspicious activity. If something bad is found in the TL, then auditors must indicate this to clients to ensure they don’t use bad certificates. Clients SHOULD have a way to ensure that the transparency log has been audited. For example, auditors may upload signed targets metadata to the repository upon valid completion of an audit. Clients can look for the auditor signature on targets metadata using multi-role delegations before verifying any Fulcio-signed delegated targets. The auditor only signs metadata if all signatures in the TL look good. If the auditor detects a problem, they may revoke the auditor-signed metadata.
+In addition to developer monitoring, the TL SHOULD have auditors that watch the log for any suspicious activity. If something bad is found in the TL, then auditors MUST indicate this to clients to ensure they don’t use bad certificates. Clients SHOULD have a way to ensure that the transparency log has been audited. For example, auditors may upload signed targets metadata to the repository upon valid completion of an audit. Clients can look for the auditor signature on targets metadata using multi-role delegations before verifying any Fulcio-signed delegated targets. The auditor only signs metadata if all signatures in the TL look good. If the auditor detects a problem, they may revoke the auditor-signed metadata.
 
-If the bad certificates are due to a compromised Fulcio server, the Fulcio server SHOULD be revoked using the root of trust.
+If the bad certificates are due to a compromised Fulcio server, the Fulcio server MUST be revoked using the root of trust.
 
 # Security Analysis
 
 This TAP improves security by eliminating the risk of developers losing their keys if they chose to use Fulcio instead of a traditional public key cryptosystem. However, it adds 2 additional services that may be compromised: the Fulcio server and the Rekor transparency log. In this section, we will analyze the impact and recovery in each of these cases.
 
-If a developer's OIDC credentials are compromised, the developer should use existing TUF processes for revocation. Specifically they should ask the delegator to replace any metadata that includes the compromised OIDC account.
+If a developer's OIDC credentials are compromised, the developer SHOULD use existing TUF processes for revocation. Specifically they SHOULD ask the delegator to replace any metadata that includes the compromised OIDC account.
 
 If the Fulcio server is compromised, it may issue certificates on behalf of any attacker who uses Fulcio to verify their identity. However, the Fulcio server is backed by offline keys that are signed by TUF root keys, and so it is possible to recover from any Fulcio server compromise. Additionally, all Fulcio certificates are published to a transparency log, so auditors will notice if the Fulcio server is misbehaving and indicate this to users, for example through the use of [multi-role delegations](https://github.com/theupdateframework/taps/blob/master/tap3.md) to a threshold of both auditor-signed metadata and developer-signed metadata.
 
