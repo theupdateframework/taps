@@ -1,5 +1,5 @@
 * TAP:
-* Title: Ephemeral identity verification using Sigstore's Fulcio for TUF developer key management
+* Title: Ephemeral identity verification using sigstore's Fulcio for TUF developer key management
 * Version: 0
 * Last-Modified: 27/07/2021
 * Author: Marina Moore, Joshua Lock, Asra Ali, Luke Hinds, Jussi Kukkonen, Trishank Kuppusamy, axel simon
@@ -10,17 +10,17 @@
 * TUF-Version:
 
 # Abstract
-In order to achieve end-to-end software update security, TUF requires developers to sign updates with a private key. However, this has proven challenging for some implementers as developers then have to create, store, and secure these private keys in order to ensure they remain private. This TAP proposes using Sigstore’s Fulcio project to simplify developer key management by allowing developers to use existing accounts to verify their identity when signing updates. TUF targets roles may delegate to Fulcio identities instead of private keys, and these identities, and the corresponding certificates can be used for verification.
+In order to achieve end-to-end software update security, TUF requires developers to sign updates with a private key. However, this has proven challenging for some implementers as developers then have to create, store, and secure these private keys in order to ensure they remain private. This TAP proposes using sigstore’s Fulcio project to simplify developer key management by allowing developers to use existing accounts to verify their identity when signing updates. TUF "targets" roles may delegate to Fulcio identities instead of private keys, and these identities (and the corresponding certificates) may be used for verification.
 
 # Motivation
-Developer key management has been a major concern for TUF adoptions, especially for projects with a small number of developers or limited resources. TUF currently requires that every targets metadata signer creates and manages a private key. However, many developers in large TUF adoptions, including PyPI, do not want the extra burden of protecting a private key for use in deployment.
+Developer key management has been a major concern for TUF adoptions, especially for projects with a small number of developers or limited resources. TUF currently requires that every targets metadata signer creates and manages a private key. However, many developers in large TUF adoptions, including the Python Package Index (PyPI), do not want the extra burden of having to protect a private key for use in deployment.
 
 Protecting a private key from loss or compromise is no simple matter. [Several](https://blog.npmjs.org/post/185397814280/plot-to-steal-cryptocurrency-foiled-by-the-npm) [attacks](https://jsoverson.medium.com/how-two-malicious-npm-packages-targeted-sabotaged-one-other-fed7199099c8) on software update systems have been achieved through the use of a compromised key, as securing private keys can be challenging and sometimes expensive (using hardware tokens such as Yubikeys etc), especially over a period of time.  
 
 This TAP proposes a way for developers to use their existing OpenID Connect (OIDC) accounts – such as an email account – to verify their identity, so that they do not have to manage any additional keys or passwords.
 
 # Rationale
-In a previous draft of [PEP 480](https://www.python.org/dev/peps/pep-0480/), the authors proposed using [MiniLock](https://www.minilock.io) - a tool which derives ed25519 keys from a user-chosen passphrase - to simplify developer key management. However, this requires developers to remember a new and additional passphrase for use when uploading packages. Furthermore, the MiniLock project is [no longer maintained](https://github.com/kaepora/miniLock).
+In a previous draft of [PEP 480](https://www.python.org/dev/peps/pep-0480/), the authors proposed using [MiniLock](https://www.minilock.io) – a tool which derives ed25519 keys from a user-chosen passphrase – to simplify developer key management. However, this requires developers to remember a new and additional passphrase for use when uploading packages. Furthermore, the MiniLock project is [no longer maintained](https://github.com/kaepora/miniLock) and has been archived.
 
 In this TAP, we instead propose use of the sigstore project. Sigstore has a growing number of adoptions, and provides a simple mechanism for developers to verify their identity using short-lived keys and ad-hoc certificates issued on the basis of OIDC. Sigstore provides two services, [Fulcio](https://github.com/sigstore/fulcio) (a WebPKI) and [Rekor](https://github.com/sigstore/rekor) (a transparency log). With sigstore, long-term efforts to keep private keys secure are not necessary, as short-lived keys are only valid for a small window of time. Fulcio certificates and client generated signatures are published to a timestamped transparency log managed by Rekor so that verifiers can ensure that the certificates were valid at the time of the signature.
 
@@ -28,7 +28,7 @@ In this TAP, we instead propose use of the sigstore project. Sigstore has a grow
 In addition to supporting existing TUF targets delegations, this TAP adds support for delegations to developer email addresses, to be verified by Fulcio. These delegations MAY replace ed25519 keys for developers in order to simplify their key management. Fulcio generates short-lived signing certificates backed by OIDC authentication of a developer’s email address. Because the certificates are short-lived, the developer will not be responsible for protecting this key in the long term and in practice SHOULD discard them immediately after signing. Fulcio certificates are automatically uploaded to the timestamped Rekor transparency log, so repositories and clients can verify that the certificate was valid at the time of signing.
 
 ## Delegation format
-In order to facilitate use of Fulcio, delegations may list an OIDC identity, such as an email address, and location of a Fulcio server instead of a public key. So, this TAP adds a “sigstore-oidc" keytype for a KEY with the following format:
+In order to facilitate use of Fulcio, delegations may list an OIDC identity, such as an email address, and location of a Fulcio server instead of a public key. To do so, this TAP adds a “sigstore-oidc" keytype for a KEY with the following format:
 
 ```
 {
@@ -88,11 +88,11 @@ If the bad certificates are due to a compromised Fulcio server, the Fulcio serve
 
 # Security Analysis
 
-This TAP improves security by eliminating the risk of developers losing their keys if they chose to use Fulcio instead of a traditional public key cryptosystem. However, it adds 2 additional services that may be compromised: the Fulcio server and the transparency log. In this section, we will analyze the impact and recovery in each of these cases.
+This TAP improves security by eliminating the risk of developers losing their keys if they chose to use Fulcio instead of a traditional public key cryptosystem. However, it adds 2 additional services that may be compromised: the Fulcio server and the Rekor transparency log. In this section, we will analyze the impact and recovery in each of these cases.
 
 If a developer's OIDC credentials are compromised, the developer should use existing TUF processes for revocation. Specifically they should ask the delegator to replace any metadata that includes the compromised OIDC account.
 
-If the Fulcio server is compromised, it may issue certificates on behalf of any developer who uses Fulcio to verify their identity. However, the Fulcio server is backed by offline keys that are signed by TUF root keys, and so it is possible to recover from any server compromise. Additionally, all Fulcio certificates are published to a transparency log, so auditors will notice if the Fulcio server is misbehaving and indicate this to users, for example through the use of [multi-role delegations](https://github.com/theupdateframework/taps/blob/master/tap3.md) to a threshold of both auditor-signed metadata and developer-signed metadata.
+If the Fulcio server is compromised, it may issue certificates on behalf of any attacker who uses Fulcio to verify their identity. However, the Fulcio server is backed by offline keys that are signed by TUF root keys, and so it is possible to recover from any Fulcio server compromise. Additionally, all Fulcio certificates are published to a transparency log, so auditors will notice if the Fulcio server is misbehaving and indicate this to users, for example through the use of [multi-role delegations](https://github.com/theupdateframework/taps/blob/master/tap3.md) to a threshold of both auditor-signed metadata and developer-signed metadata.
 
 If only the transparency log is compromised, the attacker will not be able to do anything without cooperation from the Fulcio server. However, if the attacker compromises both the Fulcio server and the transparency log, they would be able to issue fake Fulcio certificates that also appear valid on the transparency log. If this happens, developers auditing the transparency log would notice the mis-issued certificates, and the Fulcio server and transparency log could both be recovered using offline root keys. Implementations using this TAP SHOULD ensure that there are active auditors watching the transparency log.
 
