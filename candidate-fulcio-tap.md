@@ -77,7 +77,7 @@ Most of these steps SHOULD be done automatically using a tool, to simplify opera
 ## Verification
 While performing the steps in the [TUF client workflow](https://theupdateframework.github.io/specification/latest/#detailed-client-workflow), if the client encounters a signature that uses a Fulcio certificate, the client MUST verify the certificate chain up to SERVER. Additionally, they MUST ensure that SERVER is a known, trusted Fulcio root. The trusted Fulcio root MUST be communicated to the client using a secure channel before the update process, such as metadata signed by an offline root key or during initial client configuration.
 
-In addition, the repository MUST, and clients SHOULD additionally query the transparency log to ensure that the Fulcio certificate is valid at the time that it was used.
+In addition, the repository MUST, and clients SHOULD additionally query the transparency log to ensure that the Fulcio certificate is valid at the time that it was used. This may be done by directly querying the transparency log or, in cases where online verification is not possible, via the use of stapled inclusion proofs, evidence gathered by the signer from the log and presented alongside the software and signature.
 
 ## Auditors
 Developers SHOULD monitor the transparency log (TL) for certificates associated with their OIDC accounts to look for unauthorized activity. If they see a certificate on the TL that they did not issue, the developer SHOULD replace any compromised metadata, and report the compromise to the maintainers of the Fulcio server and any targets metadata owners who delegate to the compromised account.
