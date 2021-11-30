@@ -251,3 +251,7 @@ would happen if one or both of them supports succinct_hash_delegations.
 
 As you can see, if Alice supports succinct_hash_delegations and Bob
 does not, Bob will not be able to verify J.
+
+# Augmented Reference Implementation
+
+https://github.com/theupdateframework/python-tuf/pull/1106
