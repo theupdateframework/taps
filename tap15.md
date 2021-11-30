@@ -177,12 +177,12 @@ With the addition of succinct hashed bins, the delegation will contain:
        ("name": ROLENAME,)
        "keyids" : [ KEYID, ... ] ,
        "threshold" : THRESHOLD,
-       ("path_hash_prefixes" : [ HEX_DIGEST, ... ] |
-       ("succinct_hash_delegations" : {
+       ("path_hash_prefixes" : [ HEX_DIGEST, ... ], |
+       "paths" : [ PATHPATTERN, ... ], |
+       "succinct_hash_delegations" : {
          "delegation_hash_prefix_len" : BIT_LENGTH,
          "bin_name_prefix" : NAME_PREFIX
        })
-        "paths" : [ PATHPATTERN, ... ]),
        "terminating": TERMINATING,
    }, ... ]
  }
