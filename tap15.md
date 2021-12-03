@@ -157,10 +157,8 @@ NAME_PREFIX-COUNT where COUNT is a hexadecimal value between 0 and
 `succinct_hash_delegations` field is present in a delegation, the `name`
 field will not be used as a rolename, and so is not required.
 
-The `succinct_hash_delegations` will be prioritized over
-`path_hash_prefixes`. If both of these fields appear in a delegation,
-the `path_hash_prefixes` MUST be ignored in favor of the
-`succinct_hash_delegations`. If a user wishes to use both of these
+Only one of `succinct_hash_delegations`, `path_hash_prefixes`, or `paths`
+may be specified. If a user wishes to use more than one of these
 fields, they may do so in separate delegations.
 
 If a delegation contains a succinct hash delegation, all metadata
