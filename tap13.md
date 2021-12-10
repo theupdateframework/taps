@@ -153,10 +153,10 @@ file could be updated by the top-level targets role if Alice’s key changed or 
 However, as the repository’s root role is no longer trusted to provide top-level targets keys
 and different clients may have different top-level targets keys, any clients using this
 TAP must take more care.  Thus, one should take into account the operational difficultly to touch
-clients in the case of key loss or compromise for the top-level targets file.  If it is 
+clients in the case of key loss or compromise for the top-level targets metadata file.  If it is 
 operationally difficult to touch the clients, then the client may perhaps use a threshold of 
 offline keys before delegating to a developer’s key.  [TAP 8](tap8.md) also provides support for 
-cases where the key need to be rotated or changed and the key is still accessible to the developer.
+cases where the key needs to be rotated or changed and the key is still accessible to the developer.
 
 
 # Security Analysis
