@@ -175,12 +175,12 @@ With the addition of succinct hashed bins, the delegation will contain:
        ("name": ROLENAME,)
        "keyids" : [ KEYID, ... ] ,
        "threshold" : THRESHOLD,
-       ("path_hash_prefixes" : [ HEX_DIGEST, ... ] |
-       ("succinct_hash_delegations" : {
+       ("path_hash_prefixes" : [ HEX_DIGEST, ... ], |
+       "paths" : [ PATHPATTERN, ... ], |
+       "succinct_hash_delegations" : {
          "delegation_hash_prefix_len" : BIT_LENGTH,
          "bin_name_prefix" : NAME_PREFIX
        })
-        "paths" : [ PATHPATTERN, ... ]),
        "terminating": TERMINATING,
    }, ... ]
  }
@@ -249,3 +249,7 @@ would happen if one or both of them supports succinct_hash_delegations.
 
 As you can see, if Alice supports succinct_hash_delegations and Bob
 does not, Bob will not be able to verify J.
+
+# Augmented Reference Implementation
+
+https://github.com/theupdateframework/python-tuf/pull/1106
