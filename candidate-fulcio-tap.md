@@ -105,7 +105,7 @@ Clients that do not recognize Fulcio certs will not be able to validate signatur
 
 # Augmented Reference Implementation
 
-TODO
+The pull request [#181](https://github.com/theupdateframework/go-tuf/pull/181) in go-tuf adds this feature.
 
 # Copyright
 This document has been placed in the public domain.
