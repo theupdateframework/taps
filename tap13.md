@@ -37,7 +37,7 @@ For these repositories, the owner of a delegated targets role needs a mechanism
 to ensure that their users can define and pin keys.
 
 To allow for safer use of these untrusted repositories, we propose adding
-namespaces to TUF repositories which enable explicit trust decisions. In This
+namespaces to TUF repositories which enable explicit trust decisions. In this
 mode, if Alice and Bob both use repository X and ask for package foo, they may
 get different results based on their trusted namespaces.
 In summary; this proposal enables clients to restrict the targets they consume
@@ -47,7 +47,7 @@ These different views could be defined by either different users on the
 repository, made available by the repository administrator, or be created by
 some other third party. Some likely uses include:
 * **Limiting packages on a repository to those that have been signed by their
-developer.** For example, in the proposed 
+developer.** For example, in the proposed
 [PyPI Maximum Security Model](https://www.python.org/dev/peps/pep-0480/),
 packages that are only signed by the repository are listed under the 'unclaimed'
 targets role, while packages that are signed by developers are delegated
@@ -111,10 +111,10 @@ match with Alice's in this case.
 
 # Specification
 
-In order to support this situation, we propose a change to the mapping
+In order to support this situation, we propose a new type of mapping
 metadata to enable the name and key(s) for a targets metadata file to be specified.
 This targets metadata file will be uploaded to the repository and will be used as though
-it is the top-level targets metadata file by the  client instead of the top-level targets
+it is the top-level targets metadata file by the client instead of the top-level targets
 metadata file listed in the repository's root metadata.  As is true in all TUF repositories,
 all targets metadata files are listed in the snapshot file and benefit from the usual
 rollback and similar protections provided.
@@ -148,14 +148,14 @@ use mode clearer in the specification.
 
 From an operational standpoint, a lost targets key for a delegated target could have been
 remedied before by the repository but this no longer works in every case.  For example,
-previously if the repository delegated to a target from the top-level targets role, that 
+previously if the repository delegated to a target from the top-level targets role, that
 file could be updated by the top-level targets role if Alice’s key changed or was lost.  
 However, as the repository’s root role is no longer trusted to provide top-level targets keys
 and different clients may have different top-level targets keys, any clients using this
 TAP must take more care.  Thus, one should take into account the operational difficultly to touch
-clients in the case of key loss or compromise for the top-level targets metadata file.  If it is 
-operationally difficult to touch the clients, then the client may perhaps use a threshold of 
-offline keys before delegating to a developer’s key.  [TAP 8](tap8.md) also provides support for 
+clients in the case of key loss or compromise for the top-level targets metadata file.  If it is
+operationally difficult to touch the clients, then the client may perhaps use a threshold of
+offline keys before delegating to a developer’s key.  [TAP 8](tap8.md) also provides support for
 cases where the key needs to be rotated or changed and the key is still accessible to the developer.
 
 
