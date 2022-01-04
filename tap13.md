@@ -127,6 +127,7 @@ to which keys indicate the targets role. The resulting metadata will look like:
 ```
 {
  "targets_rolename": ROLENAME,
+ "threshold": THRESHOLD,
  "keys":{
   KEYID : KEY,
   ...
