@@ -122,7 +122,17 @@ rollback and similar protections provided.
 Note that both the name and the key MUST be specified.  If the name
 were permitted to be specified without the key, then the repository
 would be trusted to serve the correct file, without any offline key attesting
-to which keys indicate the targets role.
+to which keys indicate the targets role. The resulting metadata will look like:
+
+```
+{
+ "targets_rolename": ROLENAME,
+ "keys":{
+  KEYID : KEY,
+  ...
+ }
+}
+```
 
 As such, we add to the [Mechanisms that Assigns Targets to Repositories](https://github.com/theupdateframework/taps/blob/master/tap4.md#mechanism-that-assigns-targets-to-repositories)
 support for a reference to the targets file in an identical way to the
@@ -158,6 +168,12 @@ operationally difficult to touch the clients, then the client may perhaps use a 
 offline keys before delegating to a developer’s key.  [TAP 8](tap8.md) also provides support for
 cases where the key needs to be rotated or changed and the key is still accessible to the developer.
 
+## Interaction with TAP 4
+
+If a client is using TAP 4 to provide mapping metadata to multiple repositories,
+the TAP 13 targets mapping metadata will be applied to all repositories. This
+means that the targets metadata listed in the targets mapping metadata must
+be present on all repositories listed in TAP 4.
 
 # Security Analysis
 
