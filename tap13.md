@@ -172,9 +172,27 @@ cases where the key needs to be rotated or changed and the key is still accessib
 ## Interaction with TAP 4
 
 If a client is using TAP 4 to provide mapping metadata to multiple repositories,
-the TAP 13 targets mapping metadata will be applied to all repositories. This
-means that the targets metadata listed in the targets mapping metadata must
-be present on all repositories listed in TAP 4.
+they MAY provide a TAP 13 targets mapping for each repository.
+An optional `target-mapping` field will be added to TAP 4 to provide this mapping
+when TAP 13 is used. This field will contain:
+
+```
+"target-mapping": {
+   "repositories": [REPOSITORY_NAME, ...],
+   "targets_rolename": ROLENAME,
+   "threshold": THRESHOLD,
+   "keys":{
+      KEYID : KEY,
+      ...
+   }
+}
+```
+
+Where `REPOSITORY_NAME` is the name of the target repository defined in TAP 4,
+and the other fields are as described above.
+
+If a client is not using TAP 4, the targets mapping may instead be in a separate
+metadata file as described above.
 
 # Security Analysis
 
