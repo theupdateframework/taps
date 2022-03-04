@@ -272,7 +272,7 @@ SHA2-256 to calculate keyids.
 
 # Augmented Reference Implementation
 
-TODO
+[python-tuf 1.0](https://github.com/theupdateframework/python-tuf/releases/tag/v1.0.0) does not calculate keyids using the hash algorithm.
 
 # Copyright
 
