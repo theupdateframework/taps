@@ -22,10 +22,10 @@ This TAP proposes a way for developers to use their existing OpenID Connect (OID
 # Rationale
 In a previous draft of [PEP 480](https://www.python.org/dev/peps/pep-0480/), the authors proposed using [MiniLock](https://www.minilock.io) – a tool which derives ed25519 keys from a user-chosen passphrase – to simplify developer key management. However, this requires developers to remember a new and additional passphrase for use when uploading packages. Furthermore, the MiniLock project is [no longer maintained](https://github.com/kaepora/miniLock) and has been archived.
 
-In this TAP, we instead propose use of the sigstore project. Sigstore has a growing number of adoptions, and provides a simple mechanism for developers to verify their identity using short-lived keys and ad-hoc certificates issued on the basis of OIDC. Sigstore provides two services, [Fulcio](https://github.com/sigstore/fulcio) (a WebPKI) and [Rekor](https://github.com/sigstore/rekor) (a transparency log). With sigstore, long-term efforts to keep private keys secure are not necessary, as short-lived keys are only valid for a small window of time. Fulcio certificates and client generated signatures are published to a timestamped transparency log managed by Rekor so that verifiers can ensure that the certificates were valid at the time of the signature.
+In this TAP, we instead propose use of the sigstore project. Sigstore has a growing number of adoptions, and provides a simple mechanism for developers to verify their identity using short-lived keys and ad-hoc certificates issued on the basis of OIDC. Sigstore provides a few services, including [Fulcio](https://github.com/sigstore/fulcio) (a WebPKI) and [Rekor](https://github.com/sigstore/rekor) (a transparency log). With sigstore, long-term efforts to keep private keys secure are not necessary, as short-lived keys are only valid for a small window of time. Fulcio certificates and client generated signatures are published to a timestamped transparency log managed by Rekor so that verifiers can ensure that the certificates were valid at the time of the signature.
 
 # Specification
-In addition to supporting existing TUF targets delegations, this TAP adds support for delegations to developer email addresses, to be verified by Fulcio. These delegations MAY replace ed25519 keys for developers in order to simplify their key management. Fulcio generates short-lived signing certificates backed by OIDC authentication of a developer’s email address. Because the certificates are short-lived, the developer will not be responsible for protecting this key in the long term and in practice SHOULD discard them immediately after signing. Fulcio certificates are automatically uploaded to the timestamped Rekor transparency log, so repositories and clients can verify that the certificate was valid at the time of signing.
+In addition to supporting existing TUF targets delegations, this TAP adds support for delegations to developer email addresses, to be verified by Fulcio. These delegations MAY replace public keys for developers (such as ed25519 keys) in order to simplify their key management. Fulcio generates short-lived signing certificates backed by OIDC authentication of a developer’s email address. Because the certificates are short-lived, the developer will not be responsible for protecting this key in the long term and in practice SHOULD discard them immediately after signing. Fulcio certificates are automatically uploaded to the timestamped Rekor transparency log, so repositories and clients can verify that the certificate was valid at the time of signing.
 
 ## Delegation format
 In order to facilitate use of Fulcio, delegations may list an OIDC identity, such as an email address, and location of a Fulcio server instead of a public key. To do so, this TAP adds a “sigstore-oidc" keytype for a KEY with the following format:
@@ -33,17 +33,18 @@ In order to facilitate use of Fulcio, delegations may list an OIDC identity, suc
 ```
 {
   “keytype”: “sigstore-oidc",
-  “scheme”: SERVER,
+  “scheme”: "Fulcio",
   “keyval”: {
     “identity”: IDENTITY,
-    “issuer”: ISSUER
+    “issuer”: ISSUER,
+    "root-cert": ROOT_CERTIFICATE
   }
 }
 ```
 
-Where SERVER is the Fulcio server used to generate the certificate, IDENTITY is the OIDC identity of the party who is authorized to sign, and ISSUER is the OIDC entity used by Fulcio for verification. The client MUST establish trust in the Fulcio server using a trusted channel before using it for verification (see Verification).
+Where IDENTITY is the OIDC identity of the party who is authorized to sign, ISSUER is the OIDC entity used by Fulcio for verification, and ROOT_CERTIFICATE is the root certificate for this Fulcio server.
 
-Using this mechanism, the developer requests a certificate from Fulcio, verifies their identity using OIDC, uses the certificate to sign their targets metadata, and uploads the signed metadata. This signature, and the associated Rekor timestamp obtained by querying the Rekor server, MUST be verified by the repository and MAY be verified by the end user by verifying the certificate through Fulcio and the timestamp through Rekor. The verifier MUST obtain the Fulcio and Rekor root keys using a secure offline method prior to verifying the signature and associated certificate.
+Using this mechanism, the developer requests a certificate from Fulcio, verifies their identity using OIDC, uses the certificate to sign their targets metadata, and uploads the signed metadata. This signature, and the associated Rekor timestamp obtained by querying the Rekor server, MUST be verified by the repository and MAY be verified by the end user by verifying the certificate through Fulcio and the timestamp through Rekor. The verifier MUST obtain the Rekor root keys using a secure offline method prior to verifying the signature and associated certificate.
 
 
 ## Signature format
@@ -75,7 +76,7 @@ Most of these steps SHOULD be done automatically using a tool, to simplify opera
 
 
 ## Verification
-While performing the steps in the [TUF client workflow](https://theupdateframework.github.io/specification/latest/#detailed-client-workflow), if the client encounters a signature that uses a Fulcio certificate, the client MUST verify the certificate chain up to SERVER. Additionally, they MUST ensure that SERVER is a known, trusted Fulcio root. The trusted Fulcio root MUST be communicated to the client using a secure channel before the update process, such as metadata signed by an offline root key or during initial client configuration.
+While performing the steps in the [TUF client workflow](https://theupdateframework.github.io/specification/latest/#detailed-client-workflow), if the client encounters a signature that uses a Fulcio certificate, the client MUST verify the certificate chain up to ROOT_CERTIFICATE.
 
 In addition, the repository MUST, and clients SHOULD additionally query the Rekor transparency log to ensure that the Fulcio certificate is valid at the time that it was used. This may be done by directly querying the transparency log or, in cases where online verification is not possible, via the use of stapled inclusion proofs, evidence gathered by the signer from the log and presented alongside the software and signature. Verification material for these stapled inclusion proofs MUST be distributed out of band alongside the Fulcio and Rekor roots. Documentation about querying Rekor is available [here](https://docs.sigstore.dev/rekor/CLI).
 
