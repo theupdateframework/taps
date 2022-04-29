@@ -10,11 +10,11 @@
 * [TAP 9: Mandatory metadata signing schemes](tap9.md)
 * [TAP 10: Remove native support for compressed metadata](tap10.md)
 * [TAP 11: Using POUFs for Interoperability](tap11.md)
+* [TAP 12: Improving keyid flexibility](tap12.md)
 
 ## Draft
 
 * [TAP 8: Key rotation and explicit self-revocation](tap8.md)
-* [TAP 12: Improving keyid flexibility](tap12.md)
 * [TAP 13: User Selection of the Top-Level Target Files Through Mapping Metadata](tap13.md)
 * [TAP 14: Managing TUF Versions](tap14.md)
 * [TAP 15: Succinct hashed bin delegations](tap15.md)

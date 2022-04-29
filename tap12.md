@@ -3,7 +3,7 @@
 * Version: 1.0.0
 * Last-Modified: 09-04-2020
 * Author: Marina Moore
-* Status: Draft
+* Status: Accepted
 * Content-Type: markdown
 * Created: 18-03-2020
 * TUF-Version: 1.1.0
