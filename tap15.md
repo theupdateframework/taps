@@ -1,7 +1,7 @@
 * TAP: 15
 * Title: Succinct hashed bin delegations
 * Version: 1
-* Last-Modified: 06-07-2020
+* Last-Modified: 04-05-2022
 * Author: Marina Moore, Justin Cappos
 * Status: Draft
 * Created: 23-06-2020
@@ -121,21 +121,29 @@ calculated, see [this spreadsheet](https://docs.google.com/spreadsheets/d/10AKDs
 
 # Specification
 
-This TAP adds the following extension to delegations:
+This TAP extends delegations by adding a `succinct_roles` field
+that includes the following:
 
 ```
-("succinct_hash_delegations" : {
-  "delegation_hash_prefix_len" : BIT_LENGTH,
-  "bin_name_prefix" : NAME_PREFIX
-})
+"succinct_roles" : {
+       "keyids" : [ KEYID, ... ] ,
+       "threshold" : THRESHOLD,
+       "prefix_bit_length": BIT_LENGTH,
+       "name_prefix": NAME_PREFIX,
+   }
 
 ```
+
 Where 2^BIT_LENGTH is the number of bins. BIT_LENGTH must be an
 integer between 1 and 32 (inclusive).
 
+KEYID and THRESHOLD have the same definitions as in
+previous delegations.
+
 When a delegation contains this field, it represents delegations to
-2^BIT_LENGTH bins that use the keyid, threshold, path, and termination
-status from this delegation. The path_hash_prefixes and name for each
+2^BIT_LENGTH bins that use the included keyids and threshold. All
+succinct hashed bin delegations will be terminating. The
+path_hash_prefixes and name for each
 bin will be determined using the BIT_LENGTH and NAME_PREFIX.
 
 As in the current use of hashed bin delegations, target files will be
@@ -150,16 +158,13 @@ values starting with 000, the second bin would include binary values starting
 with 001, the third 010, then 011, 100, 101, 110, 111.
 
 The rolename of each bin will be determined by the bin number and the
-NAME_PREFIX listed in the `bin_name_prefix` field of the delegation.
+NAME_PREFIX listed in the `name_prefix` field of the delegation.
 The name will be structured as
 NAME_PREFIX-COUNT where COUNT is a hexadecimal value between 0 and
-2^BIT_LENGTH-1 (inclusive) that represents the bin number. If the
-`succinct_hash_delegations` field is present in a delegation, the `name`
-field will not be used as a rolename, and so is not required.
+2^BIT_LENGTH-1 (inclusive) that represents the bin number.
 
-Only one of `succinct_hash_delegations`, `path_hash_prefixes`, or `paths`
-may be specified. If a user wishes to use more than one of these
-fields, they may do so in separate delegations.
+Only one of `succinct_roles` or `roles` may be specified in a
+delegation.
 
 If a delegation contains a succinct hash delegation, all metadata
 files represented by this delegation must exist on the repository,
@@ -168,23 +173,32 @@ files should be uploaded before the metadata that delegates to them.
 With the addition of succinct hashed bins, the delegation will contain:
 
 ```
-{ "keys" : {
-       KEYID : KEY,
-       ... },
-   "roles" : [{
-       ("name": ROLENAME,)
-       "keyids" : [ KEYID, ... ] ,
-       "threshold" : THRESHOLD,
-       ("path_hash_prefixes" : [ HEX_DIGEST, ... ], |
-       "paths" : [ PATHPATTERN, ... ], |
-       "succinct_hash_delegations" : {
-         "delegation_hash_prefix_len" : BIT_LENGTH,
-         "bin_name_prefix" : NAME_PREFIX
-       })
-       "terminating": TERMINATING,
-   }, ... ]
- }
+{
+  "keys" : {
+      KEYID : KEY,
+      ...
+  },
+  "roles" : [
+    {
+      "name": ROLENAME,
+      "keyids" : [ KEYID, ... ] ,
+      "threshold" : THRESHOLD,
+      ("path_hash_prefixes" : [ HEX_DIGEST, ... ] |
+      "paths" : [ PATHPATTERN, ... ]),
+      "terminating": TERMINATING,
+    },
+    ...
+  ],
+  "succinct_roles" : {
+         "keyids" : [ KEYID, ... ] ,
+         "threshold" : THRESHOLD,
+         "prefix_bit_length": BIT_LENGTH,
+         "name_prefix": NAME_PREFIX,
+     },
+}
  ```
+
+ Eventually, the `path_hash_prefixes` field in `roles` MAY be deprecated in favor of `succinct_roles`, but it may be kept for backwards compatibility.
 
  Using succinct hashed bin delegations, the delegating metadata from the
  motivating example will contain:
@@ -193,14 +207,11 @@ With the addition of succinct hashed bins, the delegation will contain:
  "delegations":{ "keys" : {
         abc123 : abcdef123456,
         },
-    "roles" : [{
+    "succinct_roles" : {
         "keyids" : [ abc123 ] ,
-        "succinct_hash_delegations" : {
-          "delegation_hash_prefix_len" : 16,
-          "bin_name_prefix" : alice.hbd-
-        },
         "threshold" : 1,
-        "terminating": false,
+        "prefix_bit_length": 16,
+        "name_prefix" : "alice.hbd-",
     },
   }
  </code></pre>
