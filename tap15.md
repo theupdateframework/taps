@@ -164,7 +164,7 @@ NAME_PREFIX-COUNT where COUNT is a hexadecimal value between 0 and
 2^BIT_LENGTH-1 (inclusive) that represents the bin number.
 
 Only one of `succinct_roles` or `roles` may be specified in a
-delegation.
+delegation. If a role A would like to delegate to both `succinct_roles` S and `roles` R, they may do so through the use of intermediate delegations. A would create namespaced delegations to both B and C. B would then delegate to S using `succinct_roles`, and C would delegate to R using `roles`. An advantage to this approach is that A may decide which of S or R should be prioritized for each package through the ordering of the delegations to B and C.
 
 If a delegation contains a succinct hash delegation, all metadata
 files represented by this delegation must exist on the repository,
