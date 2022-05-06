@@ -142,7 +142,7 @@ previous delegations.
 
 When a delegation contains this field, it represents delegations to
 2^BIT_LENGTH bins that use the included keyids and threshold. All
-succinct hashed bin delegations will be terminating. The
+succinct hashed bin delegations will be non-terminating. The
 path_hash_prefixes and name for each
 bin will be determined using the BIT_LENGTH and NAME_PREFIX.
 
