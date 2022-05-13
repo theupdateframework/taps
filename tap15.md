@@ -128,7 +128,7 @@ that includes the following:
 "succinct_roles" : {
        "keyids" : [ KEYID, ... ] ,
        "threshold" : THRESHOLD,
-       "prefix_bit_length": BIT_LENGTH,
+       "bit_length": BIT_LENGTH,
        "name_prefix": NAME_PREFIX,
    }
 
@@ -192,7 +192,7 @@ With the addition of succinct hashed bins, the delegation will contain:
   "succinct_roles" : {
          "keyids" : [ KEYID, ... ] ,
          "threshold" : THRESHOLD,
-         "prefix_bit_length": BIT_LENGTH,
+         "bit_length": BIT_LENGTH,
          "name_prefix": NAME_PREFIX,
      },
 }
@@ -210,7 +210,7 @@ With the addition of succinct hashed bins, the delegation will contain:
     "succinct_roles" : {
         "keyids" : [ abc123 ] ,
         "threshold" : 1,
-        "prefix_bit_length": 16,
+        "bit_length": 16,
         "name_prefix" : "alice.hbd-",
     },
   }
