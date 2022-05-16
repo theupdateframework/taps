@@ -186,7 +186,7 @@ With the addition of succinct hashed bins, the delegation will contain:
       KEYID : KEY,
       ...
   },
-  "roles" : [
+  ("roles" : [
     {
       "name": ROLENAME,
       "keyids" : [ KEYID, ... ] ,
@@ -196,13 +196,13 @@ With the addition of succinct hashed bins, the delegation will contain:
       "terminating": TERMINATING,
     },
     ...
-  ],
-  "succinct_roles" : {
+  ],)
+  ("succinct_roles" : {
          "keyids" : [ KEYID, ... ] ,
          "threshold" : THRESHOLD,
          "bit_length": BIT_LENGTH,
          "name_prefix": NAME_PREFIX,
-     },
+     },)
 }
  ```
 
