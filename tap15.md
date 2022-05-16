@@ -144,9 +144,7 @@ When a delegation contains this field, it represents delegations to
 2^BIT_LENGTH bins that use the included keyids and threshold. All
 succinct hashed bin delegations will be non-terminating. If a user
 would like succinct delegations to be terminating, they may add the
-terminating flag in either the parent delegation or in the individual bins. The
-path_hash_prefixes and name for each
-bin will be determined using the BIT_LENGTH and NAME_PREFIX.
+terminating flag in either the parent delegation or in the individual bins.
 
 As in the current use of hashed bin delegations, target files will be
 distributed to bins based on the SHA2-256 hash of the target path and
