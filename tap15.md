@@ -141,7 +141,7 @@ KEYID and THRESHOLD have the same definitions as in
 previous delegations.
 
 When a delegation contains this field, it represents delegations to
-2^BIT_LENGTH bins that use the included keyids and threshold. All
+2^BIT_LENGTH bins which all use the specified keyids and threshold. All
 succinct hashed bin delegations will be non-terminating. If a user
 would like succinct delegations to be terminating, they may add the
 terminating flag in either the parent delegation or in the individual bins.
@@ -194,7 +194,7 @@ With the addition of succinct hashed bins, the delegation will contain:
       "terminating": TERMINATING,
     },
     ...
-  ],)
+  ],) |
   ("succinct_roles" : {
          "keyids" : [ KEYID, ... ] ,
          "threshold" : THRESHOLD,
