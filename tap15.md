@@ -194,8 +194,8 @@ With the addition of succinct hashed bins, the delegation will contain:
       "terminating": TERMINATING,
     },
     ...
-  ],) |
-  ("succinct_roles" : {
+  ], |
+  "succinct_roles" : {
          "keyids" : [ KEYID, ... ] ,
          "threshold" : THRESHOLD,
          "bit_length": BIT_LENGTH,
