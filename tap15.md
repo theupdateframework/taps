@@ -161,7 +161,7 @@ The rolename of each bin will be determined by the bin number and the
 NAME_PREFIX listed in the `name_prefix` field of the delegation.
 The name will be structured as
 NAME_PREFIX-COUNT where COUNT is a hexadecimal value between 0 and
-2^BIT_LENGTH-1 (inclusive) that represents the bin number.
+2^BIT_LENGTH-1 (inclusive) that represents the bin number. This value will be zero-padded so that all rolenames will be of the same length.
 
 Only one of `succinct_roles` or `roles` may be specified in a
 delegation. If a role A would like to delegate to both `succinct_roles`
@@ -221,6 +221,8 @@ With the addition of succinct hashed bins, the delegation will contain:
     },
   }
  </code></pre>
+
+ The associated bins will be named `alice.hbd-0000`, `alice.hbd-0001`, ... `alice.hbd-FFFF`.
 
 # Security Analysis
 
