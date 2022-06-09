@@ -254,7 +254,7 @@ other uploaders are not able to use the NAME_PREFIX-\*
 filename for target files.
 
 In order for succinct hashed bin delegations to be used, both the
-delegation and the client must understand the succint_hash_delegations
+delegation and the client must understand the succinct_hash_delegations
 field. Consider a client Bob who wants to download a target J and an
 uploader Alice who is responsible for delegating to J. This is what
 would happen if one or both of them supports succinct_hash_delegations.
@@ -262,7 +262,7 @@ would happen if one or both of them supports succinct_hash_delegations.
 | Parties that support succinct_hash_delegations | Result |
 | --- | --- |
 | Neither Alice nor Bob support succinct_hash_delegations | Alice would not use succinct_hash_delegations to delegate to J, and so Bob would be able to download and verify the target using the existing mechanisms. |
-| Alice supports succint_hash_delegations, Bob does not | Alice may use succinct_hash_delegations to delegate to any of her target files, including J. Bob will download metadata that has the succinct_hash_delegations field and will not be able to find the delegation that points to J. |
+| Alice supports succinct_hash_delegations, Bob does not | Alice may use succinct_hash_delegations to delegate to any of her target files, including J. Bob will download metadata that has the succinct_hash_delegations field and will not be able to find the delegation that points to J. |
 | Bob supports succinct_hash_delegation, Alice does not | Alice will not use succinct_hash_delegations to delegate to J. Bob will not see this field in the targets metadata, and so will look for the delegation using the existing mechanisms |
 | Both Alice and Bob support succinct_hash_delegations | Alice may use succinct_hash_delegations to delegate to her target files, including J. Bob will see the succinct_hash_delegations field in targets metadata and will download the alice.hdb-x bin metadata file that corresponds to J. |
 
