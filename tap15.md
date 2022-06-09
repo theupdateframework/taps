@@ -45,29 +45,37 @@ follows a common pattern.
 This TAP supports the following use case:
 
 Suppose a single targets metadata file contains a very large number of
-delegations or target files. The owner of this targets metadata file wishes to
-reduce the metadata overhead for clients, and so uses hashed bin
-delegations. They will use the same key to sign each bin delegation.
-They would like to list this key a single time in the delegation to
-prevent repetition and a large targets metadata filesize. Currently,
-the delegating metadata will list the keyid for this key in every bin
-delegation, potentially repeating the same 32-bit value thousands of
-times. The delegations in the resulting metadata would
-include:
+delegations or target files. The owner of this targets metadata file
+wishes to reduce the metadata overhead for clients, and so uses hashed
+bin delegations choosing 2,048 as appropriate number of bins.
+Given that hash bin delegation does not aim at partitioning trust for
+different target files, but to reduce metadata overhead, the delegating
+metadata will use the same key and signature threshold for each bin.
+
+Currently, the delegating metadata would list 2,048 role entries, one
+for each bin, containing the same information about the signing key,
+signature threshold, terminating property and role name prefix. The only
+data that differs between these entries are the bin name suffix, which
+is the bin index, and the list of target path hash prefixes served by a
+particular bin. The differing data is bolded in the example below.
+
+This data can be computed by the client, if they have minimal knowledge
+about the desired partitioning scheme. Providing this information in a
+succinct way will further reduce the metadata overhead.
 
 <pre><code>
 "delegations":{ "keys" : {
        "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a": {...}
        },
    "roles" : [{
-       "name": <b><i>alice.hbd</i>-000/b>,
+       "name": alice.hbd-<b>000/b>,
        "keyids" : [ "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a" ] ,
        "threshold" : 1,
        "path_hash_prefixes" : <b>["000", "001"]</b>,
        "terminating": false,
    },
 {
-       "name": <b><i>alice.hbd</i>-001</b>,
+       "name": alice.hbd-<b>001</b>,
        "keyids" : [ "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a" ] ,
        "threshold" : 1,
        "path_hash_prefixes" : <b>["002", "003"]</b>,
@@ -75,7 +83,7 @@ include:
    },
 ...
 {
-       "name": <b><i>alice.hbd</i>-7ff</b>,
+       "name": alice.hbd-<b>7ff</b>,
        "keyids" : [ "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a" ] ,
        "threshold" : 1,
        "path_hash_prefixes" : <b>["ffe", "fff"]</b>,
@@ -84,34 +92,23 @@ include:
  }
 </code></pre>
 
-Every client will then have to download this large delegating metadata
-file. Note that most of the data is the same in each delegation. The
-only data that differs between these delegations are the bolded
-fields, the name and path_hash_prefix. The name has a common prefix
-(in italics), so only differs by a count and the path_hash_prefix is
-generated using the hash algorithm and number of bins.
-
 # Rationale
 
-Hashed bin delegations commonly use the same key for each bin in order
-to allow for automated signing of target files. If the same key is
-used for all bins, this key should only need to be listed once in the
-delegating metadata.
+A succinct description of hash bin delegation in the delegating metadata
+can significantly reduce the client's metadata overhead. This is
+achieved by listing properties common to all bins only once, and by
+providing the necessary information to the client to compute which bin
+is responsible for the desired target and how the corresponding bin
+metadata is named.
 
-Similarly, bins are usually named using a numbering system with a
-common prefix (i.e. alice.hbd-0, alice.hbd-1, …). The delegating
-metadata only needs to describe this naming scheme and the location
-that these metadata files are stored.
-
-The delegating metadata could significantly reduce the client’s
-metadata overhead by providing a succinct description of the keyid and
-prefix instead of repeating these for each delegation. For a repository
-with 50,000,000 target files using the existing hashed bin delegation
-technique, the snapshot and targets metadata overhead would be around
+For a repository with 50,000,000 target files using the existing hashed
+bin delegation technique with a number of bins of 2,048 and 32-bit
+keyids the snapshot and targets metadata overhead would be around
 1,600,000 bytes for each target. Using succinct hashed bin delegations,
 the snapshot and targets metadata overhead for a target can be reduced
 to about 550,000 bytes. For more detail about how these overheads were
-calculated, see [this spreadsheet](https://docs.google.com/spreadsheets/d/10AKDsHsM2mmh45CWCNFxihJ9f-SP6gXYv7WcWpt-fDQ/edit#gid=0).
+calculated, see [this
+spreadsheet](https://docs.google.com/spreadsheets/d/10AKDsHsM2mmh45CWCNFxihJ9f-SP6gXYv7WcWpt-fDQ/edit#gid=0).
 
 # Specification
 
