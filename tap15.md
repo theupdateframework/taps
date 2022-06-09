@@ -57,32 +57,32 @@ include:
 
 <pre><code>
 "delegations":{ "keys" : {
-       abc123 : abcdef123456,
+       "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a": {...}
        },
    "roles" : [{
        "name": <b><i>alice.hbd</i>-00</b>,
-       "keyids" : [ abc123 ] ,
+       "keyids" : [ "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a" ] ,
        "threshold" : 1,
        "path_hash_prefixes" : [ <b>00*</b> ],
        "terminating": false,
    },
 {
        "name": <b><i>alice.hbd</i>-01</b>,
-       "keyids" : [ abc123 ] ,
+       "keyids" : [ "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a" ] ,
        "threshold" : 1,
        "path_hash_prefixes" : [ <b>01*</b> ],
        "terminating": false,
    },
 {
        "name": <b><i>alice.hbd</i>-02</b>,
-       "keyids" : [ abc123 ] ,
+       "keyids" : [ "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a" ] ,
        "threshold" : 1,
        "path_hash_prefixes" : [ <b>02*</b> ],
        "terminating": false,
    },
 {
        "name": <b><i>alice.hbd</i>-03</b>,
-       "keyids" : [ abc123 ] ,
+       "keyids" : [ "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a" ] ,
        "threshold" : 1,
        "path_hash_prefixes" : [ <b>03*</b>],
        "terminating": false,
@@ -211,10 +211,10 @@ With the addition of succinct hashed bins, the delegation will contain:
 
  <pre><code>
  "delegations":{ "keys" : {
-        abc123 : abcdef123456,
+        "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a": {...}
         },
     "succinct_roles" : {
-        "keyids" : [ abc123 ] ,
+        "keyids" : [ "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a" ] ,
         "threshold" : 1,
         "bit_length": 16,
         "name_prefix" : "alice.hbd",
