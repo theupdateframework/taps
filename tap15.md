@@ -45,12 +45,12 @@ follows a common pattern.
 This TAP supports the following use case:
 
 Suppose a single targets metadata file contains a very large number of
-delegations or target files. The owner of this targets metadata file
-wishes to reduce the metadata overhead for clients, and so uses hashed
-bin delegations choosing 2,048 as appropriate number of bins.
-Given that hash bin delegation does not aim at partitioning trust for
-different target files, but to reduce metadata overhead, the delegating
-metadata will use the same key and signature threshold for each bin.
+target files. The owner of this targets metadata file wishes to reduce
+the metadata overhead for clients, and so uses hashed bin delegations
+choosing 2,048 as appropriate number of bins. Given that hash bin
+delegation does not aim at partitioning trust for different target
+files, but to reduce metadata overhead, the delegating metadata will use
+the same key and signature threshold for each bin.
 
 Currently, the delegating metadata would list 2,048 role entries, one
 for each bin, containing the same information about the signing key,
