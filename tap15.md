@@ -52,7 +52,7 @@ They would like to list this key a single time in the delegation to
 prevent repetition and a large targets metadata filesize. Currently,
 the delegating metadata will list the keyid for this key in every bin
 delegation, potentially repeating the same 32-bit value thousands of
-times. The first four delegations in the resulting metadata would
+times. The delegations in the resulting metadata would
 include:
 
 <pre><code>
@@ -60,33 +60,27 @@ include:
        "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a": {...}
        },
    "roles" : [{
-       "name": <b><i>alice.hbd</i>-00</b>,
+       "name": <b><i>alice.hbd</i>-000/b>,
        "keyids" : [ "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a" ] ,
        "threshold" : 1,
-       "path_hash_prefixes" : [ <b>00*</b> ],
+       "path_hash_prefixes" : <b>["000", "001"]</b>,
        "terminating": false,
    },
 {
-       "name": <b><i>alice.hbd</i>-01</b>,
+       "name": <b><i>alice.hbd</i>-001</b>,
        "keyids" : [ "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a" ] ,
        "threshold" : 1,
-       "path_hash_prefixes" : [ <b>01*</b> ],
+       "path_hash_prefixes" : <b>["002", "003"]</b>,
        "terminating": false,
    },
+...
 {
-       "name": <b><i>alice.hbd</i>-02</b>,
+       "name": <b><i>alice.hbd</i>-7ff</b>,
        "keyids" : [ "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a" ] ,
        "threshold" : 1,
-       "path_hash_prefixes" : [ <b>02*</b> ],
+       "path_hash_prefixes" : <b>["ffe", "fff"]</b>,
        "terminating": false,
-   },
-{
-       "name": <b><i>alice.hbd</i>-03</b>,
-       "keyids" : [ "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a" ] ,
-       "threshold" : 1,
-       "path_hash_prefixes" : [ <b>03*</b>],
-       "terminating": false,
-   },... ]
+   }]
  }
 </code></pre>
 
@@ -216,13 +210,13 @@ With the addition of succinct hashed bins, the delegation will contain:
     "succinct_roles" : {
         "keyids" : [ "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a" ] ,
         "threshold" : 1,
-        "bit_length": 16,
+        "bit_length": 11,
         "name_prefix" : "alice.hbd",
     },
   }
  </code></pre>
 
- The associated bins will be named `alice.hbd-0000`, `alice.hbd-0001`, ... `alice.hbd-FFFF`.
+ The associated bins will be named `alice.hbd-000`, `alice.hbd-001`, ... `alice.hbd-7ff`.
 
 # Security Analysis
 
