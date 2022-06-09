@@ -64,32 +64,40 @@ about the desired partitioning scheme. Providing this information in a
 succinct way will further reduce the metadata overhead.
 
 <pre><code>
-"delegations":{ "keys" : {
-       "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a": {...}
-       },
-   "roles" : [{
-       "name": alice.hbd-<b>000/b>,
-       "keyids" : [ "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a" ] ,
-       "threshold" : 1,
-       "path_hash_prefixes" : <b>["000", "001"]</b>,
-       "terminating": false,
-   },
-{
-       "name": alice.hbd-<b>001</b>,
-       "keyids" : [ "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a" ] ,
-       "threshold" : 1,
-       "path_hash_prefixes" : <b>["002", "003"]</b>,
-       "terminating": false,
-   },
-...
-{
-       "name": alice.hbd-<b>7ff</b>,
-       "keyids" : [ "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a" ] ,
-       "threshold" : 1,
-       "path_hash_prefixes" : <b>["ffe", "fff"]</b>,
-       "terminating": false,
-   }]
- }
+"delegations": {
+    "keys": {
+        "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a": {...}
+    },
+    "roles": [
+        {
+            "name": "alice.hbd-<b>000</b>",
+            "keyids": [
+                "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a"
+            ],
+            "threshold": 1,
+            "path_hash_prefixes": <b>["000", "001"]</b>,
+            "terminating": false,
+        },
+        {
+            "name": "alice.hbd-<b>001</b>",
+            "keyids": [
+                "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a"
+            ],
+            "threshold": 1,
+            "path_hash_prefixes": <b>["002", "003"]</b>,
+            "terminating": false,
+        },
+        {
+            "name": "alice.hbd-<b>7ff</b>",
+            "keyids": [
+                "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a"
+            ],
+            "threshold": 1,
+            "path_hash_prefixes": <b>["ffe", "fff"]</b>,
+            "terminating": false,
+        },
+    ],
+}
 </code></pre>
 
 # Rationale
@@ -116,12 +124,12 @@ This TAP extends delegations by adding a `succinct_roles` field
 that includes the following:
 
 ```
-"succinct_roles" : {
-       "keyids" : [ KEYID, ... ] ,
-       "threshold" : THRESHOLD,
-       "bit_length": BIT_LENGTH,
-       "name_prefix": NAME_PREFIX,
-   }
+"succinct_roles": {
+    "keyids": [KEYID, ...],
+    "threshold": THRESHOLD,
+    "bit_length": BIT_LENGTH,
+    "name_prefix": NAME_PREFIX,
+}
 
 ```
 
@@ -171,49 +179,52 @@ With the addition of succinct hashed bins, the delegation will contain:
 
 ```
 {
-  "keys" : {
-      KEYID : KEY,
-      ...
-  },
-  ("roles" : [
-    {
-      "name": ROLENAME,
-      "keyids" : [ KEYID, ... ] ,
-      "threshold" : THRESHOLD,
-      ("path_hash_prefixes" : [ HEX_DIGEST, ... ] |
-      "paths" : [ PATHPATTERN, ... ]),
-      "terminating": TERMINATING,
+    "keys": {
+        KEYID: KEY,
+        ...
     },
-    ...
-  ], |
-  "succinct_roles" : {
-         "keyids" : [ KEYID, ... ] ,
-         "threshold" : THRESHOLD,
-         "bit_length": BIT_LENGTH,
-         "name_prefix": NAME_PREFIX,
-     },)
+   ("roles": [
+        {
+            "name": ROLENAME,
+            "keyids": [KEYID, ...],
+            "threshold": THRESHOLD,
+           ("path_hash_prefixes": [HEX_DIGEST, ...], |
+            "paths": [PATHPATTERN, ...],)
+            "terminating": TERMINATING,
+        },
+        ...,
+    ], |
+    "succinct_roles": {
+        "keyids": [KEYID, ...],
+        "threshold": THRESHOLD,
+        "bit_length": BIT_LENGTH,
+        "name_prefix": NAME_PREFIX,
+    },)
 }
  ```
 
- Eventually, the `path_hash_prefixes` field in `roles` MAY be deprecated in favor of `succinct_roles`, but it may be kept for backwards compatibility.
+Eventually, the `path_hash_prefixes` field in `roles` MAY be deprecated in favor of `succinct_roles`, but it may be kept for backwards compatibility.
 
- Using succinct hashed bin delegations, the delegating metadata from the
- motivating example will contain:
+Using succinct hashed bin delegations, the delegating metadata from the
+motivating example will contain:
 
  <pre><code>
- "delegations":{ "keys" : {
+"delegations": {
+    "keys": {
         "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a": {...}
-        },
-    "succinct_roles" : {
-        "keyids" : [ "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a" ] ,
-        "threshold" : 1,
-        "bit_length": 11,
-        "name_prefix" : "alice.hbd",
     },
-  }
+    "succinct_roles": {
+        "keyids": [
+            "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a"
+        ],
+        "threshold": 1,
+        "bit_length": 11,
+        "name_prefix": "alice.hbd",
+    },
+}
  </code></pre>
 
- The associated bins will be named `alice.hbd-000`, `alice.hbd-001`, ... `alice.hbd-7ff`.
+The associated bins will be named `alice.hbd-000`, `alice.hbd-001`, ... `alice.hbd-7ff`.
 
 # Security Analysis
 
