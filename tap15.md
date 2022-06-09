@@ -1,8 +1,8 @@
 * TAP: 15
 * Title: Succinct hashed bin delegations
 * Version: 1
-* Last-Modified: 04-05-2022
-* Author: Marina Moore, Justin Cappos
+* Last-Modified: 09-06-2022
+* Author: Marina Moore, Lukas Pühringer, Justin Cappos
 * Status: Draft
 * Created: 23-06-2020
 * TUF-Version:
