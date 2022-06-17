@@ -1,8 +1,8 @@
 * TAP: 15
 * Title: Succinct hashed bin delegations
 * Version: 1
-* Last-Modified: 04-05-2022
-* Author: Marina Moore, Justin Cappos
+* Last-Modified: 09-06-2022
+* Author: Marina Moore, Lukas Pühringer, Justin Cappos
 * Status: Draft
 * Created: 23-06-2020
 * TUF-Version:
@@ -45,79 +45,78 @@ follows a common pattern.
 This TAP supports the following use case:
 
 Suppose a single targets metadata file contains a very large number of
-delegations or target files. The owner of this targets metadata file wishes to
-reduce the metadata overhead for clients, and so uses hashed bin
-delegations. They will use the same key to sign each bin delegation.
-They would like to list this key a single time in the delegation to
-prevent repetition and a large targets metadata filesize. Currently,
-the delegating metadata will list the keyid for this key in every bin
-delegation, potentially repeating the same 32-bit value thousands of
-times. The first four delegations in the resulting metadata would
-include:
+target files. The owner of this targets metadata file wishes to reduce
+the metadata overhead for clients, and so uses hashed bin delegations
+choosing 2,048 as appropriate number of bins. Given that hash bin
+delegation does not aim at partitioning trust for different target
+files, but to reduce metadata overhead, the delegating metadata will use
+the same key and signature threshold for each bin.
+
+Currently, the delegating metadata would list 2,048 role entries, one
+for each bin, containing the same information about the signing key,
+signature threshold, terminating property and role name prefix. The only
+data that differs between these entries are the bin name suffix, which
+is the bin index, and the list of target path hash prefixes served by a
+particular bin. The differing data is bolded in the example below.
+
+This data can be computed by the client, if they have minimal knowledge
+about the desired partitioning scheme. Providing this information in a
+succinct way will further reduce the metadata overhead.
 
 <pre><code>
-"delegations":{ "keys" : {
-       abc123 : abcdef123456,
-       },
-   "roles" : [{
-       "name": <b><i>alice.hbd</i>-00</b>,
-       "keyids" : [ abc123 ] ,
-       "threshold" : 1,
-       "path_hash_prefixes" : [ <b>00*</b> ],
-       "terminating": false,
-   },
-{
-       "name": <b><i>alice.hbd</i>-01</b>,
-       "keyids" : [ abc123 ] ,
-       "threshold" : 1,
-       "path_hash_prefixes" : [ <b>01*</b> ],
-       "terminating": false,
-   },
-{
-       "name": <b><i>alice.hbd</i>-02</b>,
-       "keyids" : [ abc123 ] ,
-       "threshold" : 1,
-       "path_hash_prefixes" : [ <b>02*</b> ],
-       "terminating": false,
-   },
-{
-       "name": <b><i>alice.hbd</i>-03</b>,
-       "keyids" : [ abc123 ] ,
-       "threshold" : 1,
-       "path_hash_prefixes" : [ <b>03*</b>],
-       "terminating": false,
-   },... ]
- }
+"delegations": {
+    "keys": {
+        "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a": {...}
+    },
+    "roles": [
+        {
+            "name": "alice.hbd-<b>000</b>",
+            "keyids": [
+                "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a"
+            ],
+            "threshold": 1,
+            "path_hash_prefixes": <b>["000", "001"]</b>,
+            "terminating": false,
+        },
+        {
+            "name": "alice.hbd-<b>001</b>",
+            "keyids": [
+                "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a"
+            ],
+            "threshold": 1,
+            "path_hash_prefixes": <b>["002", "003"]</b>,
+            "terminating": false,
+        },
+        {
+            "name": "alice.hbd-<b>7ff</b>",
+            "keyids": [
+                "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a"
+            ],
+            "threshold": 1,
+            "path_hash_prefixes": <b>["ffe", "fff"]</b>,
+            "terminating": false,
+        },
+    ],
+}
 </code></pre>
-
-Every client will then have to download this large delegating metadata
-file. Note that most of the data is the same in each delegation. The
-only data that differs between these delegations are the bolded
-fields, the name and path_hash_prefix. The name has a common prefix
-(in italics), so only differs by a count and the path_hash_prefix is
-generated using the hash algorithm and number of bins.
 
 # Rationale
 
-Hashed bin delegations commonly use the same key for each bin in order
-to allow for automated signing of target files. If the same key is
-used for all bins, this key should only need to be listed once in the
-delegating metadata.
+A succinct description of hash bin delegation in the delegating metadata
+can significantly reduce the client's metadata overhead. This is
+achieved by listing properties common to all bins only once, and by
+providing the necessary information to the client to compute which bin
+is responsible for the desired target and how the corresponding bin
+metadata is named.
 
-Similarly, bins are usually named using a numbering system with a
-common prefix (i.e. alice.hbd-0, alice.hbd-1, …). The delegating
-metadata only needs to describe this naming scheme and the location
-that these metadata files are stored.
-
-The delegating metadata could significantly reduce the client’s
-metadata overhead by providing a succinct description of the keyid and
-prefix instead of repeating these for each delegation. For a repository
-with 50,000,000 target files using the existing hashed bin delegation
-technique, the snapshot and targets metadata overhead would be around
+For a repository with 50,000,000 target files using the existing hashed
+bin delegation technique with a number of bins of 2,048 and 32-bit
+keyids the snapshot and targets metadata overhead would be around
 1,600,000 bytes for each target. Using succinct hashed bin delegations,
 the snapshot and targets metadata overhead for a target can be reduced
 to about 550,000 bytes. For more detail about how these overheads were
-calculated, see [this spreadsheet](https://docs.google.com/spreadsheets/d/10AKDsHsM2mmh45CWCNFxihJ9f-SP6gXYv7WcWpt-fDQ/edit#gid=0).
+calculated, see [this
+spreadsheet](https://docs.google.com/spreadsheets/d/10AKDsHsM2mmh45CWCNFxihJ9f-SP6gXYv7WcWpt-fDQ/edit#gid=0).
 
 # Specification
 
@@ -125,12 +124,12 @@ This TAP extends delegations by adding a `succinct_roles` field
 that includes the following:
 
 ```
-"succinct_roles" : {
-       "keyids" : [ KEYID, ... ] ,
-       "threshold" : THRESHOLD,
-       "bit_length": BIT_LENGTH,
-       "name_prefix": NAME_PREFIX,
-   }
+"succinct_roles": {
+    "keyids": [KEYID, ...],
+    "threshold": THRESHOLD,
+    "bit_length": BIT_LENGTH,
+    "name_prefix": NAME_PREFIX,
+}
 
 ```
 
@@ -158,8 +157,8 @@ values starting with 000, the second bin would include binary values starting
 with 001, the third 010, then 011, 100, 101, 110, 111.
 
 The rolename of each bin will be determined by the bin number and the
-NAME_PREFIX listed in the `name_prefix` field of the delegation.
-The name will be structured as
+NAME_PREFIX listed in the `name_prefix` field of the delegation,
+separated by hyphen (`-`). The name will be structured as
 NAME_PREFIX-COUNT where COUNT is a hexadecimal value between 0 and
 2^BIT_LENGTH-1 (inclusive) that represents the bin number. This value will be zero-padded so that all rolenames will be of the same length.
 
@@ -180,49 +179,52 @@ With the addition of succinct hashed bins, the delegation will contain:
 
 ```
 {
-  "keys" : {
-      KEYID : KEY,
-      ...
-  },
-  ("roles" : [
-    {
-      "name": ROLENAME,
-      "keyids" : [ KEYID, ... ] ,
-      "threshold" : THRESHOLD,
-      ("path_hash_prefixes" : [ HEX_DIGEST, ... ] |
-      "paths" : [ PATHPATTERN, ... ]),
-      "terminating": TERMINATING,
+    "keys": {
+        KEYID: KEY,
+        ...
     },
-    ...
-  ], |
-  "succinct_roles" : {
-         "keyids" : [ KEYID, ... ] ,
-         "threshold" : THRESHOLD,
-         "bit_length": BIT_LENGTH,
-         "name_prefix": NAME_PREFIX,
-     },)
+   ("roles": [
+        {
+            "name": ROLENAME,
+            "keyids": [KEYID, ...],
+            "threshold": THRESHOLD,
+           ("path_hash_prefixes": [HEX_DIGEST, ...], |
+            "paths": [PATHPATTERN, ...],)
+            "terminating": TERMINATING,
+        },
+        ...,
+    ], |
+    "succinct_roles": {
+        "keyids": [KEYID, ...],
+        "threshold": THRESHOLD,
+        "bit_length": BIT_LENGTH,
+        "name_prefix": NAME_PREFIX,
+    },)
 }
  ```
 
- Eventually, the `path_hash_prefixes` field in `roles` MAY be deprecated in favor of `succinct_roles`, but it may be kept for backwards compatibility.
+Eventually, the `path_hash_prefixes` field in `roles` MAY be deprecated in favor of `succinct_roles`, but it may be kept for backwards compatibility.
 
- Using succinct hashed bin delegations, the delegating metadata from the
- motivating example will contain:
+Using succinct hashed bin delegations, the delegating metadata from the
+motivating example will contain:
 
  <pre><code>
- "delegations":{ "keys" : {
-        abc123 : abcdef123456,
-        },
-    "succinct_roles" : {
-        "keyids" : [ abc123 ] ,
-        "threshold" : 1,
-        "bit_length": 16,
-        "name_prefix" : "alice.hbd-",
+"delegations": {
+    "keys": {
+        "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a": {...}
     },
-  }
+    "succinct_roles": {
+        "keyids": [
+            "943efed2eea155f383dfe5ccad12902787b2c7c8d9aef9664ebf9f7202972f7a"
+        ],
+        "threshold": 1,
+        "bit_length": 11,
+        "name_prefix": "alice.hbd",
+    },
+}
  </code></pre>
 
- The associated bins will be named `alice.hbd-0000`, `alice.hbd-0001`, ... `alice.hbd-FFFF`.
+The associated bins will be named `alice.hbd-000`, `alice.hbd-001`, ... `alice.hbd-7ff`.
 
 # Security Analysis
 
@@ -254,7 +256,7 @@ other uploaders are not able to use the NAME_PREFIX-\*
 filename for target files.
 
 In order for succinct hashed bin delegations to be used, both the
-delegation and the client must understand the succint_hash_delegations
+delegation and the client must understand the succinct_hash_delegations
 field. Consider a client Bob who wants to download a target J and an
 uploader Alice who is responsible for delegating to J. This is what
 would happen if one or both of them supports succinct_hash_delegations.
@@ -262,7 +264,7 @@ would happen if one or both of them supports succinct_hash_delegations.
 | Parties that support succinct_hash_delegations | Result |
 | --- | --- |
 | Neither Alice nor Bob support succinct_hash_delegations | Alice would not use succinct_hash_delegations to delegate to J, and so Bob would be able to download and verify the target using the existing mechanisms. |
-| Alice supports succint_hash_delegations, Bob does not | Alice may use succinct_hash_delegations to delegate to any of her target files, including J. Bob will download metadata that has the succinct_hash_delegations field and will not be able to find the delegation that points to J. |
+| Alice supports succinct_hash_delegations, Bob does not | Alice may use succinct_hash_delegations to delegate to any of her target files, including J. Bob will download metadata that has the succinct_hash_delegations field and will not be able to find the delegation that points to J. |
 | Bob supports succinct_hash_delegation, Alice does not | Alice will not use succinct_hash_delegations to delegate to J. Bob will not see this field in the targets metadata, and so will look for the delegation using the existing mechanisms |
 | Both Alice and Bob support succinct_hash_delegations | Alice may use succinct_hash_delegations to delegate to her target files, including J. Bob will see the succinct_hash_delegations field in targets metadata and will download the alice.hdb-x bin metadata file that corresponds to J. |
 
