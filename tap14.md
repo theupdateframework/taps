@@ -163,6 +163,8 @@ with a directory for each supported TUF specification version. These directories
 contain metadata that supports the given TUF specification version. Using these
 directories, a client is able to choose the most recent metadata they support.
 More details about this directory structure are contained in the [specification](#how-a-repository-updates).
+The repository may also maintain a `supported-version` file so that the client
+can discover the supported specification versions on the repository.
 
 On the client side, this TAP also requires maintenance of multiple versions that
 support different major TUF specification
@@ -178,7 +180,8 @@ version. A specification change may rely on more than one metadata file (for
 example a change in the signing process would affect all metadata types), so
 using the same specification version for top-level metadata allows for these
 large changes to the specification. For information about how this relates to
-url pinning and TAP 5, see [Special Cases](#tap-5). However, delegated targets metadata may not be
+targets metadta pinning and TAP 13, see [Special Cases](#tap-13). However,
+delegated targets metadata may not be
 managed by the same parties as the top-level metadata. For this reason, this TAP
 allows clients to use a different TUF specification version for delegated
 targets by maintaining functions to parse metadata that conforms to different
@@ -234,6 +237,7 @@ small changes to existing features. More details about what constitutes a major,
 minor, or patch change can be found at https://semver.org/.
 
 ### Changes to TAPs
+
 In order to manage changes to TUF, TAPs shall be tied to a version of the TUF
 specification.
 
@@ -245,7 +249,7 @@ has been updated to include the TUF Version field.
 ## How a repository updates
 
 Repositories will add metadata for new TUF specification versions in new
-directories.
+directories and may maintain a `supported-versions` file.
 
 As described in the [Rationale](#rationale), repositories should support multiple
 TUF specification versions. In order to do so, this TAP proposes a new directory
@@ -361,6 +365,20 @@ upgrades from version 1.0.0 to version 2.0.0 may look like:
   |- 2.0.0 metadata files
 ```
 
+Not all TUF repositories have file systems that are able to list all directories
+in a folder (the equivalent of the `ls` command). For these repositories (such
+as OCI registries or html servers), the repository SHOULD include a
+`supported-versions` file in the top of this directory structure that lists
+all versions supported by the repository to allow for client discovery. This file
+will have the following fields:
+
+```
+{ "supported_versions" : [VERSION, ...],
+
+```
+
+where `VERSION` is the name of a supported version in the format `version-number.0.0` (i.e. 2.0.0).
+
 ## Changes to TUF clients
 
 TUF clients must store the TUF specification versions they support and may add
@@ -397,7 +415,8 @@ the client looks for the highest supported version on the repository using the
 following procedure:
 
 * The client determines the latest version available on the repository by
-looking for the directory with the largest version number.
+looking for the directory with the largest version number, or by parsing the
+`supported-versions` file.
 * If the latest version on the repository is lower than the previous
 specification version the client used from this repository, the client
 should report an error and terminate the update.
@@ -529,7 +548,9 @@ attacks and changes to the security model that should be discussed.
 A downgrade attack on the TUF specification version may be possible if an
 attacker is able to block access to a directory on the repository. This would
 mean that a client would use metadata from a previous specification version when
-performing an update. However, the metadata would still have to be current and
+performing an update. Similarly, an attacker on the repository could replace the
+`supported-versions` file to remove the most recent specification version.
+However, in both of these cases the metadata would still have to be current and
 properly signed.
 
 Clients that have previously used a repository will store the specification
