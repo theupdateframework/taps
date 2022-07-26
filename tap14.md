@@ -478,25 +478,25 @@ provided by each repository. Note that different TUF versions may use different
 hashing algorithms. If this is the case, both hashes should be verified
 independently.
 
-### TAP 5
+### TAP 13
 
-A TUF client that supports TAP 5 may download top-level metadata from multiple
-sources. However, breaking changes may require that multiple top-level metadata
-files use the same TUF specification version. To manage this, a root metadata
-file that includes a list of urls for metadata as described in TAP 5 should
-only include links to metadata files using the same TUF specification version as
-the root metadata file.
+A TUF client that supports TAP 13 may download targets metadata from multiple
+sources. However, breaking changes may require that all top-level metadata
+files use the same TUF specification version. To manage this, a client
+configuration file that lists a custom top-level targets metadata file
+as described in TAP 13 should only include targets metadata files using the
+same TUF specification version as the root metadata file.
 
-The owner of root metadata is responsible for ensuring that all metadata files
-linked in the root metadata use the same TUF specification version as the root
+The owner of the client configuration is responsible for ensuring that any
+custom targets metadata files use the same TUF specification version as the root
 metadata. If the repository that contains the root metadata supports multiple
-TUF specification versions, each root metadata file should list top-level
-metadata corresponding with its TUF specification version.
+TUF specification versions, the client configuration should list a targets metadata
+file that is available in all supported specification versions.
 
 Clients should verify that all top-level metadata use the same TUF specification
-version as the root metadata. If a metadata file linked in root metadata does
-not meet this criteria, it will be considered invalid and the client should
-use the next listed metadata file or terminate the update.
+version as the root metadata. If a metadata file provided by the TAP 13 configuration
+does not meet this criteria, it will be considered invalid and the client should
+terminate the update.
 
 ### Delegations
 
