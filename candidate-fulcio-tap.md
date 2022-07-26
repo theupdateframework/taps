@@ -15,7 +15,7 @@ In order to achieve end-to-end software update security, TUF requires developers
 # Motivation
 Developer key management has been a major concern for TUF adoptions, especially for projects with a small number of developers or limited resources. TUF currently requires that every targets metadata signer creates and manages a private key. However, many developers in large TUF adoptions, including the Python Package Index (PyPI), do not want the extra burden of having to protect a private key for use in deployment.
 
-Protecting a private key from loss or compromise is no simple matter. [Several](https://blog.npmjs.org/post/185397814280/plot-to-steal-cryptocurrency-foiled-by-the-npm) [attacks](https://jsoverson.medium.com/how-two-malicious-npm-packages-targeted-sabotaged-one-other-fed7199099c8) on software update systems have been achieved through the use of a compromised key, as securing private keys can be challenging and sometimes expensive (using hardware tokens such as Yubikeys etc), especially over a period of time.  
+Protecting a private key from loss or compromise is no simple matter. [Several](https://blog.npmjs.org/post/185397814280/plot-to-steal-cryptocurrency-foiled-by-the-npm) [attacks](https://jsoverson.medium.com/how-two-malicious-npm-packages-targeted-sabotaged-one-other-fed7199099c8) on software update systems have been achieved through the use of a compromised key, as securing private keys can be challenging and sometimes expensive (using hardware tokens such as Yubikeys etc), especially over a period of time.
 
 This TAP proposes a way for developers to use their existing OpenID Connect (OIDC) accounts – such as an email account – to verify their identity, so that they do not have to manage any additional keys or passwords.
 
@@ -70,7 +70,7 @@ In order to sign metadata using Fulcio, a developer would:
 * Upload the metadata to the repository
 
 The repository would:
-* automatically perform verification (see below) with Fulcio and the transparency log to ensure that the certificate is current and valid.
+* automatically perform verification (see below) with Fulcio and the transparency log to ensure that the certificate is current and valid. If the signature is uploaded to the repository during the validity window of the Fulcio certificate, the repository MAY skip the Rekor timestamp verification.
 
 Most of these steps SHOULD be done automatically using a tool, to simplify operations for developers and minimise the risk of human errors.
 
@@ -78,12 +78,12 @@ Most of these steps SHOULD be done automatically using a tool, to simplify opera
 ## Verification
 While performing the steps in the [TUF client workflow](https://theupdateframework.github.io/specification/latest/#detailed-client-workflow), if the client encounters a signature that uses a Fulcio certificate, the client MUST verify the certificate chain up to ROOT_CERTIFICATE.
 
-In addition, the repository MUST, and clients MAY additionally query the Rekor transparency log to ensure that the Fulcio certificate is valid at the time that it was issued. To do so the user can directly query the transparency log for the Fulcio certificate. They can then verify that the certificate was uploaded to the Rekor, and use the timestamp in Rekor to verify that the key was valid at the time it was used to sign TUF metadata.
+In addition, the repository SHOULD, and clients MAY additionally query the Rekor transparency log to ensure that the Fulcio certificate is valid at the time that it was issued. To do so the user can directly query the transparency log for the Fulcio certificate. They can then verify that the certificate was uploaded to the Rekor, and use the timestamp in Rekor to verify that the key was valid at the time it was used to sign TUF metadata. The repository SHOULD skip this step if the Fulcio certificate was valid at the time it was uploaded to the repository. Clients MAY skip this step if they would like to rely on the repository to perform the timeliness check. If the client skips this check and the repository is compromised, an attacker could allow the use of expired Fulcio certificates.
 
 In cases where online verification is not possible, stapled inclusion proofs (i.e., evidence gathered by the signer from the log) MAY be presented alongside the software and signature. The client MAY use these proofs instead of directly querying Rekor's transparecy log. Verification material for these stapled inclusion proofs MUST be distributed out of band alongside the Rekor root. Documentation about querying Rekor is available [here](https://docs.sigstore.dev/rekor/CLI).
 
 ## Auditors
-Developers SHOULD monitor the transparency log (TL) for certificates associated with their OIDC accounts to look for unauthorized activity. If they see a certificate on the TL that they did not issue, the developer SHOULD replace any compromised metadata (creating new Fulcio certificate), and report the compromise to any targets metadata owners who delegate to the compromised account.
+Developers SHOULD monitor the transparency log (TL) for certificates associated with their OIDC accounts to look for unauthorized activity. If they see a certificate on the TL that they did not issue, the developer SHOULD replace any compromised metadata (creating new Fulcio certificate), and ensure the security of their OIDC account. If the OIDC account cannot be recovered, the developer MUST contact the role that delegates to them to replace the delegation to their OIDC identity.
 
 In addition to developer monitoring, the TL SHOULD have auditors that watch the log for any suspicious activity. If something bad is found in the TL, then auditors MUST indicate this to clients to ensure they don’t use bad certificates. Clients SHOULD have a way to ensure that the transparency log has been audited. For example, auditors may upload signed targets metadata to the repository upon valid completion of an audit. Clients can look for the auditor signature on targets metadata using multi-role delegations before verifying any Fulcio-signed delegated targets. The auditor MUST only sign metadata if all signatures in the TL look good. If the auditor detects a problem, they SHOULD revoke the auditor-signed metadata.
 
@@ -93,7 +93,7 @@ If the bad certificates are due to a compromised Fulcio server, the Fulcio serve
 
 This TAP improves security by eliminating the risk of developers losing their keys if they chose to use Fulcio instead of a traditional public key cryptosystem. However, it adds 2 additional services that may be compromised: the Fulcio server and the Rekor transparency log. In this section, we will analyze the impact and recovery in each of these cases.
 
-If a developer's OIDC credentials are compromised, the developer SHOULD use existing TUF processes for revocation. Specifically they SHOULD ask the delegator to replace any metadata that includes the compromised OIDC account.
+If a developer's OIDC credentials are compromised, the developer SHOULD use existing TUF processes for revocation. Specifically they SHOULD ask the delegator to replace any metadata that includes the compromised OIDC account. If the developer's credentials were compromised, but later recovered, the developer may still use these credentials, but any metadata files that were created while the credentials were compromised should be replaced with a higher version of those metadata files so that the compromised files will not be downloaded (using the existing snapshot protection).
 
 If the Fulcio server is compromised, it may issue certificates on behalf of any attacker who uses Fulcio to verify their identity. However, the Fulcio server is backed by offline keys that are signed by TUF root keys, and so it is possible to recover from any Fulcio server compromise. Additionally, all Fulcio certificates are published to a transparency log, so auditors will notice if the Fulcio server is misbehaving and indicate this to users, for example through the use of [multi-role delegations](https://github.com/theupdateframework/taps/blob/master/tap3.md) to a threshold of both auditor-signed metadata and developer-signed metadata.
 
