@@ -163,7 +163,7 @@ with a directory for each supported TUF specification version. These directories
 contain metadata that supports the given TUF specification version. Using these
 directories, a client is able to choose the most recent metadata they support.
 More details about this directory structure are contained in the [specification](#how-a-repository-updates).
-The repository may also maintain a `supported-version` file so that the client
+The repository may also maintain a `supported-versions` file so that the client
 can discover the supported specification versions on the repository.
 
 On the client side, this TAP also requires maintenance of multiple versions that
@@ -180,7 +180,7 @@ version. A specification change may rely on more than one metadata file (for
 example a change in the signing process would affect all metadata types), so
 using the same specification version for top-level metadata allows for these
 large changes to the specification. For information about how this relates to
-targets metadta pinning and TAP 13, see [Special Cases](#tap-13). However,
+targets metadata pinning and TAP 13, see [Special Cases](#tap-13). However,
 delegated targets metadata may not be
 managed by the same parties as the top-level metadata. For this reason, this TAP
 allows clients to use a different TUF specification version for delegated
@@ -365,9 +365,9 @@ upgrades from version 1.0.0 to version 2.0.0 may look like:
   |- 2.0.0 metadata files
 ```
 
-Not all TUF repositories have file systems that are able to list all directories
+Not all TUF repositories have a mechanism that is  able to list all directories
 in a folder (the equivalent of the `ls` command). For these repositories (such
-as OCI registries or html servers), the repository SHOULD include a
+as OCI registries or http servers), the repository SHOULD include a
 `supported-versions` file in the top of this directory structure that lists
 all versions supported by the repository to allow for client discovery. This file
 will have the following fields:
@@ -499,8 +499,9 @@ independently.
 
 ### TAP 13
 
-A TUF client that supports TAP 13 may download targets metadata from multiple
-sources. However, breaking changes may require that all top-level metadata
+A TUF client that supports TAP 13 may download targets metadata that were
+uploaded by different parties.
+However, breaking changes may require that all top-level metadata
 files use the same TUF specification version. To manage this, a client
 configuration file that lists a custom top-level targets metadata file
 as described in TAP 13 should only include targets metadata files using the
