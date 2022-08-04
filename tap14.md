@@ -255,7 +255,7 @@ As described in the [Rationale](#rationale), repositories should support multipl
 TUF specification versions. In order to do so, this TAP proposes a new directory
 structure for repositories. When a repository manager chooses to upgrade to a
 new major TUF specification version, they create a new directory on the repository named
-for the major version (for example 2.0.0). This directory will contain all
+for the major version (for example 2). This directory will contain all
 metadata files for the new specification version, but target files will remain in the
 parent directory to save space. In this case the metadata files (in directories according to their spec
 version) can point to target files relative to the parent directory. After creating
@@ -270,16 +270,16 @@ version 2.0.0, the repository structure may look like:
 
 ```
 - Target files
-- 1.0.0
+- 1
   |- metadata files
-- 2.0.0
+- 2
   |- metadata files
 ```
 
 Repository updates to a new minor or patch specification version shall be done
 by uploading new metadata files in the new format to the proper directory. So if
 a repository updates from 2.0.0 to 2.1.0, the 2.1.0 metadata would go in the
-directory named 2.0.0. Minor and patch version changes are backwards compatible,
+directory named 2. Minor and patch version changes are backwards compatible,
 so clients using version 2.0.0 will still be able to parse metadata written
 using version 2.1.0.
 
@@ -346,23 +346,23 @@ TUF versions that the repository supports. Any update should be reflected across
 all of these versions. For clarity, version numbers used for consistent
 snapshots should be consistent across all
 supported specification versions so that a client can find the current
-metadata files. This means that there may be a file at 1.0.0/3.root.json as well
-as 2.0.0/3.root.json. Root metadata files with the same consistent snapshot number must
+metadata files. This means that there may be a file at 1/3.root.json as well
+as 2/3.root.json. Root metadata files with the same consistent snapshot number must
 also use the same keys so that a client can find the next root metadata file in whichever
 specification version they support.
 
 For existing TUF clients to continue operation after this TAP is implemented,
 repositories may store metadata from before TUF 2.0.0 in the top-level
-repository (with no directory named 1.0.0). This allows existing clients to
+repository (with no directory named 1). This allows existing clients to
 continue downloading metadata from the repository. So a TUF repository that
-upgrades from version 1.0.0 to version 2.0.0 may look like:
+upgrades from version 1.x.x to version 2.0.0 may look like:
 
 
 ```
 - Targets files
-- 1.0.0 metadata files
-- 2.0.0
-  |- 2.0.0 metadata files
+- 1.x.x metadata files
+- 2
+  |- 2.x.x metadata files
 ```
 
 Not all TUF repositories have a mechanism that is  able to list all directories
@@ -377,7 +377,7 @@ will have the following fields:
 
 ```
 
-where `VERSION` is the name of a supported version in the format `version-number.0.0` (i.e. 2.0.0).
+where `VERSION` is the name of a supported major version (i.e. 2).
 
 ## Changes to TUF clients
 
@@ -437,13 +437,13 @@ Once the supported directory is determined, the client shall attempt the update
 using the metadata in this directory.
 
 For example, if a client has a specification version of 3.5 and a repository has
-directories for 2.0.0, 3.0.0, and 4.0.0, the client will report that spec
-version 4.x is available, then download metadata from the 3.0.0 directory. This reporting is
+directories for 2, 3, and 4, the client will report that spec
+version 4.x is available, then download metadata from the 3 directory. This reporting is
 up to the discretion of an implementer, but it should be used to encourage
 updating the client to the most recent specification version.
 
 Alternatively, if the same client downloads metadata from a repository with
-directories 1.0.0 and 2.0.0, the client could download metadata from 2.0.0 using
+directories 1 and 2, the client could download metadata from 2 using
 a 2.x version of the client. If 2.x is not supported by the client, the client
 will report that it is unable to perform an update.
 
@@ -460,7 +460,7 @@ major version of the root file.
 
 So, if the currently trusted root file is named 4.root.json and uses version
 1.0.0 and the highest supported version is 3.0.0, the client will look for
-5.root.json first in 3.0.0, then 2.0.0, then 1.0.0. If this file is found, the
+5.root.json first in 3, then 2, then 1. If this file is found, the
 client will look for 6.root.json using the same process. To facilitate this, the
 client should maintain functions to parse root files from previous spec
 versions. If the client does not support the specification version of a root file, the
