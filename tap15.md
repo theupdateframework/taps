@@ -103,20 +103,23 @@ succinct way will further reduce the metadata overhead.
 # Rationale
 
 A succinct description of hash bin delegation in the delegating metadata
-can significantly reduce the client's metadata overhead. This is
-achieved by listing properties common to all bins only once, and by
-providing the necessary information to the client to compute which bin
-is responsible for the desired target and how the corresponding bin
-metadata is named.
+can significantly reduce the client's metadata overhead. This is achieved
+by listing properties common to all bins only once, and by providing the
+necessary information to the client to compute which bin is responsible
+for the desired target and how the corresponding bin metadata is named.
+As a consequence the size of the delegating metadata remains constant, as
+opposed to traditional hash bin delegation, where it grows linearly with
+the number of bins.
 
-For a repository with 50,000,000 target files using the existing hashed
-bin delegation technique with a number of bins of 2,048 and 32-bit
-keyids the snapshot and targets metadata overhead would be around
-1,600,000 bytes for each target. Using succinct hashed bin delegations,
-the snapshot and targets metadata overhead for a target can be reduced
-to about 550,000 bytes. For more detail about how these overheads were
-calculated, see [this
-spreadsheet](https://docs.google.com/spreadsheets/d/10AKDsHsM2mmh45CWCNFxihJ9f-SP6gXYv7WcWpt-fDQ/edit#gid=0).
+For a real-world repository, as described in PEP 458, with 2M target
+files distributed over 16K bins, the delegating metadata would grow by
+1.25 MB when using traditional hash bin delegation, and impose a
+per-package TUF metadata overhead of 69% on new users (see V10 and V17 in
+[PEP 458 - Metadata
+Scalability](https://peps.python.org/pep-0458/#metadata-scalability)).
+When using succinct hash bin delegation, on the other hand, the
+delegating metadata would not grow and the per-package metadata
+overhead can be reduced to 9%.
 
 # Specification
 
