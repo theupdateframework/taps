@@ -181,7 +181,7 @@ example a change in the signing process would affect all metadata types), so
 using the same specification version for top-level metadata allows for these
 large changes to the specification. For information about how this relates to
 targets metadata pinning and TAP 13, see [Special Cases](#tap-13). However,
-delegated targets metadata may not be
+delegated targets metadata might not be
 managed by the same parties as the top-level metadata. For this reason, this TAP
 allows clients to use a different TUF specification version for delegated
 targets by maintaining functions to parse metadata that conforms to different
@@ -249,7 +249,7 @@ has been updated to include the TUF Version field.
 ## How a repository updates
 
 Repositories will add metadata for new TUF specification versions in new
-directories and may maintain a `supported-versions` file.
+directories and SHOULD maintain a `supported-versions` file.
 
 As described in the [Rationale](#rationale), repositories should support multiple
 TUF specification versions. In order to do so, this TAP proposes a new directory
@@ -439,7 +439,7 @@ using the metadata in this directory.
 For example, if a client has a specification version of 3.5 and a repository has
 directories for 2, 3, and 4, the client will report that spec
 version 4.x is available, then download metadata from the 3 directory. This reporting is
-up to the discretion of an implementer, but it should be used to encourage
+up to the discretion of each application, but it should be used to encourage
 updating the client to the most recent specification version.
 
 Alternatively, if the same client downloads metadata from a repository with
