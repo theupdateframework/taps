@@ -3,9 +3,9 @@
 * Version: 1
 * Last-Modified: 09-06-2022
 * Author: Marina Moore, Lukas Pühringer, Justin Cappos
-* Status: Draft
+* Status: Accepted
 * Created: 23-06-2020
-* TUF-Version:
+* TUF-Version: 1.0.0
 * Post-History:
 
 # Abstract
