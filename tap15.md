@@ -276,4 +276,5 @@ does not, Bob will not be able to verify J.
 
 # Augmented Reference Implementation
 
-https://github.com/theupdateframework/python-tuf/pull/1106
+<!-- TODO: add link to API docs and example once available -->
+https://github.com/theupdateframework/python-tuf/pull/2010
