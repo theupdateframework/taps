@@ -1,5 +1,5 @@
 * TAP: 13
-* Title: User Selection of the Top-Level Target Files Through Mapping Metadata
+* Title: User Selection of the Top-Level Targets Files Through Mapping Metadata
 * Version: 1
 * Last-Modified: 02-Nov-2021
 * Author: Justin Cappos, Joshua Lock, Marina Moore, Lukas Pühringer
@@ -111,7 +111,7 @@ match with Alice's in this case.
 
 # Specification
 
-In order to support this situation, we propose a new type of mapping
+In order to support this situation, we propose a mapping
 metadata to enable the name and key(s) for a targets metadata file to be specified.
 This targets metadata file will be uploaded to the repository and will be used as though
 it is the top-level targets metadata file by the client instead of the top-level targets
@@ -172,12 +172,14 @@ cases where the key needs to be rotated or changed and the key is still accessib
 ## Interaction with TAP 4
 
 If a client is using TAP 4 to provide mapping metadata to multiple repositories,
-they MAY provide a TAP 13 targets mapping for each repository.
-An optional `target-mapping` field will be added to TAP 4 to provide this mapping
-when TAP 13 is used. This field will contain:
+they MAY provide a TAP 13 targets mapping for each repository or group of repositories.
+An optional `targets_mappings` field will be added to TAP 4 to provide this mapping
+when TAP 13 is used. the mappings will be in resolved in order, so the first mapping
+will have higher priority than the second, and so on. This field will be resolved
+after the TAP 4 `mapping` field and will contain:
 
 ```
-"target-mapping": {
+"targets_mappings": {
    "repositories": [REPOSITORY_NAME, ...],
    "targets_rolename": ROLENAME,
    "threshold": THRESHOLD,
