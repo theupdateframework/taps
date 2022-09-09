@@ -174,7 +174,7 @@ cases where the key needs to be rotated or changed and the key is still accessib
 If a client is using TAP 4 to provide mapping metadata to multiple repositories,
 they MAY provide a TAP 13 targets mapping for each repository or group of repositories.
 An optional `targets_mappings` field will be added to TAP 4 to provide this mapping
-when TAP 13 is used. the mappings will be in resolved in order, so the first mapping
+when TAP 13 is used. The mappings will be resolved in order, so the first mapping
 will have higher priority than the second, and so on. This field will be resolved
 after the TAP 4 `mapping` field and will contain:
 
