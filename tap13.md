@@ -40,7 +40,7 @@ To allow for safer use of these untrusted repositories, we propose adding
 namespaces to TUF repositories which enable explicit trust decisions. In this
 mode, if Alice and Bob both use repository X and ask for package foo, they may
 get different results based on their trusted namespaces.
-In summary; this proposal enables clients to restrict the targets they consume
+In summary; this proposal enables clients to restrict the targets roles they consume
 to filtered views of the repository.  
 
 These different views could be defined by either different users on the
@@ -70,7 +70,7 @@ specific packages and Alice wishes to install only those packages.  Every other
 user clearly should not be subject to those constraints.
 
 Second, Alice may be concerned that a full repository compromise may include
-the root role.  Since the root role in TUF indicates the top-level target's
+the root role.  Since the root role in TUF indicates the top-level targets'
 role key, this compromise can enable the attacker full control of Alice's
 namespace.  Alice may want to require that the security team at her company
 still be used to decide which packages to trust.  
@@ -136,7 +136,7 @@ to which keys indicate the targets role. The resulting metadata will look like:
 ```
 
 As such, we add to the [Mechanisms that Assigns Targets to Repositories](https://github.com/theupdateframework/taps/blob/master/tap4.md#mechanism-that-assigns-targets-to-repositories)
-support for a reference to the targets file in an identical way to the
+support for a reference to the targets metadata file in an identical way to the
 root file's reference in the [TUF specification](https://github.com/theupdateframework/specification/blob/master/tuf-spec.md#4-document-formats).
 However, additionally, the file name must be specified as this is no longer
 targets.json.
@@ -149,7 +149,7 @@ files.  All targets metadata files (top-level and otherwise) are also stored in 
 same METAPATH location listed in snapshot.json.
 
 The changes in the client application workflow are fairly minor from this
-TAP.  Steps 4.0 and 4.4.0 should refer to the specified target's metadata file instead
+TAP.  Steps 4.0 and 4.4.0 should refer to the specified targets' metadata file instead
 of the top-level targets metadata file.  Additionally, instead of verifying the targets metadata
 file using the key in the root metadata in step 4.0, verification must use the
 keys listed in the mapping metadata.
@@ -157,9 +157,9 @@ keys listed in the mapping metadata.
 There likely also needs to be a clarity pass throughout to make this potential
 use mode clearer in the specification.
 
-From an operational standpoint, a lost targets key for a delegated target could have been
+From an operational standpoint, a lost targets key for a delegated targets role could have been
 remedied before by the repository but this no longer works in every case.  For example,
-previously if the repository delegated to a target from the top-level targets role, that
+previously if the repository delegated to a targets role from the top-level targets role, that
 file could be updated by the top-level targets role if Alice’s key changed or was lost.  
 However, as the repository’s root role is no longer trusted to provide top-level targets keys
 and different clients may have different top-level targets keys, any clients using this
