@@ -179,15 +179,18 @@ will have higher priority than the second, and so on. This field will be resolve
 after the TAP 4 `mapping` field and will contain:
 
 ```
-"targets_mappings": {
-   "repositories": [REPOSITORY_NAME, ...],
-   "targets_rolename": ROLENAME,
-   "threshold": THRESHOLD,
-   "keys":{
-      KEYID : KEY,
-      ...
-   }
-}
+"targets_mappings": [
+   {
+     "repositories": [REPOSITORY_NAME, ...],
+     "targets_rolename": ROLENAME,
+     "threshold": THRESHOLD,
+     "keys":{
+        KEYID : KEY,
+        ...
+     }
+   },
+   ...
+]
 ```
 
 Where `REPOSITORY_NAME` is the name of the target repository defined in TAP 4,
