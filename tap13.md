@@ -1,5 +1,5 @@
 * TAP: 13
-* Title: User Selection of the Top-Level Target Files Through Mapping Metadata
+* Title: User Selection of the Top-Level Targets Files Through Mapping Metadata
 * Version: 1
 * Last-Modified: 02-Nov-2021
 * Author: Justin Cappos, Joshua Lock, Marina Moore, Lukas Pühringer
@@ -37,17 +37,17 @@ For these repositories, the owner of a delegated targets role needs a mechanism
 to ensure that their users can define and pin keys.
 
 To allow for safer use of these untrusted repositories, we propose adding
-namespaces to TUF repositories which enable explicit trust decisions. In This
+namespaces to TUF repositories which enable explicit trust decisions. In this
 mode, if Alice and Bob both use repository X and ask for package foo, they may
 get different results based on their trusted namespaces.
-In summary; this proposal enables clients to restrict the targets they consume
+In summary; this proposal enables clients to restrict the targets roles they consume
 to filtered views of the repository.  
 
 These different views could be defined by either different users on the
 repository, made available by the repository administrator, or be created by
 some other third party. Some likely uses include:
 * **Limiting packages on a repository to those that have been signed by their
-developer.** For example, in the proposed 
+developer.** For example, in the proposed
 [PyPI Maximum Security Model](https://www.python.org/dev/peps/pep-0480/),
 packages that are only signed by the repository are listed under the 'unclaimed'
 targets role, while packages that are signed by developers are delegated
@@ -70,7 +70,7 @@ specific packages and Alice wishes to install only those packages.  Every other
 user clearly should not be subject to those constraints.
 
 Second, Alice may be concerned that a full repository compromise may include
-the root role.  Since the root role in TUF indicates the top-level target's
+the root role.  Since the root role in TUF indicates the top-level targets'
 role key, this compromise can enable the attacker full control of Alice's
 namespace.  Alice may want to require that the security team at her company
 still be used to decide which packages to trust.  
@@ -111,10 +111,10 @@ match with Alice's in this case.
 
 # Specification
 
-In order to support this situation, we propose a change to the mapping
+In order to support this situation, we propose a mapping
 metadata to enable the name and key(s) for a targets metadata file to be specified.
 This targets metadata file will be uploaded to the repository and will be used as though
-it is the top-level targets metadata file by the  client instead of the top-level targets
+it is the top-level targets metadata file by the client instead of the top-level targets
 metadata file listed in the repository's root metadata.  As is true in all TUF repositories,
 all targets metadata files are listed in the snapshot file and benefit from the usual
 rollback and similar protections provided.
@@ -122,10 +122,21 @@ rollback and similar protections provided.
 Note that both the name and the key MUST be specified.  If the name
 were permitted to be specified without the key, then the repository
 would be trusted to serve the correct file, without any offline key attesting
-to which keys indicate the targets role.
+to which keys indicate the targets role. The resulting metadata will look like:
+
+```
+{
+ "targets_rolename": ROLENAME,
+ "threshold": THRESHOLD,
+ "keys":{
+  KEYID : KEY,
+  ...
+ }
+}
+```
 
 As such, we add to the [Mechanisms that Assigns Targets to Repositories](https://github.com/theupdateframework/taps/blob/master/tap4.md#mechanism-that-assigns-targets-to-repositories)
-support for a reference to the targets file in an identical way to the
+support for a reference to the targets metadata file in an identical way to the
 root file's reference in the [TUF specification](https://github.com/theupdateframework/specification/blob/master/tuf-spec.md#4-document-formats).
 However, additionally, the file name must be specified as this is no longer
 targets.json.
@@ -138,7 +149,7 @@ files.  All targets metadata files (top-level and otherwise) are also stored in 
 same METAPATH location listed in snapshot.json.
 
 The changes in the client application workflow are fairly minor from this
-TAP.  Steps 4.0 and 4.4.0 should refer to the specified target's metadata file instead
+TAP.  Steps 4.0 and 4.4.0 should refer to the specified targets' metadata file instead
 of the top-level targets metadata file.  Additionally, instead of verifying the targets metadata
 file using the key in the root metadata in step 4.0, verification must use the
 keys listed in the mapping metadata.
@@ -146,18 +157,47 @@ keys listed in the mapping metadata.
 There likely also needs to be a clarity pass throughout to make this potential
 use mode clearer in the specification.
 
-From an operational standpoint, a lost targets key for a delegated target could have been
+From an operational standpoint, a lost targets key for a delegated targets role could have been
 remedied before by the repository but this no longer works in every case.  For example,
-previously if the repository delegated to a target from the top-level targets role, that 
+previously if the repository delegated to a targets role from the top-level targets role, that
 file could be updated by the top-level targets role if Alice’s key changed or was lost.  
 However, as the repository’s root role is no longer trusted to provide top-level targets keys
 and different clients may have different top-level targets keys, any clients using this
 TAP must take more care.  Thus, one should take into account the operational difficultly to touch
-clients in the case of key loss or compromise for the top-level targets metadata file.  If it is 
-operationally difficult to touch the clients, then the client may perhaps use a threshold of 
-offline keys before delegating to a developer’s key.  [TAP 8](tap8.md) also provides support for 
+clients in the case of key loss or compromise for the top-level targets metadata file.  If it is
+operationally difficult to touch the clients, then the client may perhaps use a threshold of
+offline keys before delegating to a developer’s key.  [TAP 8](tap8.md) also provides support for
 cases where the key needs to be rotated or changed and the key is still accessible to the developer.
 
+## Interaction with TAP 4
+
+If a client is using TAP 4 to provide mapping metadata to multiple repositories,
+they MAY provide a TAP 13 targets mapping for each repository or group of repositories.
+An optional `targets_mappings` field will be added to TAP 4 to provide this mapping
+when TAP 13 is used. The mappings will be resolved in order, so the first mapping
+will have higher priority than the second, and so on. This field will be resolved
+after the TAP 4 `mapping` field and will contain:
+
+```
+"targets_mappings": [
+   {
+     "repositories": [REPOSITORY_NAME, ...],
+     "targets_rolename": ROLENAME,
+     "threshold": THRESHOLD,
+     "keys":{
+        KEYID : KEY,
+        ...
+     }
+   },
+   ...
+]
+```
+
+Where `REPOSITORY_NAME` is the name of the target repository defined in TAP 4,
+and the other fields are as described above.
+
+If a client is not using TAP 4, the targets mapping may instead be in a separate
+metadata file as described above.
 
 # Security Analysis
 
