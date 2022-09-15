@@ -377,7 +377,9 @@ will have the following fields:
 
 ```
 
-where `VERSION` is the name of a supported major version (i.e. 2).
+where `VERSION` is the integer name of a supported major version (i.e. 2).
+For backwards compatability, version 1 should be assumed to be in the top-level
+repository with no directory named 1.
 
 ## Changes to TUF clients
 
