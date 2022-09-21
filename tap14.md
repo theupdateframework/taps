@@ -248,8 +248,10 @@ has been updated to include the TUF Version field.
 
 ## How a repository updates
 
-Repositories will add metadata for new TUF specification versions in new
-directories and SHOULD maintain a `supported-versions` file.
+Repositories will add two things. They MUST put metadata for new TUF
+specification versions in new
+directories. In addition, repositories SHOULD maintain a `supported-versions` file
+to indicate which specification versions are supported.
 
 As described in the [Rationale](#rationale), repositories should support multiple
 TUF specification versions. In order to do so, this TAP proposes a new directory
@@ -368,16 +370,23 @@ upgrades from version 1.x.x to version 2.0.0 may look like:
 Not all TUF repositories have a mechanism that is  able to list all directories
 in a folder (the equivalent of the `ls` command). For these repositories (such
 as OCI registries or http servers), the repository SHOULD include a
-`supported-versions` file in the top of this directory structure that lists
+`supported-versions.json` file in the top of this directory structure that lists
 all versions supported by the repository to allow for client discovery. This file
-will have the following fields:
+will be signed by a threshold of root keys, and the `signed` portion will have
+the following fields:
 
 ```
-{ "supported_versions" : [VERSION, ...],
+{ "supported_versions" : [
+    { MAJOR_VERSION: FOLDER_NAME},
+    ...
+  ]
+}
 
 ```
 
-where `VERSION` is the integer name of a supported major version (i.e. 2).
+where `MAJOR_VERSION` is the integer representing a supported major version (i.e. 2)
+and `FOLDER_NAME` is the integer representing the folder containing metadata for
+this supported major version. In most cases, `MAJOR_VERSION` should match `FOLDER_NAME`.
 For backwards compatability, version 1 should be assumed to be in the top-level
 repository with no directory named 1.
 
