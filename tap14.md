@@ -163,7 +163,7 @@ with a directory for each supported TUF specification version. These directories
 contain metadata that supports the given TUF specification version. Using these
 directories, a client is able to choose the most recent metadata they support.
 More details about this directory structure are contained in the [specification](#how-a-repository-updates).
-The repository may also maintain a `supported-versions` file so that the client
+The repository may also maintain a `supported-versions.json` file so that the client
 can discover the supported specification versions on the repository.
 
 On the client side, this TAP also requires maintenance of multiple versions that
@@ -250,7 +250,7 @@ has been updated to include the TUF Version field.
 
 Repositories will add two things. They MUST put metadata for new TUF
 specification versions in new
-directories. In addition, repositories SHOULD maintain a `supported-versions` file
+directories. In addition, repositories SHOULD maintain a `supported-versions.json` file
 to indicate which specification versions are supported.
 
 As described in the [Rationale](#rationale), repositories should support multiple
@@ -385,7 +385,7 @@ the following fields:
 ```
 
 where `MAJOR_VERSION` is the integer representing a supported major version (i.e. 2)
-and `FOLDER_NAME` is the integer representing the folder containing metadata for
+and `FOLDER_NAME` is the string representing the folder containing metadata for
 this supported major version. In most cases, `MAJOR_VERSION` should match `FOLDER_NAME`.
 For backwards compatability, version 1 should be assumed to be in the top-level
 repository with no directory named 1.
@@ -427,7 +427,7 @@ following procedure:
 
 * The client determines the latest version available on the repository by
 looking for the directory with the largest version number, or by parsing the
-`supported-versions` file.
+`supported-versions.json` file.
 * If the latest version on the repository is lower than the previous
 specification version the client used from this repository, the client
 should report an error and terminate the update.
@@ -561,7 +561,7 @@ A downgrade attack on the TUF specification version may be possible if an
 attacker is able to block access to a directory on the repository. This would
 mean that a client would use metadata from a previous specification version when
 performing an update. Similarly, an attacker on the repository could replace the
-`supported-versions` file to remove the most recent specification version.
+`supported-versions.json` file to remove the most recent specification version.
 However, in both of these cases the metadata would still have to be current and
 properly signed.
 
