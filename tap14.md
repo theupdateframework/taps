@@ -377,16 +377,19 @@ the following fields:
 
 ```
 { "supported_versions" : [
-    { MAJOR_VERSION: FOLDER_NAME},
+    { "version": MAJOR_VERSION,
+      "path": FOLDER_NAME},
     ...
   ]
 }
 
 ```
 
-where `MAJOR_VERSION` is the integer representing a supported major version (i.e. 2)
+where `MAJOR_VERSION` is the integer representing a supported major version
 and `FOLDER_NAME` is the string representing the folder containing metadata for
-this supported major version. In most cases, `MAJOR_VERSION` should match `FOLDER_NAME`.
+this supported major version (e.g. { "version": 2, "path": "2" }).
+`FOLDER_NAME` MUST NOT contain any subdirectories.
+In most cases, `MAJOR_VERSION` should match `FOLDER_NAME`.
 For backwards compatability, version 1 should be assumed to be in the top-level
 repository with no directory named 1.
 
