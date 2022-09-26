@@ -357,17 +357,17 @@ For existing TUF clients to continue operation after this TAP is implemented,
 repositories may store metadata from before TUF 2.0.0 in the top-level
 repository (with no directory named 1). This allows existing clients to
 continue downloading metadata from the repository. So a TUF repository that
-upgrades from version 1.x.x to version 2.0.0 may look like:
+upgrades from version 1.x.y to version 2.0.0 may look like:
 
 
 ```
 - Targets files
-- 1.x.x metadata files
+- 1.x.y metadata files
 - 2
-  |- 2.x.x metadata files
+  |- 2.x.y metadata files
 ```
 
-Not all TUF repositories have a mechanism that is  able to list all directories
+Not all TUF repositories have a mechanism that is able to list all directories
 in a folder (the equivalent of the `ls` command). For these repositories (such
 as OCI registries or http servers), the repository SHOULD include a
 `supported-versions.json` file in the top of this directory structure that lists
