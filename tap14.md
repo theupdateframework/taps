@@ -225,7 +225,7 @@ and so clients and repositories need to use code that supports the same major
 version when performing an update in order to maintain security and functionality.
 
 If the change adds a new feature that is backwards compatible, for example in
-TAP 4 and TAP 10, it should be part of a new minor version. These TAPs add
+TAP 4, it should be part of a new minor version. These TAPs add
 additional features to TUF, but clients that do not have these features will
 still be able to securely and reliably perform updates from repositories that
 support the TAPs. There may be minor differences as to which updates a client
