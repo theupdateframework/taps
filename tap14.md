@@ -190,7 +190,7 @@ metadata files while allowing flexibility in how repositories and delegations
 are managed.
 
 For example, during the course of an update a client could use 4.0.0_parse_root,
-4.0.0_parse_snapshot, 4.0.0_parse_timestamp, 4.0.0_parse_targets,
+4.0.0_parse_timestamp, 4.0.0_parse_snapshot, 4.0.0_parse_targets,
 4.0.0_parse_delegation, and 3.0.0_parse_delegation.
 
 
