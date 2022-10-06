@@ -303,9 +303,9 @@ maintained. Inclusion of this field will signal to clients both that they will
 need to upgrade to the next specification version before the timestamp, and
 that there will not be metadata available in the current directory after this
 point. The client can check the `becomes_obsolete` field in root metadata
-before checking the metadata expiration. This allows them to differentiate
-between metadata that is expired due to deprecation and metadata that is expired
-due to an attack. Delegated targets may include this field independent of
+before checking the metadata expiration. This allows them to differentiate between metadata
+that is expired due to intended deprecation, and metadata that is expired, e.g. because
+an attacker blocked the update. Delegated targets may include this field independent of
 top-level metadata to indicate when the metadata they are responsible for will
 no longer support a given TUF specification version. With the addition of this
 field, the "signed" portion of targets metadata will include the following:
