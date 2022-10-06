@@ -478,7 +478,9 @@ So, if the currently trusted root file is named 4.root.json and uses version
 5.root.json first in 3, then 2, then 1. If this file is found, the
 client will look for 6.root.json using the same process. To facilitate this, the
 client should maintain functions to parse root files from previous spec
-versions. If the client does not support the specification version of a root file, the
+versions. Note that the library that supports a given spec version may also use
+a different naming convention than VERSION.root.json to find the root metadata.
+If the client does not support the specification version of a root file, the
 client shall terminate the update and report the specification version mismatch.
 
 When a client validates root and targets metadata, they may check for the
