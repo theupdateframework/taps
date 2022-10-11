@@ -1,7 +1,7 @@
 * TAP: 14
 * Title: Managing TUF Versions
 * Version: 1
-* Last-Modified: 07-August-2020
+* Last-Modified: 07-October-2022
 * Author: Marina Moore, Justin Cappos
 * Status: Draft
 * Content-Type: text/markdown
@@ -163,6 +163,8 @@ with a directory for each supported TUF specification version. These directories
 contain metadata that supports the given TUF specification version. Using these
 directories, a client is able to choose the most recent metadata they support.
 More details about this directory structure are contained in the [specification](#how-a-repository-updates).
+This TAP will also add a `supported_versions` field to root metadata so that the client
+can discover the supported specification versions on the repository.
 
 On the client side, this TAP also requires maintenance of multiple versions that
 support different major TUF specification
@@ -178,7 +180,8 @@ version. A specification change may rely on more than one metadata file (for
 example a change in the signing process would affect all metadata types), so
 using the same specification version for top-level metadata allows for these
 large changes to the specification. For information about how this relates to
-url pinning and TAP 5, see [Special Cases](#tap-5). However, delegated targets metadata may not be
+targets metadata pinning and TAP 13, see [Special Cases](#tap-13). However,
+delegated targets metadata might not be
 managed by the same parties as the top-level metadata. For this reason, this TAP
 allows clients to use a different TUF specification version for delegated
 targets by maintaining functions to parse metadata that conforms to different
@@ -186,9 +189,9 @@ specification versions. This compromise allows TUF specification changes to affe
 metadata files while allowing flexibility in how repositories and delegations
 are managed.
 
-For example, during the course of an update a client could use 4.0.0_parse_root,
-4.0.0_parse_snapshot, 4.0.0_parse_timestamp, 4.0.0_parse_targets,
-4.0.0_parse_delegation, and 3.0.0_parse_delegation.
+For example, during the course of an update a client could use `4.0.0_parse_root`,
+`4.0.0_parse_snapshot`, `4.0.0_parse_timestamp`, `4.0.0_parse_targets`,
+`4.0.0_parse_delegation`, and `3.0.0_parse_delegation`.
 
 
 # Specification
@@ -222,7 +225,7 @@ and so clients and repositories need to use code that supports the same major
 version when performing an update in order to maintain security and functionality.
 
 If the change adds a new feature that is backwards compatible, for example in
-TAP 4 and TAP 10, it should be part of a new minor version. These TAPs add
+TAP 4, it should be part of a new minor version. These TAPs add
 additional features to TUF, but clients that do not have these features will
 still be able to securely and reliably perform updates from repositories that
 support the TAPs. There may be minor differences as to which updates a client
@@ -234,6 +237,7 @@ small changes to existing features. More details about what constitutes a major,
 minor, or patch change can be found at https://semver.org/.
 
 ### Changes to TAPs
+
 In order to manage changes to TUF, TAPs shall be tied to a version of the TUF
 specification.
 
@@ -244,14 +248,16 @@ has been updated to include the TUF Version field.
 
 ## How a repository updates
 
-Repositories will add metadata for new TUF specification versions in new
-directories.
+Repositories will add two things. They MUST put metadata for new TUF
+specification versions in new
+directories. In addition, root metadata on a repository MUST add a `supported_versions` field
+to indicate which specification versions are supported.
 
 As described in the [Rationale](#rationale), repositories should support multiple
 TUF specification versions. In order to do so, this TAP proposes a new directory
 structure for repositories. When a repository manager chooses to upgrade to a
 new major TUF specification version, they create a new directory on the repository named
-for the major version (for example 2.0.0). This directory will contain all
+for the major version (for example 2). This directory will contain all
 metadata files for the new specification version, but target files will remain in the
 parent directory to save space. In this case the metadata files (in directories according to their spec
 version) can point to target files relative to the parent directory. After creating
@@ -259,23 +265,23 @@ the directory, the repository creates and signs root, snapshot, timestamp, and
 top-level targets metadata using the new TUF specification version and places these
 metadata files in the directory. The root file should be signed by both the new
 root key and the current root key (the root key from the most recent metadata in
-the previous major specification version). Clients will now be able to use the new
+the previous major specification version). The new supported version number, and information about the new root metadata will then be added to `supported-versions` in all previously supported specification versions. Clients will now be able to use the new
 metadata files once their TUF specification versions are also updated. After an update to
 version 2.0.0, the repository structure may look like:
 
 
 ```
 - Target files
-- 1.0.0
+- 1
   |- metadata files
-- 2.0.0
+- 2
   |- metadata files
 ```
 
 Repository updates to a new minor or patch specification version shall be done
 by uploading new metadata files in the new format to the proper directory. So if
 a repository updates from 2.0.0 to 2.1.0, the 2.1.0 metadata would go in the
-directory named 2.0.0. Minor and patch version changes are backwards compatible,
+directory named 2. Minor and patch version changes are backwards compatible,
 so clients using version 2.0.0 will still be able to parse metadata written
 using version 2.1.0.
 
@@ -297,9 +303,9 @@ maintained. Inclusion of this field will signal to clients both that they will
 need to upgrade to the next specification version before the timestamp, and
 that there will not be metadata available in the current directory after this
 point. The client can check the `becomes_obsolete` field in root metadata
-before checking the metadata expiration. This allows them to differentiate
-between metadata that is expired due to deprecation and metadata that is expired
-due to an attack. Delegated targets may include this field independent of
+before checking the metadata expiration. This allows them to differentiate between metadata
+that is expired due to intended deprecation, and metadata that is expired, e.g. because
+an attacker blocked the update. Delegated targets may include this field independent of
 top-level metadata to indicate when the metadata they are responsible for will
 no longer support a given TUF specification version. With the addition of this
 field, the "signed" portion of targets metadata will include the following:
@@ -337,29 +343,62 @@ And the "signed" portion of root will include:
 
 where `BECOMES_OBSOLETE` is a timestamp.
 
-A repository should generate all TUF metadata, including root metadata, for all
-TUF versions that the repository supports. Any update should be reflected across
-all of these versions. For clarity, version numbers used for consistent
-snapshots should be consistent across all
-supported specification versions so that a client can find the current
-metadata files. This means that there may be a file at 1.0.0/3.root.json as well
-as 2.0.0/3.root.json. Root metadata files with the same consistent snapshot number must
-also use the same keys so that a client can find the next root metadata file in whichever
-specification version they support.
-
 For existing TUF clients to continue operation after this TAP is implemented,
 repositories may store metadata from before TUF 2.0.0 in the top-level
-repository (with no directory named 1.0.0). This allows existing clients to
+repository (with no directory named 1). This allows existing clients to
 continue downloading metadata from the repository. So a TUF repository that
-upgrades from version 1.0.0 to version 2.0.0 may look like:
+upgrades from version 1.x.y to version 2.0.0 may look like:
 
 
 ```
 - Targets files
-- 1.0.0 metadata files
-- 2.0.0
-  |- 2.0.0 metadata files
+- 1.x.y metadata files
+- 2
+  |- 2.x.y metadata files
 ```
+
+In order to fascilitate the upgrade to a new specification version, root metadata for all supported spec versions MUST add a `supported_versions` field before upgrading to spec version 2.0.0.
+This field will serve two purpose.
+
+
+First, not all TUF repositories have a mechanism that is able to list all directories
+in a folder (the equivalent of the `ls` command). For these repositories (such
+as OCI registries or http servers), as well as to prevent specification version
+freeze attacks, the `supported_versions` field will lists
+all versions supported by the repository to allow for client discovery.
+
+Second, the root metadata format or versioning scheme may change between major specification versions.
+The `supported_versions` field will contain the filename and a secure hash of the first root metadata file that should be used in the new specification version.
+
+As it is
+included in root metadata, the contents of `supported_versions` will be signed by a threshold of root keys, securing against a specification version rollback, and signing the new trusted root metadata.
+This field will contain the following:
+
+```
+{ ...,
+  "supported_versions" : [
+    { "version": MAJOR_VERSION,
+      "path": FOLDER_NAME,
+      "root-filename": ROOT_FILENAME,
+      "root-digest": ROOT_DIGEST
+      },
+    ...
+  ]
+}
+
+```
+
+where `MAJOR_VERSION` is the integer representing a supported major version
+and `FOLDER_NAME` is the string representing the folder containing metadata for
+this supported major version (e.g. { "version": 2, "path": "2" }).
+`FOLDER_NAME` MUST NOT contain any subdirectories.
+In most cases, `MAJOR_VERSION` should match `FOLDER_NAME`.
+For backwards compatability, version 1 should be assumed to be in the top-level
+repository with no directory named 1. `ROOT_FILENAME` is the name of the root metadata file in the new specification version. `ROOT_DIGEST` is the digest of the new root metadata file.
+
+A repository should generate all TUF metadata, including root metadata, for all
+TUF versions that the repository supports. Any update to TUF targets or delegations should be reflected across
+all of these versions.
 
 ## Changes to TUF clients
 
@@ -389,7 +428,7 @@ remove the higher version and force the client to use a lower versioned,
 potentially less secure specification version.
 
 
-## Changes to the update process
+### Changes to the update process
 
 When a TUF client downloads metadata from a repository, the client must
 determine which specification version to use for the download. To do this,
@@ -397,55 +436,39 @@ the client looks for the highest supported version on the repository using the
 following procedure:
 
 * The client determines the latest version available on the repository by
-looking for the directory with the largest version number.
-* If the latest version on the repository is lower than the previous
+parsing the `supported_versions` field in the currently trusted root metadata.
+* The client determines the specification version to use using the following:
+	* If the latest version on the repository is lower than the previous
 specification version the client used from this repository, the client
 should report an error and terminate the update.
-* If the latest version on the repository is equal to that of the client, it
-will use this directory to download metadata.
-* If the latest version pre-dates the client specification version, it may call functions
+	* If the latest version on the repository is equal to that of the client, it
+will use this version to download metadata.
+	* If the latest version pre-dates the client specification version, it may call functions
 from a previous client version to download the metadata. The client may support
 as many or as few versions as desired for the application. If the previous
 version is not available, the client shall report that an update can not be
 performed due to an old specification version on the repository.
-* If the latest version on the repository is higher than the client spec
+	* If the latest version on the repository is higher than the client spec
 version, the client should report to the user that it is not using the most up
 to date version, and then perform the update with the directory that corresponds with the latest
 client specification version, if available. If no such directory exists, the client
 terminates the update.
+* If the client will be using a higher specification version than on their previous update, they will update their trusted root metadata by downloading the metadata available in the new specification version's directory at the root metadata location specified in the currently trusted root metadata. The client will verify that the hash of this file matches the digest listed in the current root metadata. If so, the client will set their trusted root metadata to the downloaded file.
 
-Once the supported directory is determined, the client shall attempt the update
-using the metadata in this directory.
+Once the supported directory is determined and root metadata is updated, the client shall attempt the update
+using the metadata in this directory. Every time the trusted root metadata
+file is updated, the client should perform this check to determine the specification version to use going forward.
 
 For example, if a client has a specification version of 3.5 and a repository has
-directories for 2.0.0, 3.0.0, and 4.0.0, the client will report that spec
-version 4.x is available, then download metadata from the 3.0.0 directory. This reporting is
-up to the discretion of an implementer, but it should be used to encourage
+directories for 2, 3, and 4, the client will report that spec
+version 4.x is available, then download metadata from the 3 directory. This reporting is
+up to the discretion of each application, but it should be used to encourage
 updating the client to the most recent specification version.
 
 Alternatively, if the same client downloads metadata from a repository with
-directories 1.0.0 and 2.0.0, the client could download metadata from 2.0.0 using
+directories 1 and 2, the client could download metadata from 2 using
 a 2.x version of the client. If 2.x is not supported by the client, the client
 will report that it is unable to perform an update.
-
-Once the supported directory is determined, the client must validate root
-metadata from this directory. If the currently trusted root file saved on the
-client uses a specification version other than the supported version, the client will
-look for the next root file. The next root file may have been generated using
-the supported version, or it may have been generated using a previous TUF
-version. The client will look for the root file first in the supported version,
-then move to the previous versions until the next root file is found, or until
-the currently trusted root file's version is reached. All root files must be
-verified using the major version of the TUF client that corresponds with the
-major version of the root file.
-
-So, if the currently trusted root file is named 4.root.json and uses version
-1.0.0 and the highest supported version is 3.0.0, the client will look for
-5.root.json first in 3.0.0, then 2.0.0, then 1.0.0. If this file is found, the
-client will look for 6.root.json using the same process. To facilitate this, the
-client should maintain functions to parse root files from previous spec
-versions. If the client does not support the specification version of a root file, the
-client shall terminate the update and report the specification version mismatch.
 
 When a client validates root and targets metadata, they may check for the
 `becomes_obsolete` field. If this field is present, the client should do
@@ -478,25 +501,26 @@ provided by each repository. Note that different TUF versions may use different
 hashing algorithms. If this is the case, both hashes should be verified
 independently.
 
-### TAP 5
+### TAP 13
 
-A TUF client that supports TAP 5 may download top-level metadata from multiple
-sources. However, breaking changes may require that multiple top-level metadata
-files use the same TUF specification version. To manage this, a root metadata
-file that includes a list of urls for metadata as described in TAP 5 should
-only include links to metadata files using the same TUF specification version as
-the root metadata file.
+A TUF client that supports TAP 13 may download targets metadata that were
+uploaded by different parties.
+However, breaking changes may require that all top-level metadata
+files use the same TUF specification version. To manage this, a client
+configuration file that lists a custom top-level targets metadata file
+as described in TAP 13 should only include targets metadata files using the
+same TUF specification version as the root metadata file.
 
-The owner of root metadata is responsible for ensuring that all metadata files
-linked in the root metadata use the same TUF specification version as the root
+The owner of the client configuration is responsible for ensuring that any
+custom targets metadata files use the same TUF specification version as the root
 metadata. If the repository that contains the root metadata supports multiple
-TUF specification versions, each root metadata file should list top-level
-metadata corresponding with its TUF specification version.
+TUF specification versions, the client configuration should list a targets metadata
+file that is available in all supported specification versions.
 
 Clients should verify that all top-level metadata use the same TUF specification
-version as the root metadata. If a metadata file linked in root metadata does
-not meet this criteria, it will be considered invalid and the client should
-use the next listed metadata file or terminate the update.
+version as the root metadata. If a metadata file provided by the TAP 13 configuration
+does not meet this criteria, it will be considered invalid and the client should
+terminate the update.
 
 ### Delegations
 
@@ -510,14 +534,6 @@ version (found using the same procedure as described in
 compatible specification version between the client and delegation, the client
 should report this and terminate the update.
 
-### Updating Trusted Root Metadata
-
-To allow for future updates after a major version change, the client must update
-its trusted root metadata to one that complies with the new specification
-version. To do so, the client first downloads and verifies the current version
-root metadata file, which then must be stored as the trusted root metadata. In
-future updates, the client will start from the trusted root metadata to find the
-next available update.
 
 # Security Analysis
 
@@ -529,8 +545,9 @@ attacks and changes to the security model that should be discussed.
 A downgrade attack on the TUF specification version may be possible if an
 attacker is able to block access to a directory on the repository. This would
 mean that a client would use metadata from a previous specification version when
-performing an update. However, the metadata would still have to be current and
-properly signed.
+performing an update.
+However, a client would be able to detect this attack using the `supported_versions`
+field listed in root metadata and signed with root keys.
 
 Clients that have previously used a repository will store the specification
 version used to communicate with that repository, so a downgrade attack will
@@ -546,10 +563,8 @@ should be revoked or allowed to expire). In addition, clients should be upgraded
 to no longer support a vulnerable specification version.
 
 ## Root Key Rotation
-The TUF version upgrade system described in this TAP uses the root key rotation
-mechanism to ensure that the client only uses valid TUF metadata. The first time
-a new TUF version is used by the client, it checks the repository's root
-metadata in the new version's format. If the root metadata is not signed by the
+The TUF version upgrade system described in this TAP uses the previous trusted root metadata to sign the root metadata in future specification versions. The first time
+a new TUF version is used by the client, it checks the new root metadata against the hash listed in the root metadata of the previously used specification version. If the root metadata is not signed by the
 previous trusted root key, the update does not proceed, and the client halts the
 update. In this way, updates to the repository's TUF version do not impact the
 security of an update.
