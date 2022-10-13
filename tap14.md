@@ -1,9 +1,9 @@
 * TAP: 14
 * Title: Managing TUF Versions
 * Version: 1
-* Last-Modified: 07-October-2022
+* Last-Modified: 13-October-2022
 * Author: Marina Moore, Justin Cappos
-* Status: Draft
+* Status: Accepted
 * Content-Type: text/markdown
 * Created: 19-December-2018
 
@@ -601,7 +601,7 @@ in the specification section.
 # Augmented Reference Implementation
 
 Semantic Versioning was added to the TUF Reference Implementation in [#914](https://github.com/theupdateframework/python-tuf/pull/914).
-The rest of this proposal has not yet been implemented.
+The rest of the proposal is implemented as a proof of conceps in [#2114](https://github.com/theupdateframework/python-tuf/pull/2114). The pr can be finalized once this TAP is accepted.
 
 # Copyright
 
