@@ -268,7 +268,7 @@ the directory, the repository creates and signs root, snapshot, timestamp, and
 top-level targets metadata using the new TUF specification version and places these
 metadata files in the directory. The root file should be signed by both the new
 root key and the current root key (the root key from the most recent metadata in
-the previous major specification version). The new supported version number, and information about the new root metadata will then be added to `supported-versions` in all previously supported specification versions. Clients will now be able to use the new
+the previous major specification version). The new supported version number, and information about the new root metadata will then be added to `supported_versions` in all previously supported specification versions. Clients will now be able to use the new
 metadata files once their TUF specification versions are also updated. After an update to
 version 2.0.0, the repository structure may look like:
 
