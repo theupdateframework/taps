@@ -266,11 +266,13 @@ parent directory to save space. In this case the metadata files (in directories 
 version) can point to target files relative to the parent directory. After creating
 the directory, the repository creates and signs root, snapshot, timestamp, and
 top-level targets metadata using the new TUF specification version and places these
-metadata files in the directory. The root file should be signed by both the new
-root key and the current root key (the root key from the most recent metadata in
-the previous major specification version). The new supported version number, and information about the new root metadata will then be added to `supported_versions` in all previously supported specification versions. Clients will now be able to use the new
-metadata files once their TUF specification versions are also updated. After an update to
-version 2.0.0, the repository structure may look like:
+metadata files in the directory. The root file should be signed by the new root keys
+listed in the file. A digest of the signed root metadata, along with the new
+supported version numver  will then be added to the `supported_versions` field in
+a new root metadata file for all previously supported specififcation versions.
+Clients will now be able to use the new metadata files once their TUF specification
+versions are also updated. After an update to version 2.0.0, the repository
+structure may look like:
 
 
 ```
@@ -399,6 +401,10 @@ In most cases, `MAJOR_VERSION` should match `FOLDER_NAME`.
 For backwards compatability, version 1 should be assumed to be in the top-level
 repository with no directory named 1. `ROOT_FILENAME` is the name of the root metadata file in the new specification version. `ROOT_DIGEST` is the digest of the new root metadata file.
 
+The `root-digest` field MUST be empty for the supported version that matches the
+specification version used by the current root metadata file. `supported_versions`
+MAY leave out the specification version used by the current root metadata.
+
 A repository should generate all TUF metadata, including root metadata, for all
 TUF versions that the repository supports. Any update to TUF targets or delegations should be reflected across
 all of these versions.
@@ -462,13 +468,11 @@ parsing the `supported_versions` field in the currently trusted root metadata.
 	* If the latest version on the repository is lower than the previous
 specification version the client used from this repository, the client
 should report an error and terminate the update.
-	* If the latest version on the repository is equal to that of the client, it
+	* If the latest version on the repository is equal to the latest version  of the client, it
 will use this version to download metadata.
-	* If the latest version pre-dates the client specification version, it may call functions
-from a previous client version to download the metadata. The client may support
-as many or as few versions as desired for the application. If the previous
-version is not available, the client shall report that an update can not be
-performed due to an old specification version on the repository.
+	* If the latest version on the repository is less that the latest version of the client specification version, the client may use the latest version on the repository
+  if this version is supported by the client. If this version is not supported by the client, the client shall report that an update can not be
+    performed due to an old specification version on the repository.
 	* If the latest version on the repository is higher than the client spec
 version, the client should report to the user that it is not using the most up
 to date version, and then perform the update with the directory that corresponds with the latest
