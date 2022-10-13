@@ -160,7 +160,10 @@ period of time after upgrading. This grace period gives existing clients that
 implement old versions of the TUF specification time to implement support for a
 new specification version. Repositories achieve this using a directory structure
 with a directory for each supported TUF specification version. These directories
-contain metadata that supports the given TUF specification version. Using these
+contain metadata that supports the given TUF specification version. The
+repository may generate metadata for each directory using independent,
+version-specific code, or they may optimize when there is redundant metadata
+between different versions of the specification. Using these
 directories, a client is able to choose the most recent metadata they support.
 More details about this directory structure are contained in the [specification](#how-a-repository-updates).
 This TAP will also add a `supported_versions` field to root metadata so that the client
@@ -399,6 +402,24 @@ repository with no directory named 1. `ROOT_FILENAME` is the name of the root me
 A repository should generate all TUF metadata, including root metadata, for all
 TUF versions that the repository supports. Any update to TUF targets or delegations should be reflected across
 all of these versions.
+
+### Generating metadata for multiple specification versions
+
+There are a couple of strategies that repositories MAY employ to generate TUF
+metadata for multiple specification versions. The simplest option is for
+repositories to keep a fork of the code that uses
+the old specification version, and generate all metadata for each specification
+version using both this fork and the latest code. For efficiency, repositories
+may instead re-generate only those metadata files that were effected by the
+breaking changes in the specification. For example, if version 3.0.0 introduces
+a new snapshot metadata format, a repository that supports major versions 2 and
+3 may generate all metadata using the latest version, then call just the
+functions from the version 2 code that are used to generate snapshot metadata.
+
+For additional optimizations, the repository could any duplicate metadata files
+only once in the most recent specification version directory, then hard link
+to this copy from other directories. This strategy has been used to link
+duplicate metadata files used for consistent snapshots.
 
 ## Changes to TUF clients
 
