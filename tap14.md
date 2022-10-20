@@ -346,7 +346,7 @@ And the "signed" portion of root will include:
 }
 ```
 
-where `BECOMES_OBSOLETE` is a timestamp.
+where `BECOMES_OBSOLETE` is a date-time string with the same format as `expires`
 
 For existing TUF clients to continue operation after this TAP is implemented,
 repositories may store metadata from before TUF 2.0.0 in the top-level
@@ -383,7 +383,6 @@ This field will contain the following:
 { ...,
   "supported_versions" : [
     { "version": MAJOR_VERSION,
-      "path": FOLDER_NAME,
       "root-filename": ROOT_FILENAME,
       "root-digest": ROOT_DIGEST
       },
@@ -394,16 +393,15 @@ This field will contain the following:
 ```
 
 where `MAJOR_VERSION` is the integer representing a supported major version
-and `FOLDER_NAME` is the string representing the folder containing metadata for
-this supported major version (e.g. { "version": 2, "path": "2" }).
-`FOLDER_NAME` MUST NOT contain any subdirectories.
-In most cases, `MAJOR_VERSION` should match `FOLDER_NAME`.
 For backwards compatability, version 1 should be assumed to be in the top-level
 repository with no directory named 1. `ROOT_FILENAME` is the name of the root metadata file in the new specification version. `ROOT_DIGEST` is the digest of the new root metadata file.
 
 The `root-digest` field MUST be empty for the supported version that matches the
 specification version used by the current root metadata file. `supported_versions`
-MAY leave out the specification version used by the current root metadata.
+MAY leave out the specification version used by the current root metadata, and any
+older specification versions. So all supported versions greater than the specification
+version of the root metadata MUST be included, and any less than or equal to
+the current specification version MAY be included.
 
 A repository should generate all TUF metadata, including root metadata, for all
 TUF versions that the repository supports. Any update to TUF targets or delegations should be reflected across
