@@ -256,11 +256,62 @@ specification versions in new
 directories. In addition, root metadata on a repository MUST add a `supported_versions` field
 to indicate which specification versions are supported.
 
+In order to fascilitate the upgrade to a new specification version, root metadata for all supported spec versions MUST add a `supported_versions` field before upgrading to spec version 2.0.0.
+This field will serve two purpose.
+
+
+First, not all TUF repositories have a mechanism that is able to list all directories
+in a folder (the equivalent of the `ls` command). For these repositories (such
+as OCI registries or http servers), as well as to prevent specification version
+freeze attacks, the `supported_versions` field will lists
+all versions supported by the repository to allow for client discovery.
+
+Second, the root metadata format or versioning scheme may change between major specification versions.
+The `supported_versions` field will contain the filename and a secure hash of the first root metadata file that should be used in the new specification version.
+
+As it is
+included in root metadata, the contents of `supported_versions` will be signed by a threshold of root keys, securing against a specification version rollback, and signing the new trusted root metadata.
+This field will contain the following:
+
+```
+{ ...,
+  "supported_versions" : [
+    { "version": MAJOR_VERSION,
+      "path": VERSION_PATH,
+      "features": FEATURES_STRING,
+      "root-filename": ROOT_FILENAME,
+      "root-digest": ROOT_DIGEST
+      },
+    ...
+  ]
+}
+
+```
+
+where `MAJOR_VERSION` is the integer representing a supported major version
+For backwards compatability, version 1 should be assumed to be in the top-level
+repository with no directory named 1. `ROOT_FILENAME` is the name of the root metadata file in the new specification version. `ROOT_DIGEST` is the digest of the new root metadata file.
+`VERSION_PATH` is the path to the directory for this version. In many cases, this will match the specification version, ie "2/".
+`FEATURES_STRING` is a string for the features supported in this version. This string may be used to include an API version for a particular implementation, or to indicate which features in a new specification version are supported. This field MAY be empty, but if it is used, the client MUST ensure that they support the features used. A combination of the specification version and features string will be used to determine which version the client should use. 
+
+All entries in `supported-versions` will be in priority order so that a client will use the last specification version and feature combination that they support.
+
+The `root-digest` field MUST be empty for the supported version that matches the
+specification version and features string used by the current root metadata file. `supported_versions`
+MAY leave out the specification version used by the current root metadata, and any
+older specification versions. So all supported versions greater than the specification
+version of the root metadata MUST be included, and any less than or equal to
+the current specification version MAY be included.
+
+A repository should generate all TUF metadata, including root metadata, for all
+TUF versions that the repository supports. Any update to TUF targets or delegations should be reflected across
+all of these versions.
+
 As described in the [Rationale](#rationale), repositories should support multiple
 TUF specification versions. In order to do so, this TAP proposes a new directory
 structure for repositories. When a repository manager chooses to upgrade to a
-new major TUF specification version, they create a new directory on the repository named
-for the major version (for example 2). This directory will contain all
+new major TUF specification version, they create a new directory on the repository
+for the major version and feature set (for example "2" for version 2). This directory will contain all
 metadata files for the new specification version, but target files will remain in the
 parent directory to save space. In this case the metadata files (in directories according to their spec
 version) can point to target files relative to the parent directory. After creating
@@ -268,7 +319,7 @@ the directory, the repository creates and signs root, snapshot, timestamp, and
 top-level targets metadata using the new TUF specification version and places these
 metadata files in the directory. The root file should be signed by the new root keys
 listed in the file. A digest of the signed root metadata, along with the new
-supported version numver  will then be added to the `supported_versions` field in
+supported version number  will then be added to the `supported_versions` field in
 a new root metadata file for all previously supported specififcation versions.
 Clients will now be able to use the new metadata files once their TUF specification
 versions are also updated. After an update to version 2.0.0, the repository
@@ -286,7 +337,7 @@ structure may look like:
 Repository updates to a new minor or patch specification version shall be done
 by uploading new metadata files in the new format to the proper directory. So if
 a repository updates from 2.0.0 to 2.1.0, the 2.1.0 metadata would go in the
-directory named 2. Minor and patch version changes are backwards compatible,
+same directory. Minor and patch version changes are backwards compatible,
 so clients using version 2.0.0 will still be able to parse metadata written
 using version 2.1.0.
 
@@ -362,50 +413,6 @@ upgrades from version 1.x.y to version 2.0.0 may look like:
   |- 2.x.y metadata files
 ```
 
-In order to fascilitate the upgrade to a new specification version, root metadata for all supported spec versions MUST add a `supported_versions` field before upgrading to spec version 2.0.0.
-This field will serve two purpose.
-
-
-First, not all TUF repositories have a mechanism that is able to list all directories
-in a folder (the equivalent of the `ls` command). For these repositories (such
-as OCI registries or http servers), as well as to prevent specification version
-freeze attacks, the `supported_versions` field will lists
-all versions supported by the repository to allow for client discovery.
-
-Second, the root metadata format or versioning scheme may change between major specification versions.
-The `supported_versions` field will contain the filename and a secure hash of the first root metadata file that should be used in the new specification version.
-
-As it is
-included in root metadata, the contents of `supported_versions` will be signed by a threshold of root keys, securing against a specification version rollback, and signing the new trusted root metadata.
-This field will contain the following:
-
-```
-{ ...,
-  "supported_versions" : [
-    { "version": MAJOR_VERSION,
-      "root-filename": ROOT_FILENAME,
-      "root-digest": ROOT_DIGEST
-      },
-    ...
-  ]
-}
-
-```
-
-where `MAJOR_VERSION` is the integer representing a supported major version
-For backwards compatability, version 1 should be assumed to be in the top-level
-repository with no directory named 1. `ROOT_FILENAME` is the name of the root metadata file in the new specification version. `ROOT_DIGEST` is the digest of the new root metadata file.
-
-The `root-digest` field MUST be empty for the supported version that matches the
-specification version used by the current root metadata file. `supported_versions`
-MAY leave out the specification version used by the current root metadata, and any
-older specification versions. So all supported versions greater than the specification
-version of the root metadata MUST be included, and any less than or equal to
-the current specification version MAY be included.
-
-A repository should generate all TUF metadata, including root metadata, for all
-TUF versions that the repository supports. Any update to TUF targets or delegations should be reflected across
-all of these versions.
 
 ### Generating metadata for multiple specification versions
 
