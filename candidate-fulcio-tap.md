@@ -17,7 +17,7 @@ Developer key management has been a major concern for TUF adoptions, especially 
 
 Protecting a private key from loss or compromise is no simple matter. [Several](https://blog.npmjs.org/post/185397814280/plot-to-steal-cryptocurrency-foiled-by-the-npm) [attacks](https://jsoverson.medium.com/how-two-malicious-npm-packages-targeted-sabotaged-one-other-fed7199099c8) on software update systems have been achieved through the use of a compromised key, as securing private keys can be challenging and sometimes expensive (using hardware tokens such as Yubikeys etc), especially over a period of time.
 
-This TAP proposes a way for developers to use their existing OpenID Connect (OIDC) accounts – such as an email account – to use identity instead of a key as part of a verification policy, so that they do not have to manage any additional keys or passwords.
+This TAP proposes a way for developers to use their existing OpenID Connect (OIDC) accounts – such as an email account – as an identity instead of using a key. This means that they do not have to manage any additional keys or passwords.
 
 # Rationale
 In a previous draft of [PEP 480](https://www.python.org/dev/peps/pep-0480/), the authors proposed using [MiniLock](https://www.minilock.io) – a tool which derives ed25519 keys from a user-chosen passphrase – to simplify developer key management. However, this requires developers to remember a new and additional passphrase for use when uploading packages. Furthermore, the MiniLock project is [no longer maintained](https://github.com/kaepora/miniLock) and has been archived.
@@ -36,31 +36,32 @@ In order to facilitate use of Fulcio, delegations may list an OIDC identity, suc
   “scheme”: "Fulcio",
   “keyval”: {
     “identity”: IDENTITY,
-    “issuer”: ISSUER,
-    "root-cert": ROOT_CERTIFICATE
+    “issuer”: ISSUER
   }
 }
 ```
 
-Where IDENTITY is the OIDC identity of the party who is authorized to sign, ISSUER is the OIDC entity used by Fulcio for verification, and ROOT_CERTIFICATE is the root certificate or certificate chain for this Fulcio server.
+Where IDENTITY is the OIDC identity of the party who is authorized to sign and ISSUER is the OIDC entity used by Fulcio for verification.
+
+The root certificate or certificate chain for the Fulcio server MUST be obtained using the Sigstore root of trust.
 
 Using this mechanism, the developer requests a certificate from Fulcio, Fulcio verifies the developer's identity using OIDC, the developer uses the signing key listed in the certificate to sign their targets metadata, and finally the developer uploads the signed metadata. This signature, and the associated Rekor timestamp obtained by querying the Rekor server, MUST be verified by the repository and MAY be verified by the end user by verifying the certificate through Fulcio and the timestamp through Rekor. The verifier MUST obtain the Rekor root keys using a secure offline method prior to verifying the signature and associated certificate.
 
 
 ## Signature format
-A signature using a Fulcio key MUST include the Fulcio certificate for use in verification. For this verification, this TAP adds a ‘cert’ field to ‘signatures’. With this field, signatures would look like:
+A signature using a Fulcio key MUST include the Fulcio certificate for use in verification. For this verification, this TAP adds a ‘bundle’ field to ‘signatures’ to replace `sig` for this key type. With this field, signatures would look like:
 
 ```
 "signatures" : [
     { "keyid" : KEYID,
-      "sig" : SIGNATURE,
-      “cert”:  CERTIFICATE }
+      “bundle”:  BUNDLE }
       , ... ]
 ```
-Where CERTIFICATE is a Fulcio X.509 signing certificate in PEM format. CERTIFICATE MUST be uploaded to a timestamped transparency log upon creation.
+Where BUNDLE is an object that contains the proof of inclusion in the transparency log, signed tree head, and Fulcio X.509 signing certificate in PEM format, conforming to the [format defined by Sigstore](https://github.com/sigstore/protobuf-specs/blob/main/protos/sigstore_bundle.proto).
 
 ## Signing
 In order to sign metadata using Fulcio, a developer would:
+
 * Generate a key pair locally
 * Initiate an OIDC session to obtain a signed identity token containing an identity such as an email from an OIDC provider
 * Perform a challenge by signing the subjest of the identity token with the public key
@@ -76,11 +77,9 @@ Most of these steps SHOULD be done automatically using a tool, to simplify opera
 
 
 ## Verification
-While performing the steps in the [TUF client workflow](https://theupdateframework.github.io/specification/latest/#detailed-client-workflow), if the client encounters a signature that uses a Fulcio certificate, the client MUST verify the certificate chain up to ROOT_CERTIFICATE.
+While performing the steps in the [TUF client workflow](https://theupdateframework.github.io/specification/latest/#detailed-client-workflow), if the client encounters a signature that uses a Fulcio certificate, the client MUST verify the certificate chain up to the root certificate and verify the inclusion proof to ensure that the key was valid at the time it was used to sign TUF metadata.
 
-In addition, the repository SHOULD, and clients MAY additionally query the Rekor transparency log to ensure that the Fulcio certificate is valid at the time that it was issued. To do so the user can directly query the transparency log for the Fulcio certificate. They can then verify that the certificate was uploaded to Rekor, and use the timestamp in Rekor to verify that the key was valid at the time it was used to sign TUF metadata. The repository SHOULD skip this step if the Fulcio certificate was valid at the time it was uploaded to the repository. Clients MAY skip this step if they would like to rely on the repository to perform the timeliness check. If the client skips this check and the repository is compromised, an attacker could allow the use of expired Fulcio certificates.
-
-In cases where online verification is not possible, stapled inclusion proofs (i.e., evidence gathered by the signer from the log) or SET bundles (promises of inclusion signed by the tlog signer)  MAY be presented alongside the software and signature. The client MAY use these proofs instead of directly querying Rekor's transparecy log. Verification material for these stapled inclusion proofs MUST be distributed out of band alongside the Rekor root. Documentation about querying Rekor is available [here](https://docs.sigstore.dev/rekor/CLI).
+In addition, the repository SHOULD, and clients MAY additionally query the Rekor transparency log to ensure that the Fulcio certificate is included in the current signed tree head. To do so the user can directly query the transparency log for the signed tree head and inclusion proof. They can then verify that the certificate is in the current Rekor log. 
 
 ## Auditors
 Developers SHOULD monitor the transparency log (TL) for certificates associated with their OIDC accounts to look for unauthorized activity. If they see a certificate on the TL that they did not issue, the developer SHOULD replace any compromised metadata (creating new Fulcio certificate), and ensure the security of their OIDC account. If the OIDC account cannot be recovered, the developer MUST contact the role that delegates to them to replace the delegation to their OIDC identity.
