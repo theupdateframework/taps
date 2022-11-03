@@ -45,8 +45,6 @@ Where IDENTITY is the OIDC identity of the party who is authorized to sign and I
 
 The root certificate or certificate chain for the Fulcio server MUST be obtained using the Sigstore root of trust.
 
-Using this mechanism, the developer requests a certificate from Fulcio, Fulcio verifies the developer's identity using OIDC, the developer uses the signing key listed in the certificate to sign their targets metadata, and finally the developer uploads the signed metadata. This signature, and the associated Rekor timestamp obtained by querying the Rekor server, MUST be verified by the repository and MAY be verified by the end user by verifying the certificate through Fulcio and the timestamp through Rekor. The verifier MUST obtain the Rekor root keys using a secure offline method prior to verifying the signature and associated certificate.
-
 
 ## Signature format
 A signature using a Fulcio key MUST include the Fulcio certificate for use in verification. For this verification, this TAP adds a ‘bundle’ field to ‘signatures’ to replace `sig` for this key type. With this field, signatures would look like:
@@ -67,9 +65,10 @@ In order to sign metadata using Fulcio, a developer would:
 * Perform a challenge by signing the subjest of the identity token with the public key
 * Request a short-lived certificate from Fulcio
    * Fulcio will upload the certificate to a Certificate Transparency log
-* Use the generated private key to sign targets metadata, then include the certificate in ‘signatures’ as indicated above
-* Upload the metadata to the repository
-* Upload the certificate to the timestamped Fulcio transparency log.
+* Use the generated private key to create signature over targets metadata
+* Upload the certificate to the timestamped Rekor transparency log. Rekor will return a proof of inclusion and a signed tre head.
+* Create a bundle that contains the signature, Fulcio certificate, proof of inclusion, and signed tree head
+* Upload the metadata, including the bundle to the repository
 
 The repository would automatically perform verification (see below) with Fulcio and the transparency log to ensure that the certificate is current and valid. If the signature is uploaded to the repository during the validity window of the Fulcio certificate, the repository MAY skip the Rekor timestamp verification.
 
@@ -77,9 +76,28 @@ Most of these steps SHOULD be done automatically using a tool, to simplify opera
 
 
 ## Verification
-While performing the steps in the [TUF client workflow](https://theupdateframework.github.io/specification/latest/#detailed-client-workflow), if the client encounters a signature that uses a Fulcio certificate, the client MUST verify the certificate chain up to the root certificate and verify the inclusion proof to ensure that the key was valid at the time it was used to sign TUF metadata.
+This signature, and the associated Rekor timestamp obtained by querying the Rekor server, MUST be verified by the repository and MAY be verified by the end user. The verifier MUST obtain the Rekor root keys using a secure offline method prior to verifying the signature and associated certificate.
 
-In addition, the repository SHOULD, and clients MAY additionally query the Rekor transparency log to ensure that the Fulcio certificate is included in the current signed tree head. To do so the user can directly query the transparency log for the signed tree head and inclusion proof. They can then verify that the certificate is in the current Rekor log. 
+A repository should perform the following verification:
+
+* Verify the signature, and ensure that the signature chains up to the trusted Fulcio root.
+* Verify the proof of inclusion using the signed tree head to ensure that the certificate was included in the Rekor transparency log.
+* If the Fulcio certificate is valid at the time it is verified (ie it was uploaded within the short validity period), stop here.
+* Otherwise, query the Rekor transparancy log for the current signed tree head and a proof of inclusion of the signed tree head included in the signature.
+* Verify this inclusion proof.
+
+
+While performing the steps in the [TUF client workflow](https://theupdateframework.github.io/specification/latest/#detailed-client-workflow), if the client encounters a signature that uses a Fulcio certificate, the client MUST perform the following verification:
+
+* Verify the signature, and ensure that the signature chains up to the trusted Fulcio root.
+* Verify the proof of inclusion using the signed tree head to ensure that the certificate was included in the Rekor transparency log.
+
+Online client MAY additionally perform the following verification:
+
+* Query the Rekor transparancy log for the current signed tree head and a proof of inclusion of the signed tree head included in the signature. Verify this inclusion proof.
+
+Clients that skip the online verification rely on the repository to ensure that the Fulcio certificate was valid at the time it was used to sign TUF metadata.
+
 
 ## Auditors
 Developers SHOULD monitor the transparency log (TL) for certificates associated with their OIDC accounts to look for unauthorized activity. If they see a certificate on the TL that they did not issue, the developer SHOULD replace any compromised metadata (creating new Fulcio certificate), and ensure the security of their OIDC account. If the OIDC account cannot be recovered, the developer MUST contact the role that delegates to them to replace the delegation to their OIDC identity.
@@ -105,7 +123,7 @@ If the identity provider used for OIDC is compromised, they may issue tokens wit
 
 Clients that do not recognize Fulcio certs will not be able to validate signatures from Fulcio certs, but they will be able to parse the metadata.
 
-‘Cert’ is a new field added to ‘signatures’. Clients that do not recognize Fulcio certs will ignore this field by default.
+‘Bundle’ is a new field added to ‘signatures’. Clients that do not recognize Fulcio certs will ignore this field by default.
 
 # Augmented Reference Implementation
 
