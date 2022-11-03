@@ -55,22 +55,20 @@ A signature using a Fulcio key MUST include the Fulcio certificate for use in ve
       “bundle”:  BUNDLE }
       , ... ]
 ```
-Where BUNDLE is an object that contains the proof of inclusion in the transparency log, signed tree head, and Fulcio X.509 signing certificate in PEM format, conforming to the [format defined by Sigstore](https://github.com/sigstore/protobuf-specs/blob/main/protos/sigstore_bundle.proto).
+Where BUNDLE is an object that contains the transparency log verification information, Fulcio X.509 signing certificate, and a signature over targets metadata, conforming to the [format defined by Sigstore](https://github.com/sigstore/protobuf-specs/blob/main/protos/sigstore_bundle.proto). The transparency log verification information includes a signed timestamp (SET) from Rekor promising inclusion in the Rekor transparency log.
 
 ## Signing
-In order to sign metadata using Fulcio, a developer would:
+In order to sign metadata using Fulcio, a developer MUST:
 
-* Generate a key pair locally
-* Initiate an OIDC session to obtain a signed identity token containing an identity such as an email from an OIDC provider
-* Perform a challenge by signing the subjest of the identity token with the public key
-* Request a short-lived certificate from Fulcio
-   * Fulcio will upload the certificate to a Certificate Transparency log
-* Use the generated private key to create signature over targets metadata
-* Upload the certificate to the timestamped Rekor transparency log. Rekor will return a proof of inclusion and a signed tre head.
-* Create a bundle that contains the signature, Fulcio certificate, proof of inclusion, and signed tree head
-* Upload the metadata, including the bundle to the repository
-
-The repository would automatically perform verification (see below) with Fulcio and the transparency log to ensure that the certificate is current and valid. If the signature is uploaded to the repository during the validity window of the Fulcio certificate, the repository MAY skip the Rekor timestamp verification.
+* Initiate an OIDC session to obtain an identity token signed by the OIDC identity provider's public key containing the developer's IDENTITY.
+* Generate a key pair locally.
+* Create a certificate signing request containing the subject of the identity token. Sign this certificate with the generated private key.
+* Request a short-lived certificate from Fulcio by sending the certificate signing request along with the identity token.
+   * Fulcio will upload the certificate to a Certificate Transparency log.
+* Use the generated private key to create signature over targets metadata.
+* Upload the certificate, signature, and hash of the targets metadata to the timestamped Rekor transparency log. Rekor will return an SET with a timestampe that indicates that Rekor recieved the request and will include it in the log.
+* Create a bundle that contains the signature, Fulcio certificate, SET.
+* Upload the metadata, including the bundle to the repository.
 
 Most of these steps SHOULD be done automatically using a tool, to simplify operations for developers and minimise the risk of human errors.
 
@@ -78,31 +76,32 @@ Most of these steps SHOULD be done automatically using a tool, to simplify opera
 ## Verification
 This signature, and the associated Rekor timestamp obtained by querying the Rekor server, MUST be verified by the repository and MAY be verified by the end user. The verifier MUST obtain the Rekor root keys using a secure offline method prior to verifying the signature and associated certificate.
 
-A repository should perform the following verification:
+While performing the steps in the [TUF client workflow](https://theupdateframework.github.io/specification/latest/#detailed-client-workflow), if the client encounters a signature that uses a Fulcio certificate, the client MUST perform the verification. In addition, the repository MUST perform verifcation.
 
-* Verify the signature, and ensure that the signature chains up to the trusted Fulcio root.
-* Verify the proof of inclusion using the signed tree head to ensure that the certificate was included in the Rekor transparency log.
-* If the Fulcio certificate is valid at the time it is verified (ie it was uploaded within the short validity period), stop here.
-* Otherwise, query the Rekor transparancy log for the current signed tree head and a proof of inclusion of the signed tree head included in the signature.
+Verification includes the following steps:
+
+* Verify the signature on the certificate to ensure that the signature chains up to the trusted Fulcio root.
+* Verify the signature on the TUF metadata using the key from the Fulcio certificate.
+* Verify the SET to ensure that the certificate was included in the Rekor transparency log.
+
+Periodically the repository SHOULD perform online verification of all Rekor uses.
+Online clients MAY additionally perform online verification. This process is described in the auditors section below.
+
+## Auditors and Monitoring
+
+Online verification requires the following steps:
+
+* Obtain the most recent Rekor signed tree head.
+	* Query the Rekor transparancy log for a consistency proof against your current signed tree head.
+	* Verify this consistency proof.
+* Query the Rekor transparency log for a proof of inclusion against the certificate included in the TUF metadata
 * Verify this inclusion proof.
 
+Online verification SHOULD be performed periodically by repositories and MAY be performed by clients.
 
-While performing the steps in the [TUF client workflow](https://theupdateframework.github.io/specification/latest/#detailed-client-workflow), if the client encounters a signature that uses a Fulcio certificate, the client MUST perform the following verification:
+Developers SHOULD monitor the transparency log (TL)  and look for certificates associated with their OIDC accounts to look for unauthorized activity. If they see a certificate on the TL that they did not issue, the developer SHOULD replace any compromised metadata (creating new Fulcio certificate), and ensure the security of their OIDC account. If the OIDC account cannot be recovered, the developer MUST contact the role that delegates to them to replace the delegation to their OIDC identity.
 
-* Verify the signature, and ensure that the signature chains up to the trusted Fulcio root.
-* Verify the proof of inclusion using the signed tree head to ensure that the certificate was included in the Rekor transparency log.
-
-Online client MAY additionally perform the following verification:
-
-* Query the Rekor transparancy log for the current signed tree head and a proof of inclusion of the signed tree head included in the signature. Verify this inclusion proof.
-
-Clients that skip the online verification rely on the repository to ensure that the Fulcio certificate was valid at the time it was used to sign TUF metadata.
-
-
-## Auditors
-Developers SHOULD monitor the transparency log (TL) for certificates associated with their OIDC accounts to look for unauthorized activity. If they see a certificate on the TL that they did not issue, the developer SHOULD replace any compromised metadata (creating new Fulcio certificate), and ensure the security of their OIDC account. If the OIDC account cannot be recovered, the developer MUST contact the role that delegates to them to replace the delegation to their OIDC identity.
-
-In addition to developer monitoring, the TL SHOULD have auditors that watch the log for any suspicious activity. If something bad (such as a mutation in the log, a deviation from the append-only policy, or invalid inclusion proofs) is found in the TL, then auditors MUST indicate this to clients to ensure they don’t use bad certificates. Clients SHOULD have a way to ensure that the transparency log has been audited. For example, auditors may upload signed targets metadata to the repository upon valid completion of an audit. Clients can look for the auditor signature on targets metadata using [multi-role delegations](https://github.com/theupdateframework/taps/blob/master/tap3.md) before verifying any Fulcio-signed delegated targets. The auditor MUST only sign metadata if all signatures in the TL look good. If the auditor detects a problem, they SHOULD revoke the auditor-signed metadata.
+In addition to developer monitoring, the TL SHOULD have auditors that watch the log by performing online verification for all uses in TUF metadata for any suspicious activity. If something bad (such as a mutation in the log, a deviation from the append-only policy, or invalid inclusion proofs) is found in the TL, then auditors MUST indicate this to clients to ensure they don’t use bad certificates. Clients SHOULD have a way to ensure that the transparency log has been audited. For example, auditors may upload signed targets metadata to the repository upon valid completion of an audit. Clients can look for the auditor signature on targets metadata using [multi-role delegations](https://github.com/theupdateframework/taps/blob/master/tap3.md) before verifying any Fulcio-signed delegated targets. The auditor MUST only sign metadata if all signatures in the TL look good. If the auditor detects a problem, they SHOULD revoke the auditor-signed metadata. The repository SHOULD be an auditor of the log.
 
 If the bad certificates are due to a compromised Fulcio server, Fulcio MUST revoke its certificate and distribute a new certificate in the TUF Sigstore root, and inform any affected clients of the compromise.
 
@@ -117,6 +116,8 @@ If the Fulcio server is compromised, it may issue certificates on behalf of any 
 If only one of the transparency logs is compromised, the attacker will not be able to do anything without cooperation from the Fulcio server because the attack will not be able to create a valid certificate without a compromised Fulcio instance. However, if the attacker compromises both the Fulcio server and the transparency log, they would be able to issue fake Fulcio certificates that also appear valid on the transparency log. If this happens, developers auditing the transparency log would notice the mis-issued certificates, and the Fulcio server and transparency log could both securely replace their key material using offline root key from the TUF Sigstore root. Implementations using this TAP SHOULD ensure that there are active auditors watching both the transparency logs.
 
 If the identity provider used for OIDC is compromised, they may issue tokens with attacker controlled identities. Metadata signed by certificates from compromised identity providers can be revoked using the usual TUF process, and the identity providers can be removed from the delegating TUF metadata.
+
+By default, clients will perform offline verification. They may choose to additionally perform online verification. In practice, exisiting uses of transparency logs use offline verification as it saves bandwidth and maximum merge delays on the transparency log mean that onlie verification is not immediately available. This is because the transparency log will batch additions to the log. Offline verification relies on a signature from the Rekor key that the entry will be included. This is the same key that signs the Rekor signed tree head in online verification. If the Rekor key is compromised, both of these verification types could be tricked. However, monitors are able to detect bad behavior once entries are added to the log, and monitor signatures can be used to provide additional assurance.
 
 
 # Backwards Compatibility
