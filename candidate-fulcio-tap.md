@@ -43,7 +43,7 @@ In order to facilitate use of Fulcio, delegations may list an OIDC identity, suc
 
 Where IDENTITY is the OIDC identity of the party who is authorized to sign and ISSUER is the OIDC entity used by Fulcio for verification.
 
-The root certificate or certificate chain for the Fulcio server MUST be obtained using the Sigstore root of trust.
+The root certificate or certificate chain for the Fulcio server MUST be obtained using the Sigstore root of trust. The client MUST use a single Fulcio instance.
 
 
 ## Signature format
@@ -74,7 +74,7 @@ Most of these steps SHOULD be done automatically using a tool, to simplify opera
 
 
 ## Verification
-This signature, and the associated Rekor timestamp obtained by querying the Rekor server, MUST be verified by the repository and MAY be verified by the end user. The verifier MUST obtain the Rekor root keys using a secure offline method prior to verifying the signature and associated certificate.
+This signature, and the associated Rekor timestamp obtained by querying the Rekor server, MUST be verified by the repository and MAY be verified by the end user. The verifier MUST obtain the Rekor root keys using a secure out of band method prior to verifying the signature and associated certificate.
 
 While performing the steps in the [TUF client workflow](https://theupdateframework.github.io/specification/latest/#detailed-client-workflow), if the client encounters a signature that uses a Fulcio certificate, the client MUST perform the verification. In addition, the repository MUST perform verifcation.
 
