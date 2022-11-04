@@ -55,7 +55,7 @@ A signature using a Fulcio key MUST include the Fulcio certificate for use in ve
       “bundle”:  BUNDLE }
       , ... ]
 ```
-Where BUNDLE is an object that contains the transparency log verification information, Fulcio X.509 signing certificate, and a signature over targets metadata, conforming to the [format defined by Sigstore](https://github.com/sigstore/protobuf-specs/blob/main/protos/sigstore_bundle.proto). The transparency log verification information includes a signed timestamp (SET) from Rekor promising inclusion in the Rekor transparency log.
+Where BUNDLE is an object that contains the verification information (transparency log references or timestamps), Fulcio X.509 signing certificate, and a signature over targets metadata, conforming to the [format defined by Sigstore](https://github.com/sigstore/protobuf-specs/blob/main/protos/sigstore_bundle.proto). The transparency log verification information includes a signed timestamp (SET) from Rekor promising inclusion in the Rekor transparency log.
 
 ## Signing
 In order to sign metadata using Fulcio, a developer MUST:
@@ -66,7 +66,7 @@ In order to sign metadata using Fulcio, a developer MUST:
 * Request a short-lived certificate from Fulcio by sending the certificate signing request along with the identity token.
    * Fulcio will upload the certificate to a Certificate Transparency log.
 * Use the generated private key to create signature over targets metadata.
-* Upload the certificate, signature, and hash of the targets metadata to the timestamped Rekor transparency log. Rekor will return an SET with a timestampe that indicates that Rekor recieved the request and will include it in the log.
+* Upload the certificate, signature, and hash of the targets metadata to the timestamped Rekor transparency log. Rekor will return an SET with a timestamp that indicates that Rekor received the request and will include it in the log.
 * Create a bundle that contains the signature, Fulcio certificate, SET.
 * Upload the metadata, including the bundle to the repository.
 
@@ -82,7 +82,7 @@ Verification includes the following steps:
 
 * Verify the signature on the certificate to ensure that the signature chains up to the trusted Fulcio root.
 * Verify the signature on the TUF metadata using the key from the Fulcio certificate.
-* Verify the SET to ensure that the certificate was included in the Rekor transparency log.
+* Verify the SET to ensure that the signature was signed during certificate validity
 
 Periodically the repository SHOULD perform online verification of all Rekor uses.
 Online clients MAY additionally perform online verification. This process is described in the auditors section below.
@@ -94,8 +94,10 @@ Online verification requires the following steps:
 * Obtain the most recent Rekor signed tree head.
 	* Query the Rekor transparancy log for a consistency proof against your current signed tree head.
 	* Verify this consistency proof.
-* Query the Rekor transparency log for a proof of inclusion against the certificate included in the TUF metadata
+	* Persist the newest signed tree head
+* Query the Rekor transparency log for a proof of inclusion against the certificate and TUF metadata
 * Verify this inclusion proof.
+* Verify that the root hash of the inclusion proof is consistent with the signed tree head verified in step 1
 
 Online verification SHOULD be performed periodically by repositories and MAY be performed by clients.
 
@@ -117,7 +119,7 @@ If only one of the transparency logs is compromised, the attacker will not be ab
 
 If the identity provider used for OIDC is compromised, they may issue tokens with attacker controlled identities. Metadata signed by certificates from compromised identity providers can be revoked using the usual TUF process, and the identity providers can be removed from the delegating TUF metadata.
 
-By default, clients will perform offline verification. They may choose to additionally perform online verification. In practice, exisiting uses of transparency logs use offline verification as it saves bandwidth and maximum merge delays on the transparency log mean that onlie verification is not immediately available. This is because the transparency log will batch additions to the log. Offline verification relies on a signature from the Rekor key that the entry will be included. This is the same key that signs the Rekor signed tree head in online verification. If the Rekor key is compromised, both of these verification types could be tricked. However, monitors are able to detect bad behavior once entries are added to the log, and monitor signatures can be used to provide additional assurance.
+By default, clients will perform offline verification. They may choose to additionally perform online verification. In practice, exisiting uses of transparency logs use offline verification as it saves bandwidth and maximum merge delays on the transparency log mean that onlie verification is not immediately available. This is because the transparency log will batch additions to the log. Offline verification relies on a signature from the Rekor key that the entry will be included and that the entry was seen at a certain time. This is the same key that signs the Rekor signed tree head in online verification. If the Rekor key is compromised, both of these verification types could be tricked. However, monitors are able to detect bad behavior once entries are added to the log, and monitor signatures can be used to provide additional assurance.
 
 
 # Backwards Compatibility
