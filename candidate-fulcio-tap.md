@@ -74,13 +74,14 @@ Most of these steps SHOULD be done automatically using a tool, to simplify opera
 
 
 ## Verification
-This signature, and the associated Rekor timestamp obtained by querying the Rekor server, MUST be verified by the repository and MAY be verified by the end user. The verifier MUST obtain the Rekor root keys using a secure out of band method prior to verifying the signature and associated certificate.
+This signature, and the associated Rekor timestamp obtained by querying the Rekor server, MUST be verified by the repository and MAY be verified by the end user. The verifier MUST obtain the Rekor root keys and the certificate log public key using a secure out of band method prior to verifying the signature and associated certificate.
 
 While performing the steps in the [TUF client workflow](https://theupdateframework.github.io/specification/latest/#detailed-client-workflow), if the client encounters a signature that uses a Fulcio certificate, the client MUST perform the verification. In addition, the repository MUST perform verifcation.
 
 Verification includes the following steps:
 
 * Verify the signature on the certificate to ensure that the signature chains up to the trusted Fulcio root.
+* Verify the Fulcio certificate's inclusion in the CT log with the trusted certificate log public key
 * Verify the signature on the TUF metadata using the key from the Fulcio certificate.
 * Verify the SET to ensure that the signature was signed during certificate validity
 
