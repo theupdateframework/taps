@@ -25,9 +25,14 @@ examination of every valid version of every Targets metadata file.
 
 While TUF's verification workflow only cares about the latest set of metadata
 for each role, a record of all prior metadata can be useful to trace back to
-the initial state of the repository. For use cases where examining old Targets
-metadata is necessary, we can only verify the veracity of any old file by
-checking if it was also part of the valid Snapshot role at the time. However,
+the initial state of the repository. One example of a system that needs to verify
+old metadata is [The Archival Framework (TAF)](https://github.com/openlawlibrary/taf),
+whose main goal is to protect digital law. After laws are published, they need
+to be authenticable for decades or even centuries.
+
+For use cases where examining old Targets metadata is necessary,
+we can only verify the veracity of any old file by checking
+if it was also part of the valid Snapshot role at the time. However,
 it may be impossible to validate an older Snapshot role as its keys may have
 been rotated or revoked since. Finally, a verifiable record of Snapshot and
 Targets metadata is also useful to identify if some previous metadata file is
