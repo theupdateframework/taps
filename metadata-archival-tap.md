@@ -233,6 +233,14 @@ hashes, are looked up in the Snapshot role and validated. As such, an extra
 entry in the Snapshot role recording the characteristics of the previous
 version of the Snapshot metadata has no effect on backwards compatibility.
 
+If a TUF client that implements this TAP (i.e., it can follow a chain of
+Snapshot metadata back to validate some Targets metadata file) but encounters a
+TUF repository that does not implement this TAP, the verification of some
+retired Targets metadata file will fail. The verifiability provided by this TAP
+of prior Targets metadata requires buy-in from the repository. However, the TUF
+client in this case should be able to perform all the other standard TUF
+verification workflows.
+
 # Augmented Reference Implementation
 
 None at the moment.
