@@ -156,6 +156,15 @@ hash. This continues all the way to the current Snapshot role, and therefore,
 when looking back, it is only possible to claim some Snapshot metadata file was
 legitimate when starting from the current legitimate role.
 
+Validating some Targets metadata file entails following the snapshot chain until
+one is found that records the Targets file in question. Note that there are two
+similar but different questions here. The first is if all the Targets files in a
+given set of metadata were ever valid. If every file in the set is found in a
+Snapshot file part of the chain, then the answer is yes. The second question is
+if a given set of Targets metadata were ever valid at the _same time_. In this
+case, all the Targets files must be found in the same Snapshot file part of the
+chain starting from the current Snapshot metadata file.
+
 # Security Analysis
 
 The inherent ability to track prior Snapshot roles does not weaken any of TUF's
