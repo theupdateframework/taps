@@ -2,7 +2,7 @@
 * Title: Using TUF Semantics for Verifiable Metadata Archival
 * Version: 1
 * Last-Modified:
-* Author: Aditya Sirish A Yelgundhalli
+* Author: Aditya Sirish A Yelgundhalli, Renata Vaderna
 * Status:
 * Content-Type: text/markdown
 * Created: 14-Jun-2022
