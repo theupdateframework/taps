@@ -165,6 +165,32 @@ if a given set of Targets metadata were ever valid at the _same time_. In this
 case, all the Targets files must be found in the same Snapshot file part of the
 chain starting from the current Snapshot metadata file.
 
+## Supporting Verification of Prior Repository State
+
+While following the chain back to an older Snapshot version establishes its
+legitimacy, using the Targets metadata at that historical state requires them to
+be verifiable. Verification of the metadata requires a record of the keys
+trusted to sign that version of the metadata. For these scenarios, in addition
+to recording an entry of the previous Snapshot role, each Snapshot role must
+also record the current Root role.
+
+As before, actually finding the piece of metadata that corresponds to the entry
+is an implementation detail. Such metadata must not be implicitly trusted
+either. Instead, the standard TUF workflow must be followed to validate the
+specified version of the Root role. After that version is verified, TUF's
+verification workflow can be employed to validate some target. This means that
+including the Root role merely provides a hint about the version of the Root to
+be used for some Snapshot role and the set of Targets metadata it recorded. The
+specified Root role is not directly trusted just because it was recorded in the
+Snapshot role.
+
+It is possible to guess the version of the Root role to use for some historic
+state of the repository, perhaps by correlating the keys used to sign the
+Snapshot role with what is specified in the Root role. However, this is not
+guaranteed to work as Targets keys may have been rotated while Snapshot keys
+remained the same, leading to ambiguity in which version of the Root role should
+be used.
+
 # Security Analysis
 
 The inherent ability to track prior Snapshot roles does not weaken any of TUF's
