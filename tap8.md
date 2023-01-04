@@ -34,15 +34,17 @@ from Y to Z, etc. Trust can even be transferred back from Z to X, allowing a key
 to be added to a role, then later removed.
 
 The mechanism in this TAP has an additional use case: if a rotation
-to a null key is detected, it causes the role to no longer be trusted.  
-A role could use a rotation to a null key if they suspect a key has been compromised
+to a null key is detected, it causes the role to no longer be trusted.
+A role could use a rotation to a null key if they suspect a threshold of keys
+have been compromised
 (a lost hard drive, system breach, etc). The role is able to create a
 rotation to null without the help of the delegator, so they are able to
 explicitly revoke trust in the role immediately, improving response time
 to a key compromise. A rotation to a null key revokes trust in the role,
 not specific keys, so all keys associated with the role will be invalid
-after a rotation to null. The client will detect a rotation to a null key
-and treat it as if the metadata was unsigned.
+after a rotation to null. If only a single key needs to be replaced, it can be
+safely rotated using the mechanism in this TAP. The client will detect a rotation
+to a null key and treat it as if the metadata was unsigned.
 
 A delegator to a role A is able to help A recover from a rotation to null of A by delegating
 to a new set of keys for A.
@@ -111,14 +113,14 @@ thus is not intended to be handled by this TAP.
 TUF is a framework for securing software update systems that is designed
 to maintain trust in the system through key compromises. The trust
 is rooted in a quorum of root keys, which delegate trust to other roles.
-When the root keys delegate trust to a role t for all names, this can be
-used to delegate some names to role d, etc.  When the person who owns
-role d wants to renew their key, they have until now had to ask the holder of
-role t to delegate to the new keyset e. If one of role d's keys is
-compromised, they have to wait for role t to replace the key with a new,
+When the root keys delegate trust to a role T for all names, this can be
+used to delegate some names to role D, etc.  When the person who owns
+role D wants to renew their key, they have until now had to ask the holder of
+role T to delegate to the new keyset e. If one of role D's keys is
+compromised, they have to wait for role T to replace the key with a new,
 trusted key.
 
-With this proposal, the owner of role d can replace their own key, and also
+With this proposal, the owner of role D can replace their own key, and also
 revoke their key without relying on the delegator.  This will improve
 response time to key compromises and prevent key sharing by allowing keys to be rotated more
 regularly.  Combined with multi-role delegations this allows
@@ -207,13 +209,9 @@ or there is a rotation to null the targets file is invalid and the client will p
 
 ## Timestamp and snapshot rotation
 
-Timestamp and snapshot keys can rotate as
-well, leading to ROLE.rotate.ID.PREV files, where ID and PREV are as described above. Each file is
-signed by a quorum of old keys, and contains the new keys. During verification,
-the client needs to fetch the ROLE.rotate.ID.PREV file
-where ID is as described above using the timestamp keyid, either from
-the root file or locally cached and PREV is as described using the previous
-timestamp rotate file or null.  If the timestamp key is renewed by
+Timestamp and snapshot keys can rotate as well, leading to ROLE.rotate.ID.PREV
+files, where ID and PREV are as described above. Each file is signed by a quorum
+of old keys, and contains the new keys. If the timestamp key is renewed by
 the root, all timestamp.rotate files can be safely removed from the
 repository.
 
@@ -272,7 +270,8 @@ directly trust this team), the foo.rotate files can be safely removed.
 There should be no negative security impact.  The major benefits are
 that many security-sensitive operations that require key use by
 multiple parties, will now be much easier to do.  This will
-provide a simple mechanism extending and shrinking project membership without an individual with elevated privileges, but based
+provide a simple mechanism for extending and shrinking project membership
+without an individual with elevated privileges, but based
 on a threshold of signatures.
 
 Clients need to take care to check for rotation to a null key (rotate
