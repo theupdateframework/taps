@@ -28,8 +28,8 @@ root role. The root role will continue to use the root metadata to establish
 a trusted root key.
 
 Conceptually, the rotation process says if you trusted threshold of keys
-X = X_0, ... X_n, now instead trust threshold of keys Y = Y_0, ... Y_n.  Rotation of a
-key may be performed any number of times, transferring trust from X to Y, then
+X = X_0, ... X_n, now instead trust threshold of keys Y = Y_0, ... Y_n.  Rotation
+of a key may be performed any number of times, transferring trust from X to Y, then
 from Y to Z, etc. Trust can even be transferred back from Z to X, allowing a key
 to be added to a role, then later removed.
 
@@ -46,10 +46,11 @@ after a rotation to null. If only a single key needs to be replaced, it can be
 safely rotated using the mechanism in this TAP. The client will detect a rotation
 to a null key and treat it as if the metadata was unsigned.
 
-A delegator to a role A is able to help A recover from a rotation to null of A by delegating
-to a new set of keys for A.
-Additionally, a delegator can overrule a rotate file by delegating to the role with a new set of keys. This ensures that the delegator is still the source of trust,
-but allows the role to act independently.
+A delegator to a role A is able to help A recover from a rotation to null of A by
+delegating to a new set of keys for A.
+Additionally, a delegator can overrule a rotate file by delegating to the role
+with a new set of keys. This ensures that the delegator is still the source of
+trust, but allows the role to act independently.
 
 
 # Motivation
@@ -83,11 +84,11 @@ key, and rotate these keys in and out without going through the delegator.
 ## Why root key rotation is not supported
 
 TAP 8 provides a methodology for key rotations for roles other than root,
-leaving the root rotation mechanism in place. The root metadata file contains information, like the
-spec-version, that needs to be seen for each version of the file. This
-means that even if the keys are not changed, a client must download every
-version of the root metadata in order to ensure the client spec-version is
-in line with the server spec-version.
+leaving the root rotation mechanism in place. The root metadata file contains
+information, like the spec-version, that needs to be seen for each version of
+the file. This means that even if the keys are not changed, a client must
+download every version of the root metadata in order to ensure the client
+spec-version is in line with the server spec-version.
 
 ## Auto-rotation timestamp role
 
@@ -122,8 +123,8 @@ trusted key.
 
 With this proposal, the owner of role D can replace their own key, and also
 revoke their key without relying on the delegator.  This will improve
-response time to key compromises and prevent key sharing by allowing keys to be rotated more
-regularly.  Combined with multi-role delegations this allows
+response time to key compromises and prevent key sharing by allowing keys to be
+rotated more regularly. Combined with multi-role delegations this allows
 project teams to shrink and grow without delegation to a project key.
 
 TUF already contains a key rotation mechanism, which is only specified
@@ -167,7 +168,9 @@ it is meant to be signed once and never modified.  The rotate
 file has to be signed with an old threshold of old keys.
 
 The rotate file will go into a repository in a 'rotate' folder that contains
-all rotate files for the repository. These files will be listed in snapshot metadata for the repository so that the client can verify that they recieve all current rotate files.
+all rotate files for the repository. These files will be listed in snapshot
+metadata for the repository so that the client can verify that they recieve
+all current rotate files.
 
 Let's consider a motivating example, project foo is delegated to Alice.
 Alice's computer with the key material got stolen, but the disk was
@@ -188,11 +191,14 @@ The second suffix, referred to as 'PREV' is a SHA256 hash of the previous
 rotate file, or the empty string if there is no previous rotate file.
 This prevents rotation cycles.
 
-The existing delegation to Alice's old key is still valid. The client will start with this delegation and look for rotation files to determine the current set of trusted keys.
+The existing delegation to Alice's old key is still valid. The client will
+start with this delegation and look for rotation files to determine the current
+set of trusted keys.
 
-If the delegation
-is changed to include her new key, it will also be valid. Any old rotate files for this role should be deleted and removed from snapshot on the next snapshot key rotation. The client will determine
-the correct rotate file to begin the chain using the set of keys in the delegation for the role as the `ID`.
+If the delegation is changed to include her new key, it will also be valid. Any
+old rotate files for this role should be deleted and removed from snapshot on
+the next snapshot key rotation. The client will determine the correct rotate file
+to begin the chain using the set of keys in the delegation for the role as the `ID`.
 
 ## Client workflow
 
@@ -205,7 +211,8 @@ The client then looks for a rotate file with the new keyid, repeating until
 there is no matching rotate file to ensure up to date key information. This
 establishes trust in Alice's new key, and the client can now verify the
 signature of Alice's targets file using the new key.  If key data is missing
-or there is a rotation to null the targets file is invalid and the client will proceed with the update process as if verification for this file failed.
+or there is a rotation to null the targets file is invalid and the client will
+proceed with the update process as if verification for this file failed.
 
 ## Timestamp and snapshot rotation
 
@@ -216,18 +223,19 @@ the root, all timestamp.rotate files can be safely removed from the
 repository.
 
 The root role should ensure that all previous rotate files are removed when
-it delegates to a new chain of trust. This saves space and simlifies the client search for rotate files.
+it delegates to a new chain of trust. This saves space and simlifies the client
+search for rotate files.
 
 ## Interoperability with TAP 3 (multi-role delegations)
 
 Multi-role delegations are handled using the same methodology.
 
 Let's consider the project baz, initially delegated to a multi-role
-threshold (of 2) to roles foo, and bar, each of which have a threshold of 2 keys.  When they want
-to add a keyid from Dan to the foo role, the current foo keyholders create a foo.rotate.ID.PREV
-file, where ID is as described above (the SHA256 of the concatenated
-key ids of foo, and the character 0x32). This
-contains all previous foo keys, as well as Dan's key and a new threshold.  PREV is the
+threshold (of 2) to roles foo, and bar, each of which have a threshold of 2
+keys.  When they want to add a keyid from Dan to the foo role, the current foo
+keyholders create a foo.rotate.ID.PREV file, where ID is as described above (the
+SHA256 of the concatenated key ids of foo, and the character 0x32). This contains
+all previous foo keys, as well as Dan's key and a new threshold.  PREV is the
 SHA256 of "" as this is the first rotation for foo.  The file
 foo.rotate.ID.PREV is signed by at least 2 current keyids of foo.
 The new targets file foo is then signed by a new threshold (again 2) of
@@ -237,12 +245,13 @@ Let's assume Bob and Dan signed foo.  A client which encounters a
 delegation to foo first looks for a foo.rotate.ID.PREV file with the
 keyids and threshold specified in the delegation file and an initial
 value of "" for the previous rotate file.  If this file exists and is
-properly signed by Alice and Bob, the client uses it to fetch new keys.  
+properly signed by Alice and Bob, the client uses it to fetch new keys.
 The client can then verify foo using Bob's and Dan's signature.
 
 When Evelyn joins, and the threshold is increased to 3,
-foo.rotate.ID'.PREV' is created (ID' is the SHA256 of the concatenated old keyids, and 0x32, PREV' is the SHA256 of the previous
-rotate file), which contains the existing keyids as well as Evelyn's public key, and a threshold value of 3.  This
+foo.rotate.ID'.PREV' is created (ID' is the SHA256 of the concatenated old keyids,
+and 0x32, PREV' is the SHA256 of the previous rotate file), which contains the
+existing keyids as well as Evelyn's public key, and a threshold value of 3.  This
 is signed with at least 2 keys from the current set of keyids.
 
 ## Rotation to Null
@@ -259,7 +268,8 @@ modified.  If a client wants to rotate to a different
 key, without having access to their currently delegated private key,
 this requires a key revocation by the delegating metadata.
 
-Rotations which do not have any entry point anymore (the delegation they stem from has can been replaced with new keys) can be
+Rotations which do not have any entry point anymore (the delegation they
+stem from has can been replaced with new keys) can be
 safely removed from the repository. If the delegation of foo is
 directly done to Alice, Bob, Charlie and Dan with a threshold of 2
 (e.g. the delegation expired, and the person in charge decided to
@@ -277,7 +287,9 @@ on a threshold of signatures.
 Clients need to take care to check for rotation to a null key (rotate
 files that contain a null key).  This shall be handled in the
 same manner as an invalid metadata signature on by the role possessing
-the key. The role will be invalid until it is re-delegated to with a new key. Clients MUST use snapshot metadata to ensure that they recieve all rotate files in the chain.
+the key. The role will be invalid until it is re-delegated to with a new key.
+Clients MUST use snapshot metadata to ensure that they recieve all rotate files
+in the chain.
 
 Intentionally rotating to null enables a repository, a
 project, and individuals to explicitly revoke their key material
@@ -289,7 +301,9 @@ only if it can be assured that the legitimate holder is faster (at the
 snapshot service, and/or at the client) than the attacker who got
 control over the private key.  Because this is hard to achieve, it is
 recommended for proper mitigation that the delegation itself is changed from
-the compromised key to a new key as soon as possible. Key revocation using rotation defined in this TAP can be used as a stop-gap for delegations made by offline keys that may take some time to update.
+the compromised key to a new key as soon as possible. Key revocation using
+rotation defined in this TAP can be used as a stop-gap for delegations made
+by offline keys that may take some time to update.
 
 As a general note, this TAP only extends the possibilities of a target,
 but the delegation mechanism is still in place - i.e. a key higher up
@@ -300,7 +314,9 @@ Infrastructure - http://people.scs.carleton.ca/~paulv/papers/wisec2014-baton.pdf
 - is a similar proposal to extend Android's signing infrastructure.
 The main differences is that they put the old _and_ new keys in
 the token, whereas we only put the new keys inside, since the old
-keyids are already listed in the delegation. Our proposal also takes advantage of the existing delegation model in TUF to allow for thresholds of signatures and revocation by a more trusted role.
+keyids are already listed in the delegation. Our proposal also takes advantage
+of the existing delegation model in TUF to allow for thresholds of signatures
+and revocation by a more trusted role.
 
 Clashes of rotate file names are unlikely - the role is the first
 element, followed by "rotate", all key ids in alphabetical order,
