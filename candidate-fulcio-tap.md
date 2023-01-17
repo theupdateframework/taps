@@ -13,7 +13,7 @@
 In order to achieve end-to-end software update security, TUF requires developers to sign updates with a private key. However, this has proven challenging for some implementers as developers then have to create, store, and secure these private keys in order to ensure they remain private. This TAP proposes using sigstore’s Fulcio project to simplify developer key management by allowing developers to use existing accounts to verify their identity when signing updates. TUF "targets" roles may delegate to Fulcio identities instead of private keys, and these identities (and the corresponding certificates) may be used for verification.
 
 # Motivation
-Developer key management has been a major concern for TUF adoptions, especially for projects with a small number of developers or limited resources. TUF currently requires that every targets metadata signer creates and manages a private key. However, many developers that upload packages to large TUF adoptions, including the Python Package Index (PyPI), manage small or under-resourced projects and do not want the extra burden of having to store and protect a private key for use in deployment.
+Developer key management has been a major concern for TUF adoptions, especially for projects with a small number of developers or limited resources. TUF currently requires that every targets metadata signer creates and manages a private key, including secure storage of the key over a long period of time to prevent it leaking to an attacker. However, many developers that upload packages to large TUF adoptions, including the Python Package Index (PyPI), manage small or under-resourced projects and do not want the extra burden of having to protect a private key for use in deployment.
 
 Protecting a private key from loss or compromise is no simple matter. [Several](https://blog.npmjs.org/post/185397814280/plot-to-steal-cryptocurrency-foiled-by-the-npm) [attacks](https://jsoverson.medium.com/how-two-malicious-npm-packages-targeted-sabotaged-one-other-fed7199099c8) on software update systems have been achieved through the use of a compromised key, as securing private keys can be challenging and sometimes expensive (using hardware tokens such as Yubikeys etc), especially over a period of time.
 
@@ -70,7 +70,7 @@ In order to sign metadata using Fulcio, a developer MUST:
 * Create a bundle that contains the signature, Fulcio certificate, SET.
 * Upload the metadata, including the bundle to the repository.
 
-Most of these steps SHOULD be done automatically using a tool, to simplify operations for developers and minimise the risk of human errors.
+Most of these steps SHOULD be done automatically using a tool (such as Sigstore), to simplify operations for developers and minimise the risk of human errors.
 
 
 ## Verification
@@ -85,6 +85,7 @@ Verification includes the following steps:
 * Verify the signature on the TUF metadata using the key from the Fulcio certificate.
 * Verify the SET to ensure that the signature was signed during certificate validity
 
+Similar to signing, this verification SHOULD be done with existing Sigstore tooling.
 Periodically the repository SHOULD perform online verification of all Rekor uses.
 Online clients MAY additionally perform online verification. This process is described in the auditors section below.
 
