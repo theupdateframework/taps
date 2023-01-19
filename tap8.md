@@ -275,6 +275,13 @@ directly done to Alice, Bob, Charlie and Dan with a threshold of 2
 (e.g. the delegation expired, and the person in charge decided to
 directly trust this team), the foo.rotate files can be safely removed.
 
+## Interoperability with Fulcio TAP
+
+TAP 8 can be used with the Fulcio identities proposed in the Fulcio TAP.
+To do so, the `sigstore-oidc` keytype may be used in the rotate file
+as a KEY. Using this extension, TAP 8 can be used to rotate Fulcio identities
+as well as other key types.
+
 # Security Analysis
 
 There should be no negative security impact.  The major benefits are
