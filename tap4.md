@@ -253,7 +253,6 @@ The following is an example of a map file:
       // targets, the following mapping will be consulted.
 
     },
-    {
       ...
     {
       // Map all other targets only to PyPI.
