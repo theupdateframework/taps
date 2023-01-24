@@ -282,6 +282,19 @@ To do so, the `sigstore-oidc` keytype may be used in the rotate file
 as a KEY. Using this extension, TAP 8 can be used to rotate Fulcio identities
 as well as other key types.
 
+The interaction between the Fulcio TAP and this TAP may impact the security
+considerations in this TAP. If the Fulcio server or OIDC issuer is compromised,
+an attacker could gain control over all TUF roles controlled by that entity.
+If this happens, the attacker could use TAP 8 to create large-scale rotations
+to null to perform a denial of service. However, this attack can be safely
+recovered from using the delegator to replace all effected keys. This is
+especially effective if the top-level targets is controlled by offline keys.
+Further, an attacker with access to a large number of identities through
+a compromised Fulcio server or OIDC issuer would be able to perform a
+similar attack without TAP 8 by signing invalid or attacker-controlled
+metadata.
+
+
 # Security Analysis
 
 There should be no negative security impact.  The major benefits are
