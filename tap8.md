@@ -148,7 +148,7 @@ signatures wrapper as in tuf spec, not shown here):
 ```python
 {
     "_type" : "rotate" ,
-    "previous" : PREV_FILENAME
+    "version" : VERSION
     "role" : ROLE,
     "keys" : {
         KEYID : KEY
@@ -159,9 +159,10 @@ signatures wrapper as in tuf spec, not shown here):
 
 Where ROLE, KEYID, KEY, and THRESHOLD are as defined in the original
 tuf spec.  The value of ROLE has to be the same as the role for the
-delegation.  The value of THRESHOLD is its new value.  PREV_FILENAME is
-the name of the previous rotate file in the chain, or the empty string if this is
-the first rotate file for this role.  The keys specify the new valid keys
+delegation.  The value of THRESHOLD is its new value.  VERSION is
+the integer version number of rotate files for this role. Version
+numbers MUST increase by exactly 1 from the previous rotate file for
+this role. The keys specify the new valid keys
 and associated key ids (which may be a subset or superset of
 the old ones).  A rotate file does _not_ contain an expiration date,
 it is meant to be signed once and never modified.  The rotate
@@ -176,20 +177,13 @@ Let's consider a motivating example, project foo is delegated to Alice.
 Alice's computer with the key material got stolen, but the disk was
 encrypted.  To be safe, she decides to get her key from her backup and
 roll over her key to a fresh one.  To do that, she creates a file
-`foo.rotate.ID.PREV`.  This file contains her new key, a threshold of 1, and
+`foo.rotate.VERSION`.  This file contains her new key, a threshold of 1, and
 is signed with her old key.  She signs her targets file with the new key,
 and uploads both the rotate file and the freshly signed targets file to
 the repository.
 
-The first filename suffix, referred as `ID` above and below, is the hex
-representation of the SHA256 hash of the concatenation (using "." as
-separator) of the KEYIDs (in ascending lexical order), and the old
-threshold value, encoded decimal as ASCII (0x31 for 1, 0x32 for 2,
-0x31 0x30 for 10).
-
-The second suffix, referred to as 'PREV' is a SHA256 hash of the previous
-rotate file, or the empty string if there is no previous rotate file.
-This prevents rotation cycles.
+The first filename suffix, referred as `VERSION` above and below, is the
+same as the VERSION listed in the metadata.
 
 The existing delegation to Alice's old key is still valid. The client will
 start with this delegation and look for rotation files to determine the current
@@ -198,16 +192,15 @@ set of trusted keys.
 If the delegation is changed to include her new key, it will also be valid. Any
 old rotate files for this role should be deleted and removed from snapshot on
 the next snapshot key rotation. The client will determine the correct rotate file
-to begin the chain using the set of keys in the delegation for the role as the `ID`.
+by starting from VERSION 0.
 
 ## Client workflow
 
 A client who wants to install foo now fetches Alice's targets file, and
-during verification looks for a file named `foo.rotate.ID.PREV` in the
-rotate folder, ID and PREV are explained above using Alice's old keyid.
-The client sees the file, fetches
+during verification looks for a file named `foo.rotate.0` in the
+rotate folder. The client sees the file, fetches
 it and verifies this rotate file using the public key from the delegation.
-The client then looks for a rotate file with the new keyid, repeating until
+The client then looks for a rotate file with version `1`, repeating until
 there is no matching rotate file to ensure up to date key information. This
 establishes trust in Alice's new key, and the client can now verify the
 signature of Alice's targets file using the new key.  If key data is missing
@@ -216,10 +209,10 @@ proceed with the update process as if verification for this file failed.
 
 ## Timestamp and snapshot rotation
 
-Timestamp and snapshot keys can rotate as well, leading to ROLE.rotate.ID.PREV
-files, where ID and PREV are as described above. Each file is signed by a quorum
+Timestamp and snapshot keys can rotate as well, leading to ROLE.rotate.VERSION
+files for these roles. Each file is signed by a quorum
 of old keys, and contains the new keys. If the timestamp key is renewed by
-the root, all timestamp.rotate files can be safely removed from the
+the root, all `timestamp.rotate` files can be safely removed from the
 repository.
 
 The root role should ensure that all previous rotate files are removed when
@@ -233,25 +226,20 @@ Multi-role delegations are handled using the same methodology.
 Let's consider the project baz, initially delegated to a multi-role
 threshold (of 2) to roles foo, and bar, each of which have a threshold of 2
 keys.  When they want to add a keyid from Dan to the foo role, the current foo
-keyholders create a foo.rotate.ID.PREV file, where ID is as described above (the
-SHA256 of the concatenated key ids of foo, and the character 0x32). This contains
-all previous foo keys, as well as Dan's key and a new threshold.  PREV is the
-SHA256 of "" as this is the first rotation for foo.  The file
-foo.rotate.ID.PREV is signed by at least 2 current keyids of foo.
+keyholders create a foo.rotate.0 file. This contains
+all previous foo keys, as well as Dan's key and a new threshold. The file
+foo.rotate.0 is signed by at least 2 current keyids of foo.
 The new targets file foo is then signed by a new threshold (again 2) of
 the new keyids (including Dan) to complete the rotation.
 
 Let's assume Bob and Dan signed foo.  A client which encounters a
-delegation to foo first looks for a foo.rotate.ID.PREV file with the
-keyids and threshold specified in the delegation file and an initial
-value of "" for the previous rotate file.  If this file exists and is
-properly signed by Alice and Bob, the client uses it to fetch new keys.
+delegation to foo first looks for a foo.rotate.0 file. If this file exists
+and is properly signed by Alice and Bob, the client uses it to fetch new keys.
 The client can then verify foo using Bob's and Dan's signature.
 
 When Evelyn joins, and the threshold is increased to 3,
-foo.rotate.ID'.PREV' is created (ID' is the SHA256 of the concatenated old keyids,
-and 0x32, PREV' is the SHA256 of the previous rotate file), which contains the
-existing keyids as well as Evelyn's public key, and a threshold value of 3.  This
+foo.rotate.1 is created, which contains the existing keyids as well as
+Evelyn's public key, and a threshold value of 3.  This
 is signed with at least 2 keys from the current set of keyids.
 
 ## Rotation to Null
@@ -317,13 +305,6 @@ the token, whereas we only put the new keys inside, since the old
 keyids are already listed in the delegation. Our proposal also takes advantage
 of the existing delegation model in TUF to allow for thresholds of signatures
 and revocation by a more trusted role.
-
-Clashes of rotate file names are unlikely - the role is the first
-element, followed by "rotate", all key ids in alphabetical order,
-and the threshold value.  Certainly this requires that key ids and
-roles do not contain any "." - which is used as separator. In addition
-the inclusion of the SHA256 of the previous rotate file makes collisions
-even more unlikely.
 
 # Backwards compatibility
 
