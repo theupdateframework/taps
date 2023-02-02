@@ -69,8 +69,7 @@ In order to sign metadata using Fulcio, a signer MUST:
 * Upload the certificate, signature, and hash of the targets metadata to the timestamped Rekor transparency log. Rekor will return an SET with a timestamp that indicates that Rekor received the request and will include it in the log.
 * Create a bundle that contains the signature, Fulcio certificate, SET.
 
-Most of these steps SHOULD be done automatically using a tool (such as Sigstore), to simplify operations for signers and minimise the risk of human errors. After the
-signature is created, the TUF metadata SHOULD be uploaded as ususal.
+Most of these steps SHOULD be done automatically using a tool (such as Sigstore), to simplify operations for signers and minimise the risk of human errors.
 
 
 ## Verification
@@ -81,7 +80,7 @@ While performing the steps in the [TUF client workflow](https://theupdateframewo
 Offline verification includes the following steps:
 
 * Verify the signature on the certificate to ensure that the signature chains up to the trusted Fulcio root.
-* Verify the Fulcio certificate's inclusion in the CT log with the trusted certificate log public key.
+* Verify the Fulcio certificate's bundled CT inclusion proof with the trusted certificate log public key.
 * Verify the signature on the TUF metadata using the key from the Fulcio certificate.
 * Verify the SET to ensure that the signature was signed during certificate validity.
 
