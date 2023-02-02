@@ -52,7 +52,7 @@ A signature using a Fulcio key MUST include the Fulcio certificate for use in ve
 ```
 {
    "keyid" : KEYID,
-   "bundle":  BUNDLE
+   "bundle": BUNDLE
  }
 ```
 Where BUNDLE is an object that contains the verification information (transparency log references or timestamps), Fulcio X.509 signing certificate, and a signature over targets metadata, conforming to the [format defined by Sigstore](https://github.com/sigstore/protobuf-specs/blob/main/protos/sigstore_bundle.proto). The transparency log verification information includes a signed timestamp (SET) from Rekor promising inclusion in the Rekor transparency log.
@@ -103,7 +103,7 @@ Online verification requires the following steps:
 
 Online verification SHOULD be performed periodically by a centralized entity with the ability to remove compromised metadata from the repository and MAY be performed by clients.
 
-Signers SHOULD monitor the transparency log (TL)  and look for certificates associated with their OIDC accounts to look for unauthorized activity. If they see a certificate on the TL that they did not issue, the signer SHOULD replace any compromised metadata (creating new Fulcio certificate), and ensure the security of their OIDC account. If the OIDC account cannot be recovered, the signer MUST contact the role that delegates to them to replace the delegation to their OIDC identity.
+Signers SHOULD monitor the transparency log (TL) and look for certificates associated with their OIDC accounts to look for unauthorized activity. If they see a certificate on the TL that they did not issue, the signer SHOULD replace any compromised metadata (creating new Fulcio certificate), and ensure the security of their OIDC account. If the OIDC account cannot be recovered, the signer MUST contact the role that delegates to them to replace the delegation to their OIDC identity.
 
 In addition to signer monitoring, the TL SHOULD have auditors that watch the log by performing online verification for all uses in TUF metadata for any suspicious activity. If something bad (such as a mutation in the log, a deviation from the append-only policy, or invalid inclusion proofs) is found in the TL, then auditors MUST indicate this to clients to ensure they don't use bad certificates. Clients SHOULD have a way to ensure that the transparency log has been audited. For example, auditors may upload signed targets metadata to the repository upon valid completion of an audit. Clients can look for the auditor signature on targets metadata using [multi-role delegations](https://github.com/theupdateframework/taps/blob/master/tap3.md) before verifying any Fulcio-signed delegated targets. The auditor MUST only sign metadata if all signatures in the TL look good. If the auditor detects a problem, they SHOULD revoke the auditor-signed metadata. The repository SHOULD be an auditor of the log.
 
