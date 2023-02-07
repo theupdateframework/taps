@@ -1,7 +1,7 @@
-* TAP:
+* TAP: 18
 * Title: Ephemeral identity verification using sigstore's Fulcio for TUF developer key management
 * Version: 0
-* Last-Modified: 27/07/2021
+* Last-Modified: 07/02/2023
 * Author: Marina Moore, Joshua Lock, Asra Ali, Luke Hinds, Jussi Kukkonen, Trishank Kuppusamy, axel simon
 * Type: Standardization
 * Status: Draft
@@ -41,9 +41,9 @@ In order to facilitate use of Fulcio, delegations may list an OIDC identity, suc
 }
 ```
 
-Where IDENTITY is the OIDC identity of the party who is authorized to sign and ISSUER is the OIDC entity used by Fulcio for verification.
+Where IDENTITY is the OIDC identity of the party who is authorized to sign and ISSUER is the OIDC entity used by Fulcio for verification. For example, identity could be "hello@gmail.com" with an issuer "https://accounts.google.com".
 
-The root certificate or certificate chain for the Fulcio server MUST be obtained using the Sigstore root of trust. The client MUST use a single Fulcio instance.
+The root certificate or certificate chain for the Fulcio server MUST be obtained using the Sigstore [root of trust](https://github.com/sigstore/root-signing). The client MUST use a single Fulcio instance.
 
 
 ## Signature format
@@ -52,7 +52,7 @@ A signature using a Fulcio key MUST include the Fulcio certificate for use in ve
 ```
 {
    "keyid" : KEYID,
-   "bundle": BUNDLE
+   "sig": BUNDLE
  }
 ```
 Where BUNDLE is an object that contains the verification information (transparency log references or timestamps), Fulcio X.509 signing certificate, and a signature over targets metadata, conforming to the [format defined by Sigstore](https://github.com/sigstore/protobuf-specs/blob/main/protos/sigstore_bundle.proto). The transparency log verification information includes a signed timestamp (SET) from Rekor promising inclusion in the Rekor transparency log.
@@ -126,8 +126,6 @@ By default, clients will perform offline verification. They may choose to additi
 # Backwards Compatibility
 
 Clients that do not recognize Fulcio certs will not be able to validate signatures from Fulcio certs, but they will be able to parse the metadata.
-
-As `sig` was removed from `signatures`, parsing of the signatures will fail for old clients.
 
 # Augmented Reference Implementation
 
