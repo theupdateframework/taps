@@ -166,12 +166,18 @@ this role. The keys specify the new valid keys
 and associated key ids (which may be a subset or superset of
 the old ones).  A rotate file does _not_ contain an expiration date,
 it is meant to be signed once and never modified.  The rotate
-file has to be signed with an old threshold of old keys.
+file has to be signed with an old threshold of old keys. All keys in a
+rotation chain, other than a chain that has a rotation to null, should
+be securely stored.
 
 The rotate file will go into a repository in a 'rotate' folder that contains
 all rotate files for the repository. These files will be listed in snapshot
 metadata for the repository so that the client can verify that they recieve
-all current rotate files.
+all current rotate files. The files listed in snapshot SHOULD contain a
+hash in order to ensure that an attacker that later compromises previoiusly
+trusted keys cannot replace a rotate file. If a rotate file listed in
+snapshot for a role is not found, the user MUST act as if the role's metadata
+is not signed with a valid threshold of keys.
 
 Let's consider a motivating example, project foo is delegated to Alice.
 Alice's computer with the key material got stolen, but the disk was
