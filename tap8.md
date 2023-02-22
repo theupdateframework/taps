@@ -225,6 +225,10 @@ The root role should ensure that all previous rotate files are removed when
 it delegates to a new chain of trust. This saves space and simlifies the client
 search for rotate files.
 
+## Interoperability with TAP 4 (Multiple repository consensus)
+
+If multiple repositories use the same role definition, rotate files may need to be coordinated to ensure consistency. There are two cases when roles are used across multiple repositories, the first is a mirror of a repository, and the second is two repositories that have different contents, but share a particular targets role. In the case of a mirror, all rotate files should be copied, and the repository can perform as usual, including any rotations. In the second case, the repository manager must ensure that they have the same set of trusted keys for a role after all rotations. This can be achieved by copying all rotate files for a role or by creating a delegation to the final set of trusted keys indicated by rotate files on another repository. If the latter method is used, note that future rotate files may not by copied as the version numbers will not start from one.
+
 ## Interoperability with TAP 3 (multi-role delegations)
 
 Multi-role delegations are handled using the same methodology.
