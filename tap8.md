@@ -202,16 +202,14 @@ by starting from VERSION 1.
 
 ## Client workflow
 
-A client who wants to install foo now fetches Alice's targets file, and
-during verification looks for a file named `foo.rotate.1` in the
-rotate folder. The client sees the file, fetches
-it and verifies this rotate file using the public key from the delegation.
-The client then looks for a rotate file with version `2`, repeating until
-there is no matching rotate file to ensure up to date key information. This
+A client who wants to install foo now fetches Alice's targets file and will determine the set of trusted keys for this role as follows. The client will start with the keys listed in the delegation as trusted keys for this role.
+The client will then look for all files that begin with `rotate/foo.rotate` in
+the snapshot metadata. The client will process these in version order (ie starting with `rotate/foo.rotate.1`, then `rotate/foo.rotate.2` by first checking for this version file in a local cache. The client will then fetch
+the rotate file from remote. If the remote file is a rotation to null, and is signed with the currently trusted keys, the client will halt the verification of this metadata and act as if it is unverified when continuing the update process. Otherwise, the client should ensure that the cached file is identical to the remote version. The client will then verify the rotate file using the currently trusted public key. If a rotate file is successfully verified, the client will update the set of trusted keys for this role to be the set listed in the rotate files. If key data is missing
+or there is a rotation to null, the targets file is invalid and the client will
+proceed with the update process as if verification for this file failed. This process
 establishes trust in Alice's new key, and the client can now verify the
-signature of Alice's targets file using the new key.  If key data is missing
-or there is a rotation to null the targets file is invalid and the client will
-proceed with the update process as if verification for this file failed.
+signature of Alice's targets file using the new key. 
 
 ## Timestamp and snapshot rotation
 
