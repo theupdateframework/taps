@@ -198,15 +198,15 @@ set of trusted keys.
 If the delegation is changed to include her new key, it will also be valid. Any
 old rotate files for this role should be deleted and removed from snapshot on
 the next snapshot key rotation. The client will determine the correct rotate file
-by starting from VERSION 0.
+by starting from VERSION 1.
 
 ## Client workflow
 
 A client who wants to install foo now fetches Alice's targets file, and
-during verification looks for a file named `foo.rotate.0` in the
+during verification looks for a file named `foo.rotate.1` in the
 rotate folder. The client sees the file, fetches
 it and verifies this rotate file using the public key from the delegation.
-The client then looks for a rotate file with version `1`, repeating until
+The client then looks for a rotate file with version `2`, repeating until
 there is no matching rotate file to ensure up to date key information. This
 establishes trust in Alice's new key, and the client can now verify the
 signature of Alice's targets file using the new key.  If key data is missing
@@ -236,19 +236,19 @@ Multi-role delegations are handled using the same methodology.
 Let's consider the project baz, initially delegated to a multi-role
 threshold (of 2) to roles foo, and bar, each of which have a threshold of 2
 keys.  When they want to add a keyid from Dan to the foo role, the current foo
-keyholders create a foo.rotate.0 file. This contains
+keyholders create a foo.rotate.1 file. This contains
 all previous foo keys, as well as Dan's key and a new threshold. The file
-foo.rotate.0 is signed by at least 2 current keyids of foo.
+foo.rotate.1 is signed by at least 2 current keyids of foo.
 The new targets file foo is then signed by a new threshold (again 2) of
 the new keyids (including Dan) to complete the rotation.
 
 Let's assume Bob and Dan signed foo.  A client which encounters a
-delegation to foo first looks for a foo.rotate.0 file. If this file exists
+delegation to foo first looks for a foo.rotate.1 file. If this file exists
 and is properly signed by Alice and Bob, the client uses it to fetch new keys.
 The client can then verify foo using Bob's and Dan's signature.
 
 When Evelyn joins, and the threshold is increased to 3,
-foo.rotate.1 is created, which contains the existing keyids as well as
+foo.rotate.2 is created, which contains the existing keyids as well as
 Evelyn's public key, and a threshold value of 3.  This
 is signed with at least 2 keys from the current set of keyids.
 
