@@ -1,7 +1,7 @@
 * TAP: 18
 * Title: Ephemeral identity verification using sigstore's Fulcio for TUF developer key management
 * Version: 0
-* Last-Modified: 07/02/2023
+* Last-Modified: 01/03/2023
 * Author: Marina Moore, Joshua Lock, Asra Ali, Luke Hinds, Jussi Kukkonen, Trishank Kuppusamy, axel simon
 * Type: Standardization
 * Status: Draft
@@ -10,12 +10,12 @@
 * TUF-Version:
 
 # Abstract
-In order to achieve end-to-end software update security, TUF requires developers to sign updates with a private key. However, this has proven challenging for some implementers as developers then have to create, store, and secure these private keys in order to ensure they remain private. This TAP proposes using sigstore's Fulcio project to simplify developer key management by allowing developers to use existing accounts to verify their identity when signing updates. TUF "targets" roles may delegate to Fulcio identities instead of private keys, and these identities (and the corresponding certificates) may be used for verification.
+In order to achieve end-to-end software update security, TUF requires developers to sign metadata about updates with a private key. However, this has proven challenging for some implementers as developers then have to create, store, and secure these private keys in order to ensure they remain private. This TAP proposes adding a new signing option using sigstore's Fulcio project to simplify developer key management by allowing developers to use existing accounts to verify their identity. TUF "targets" roles may delegate to Fulcio identities instead of private keys, and these identities (and the corresponding certificates) may be used for verification.
 
 # Motivation
 Developer key management has been a major concern for TUF adoptions, especially for projects with a small number of developers or limited resources. TUF currently requires that every targets metadata signer creates and manages a private key, including secure storage of the key over a long period of time to prevent it leaking to an attacker. However, many developers that upload packages to large TUF adoptions, including the Python Package Index (PyPI), manage small or under-resourced projects and do not want the extra burden of having to protect a private key for use in deployment.
 
-Protecting a private key from loss or compromise is no simple matter. [Several](https://blog.npmjs.org/post/185397814280/plot-to-steal-cryptocurrency-foiled-by-the-npm) [attacks](https://jsoverson.medium.com/how-two-malicious-npm-packages-targeted-sabotaged-one-other-fed7199099c8) on software update systems have been achieved through the use of a compromised key, as securing private keys can be challenging and sometimes expensive (using hardware tokens such as Yubikeys etc), especially over a period of time.
+Protecting a private key from loss or compromise is no simple matter. [Several](https://blog.npmjs.org/post/185397814280/plot-to-steal-cryptocurrency-foiled-by-the-npm) [attacks](https://jsoverson.medium.com/how-two-malicious-npm-packages-targeted-sabotaged-one-other-fed7199099c8) on software update systems have been achieved through the use of a compromised key, as securing private keys can be challenging and sometimes expensive (using hardware tokens such as HSMs etc), especially over a period of time.
 
 This TAP proposes a way for signers to use their existing OpenID Connect (OIDC) accounts – such as an email account – as an identity instead of using a key. This means that they do not have to manage any additional keys or passwords.
 
@@ -75,7 +75,7 @@ Most of these steps SHOULD be done automatically using a tool (such as Sigstore)
 ## Verification
 This signature, and the associated Rekor timestamp obtained by querying the Rekor server, MUST be verified by a centralized authority and MAY be verified by the end user. This centralized authority MAY be a repository, or MAY be a separate service. The verifier MUST obtain the Rekor root keys and the certificate log public key using a secure out of band method prior to verifying the signature and associated certificate.
 
-While performing the steps in the [TUF client workflow](https://theupdateframework.github.io/specification/latest/#detailed-client-workflow), if the client encounters a signature that uses a Fulcio certificate, the client MUST perform the offline verification. In addition, a centralized entity (such as the repository) MUST perform offline verification.
+While performing the steps in the [TUF client workflow](https://theupdateframework.github.io/specification/latest/#detailed-client-workflow), if the client encounters a signature that uses a Fulcio certificate, the client MUST perform offline verification. In addition, a centralized entity (such as the repository) MUST perform offline verification.
 
 Offline verification includes the following steps:
 
@@ -110,7 +110,7 @@ If the bad certificates are due to a compromised Fulcio server, Fulcio MUST revo
 
 # Security Analysis
 
-Our [threat modelling](https://docs.google.com/document/d/1fkz8zO35zAIXlvTNSQYyLSK_T6n0G8STGxCoxB3RNQo/edit#) has found that using Fulcio with TUF namespacing is mostly security neutral with the existing TUF specification as long as different accounts are used for login and for the OIDC-backed signatures. This TAP improves security by eliminating the risk of signers losing their keys if they chose to use Fulcio instead of a traditional public key cryptosystem. However, it adds additional services that may be compromised: the signer's OIDC credentials, the Fulcio server, the Rekor transparency log, and the identity provider. In this section, we will analyze the impact and recovery in each of these cases.
+Our [threat modeling](https://docs.google.com/document/d/1fkz8zO35zAIXlvTNSQYyLSK_T6n0G8STGxCoxB3RNQo/edit#) has found that using Fulcio with TUF namespacing is mostly security neutral with the existing TUF specification as long as different accounts are used for login and for the OIDC-backed signatures. This TAP improves security by eliminating the risk of signers losing their keys if they chose to use Fulcio instead of a traditional public key cryptosystem. However, it adds additional services that may be compromised: the signer's OIDC credentials, the Fulcio server, the Rekor transparency log, and the identity provider. In this section, we will analyze the impact and recovery in each of these cases.
 
 If a signer's OIDC credentials are compromised, the signer SHOULD use existing TUF processes for revocation. Specifically they SHOULD ask the delegator to replace any metadata that includes the compromised OIDC account. If the signer's credentials were compromised, but later recovered through the OIDC provider, the signer may still use these credentials, but any metadata files that were created while the credentials were compromised should be replaced with a higher version of those metadata files so that the compromised files will not be downloaded (using the existing snapshot protection).
 
