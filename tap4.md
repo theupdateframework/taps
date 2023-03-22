@@ -294,7 +294,7 @@ There's an implementation of TAP 4 under the `multirepo` package in
 [rdimitrov/go-tuf-metadata](https://github.com/rdimitrov/go-tuf-metadata).
 It implements the multiple repository consensus on entrusted targets via a
 map.json file. The package provides a multi-repository client API for creating
-a client, searching for a given target and downloading it all by implementing
+a client, searching for a given target and downloading it all by following
 the search algorithm described in TAP 4.
 
 # Copyright
