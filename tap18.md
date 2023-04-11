@@ -1,7 +1,7 @@
 * TAP: 18
 * Title: Ephemeral identity verification using sigstore's Fulcio for TUF developer key management
 * Version: 0
-* Last-Modified: 01/03/2023
+* Last-Modified: 06/04/2023
 * Author: Marina Moore, Joshua Lock, Asra Ali, Luke Hinds, Jussi Kukkonen, Trishank Kuppusamy, axel simon
 * Type: Standardization
 * Status: Draft
@@ -47,15 +47,17 @@ The root certificate or certificate chain for the Fulcio server MUST be obtained
 
 
 ## Signature format
-A signature using a Fulcio key MUST include the Fulcio certificate for use in verification. For this verification, this TAP adds a 'bundle' field to 'signatures' to replace `sig` for this key type. With this field, signatures would look like:
+A signature using a Fulcio key MUST include the Fulcio certificate for use in verification. For this verification, this TAP adds an additional 'bundle' field to 'signatures'. With this field, signatures would look like:
 
 ```
 {
    "keyid" : KEYID,
-   "sig": BUNDLE
+   "sig": SIGNATURE,
+   "bundle": BUNDLE
  }
 ```
 Where BUNDLE is an object that contains the verification information (transparency log references or timestamps), Fulcio X.509 signing certificate, and a signature over targets metadata, conforming to the [format defined by Sigstore](https://github.com/sigstore/protobuf-specs/blob/main/protos/sigstore_bundle.proto). The transparency log verification information includes a signed timestamp (SET) from Rekor promising inclusion in the Rekor transparency log.
+SIGNATURE is the 'message_signature' from the bundle in hex-encoded form.
 
 ## Signing
 In order to sign metadata using Fulcio, a signer MUST:
