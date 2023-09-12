@@ -277,9 +277,9 @@ directly trust this team), the foo.rotate files can be safely removed.
 
 ## Interoperability with Fulcio TAP
 
-TAP 8 can be used with the Fulcio identities proposed in the Fulcio TAP.
+TAP 8 can be used with the Fulcio identities proposed in [TAP 18](https://github.com/theupdateframework/taps/blob/master/tap18.md).
 To do so, the `sigstore-oidc` keytype may be used in the rotate file
-as a KEY. Using this extension, TAP 8 can be used to rotate Fulcio identities
+as a KEY and this keytype may also be used to sign the rotate file. Using this extension, TAP 8 can be used to rotate Fulcio identities
 as well as other key types.
 
 The interaction between the Fulcio TAP and this TAP may impact the security
