@@ -202,10 +202,20 @@ by starting from VERSION 1.
 
 ## Client workflow
 
-A client who wants to install foo now fetches Alice's targets file and will determine the set of trusted keys for this role as follows. The client will start with the keys listed in the delegation as trusted keys for this role.
+A client who wants to install foo now fetches Alice's targets file and will
+determine the set of trusted keys for this role as follows. The client will start
+with the keys listed in the delegation as trusted keys for this role.
 The client will then look for all files that begin with `rotate/foo.rotate` in
-the snapshot metadata. The client will process these in version order (ie starting with `rotate/foo.rotate.1`, then `rotate/foo.rotate.2` by first checking for this version file in a local cache. The client will then fetch
-the rotate file from remote. If the remote file is a rotation to null, and is signed with the currently trusted keys, the client will halt the verification of this metadata and act as if it is unverified when continuing the update process. Otherwise, the client should ensure that the cached file is identical to the remote version. The client will then verify the rotate file using the currently trusted public key. If a rotate file is successfully verified, the client will update the set of trusted keys for this role to be the set listed in the rotate files. If key data is missing
+the snapshot metadata. The client will process these in version order (ie starting
+with `rotate/foo.rotate.1`, then `rotate/foo.rotate.2` by first checking for this
+version file in a local cache. The client will then fetch the rotate file from
+remote. If the remote file is a rotation to null, and is signed with the currently
+trusted keys, the client will halt the verification of this metadata and act as if
+it is unverified when continuing the update process. Otherwise, the client should
+ensure that the cached file is identical to the remote version. The client will
+then verify the rotate file using the currently trusted public key. If a rotate
+file is successfully verified, the client will update the set of trusted keys for
+this role to be the set listed in the rotate files. If key data is missing
 or there is a rotation to null, the targets file is invalid and the client will
 proceed with the update process as if verification for this file failed. This process
 establishes trust in Alice's new key, and the client can now verify the
@@ -225,7 +235,17 @@ search for rotate files.
 
 ## Interoperability with TAP 4 (Multiple repository consensus)
 
-If multiple repositories use the same role definition, rotate files may need to be coordinated to ensure consistency. There are two cases when roles are used across multiple repositories, the first is a mirror of a repository, and the second is two repositories that have different contents, but share a particular targets role. In the case of a mirror, all rotate files should be copied, and the repository can perform as usual, including any rotations. In the second case, the repository manager must ensure that they have the same set of trusted keys for a role after all rotations. This can be achieved by copying all rotate files for a role or by creating a delegation to the final set of trusted keys indicated by rotate files on another repository. If the latter method is used, note that future rotate files may not by copied as the version numbers will not start from one.
+If multiple repositories use the same role definition, rotate files may need to be
+coordinated to ensure consistency. There are two cases when roles are used across
+multiple repositories, the first is a mirror of a repository, and the second is
+two repositories that have different contents, but share a particular targets
+role. In the case of a mirror, all rotate files should be copied, and the
+repository can perform as usual, including any rotations. In the second case, the
+repository manager must ensure that they have the same set of trusted keys for a
+role after all rotations. This can be achieved by copying all rotate files for a
+role or by creating a delegation to the final set of trusted keys indicated by
+rotate files on another repository. If the latter method is used, note that future
+rotate files may not by copied as the version numbers will not start from one.
 
 ## Interoperability with TAP 3 (multi-role delegations)
 
