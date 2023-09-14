@@ -92,7 +92,7 @@ spec-version is in line with the server spec-version.
 
 ## Use of ephemeral keys (TAP 18)
 
-TAP 18 proposes the use of Sigstore's Fulcio to replace long-lived keys with short-lived keys backed by OIDC identities. This use of identities rather than keys simplifies key management for signers in TUF, but it presents an issue when teams that manage a targets metadata file change over time. In TUF today, if a team member leaves, they can pass on a key for use by another team memeber until the delegating targets metadata is able to update the delegation to a new team member. However, OIDC identities are generally tied to email accounts and other personal data, and so cannot be shared even for the short term. To address this, teams need a way to indicate that a different OIDC identity should be used without waiting for interaction from the delegating metadata.
+TAP 18 proposes the use of Sigstore's Fulcio to replace long-lived keys with short-lived keys backed by OIDC identities. This use of identities rather than keys simplifies key management for signers in TUF, but it presents an issue when teams that manage a targets metadata file change over time. In TUF today, if a team member leaves, they can pass on a key for use by another team member until the delegating targets metadata is able to update the delegation to a new team member. However, OIDC identities are generally tied to email accounts and other personal data, and so cannot be shared even for the short term. To address this, teams need a way to indicate that a different OIDC identity should be used without waiting for interaction from the delegating metadata.
 
 ## Community repositories
 
