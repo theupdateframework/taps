@@ -224,9 +224,14 @@ proceed with the update process as if verification for this file failed.
 
 ## Timestamp and snapshot rotation
 
-Timestamp and snapshot keys cannot rotate using this mechanism. Rotate files are
-included in snapshot metadata, and so cannot be used by timestamp and snapshot,
-which must be verified before the use of snapshot metadata.
+Timestamp and snapshot keys cannot rotate using this mechanism. This decision
+was made to prevent rollback and freeze attacks on rotate files. Rotate files
+are included in snapshot metadata to ensure that the user always sees the current
+set of rotate files. Thus, an attacker cannot block access to rotate files or
+present an outdated set of rotate files to a user. However, this means that rotate
+files can only be verified after snapshot metadata has been verified. In the TUF
+workflow, the timestamp and snapshot keys are used before the snapshot metadata
+is verified, and thus cannot be rotated using the mechanism in this TAP.
 
 ## Interoperability with TAP 3 (multi-role delegations)
 
