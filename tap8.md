@@ -213,13 +213,21 @@ remote. If the remote file is a rotation to null, and is signed with the current
 trusted keys, the client will halt the verification of this metadata and act as if
 it is unverified when continuing the update process. Otherwise, the client should
 ensure that the cached file is identical to the remote version. The client will
-then verify the rotate file using the currently trusted public key. If a rotate
+then verify the rotate file using the currently trusted public key(s) for this role.
+If a rotate
 file is successfully verified, the client will update the set of trusted keys for
 this role to be the set listed in the rotate files. If key data is missing
 or there is a rotation to null, the targets file is invalid and the client will
-proceed with the update process as if verification for this file failed. This process
-establishes trust in Alice's new key, and the client can now verify the
-signature of Alice's targets file using the new key. 
+proceed with the update process as if verification for this role failed (by moving
+on to another trusted role for this target, or reporting an error to the user). 
+
+This process establishes trust in Alice's new key, and the client can now verify the
+signature of Alice's targets file using the new key. In the case that there are
+multiple keys for a role, this rotate process can be used to rotate any number of
+individual keys, or to add or remove keys. A role `foo` can be delegated to with keys
+A, B, and C with a threshold of 2. A rotate file can then change the keys for both B
+and C by creating a rotation to A, D, and E. Another rotate file can then add an
+additional collaborator by rotating to A, D, E, and F.
 
 ## Timestamp and snapshot rotation
 
