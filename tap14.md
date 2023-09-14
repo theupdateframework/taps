@@ -427,9 +427,9 @@ a new snapshot metadata format, a repository that supports major versions 2 and
 3 may generate all metadata using the latest version, then call just the
 functions from the version 2 code that are used to generate snapshot metadata.
 
-For additional optimizations, the repository could any duplicate metadata files
-only once in the most recent specification version directory, then hard link
-to this copy from other directories. This strategy has been used to link
+For additional optimizations, the repository could generate any duplicate
+metadata files only once in the most recent specification version directory, then
+hard link to this copy from other directories. This strategy has been used to link
 duplicate metadata files used for consistent snapshots.
 
 ## Changes to TUF clients
