@@ -92,11 +92,30 @@ spec-version is in line with the server spec-version.
 
 ## Use of ephemeral keys (TAP 18)
 
-TAP 18 proposes the use of Sigstore's Fulcio to replace long-lived keys with short-lived keys backed by OIDC identities. This use of identities rather than keys simplifies key management for signers in TUF, but it presents an issue when teams that manage a targets metadata file change over time. In TUF today, if a team member leaves, they can pass on a key for use by another team member until the delegating targets metadata is able to update the delegation to a new team member. However, OIDC identities are generally tied to email accounts and other personal data, and so cannot be shared even for the short term. To address this, teams need a way to indicate that a different OIDC identity should be used without waiting for interaction from the delegating metadata.
+TAP 18 proposes the use of Sigstore's Fulcio to replace long-lived keys with
+short-lived keys backed by OIDC identities. This use of identities rather
+than keys simplifies key management for signers in TUF, but it presents an
+issue when teams that manage a targets metadata file change over time. In
+TUF today, if a team member leaves, they can pass on a key for use by another
+team member until the delegating targets metadata is able to update the
+delegation to a new team member. However, OIDC identities are generally tied
+to email accounts and other personal data, and so cannot be shared even for
+the short term. To address this, teams need a way to indicate that a different
+OIDC identity should be used without waiting for interaction from the
+delegating metadata.
 
 ## Community repositories
 
-Community repositories are often managed by a small group of volunteer administrators. These administrators are responsible for managing the targets metadata that delegates to all projects on the repository, often with an offline key for additional security. This means that any changes to project owners will not be reflected in the metadata until the volunteer administrator learns about and verifies the change, then manually signs new metadata that includes the new key(s) with the offline key. Each of these steps can be time consuming, and the whole process may take many hours or even days. During this period, the project will not be able to upload new versions or revoke existing versions as the new project owners are not trusted.
+Community repositories are often managed by a small group of volunteer
+administrators. These administrators are responsible for managing the targets
+metadata that delegates to all projects on the repository, often with an offline
+key for additional security. This means that any changes to project owners will
+not be reflected in the metadata until the volunteer administrator learns about
+and verifies the change, then manually signs new metadata that includes the new
+key(s) with the offline key. Each of these steps can be time consuming, and the
+whole process may take many hours or even days. During this period, the project
+will not be able to upload new versions or revoke existing versions as the new
+project owners are not trusted.
 
 # Rationale
 
@@ -205,7 +224,9 @@ proceed with the update process as if verification for this file failed.
 
 ## Timestamp and snapshot rotation
 
-Timestamp and snapshot keys cannot rotate using this mechanism. Rotate files are included in snapshot metadata, and so cannot be used by timestamp and snapshot, which must be verified before the use of snapshot metadata.
+Timestamp and snapshot keys cannot rotate using this mechanism. Rotate files are
+included in snapshot metadata, and so cannot be used by timestamp and snapshot,
+which must be verified before the use of snapshot metadata.
 
 ## Interoperability with TAP 3 (multi-role delegations)
 
