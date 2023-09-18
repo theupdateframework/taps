@@ -290,6 +290,8 @@ If this happens, the attacker could use TAP 8 to create large-scale rotations
 to null to perform a denial of service. However, this attack can be safely
 recovered from using the delegator to replace all effected keys. This is
 especially effective if the top-level targets is controlled by offline keys.
+For this reason, we recommend that both root and top-level targets are
+controlled by an offline, non-Fulcio key.
 Further, an attacker with access to a large number of identities through
 a compromised Fulcio server or OIDC issuer would be able to perform a
 similar attack without TAP 8 by signing invalid or attacker-controlled
