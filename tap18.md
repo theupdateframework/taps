@@ -41,7 +41,7 @@ In order to facilitate use of Fulcio, delegations may list an OIDC identity, suc
 }
 ```
 
-Where IDENTITY is the OIDC identity of the party who is authorized to sign and ISSUER is the OIDC entity used by Fulcio for verification. For example, identity could be "hello@gmail.com" with an issuer "https://accounts.google.com".
+Where IDENTITY is the OIDC identity of the party who is authorized to sign and ISSUER is the OIDC entity used by Fulcio for verification. For example, identity could be "hello@gmail.com" with an issuer "https://accounts.google.com". Both IDENTITY and ISSUER are required for this keytype.
 
 The root certificate or certificate chain for the Fulcio server MUST be obtained using the Sigstore [root of trust](https://github.com/sigstore/root-signing). The client MUST use a single Fulcio instance.
 
@@ -81,7 +81,7 @@ While performing the steps in the [TUF client workflow](https://theupdateframewo
 
 Offline verification includes the following steps:
 
-* Verify the signature on the certificate to ensure that the signature chains up to the trusted Fulcio root.
+* Verify the signature on the certificate to ensure that the signature chains up to the trusted Fulcio root and that the identity and issuer in the certificate match those found in the delegation.
 * Verify the Fulcio certificate's bundled CT inclusion proof with the trusted certificate log public key.
 * Verify the signature on the TUF metadata using the key from the Fulcio certificate.
 * Verify the SET to ensure that the signature was signed during certificate validity.
