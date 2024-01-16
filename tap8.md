@@ -135,10 +135,10 @@ mechanism to be used by other delegations, and extends it with self-revocation.
 # Specification
 
 To support key rotation, the new metadata type `rotate` is
-introduced, which contains the new public key(s), the threshold, a hash
-of the previous rotate file in the chain, and is
-signed by a threshold of old public keys.   The intuition is while
-delegations keep intact, the targets can rotate keys, shrink or grow.
+introduced, which contains the new public key(s), the threshold, a version
+number, and is
+signed by a threshold of old public keys.   The intuition is that while
+delegations stay intact, the targets can rotate keys, remove keys, or add keys.
 
 ## Rotate file
 
@@ -147,8 +147,8 @@ signatures wrapper as in tuf spec, not shown here):
 
 ```python
 {
-    "_type" : "rotate" ,
-    "version" : VERSION
+    "_type" : "rotate",
+    "version" : VERSION,
     "role" : ROLE,
     "keys" : {
         KEYID : KEY
@@ -164,17 +164,17 @@ the integer version number of rotate files for this role. Version
 numbers MUST increase by exactly 1 from the previous rotate file for
 this role. The keys specify the new valid keys
 and associated key ids (which may be a subset or superset of
-the old ones).  A rotate file does _not_ contain an expiration date,
+the old ones).  A rotate file does _not_ contain an expiration date, as
 it is meant to be signed once and never modified.  The rotate
 file has to be signed with an old threshold of old keys. All keys in a
 rotation chain, other than a chain that has a rotation to null, should
 be securely stored.
 
-The rotate file will go into a repository in a 'rotate' folder that contains
+The rotate file will go into a 'rotate' folder on the repository that contains
 all rotate files for the repository. These files will be listed in snapshot
-metadata for the repository so that the client can verify that they recieve
+metadata for the repository so that the client can verify that they receive
 all current rotate files. The files listed in snapshot SHOULD contain a
-hash in order to ensure that an attacker that later compromises previoiusly
+hash in order to ensure that an attacker that later compromises previously
 trusted keys cannot replace a rotate file. If a rotate file listed in
 snapshot for a role is not found, the user MUST act as if the role's metadata
 is not signed with a valid threshold of keys.
@@ -182,7 +182,7 @@ is not signed with a valid threshold of keys.
 Let's consider a motivating example, project foo is delegated to Alice.
 Alice's computer with the key material got stolen, but the disk was
 encrypted.  To be safe, she decides to get her key from her backup and
-roll over her key to a fresh one.  To do that, she creates a file
+rotate her key to a fresh one.  To do that, she creates a file
 `foo.rotate.VERSION`.  This file contains her new key, a threshold of 1, and
 is signed with her old key.  She signs her targets file with the new key,
 and uploads both the rotate file and the freshly signed targets file to
@@ -192,10 +192,11 @@ The first filename suffix, referred as `VERSION` above and below, is the
 same as the VERSION listed in the metadata.
 
 The existing delegation to Alice's old key is still valid. The client will
-start with this delegation and look for rotation files to determine the current
-set of trusted keys.
+start with this delegation and look for rotate files to determine the current
+set of trusted keys. They will see `foo.rotate.1` and discover Alice's new key.
 
-If the delegation is changed to include her new key, it will also be valid. Any
+If the delegation is changed to Alice's new key, it will also be valid and will
+over-rule any rotate files. Any
 old rotate files for this role should be deleted and removed from snapshot on
 the next snapshot key rotation. The client will determine the correct rotate file
 by starting from VERSION 1.
@@ -229,14 +230,6 @@ individual keys, or to add or remove keys. A role `foo` can be delegated to with
 A, B, and C with a threshold of 2. A rotate file can then change the keys for both B
 and C by creating a rotation to A, D, and E. Another rotate file can then add an
 additional collaborator by rotating to A, D, E, and F.
-
-## Timestamp and snapshot rotation
-
-Timestamp and snapshot keys can rotate as well, leading to ROLE.rotate.VERSION
-files for these roles. Each file is signed by a quorum
-of old keys, and contains the new keys. If the timestamp key is renewed by
-the root, all `timestamp.rotate` files can be safely removed from the
-repository.
 
 The root role should ensure that all previous rotate files are removed when
 it delegates to a new chain of trust. This saves space and simplifies the client
