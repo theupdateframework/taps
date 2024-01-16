@@ -211,7 +211,8 @@ with `rotate/foo.rotate.1`, then `rotate/foo.rotate.2` by first checking for thi
 version file in a local cache. The client will then fetch the rotate file from
 remote. If the remote file is a rotation to null, and is signed with the currently
 trusted keys, the client will halt the verification of this metadata and act as if
-it is unverified when continuing the update process. Otherwise, the client should
+it is unverified when continuing the update process (and look for metadata from
+the next role in the pre-order depth-first search). Otherwise, the client should
 ensure that the cached file is identical to the remote version. The client will
 then verify the rotate file using the currently trusted public key(s) for this role.
 If a rotate
@@ -219,7 +220,7 @@ file is successfully verified, the client will update the set of trusted keys fo
 this role to be the set listed in the rotate files. If key data is missing
 or there is a rotation to null, the targets file is invalid and the client will
 proceed with the update process as if verification for this role failed (by moving
-on to another trusted role for this target, or reporting an error to the user). 
+on to another trusted role for this target, or reporting an error to the user).
 
 This process establishes trust in Alice's new key, and the client can now verify the
 signature of Alice's targets file using the new key. In the case that there are
@@ -238,7 +239,7 @@ the root, all `timestamp.rotate` files can be safely removed from the
 repository.
 
 The root role should ensure that all previous rotate files are removed when
-it delegates to a new chain of trust. This saves space and simlifies the client
+it delegates to a new chain of trust. This saves space and simplifies the client
 search for rotate files.
 
 ## Interoperability with TAP 4 (Multiple repository consensus)
