@@ -20,6 +20,8 @@
 * [TAP 14: Managing TUF Versions](tap14.md)
 * [TAP 16: Snapshot Merkle Trees](tap16.md)
 * [TAP 17: Remove Signature Wrapper from the TUF Specification](tap17.md)
+* [TAP 18: Ephemeral identity verification using sigstore's Fulcio for TUF developer key management](tap18.md)
+* [TAP 19: Content Addressable Systems and TUF](tap19.md)
 
 ## Rejected
 
@@ -29,10 +31,8 @@
 
 ## License
 
-This work is [dual-licensed](https://en.wikipedia.org/wiki/Multi-licensing) and
-distributed under the (1) MIT License and (2) Apache License, Version 2.0.
-Please see [LICENSE-MIT.txt](LICENSE-MIT.txt) and
-[LICENSE-APACHE.txt](LICENSE-APACHE.txt).
+This work is distributed under the Community Specification License 1.0.
+Please see [LICENSE](LICENSE) for more details.
 
 
 ## Acknowledgements

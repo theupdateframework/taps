@@ -90,24 +90,32 @@ the file. This means that even if the keys are not changed, a client must
 download every version of the root metadata in order to ensure the client
 spec-version is in line with the server spec-version.
 
-## Auto-rotation timestamp role
+## Use of ephemeral keys (TAP 18)
 
-Roles which typically have short lived keys, like the timestamp role,
-may wish to revoke trust in the prior key and sign a new key with the
-old.  This limits the ability for attackers to walk back the set of
-trusted keys.  Right now, there is no good way to do this within TUF,
-which may result in some keys being trusted longer than they should be.
+TAP 18 proposes the use of Sigstore's Fulcio to replace long-lived keys with
+short-lived keys backed by OIDC identities. This use of identities rather
+than keys simplifies key management for signers in TUF, but it presents an
+issue when teams that manage a targets metadata file change over time. In
+TUF today, if a team member leaves, they can pass on a key for use by another
+team member until the delegating targets metadata is able to update the
+delegation to a new team member. However, OIDC identities are generally tied
+to email accounts and other personal data, and so cannot be shared even for
+the short term. To address this, teams need a way to indicate that a different
+OIDC identity should be used without waiting for interaction from the
+delegating metadata.
 
-Using TAP 8, the online key can rotate itself without a signature by the
-offline root key.
+## Community repositories
 
-Note, this TAP is not meant to address all situations where keys will
-change.  If there is a scenario where new keys are generated and
-delegated to by a delegating role this model remains the same as in TUF
-today.  For example a HSM may generate and sign new timestamp keys every
-hour.  Since the HSM's key does not change, this is not a rotation and
-thus is not intended to be handled by this TAP.
-
+Community repositories are often managed by a small group of volunteer
+administrators. These administrators are responsible for managing the targets
+metadata that delegates to all projects on the repository, often with an offline
+key for additional security. This means that any changes to project owners will
+not be reflected in the metadata until the volunteer administrator learns about
+and verifies the change, then manually signs new metadata that includes the new
+key(s) with the offline key. Each of these steps can be time consuming, and the
+whole process may take many hours or even days. During this period, the project
+will not be able to upload new versions or revoke existing versions as the new
+project owners are not trusted.
 
 # Rationale
 
@@ -235,6 +243,17 @@ The root role should ensure that all previous rotate files are removed when
 it delegates to a new chain of trust. This saves space and simplifies the client
 search for rotate files.
 
+## Timestamp and snapshot rotation
+
+Timestamp and snapshot keys cannot rotate using this mechanism. This decision
+was made to prevent rollback and freeze attacks on rotate files. Rotate files
+are included in snapshot metadata to ensure that the user always sees the current
+set of rotate files. Thus, an attacker cannot block access to rotate files or
+present an outdated set of rotate files to a user. However, this means that rotate
+files can only be verified after snapshot metadata has been verified. In the TUF
+workflow, the timestamp and snapshot keys are used before the snapshot metadata
+is verified, and thus cannot be rotated using the mechanism in this TAP.
+
 ## Interoperability with TAP 4 (Multiple repository consensus)
 
 If multiple repositories use the same role definition, rotate files may need to be
@@ -292,6 +311,29 @@ safely removed from the repository. If the delegation of foo is
 directly done to Alice, Bob, Charlie and Dan with a threshold of 2
 (e.g. the delegation expired, and the person in charge decided to
 directly trust this team), the foo.rotate files can be safely removed.
+
+## Interoperability with Fulcio TAP
+
+TAP 8 can be used with the Fulcio identities proposed in [TAP 18](tap18.md).
+To do so, the `sigstore-oidc` keytype may be used in the rotate file
+as a KEY and this keytype may also be used to sign the rotate file. Using this
+extension, TAP 8 can be used to rotate Fulcio identities as well as other key
+types.
+
+The interaction between the Fulcio TAP and this TAP may impact the security
+considerations in this TAP. If the Fulcio server or OIDC issuer is compromised,
+an attacker could gain control over all TUF roles controlled by that entity.
+If this happens, the attacker could use TAP 8 to create large-scale rotations
+to null to perform a denial of service. However, this attack can be safely
+recovered from using the delegator to replace all effected keys. This is
+especially effective if the top-level targets is controlled by offline keys.
+For this reason, we recommend that both root and top-level targets are
+controlled by an offline, non-Fulcio key.
+Further, an attacker with access to a large number of identities through
+a compromised Fulcio server or OIDC issuer would be able to perform a
+similar attack without TAP 8 by signing invalid or attacker-controlled
+metadata.
+
 
 # Security Analysis
 
