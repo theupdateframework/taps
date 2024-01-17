@@ -275,6 +275,29 @@ directly done to Alice, Bob, Charlie and Dan with a threshold of 2
 (e.g. the delegation expired, and the person in charge decided to
 directly trust this team), the foo.rotate files can be safely removed.
 
+## Interoperability with Fulcio TAP
+
+TAP 8 can be used with the Fulcio identities proposed in [TAP 18](tap18.md).
+To do so, the `sigstore-oidc` keytype may be used in the rotate file
+as a KEY and this keytype may also be used to sign the rotate file. Using this
+extension, TAP 8 can be used to rotate Fulcio identities as well as other key
+types.
+
+The interaction between the Fulcio TAP and this TAP may impact the security
+considerations in this TAP. If the Fulcio server or OIDC issuer is compromised,
+an attacker could gain control over all TUF roles controlled by that entity.
+If this happens, the attacker could use TAP 8 to create large-scale rotations
+to null to perform a denial of service. However, this attack can be safely
+recovered from using the delegator to replace all effected keys. This is
+especially effective if the top-level targets is controlled by offline keys.
+For this reason, we recommend that both root and top-level targets are
+controlled by an offline, non-Fulcio key.
+Further, an attacker with access to a large number of identities through
+a compromised Fulcio server or OIDC issuer would be able to perform a
+similar attack without TAP 8 by signing invalid or attacker-controlled
+metadata.
+
+
 # Security Analysis
 
 There should be no negative security impact.  The major benefits are
