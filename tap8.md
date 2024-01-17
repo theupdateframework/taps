@@ -24,7 +24,8 @@ role to change their delegation. Roles are thus able to rotate to new trusted
 keys independently, allowing keys to be changed more often and without
 interaction from delegators.
 
-The key rotation mechanism is designed to be used by any targets roles. The root role will continue to use the root metadata to establish a trusted root key.
+The key rotation mechanism is designed to be used by any targets roles. The root 
+role will continue to use the root metadata to establish a trusted root key.
 
 Conceptually, the rotation process says if you trusted threshold of keys
 X = X_0, ... X_n, now instead trust threshold of keys Y = Y_0, ... Y_n.  Rotation
