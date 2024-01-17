@@ -90,24 +90,32 @@ the file. This means that even if the keys are not changed, a client must
 download every version of the root metadata in order to ensure the client
 spec-version is in line with the server spec-version.
 
-## Auto-rotation timestamp role
+## Use of ephemeral keys (TAP 18)
 
-Roles which typically have short lived keys, like the timestamp role,
-may wish to revoke trust in the prior key and sign a new key with the
-old.  This limits the ability for attackers to walk back the set of
-trusted keys.  Right now, there is no good way to do this within TUF,
-which may result in some keys being trusted longer than they should be.
+TAP 18 proposes the use of Sigstore's Fulcio to replace long-lived keys with
+short-lived keys backed by OIDC identities. This use of identities rather
+than keys simplifies key management for signers in TUF, but it presents an
+issue when teams that manage a targets metadata file change over time. In
+TUF today, if a team member leaves, they can pass on a key for use by another
+team member until the delegating targets metadata is able to update the
+delegation to a new team member. However, OIDC identities are generally tied
+to email accounts and other personal data, and so cannot be shared even for
+the short term. To address this, teams need a way to indicate that a different
+OIDC identity should be used without waiting for interaction from the
+delegating metadata.
 
-Using TAP 8, the online key can rotate itself without a signature by the
-offline root key.
+## Community repositories
 
-Note, this TAP is not meant to address all situations where keys will
-change.  If there is a scenario where new keys are generated and
-delegated to by a delegating role this model remains the same as in TUF
-today.  For example a HSM may generate and sign new timestamp keys every
-hour.  Since the HSM's key does not change, this is not a rotation and
-thus is not intended to be handled by this TAP.
-
+Community repositories are often managed by a small group of volunteer
+administrators. These administrators are responsible for managing the targets
+metadata that delegates to all projects on the repository, often with an offline
+key for additional security. This means that any changes to project owners will
+not be reflected in the metadata until the volunteer administrator learns about
+and verifies the change, then manually signs new metadata that includes the new
+key(s) with the offline key. Each of these steps can be time consuming, and the
+whole process may take many hours or even days. During this period, the project
+will not be able to upload new versions or revoke existing versions as the new
+project owners are not trusted.
 
 # Rationale
 
@@ -216,15 +224,14 @@ proceed with the update process as if verification for this file failed.
 
 ## Timestamp and snapshot rotation
 
-Timestamp and snapshot keys can rotate as well, leading to ROLE.rotate.ID.PREV
-files, where ID and PREV are as described above. Each file is signed by a quorum
-of old keys, and contains the new keys. If the timestamp key is renewed by
-the root, all timestamp.rotate files can be safely removed from the
-repository.
-
-The root role should ensure that all previous rotate files are removed when
-it delegates to a new chain of trust. This saves space and simlifies the client
-search for rotate files.
+Timestamp and snapshot keys cannot rotate using this mechanism. This decision
+was made to prevent rollback and freeze attacks on rotate files. Rotate files
+are included in snapshot metadata to ensure that the user always sees the current
+set of rotate files. Thus, an attacker cannot block access to rotate files or
+present an outdated set of rotate files to a user. However, this means that rotate
+files can only be verified after snapshot metadata has been verified. In the TUF
+workflow, the timestamp and snapshot keys are used before the snapshot metadata
+is verified, and thus cannot be rotated using the mechanism in this TAP.
 
 ## Interoperability with TAP 3 (multi-role delegations)
 
