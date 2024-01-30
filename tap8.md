@@ -21,17 +21,19 @@ by roles that have multiple trusted keys by allowing the role to define a new
 list of trusted keys with an associated threshold during the rotate process.
 Performing a key rotation does not require parties that delegated trust to the
 role to change their delegation. Roles are thus able to rotate to new trusted
-keys independently, allowing keys to be changed more often.
+keys independently, allowing keys to be changed more often and without
+interaction from delegators.
 
-The key rotation mechanism is designed to be used by all roles except the
-root role. The root role will continue to use the root metadata to establish
-a trusted root key.
+The key rotation mechanism is designed to be used by any targets roles. The root
+role will continue to use the root metadata to establish a trusted root key.
+Snapshot and timestamp cannot use this rotation mechanism.
 
 Conceptually, the rotation process says if you trusted threshold of keys
 X = X_0, ... X_n, now instead trust threshold of keys Y = Y_0, ... Y_n.  Rotation
 of a key may be performed any number of times, transferring trust from X to Y, then
 from Y to Z, etc. Trust can even be transferred back from Z to X, allowing a key
-to be added to a role, then later removed.
+to be added to a role, then later removed. If a single key needs to be replaced,
+it can be safely rotated using the mechanism in this TAP.
 
 The mechanism in this TAP has an additional use case: if a rotation
 to a null key is detected, it causes the role to no longer be trusted.
@@ -42,8 +44,7 @@ rotation to null without the help of the delegator, so they are able to
 explicitly revoke trust in the role immediately, improving response time
 to a key compromise. A rotation to a null key revokes trust in the role,
 not specific keys, so all keys associated with the role will be invalid
-after a rotation to null. If only a single key needs to be replaced, it can be
-safely rotated using the mechanism in this TAP. The client will detect a rotation
+after a rotation to null. The client will detect a rotation
 to a null key and treat it as if the metadata was unsigned.
 
 A delegator to a role A is able to help A recover from a rotation to null of A by
