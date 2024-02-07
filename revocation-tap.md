@@ -1,5 +1,5 @@
 * TAP: TBD
-* Title: Self-revocation of keys
+* Title: Self-revocation
 * Version: 1
 * Last-Modified: 29-Jan-2024
 * Author: Marina Moore
@@ -9,19 +9,19 @@
 
 
 # Abstract
-This TAP proposes a mechanism for independent key rotation that allows any key
+This TAP proposes a mechanism for independent key revocation that allows any key
 holder to revoke their key without waiting on delegator. Performing a revocation
-in TUF requires parties that delegated trust to a key to change their delegation
+in TUF requires parties that delegated trust to a role to change their delegation
 to remove the revoked key. However, this introduces a lag between when a key
 holder becomes aware of a compromise and when the delegator responds to this
 compromise. This TAP will reduce lag time between a key compromise and a
-revocation by allowing the key holder to revoke their own key.
+revocation by allowing any key holder to revoke the role they are trusted to sign.
 
 The revocation mechanism is designed to be used by all targets roles. Targets
 roles, especially delegated targets roles, are not controlled by the repository,
 and so have the greatest likelihood of a delay before revocation.
 
-This TAP uses the rotation mechanism from TAP 8 to achieve key revocation. It
+This TAP uses the rotation mechanism from TAP 8 to achieve revocation. It
 adds a 'null key' that, when rotated to, revokes a role. If a rotation to a null
 key is detected, it causes the role to no longer be trusted. The client will
 detect a rotation to a null key and treat it as if the metadata was unsigned.
@@ -29,7 +29,8 @@ A role could use a revocation if they suspect a threshold of keys have been
 compromised (a lost hard drive, system breach, etc). A rotation to a null key
 revokes trust in the role, not specific keys, so all keys associated with the
 role will be invalid after a rotation to null. If only a single key needs to be
-replaced, it can be safely rotated using the mechanism in TAP 8.
+replaced, it can be safely rotated using the mechanism in TAP 8 especially in
+the case that a threshold of keys is required.
 
 A delegator to a role A is able to help A recover from a rotation to null of A
 by delegating to a new set of keys for A. This ensures that the delegator is
@@ -64,7 +65,7 @@ compromised, they have to wait for role T to replace the key with a new,
 trusted key.
 
 With this proposal, the owner of role D can
-revoke their key without relying on the delegator.  This will improve
+revoke their role without relying on the delegator.  This will improve
 response time to key compromises.
 
 TAP 8 already proposes a mechanism for key rotation. We utilize document formats
