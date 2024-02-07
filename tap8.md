@@ -339,6 +339,14 @@ As a general note, this TAP only extends the possibilities of a target,
 but the delegation mechanism is still in place - i.e. a key higher up
 in the delegation can always revoke / modify the delegation itself.
 
+A key holder or attacker could upload a large number of rotate files to DoS the
+role or repository. This is similar to an existing attack where an attacker
+with access to a private key can upload several different versions of the same
+metadata file. To mitigate this attack on rotations, the repository should
+set a limit on the number of rotate files per role. If a role needs to change
+more than this limit, the delegator must re-delegate to the role, re-setting
+any rotations.
+
 Baton - Baton: Certificate Agility for Android’s Decentralized Signing
 Infrastructure - http://people.scs.carleton.ca/~paulv/papers/wisec2014-baton.pdf
 - is a similar proposal to extend Android's signing infrastructure.
