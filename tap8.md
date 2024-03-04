@@ -208,6 +208,8 @@ old rotate files for this role should be deleted and removed from snapshot on
 the next snapshot key rotation. The client will determine the correct rotate file
 to begin the chain using the set of keys in the delegation for the role as the `ID`.
 
+The repository SHOULD set a limit to the number of rotate files per role. This limit should be clear to all key holders (for example, it could be in repository documentation or added to root metadata). Once this number of rotate files is reached, the repository will reject rotations for this role until a new delegation is made to it, clearing all previous rotations.
+
 ## Client workflow
 
 A client who wants to install foo now fetches Alice's targets file, and
