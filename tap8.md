@@ -47,8 +47,8 @@ safely rotated using the mechanism in this TAP. The client will detect a rotatio
 to a null key and treat it as if the metadata was unsigned.
 
 A delegator to a role A is able to help A recover from a rotation to null of A by
-delegating to a new set of keys for A.
-Additionally, a delegator can overrule a rotate file by delegating to the role
+delegating to a new set of keys for A with a new role name.
+Additionally, a delegator can overrule a rotate file by delegating to a new role
 with a new set of keys. This ensures that the delegator is still the source of
 trust, but allows the role to act independently.
 
@@ -203,10 +203,10 @@ The existing delegation to Alice's old key is still valid. The client will
 start with this delegation and look for rotate files to determine the current
 set of trusted keys. They will see `foo.rotate.1` and discover Alice's new key.
 
-If the delegation is changed to Alice's new key, it will also be valid and will
-over-rule any rotate files. Any
-old rotate files for this role should be deleted and removed from snapshot on
-the next snapshot key rotation. The client will determine the correct rotate file
+If the delegation is changed to Alice's new key, it should use a new role name to
+over-rule any existing rotate files. Any
+old rotate files for the old role should be deleted and removed from snapshot on
+the next snapshot key rotation. The client will determine the correct rotate file for the new role
 by starting from VERSION 1.
 
 ## Client workflow
@@ -239,7 +239,7 @@ A, B, and C with a threshold of 2. A rotate file can then change the keys for bo
 and C by creating a rotation to A, D, and E. Another rotate file can then add an
 additional collaborator by rotating to A, D, E, and F.
 
-The root role should ensure that all previous rotate files are removed when
+The delegating role should ensure that all previous rotate files are removed when
 it delegates to a new chain of trust. This saves space and simplifies the client
 search for rotate files.
 
