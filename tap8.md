@@ -208,7 +208,7 @@ old rotate files for this role should be deleted and removed from snapshot on
 the next snapshot key rotation. The client will determine the correct rotate file
 to begin the chain using the set of keys in the delegation for the role as the `ID`.
 
-The repository SHOULD set a limit to the number of rotate files per role. This limit should be clear to all key holders (for example, it could be in repository documentation or added to root metadata). Once this number of rotate files is reached, the repository will reject rotations for this role until a new delegation is made to it, clearing all previous rotations.
+The repository SHOULD set a limit to the number of rotate files per role. This limit should be clear to all key holders (for example, it could be in repository documentation or added to root metadata). Once this number of rotate files is reached, the repository will reject rotations for this role and the delegator should create a new delegation to a new role.
 
 ## Client workflow
 
@@ -346,7 +346,7 @@ role or repository. This is similar to an existing attack where an attacker
 with access to a private key can upload several different versions of the same
 metadata file. To mitigate this attack on rotations, the repository should
 set a limit on the number of rotate files per role. If a role needs to change
-more than this limit, the delegator must re-delegate to the role, re-setting
+more than this limit, the delegator must re-delegate to a new role, re-setting
 any rotations.
 
 Baton - Baton: Certificate Agility for Android’s Decentralized Signing
