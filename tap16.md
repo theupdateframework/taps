@@ -90,11 +90,17 @@ algorithm should be documented in a [POUF](https://github.com/theupdateframework
 so that implementations can be
 compatible and correctly verify Merkle tree data. However, all implementations
 should meet the following requirements:
+
 * Leaf nodes must be unique. A unique identifier of the targets metadata – such as the
 filepath, filename, or the hash of the content – must be included in the leaf data to ensure that no two leaf
 node hashes are the same.
 * The tree must be a Merkle tree. Each internal node must contain a hash that
 includes both child nodes.
+
+A [Merkle prefix tree](https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-melara.pdf)
+is suggested as it allows for efficient updates and
+non-membership proofs (so that the user can efficiently verify that a particular package
+is not in the tree, preventing a DoS attack).
 
 Once the Merkle tree is generated, the repository must create a snapshot Merkle
 metadata file for each targets metadata file. This file must contain the leaf contents and
