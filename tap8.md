@@ -196,7 +196,7 @@ is signed with her old key.  She signs her targets file with the new key,
 and uploads both the rotate file and the freshly signed targets file to
 the repository.
 
-The first filename suffix, referred as `VERSION` above and below, is the
+The filename suffix, referred as `VERSION` above and below, is the
 same as the VERSION listed in the metadata.
 
 The existing delegation to Alice's old key is still valid. The client will
