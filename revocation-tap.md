@@ -107,9 +107,24 @@ file has to be signed with an old threshold of old keys.
 Clients need to check for rotations to a null key, and any delegation pointing
 to a rotation to a null key is invalid.  The null key is a hard coded value used
 across TUF implementations. This enables a role to explicitly revoke their
-own key(s) by introducing a rotation to null.
+own key(s) by introducing a rotation to null. As example rotate file would be:
 
-**Prioritizing Self Revocation**
+```python
+{
+    "_type" : "rotate",
+    "version" : 2,
+    "role" : "foo",
+    "keys" : {
+        NULL
+        } ,
+    "threshold" : 1 }
+}
+```
+
+where NULL is the null key.
+
+### Prioritizing Self Revocation
+
 Rotation files are immutable unless replaced with a revocation (rotate
 to null).  This is the only case in which they can be replaced or
 modified.  If a client wants to rotate to a different
