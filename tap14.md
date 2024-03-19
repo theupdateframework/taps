@@ -3,7 +3,7 @@
 * Version: 1
 * Last-Modified: 13-October-2022
 * Author: Marina Moore, Justin Cappos
-* Status: Accepted
+* Status: Deferred
 * Content-Type: text/markdown
 * Created: 19-December-2018
 
@@ -292,7 +292,7 @@ where `MAJOR_VERSION` is the integer representing a supported major version
 For backwards compatability, version 1 should be assumed to be in the top-level
 repository with no directory named 1. `ROOT_FILENAME` is the name of the root metadata file in the new specification version. `ROOT_DIGEST` is the digest of the new root metadata file.
 `VERSION_PATH` is the path to the directory for this version. In many cases, this will match the specification version, ie "2/".
-`FEATURES_STRING` is a string for the features supported in this version. This string may be used to include an API version for a particular implementation, or to indicate which features in a new specification version are supported. This field MAY be empty, but if it is used, the client MUST ensure that they support the features used. A combination of the specification version and features string will be used to determine which version the client should use. 
+`FEATURES_STRING` is a string for the features supported in this version. This string may be used to include an API version for a particular implementation, or to indicate which features in a new specification version are supported. This field MAY be empty, but if it is used, the client MUST ensure that they support the features used. A combination of the specification version and features string will be used to determine which version the client should use.
 
 All entries in `supported-versions` will be in priority order so that a client will use the last specification version and feature combination that they support.
 
