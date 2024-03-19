@@ -116,8 +116,8 @@ own key(s) by introducing a rotation to null. As example rotate file would be:
     "role" : "foo",
     "keys" : {
         NULL
-        } ,
-    "threshold" : 1 }
+        },
+    "threshold" : 1
 }
 ```
 
