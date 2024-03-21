@@ -12,7 +12,7 @@
 
 # Abstract
 
-This TAP describes how a client should initialize a client with local metadata,
+This TAP describes how a client should initialize with local metadata,
 and impose a metadata backstop to limit the range of a potential rollback
 attack during client initialization.
 
@@ -20,7 +20,7 @@ attack during client initialization.
 
 One of the attacks [TUF] protects against is a rollback attack, where an
 attacker tricks a client into using older metadata in order to install a
-vulnerable target. TUF protects against this by requiring all new metadata must
+vulnerable target. TUF protects against this by requiring that all new metadata must
 have a version number greater than the current version. However, TUF is still
 vulnerable to two other avenues to trigger a rollback:
 
@@ -42,24 +42,27 @@ Unfortunately these have limitations:
 
 * Rotating the keys in the root role can be a complicated manual process, so
   it’s expected to be infrequently performed. This can give a man-in-the-middle
-  a serve a wide range of old metadata.
+  a large window in which they can serve a wide range of old metadata.
 * Offline devices could use TUF to install updates from some physical medium,
   like a USB thumb drive. In these circumstances, the TUF metadata could not
   use a short expiration window in order to account for the time difference
   from capturing the metadata to when it was used to install packages.
-* A local attacker could both of these protections by modifying the local copy
+* A local attacker could bypass both of these protections by modifying the local copy
   of the trusted metadata, or manipulate the system clock to allow installation
   of expired metadata.
 
 # Rationale
 
-Some devices and operating systems can establish a trusted boot mechanism to
+Some devices and operating systems use a trusted boot mechanism to
 establish a chain of trust from a hardware-protected root of trust, which
 verifies the bootloader, which in turn verifies the kernel, and finally the
 user space. For example, UEFI [Secure Boot], Android’s [Verified Boot].  This
 technology can be used to establish a metadata backstop that cannot be
-manipulated by a local attacker, and can be easier to be kept up to date than
+manipulated by a local attacker, and can be be kept up to date more easily than
 rolling root metadata keys.
+
+The following three sections describe different scenarios to generationg backstop
+metadata:
 
 ## Including all metadata in the backstop
 
@@ -69,7 +72,7 @@ metadata, before loading the local cached metadata, and finally updating with
 the latest remote metadata. Since the backstop is in a signed partition, a
 local attacker cannot replace this metadata with older compromised metadata.
 However, if the repository is large, it can be expensive to bake in the full
-backtop metadata just to prevent a rollback attack.
+backstop metadata just to prevent a rollback attack.
 
 ## Root and Snapshot metadata backstop
 
@@ -86,7 +89,7 @@ device, that space may be limited, so it may be too expensive.
 
 However, since it is optional for the Snapshot to contain hashes for the
 Targets and Delegated Targets. This leaves susceptible to the attack detailed
-in [Mercury Paper][Mercury Paper 6.4], where an attacker who has stolen the
+in [Mercury Paper], where an attacker who has stolen the
 Targets or Delegated Targets keys can forge a Targets role that shares a
 version with the trusted Targets, but points at a compromised target.
 
@@ -111,7 +114,8 @@ However, this approach has a few downsides:
   * it may reveal to a repository that a client is initializing. This could be
     alleviated by a client trying to first fetch the backstop metadata from a
     local store.
-    * A repository may accidentally remove old metadata.
+    * A repository may remove old metadata, either accidentally or as part of
+      a garbage collection process.
     * A specific Snapshot metadata cannot be fetched from a repository with
       inconsistent snapshots.
 * By just checking the backstop version, it’s possible an attacker that has
@@ -127,7 +131,7 @@ integrate into one of these trusted boot mechanisms.
 
 ...
 
-_**5.0**. **Load the initial root metadata file.** We assume that a good, trusted
+_**5.0**. **Load the trusted root metadata file.** We assume that a good, trusted
 copy of this file was shipped with the package manager or software updater
 using an out-of-band process._
 
@@ -137,6 +141,8 @@ using an out-of-band process._
   as required, discard it, abort client initialization, and report the
   signature failure._
 
+<!-- TODO: what approaches could be taken to delivering these out of band? Are they
+     baked into the client? -->
 _**5.1**. **Load the backstop metadata versions and hashes**, if any. We assume these
 version numbers are provided by a trusted out-of-band process._
 
@@ -146,7 +152,7 @@ _**5.2**. **Initialize the root metadata role.**_
   file._
 
 * _**5.2.2**. Try loading version N+1 of the root metadata file from the local
-  repository. If this file is not available, then go to step 5.2.7._
+  backstop repository. If this file is not available, then go to step 5.2.7._
 
 * _**5.2.3**. **Check for an arbitrary software attack.** Version N+1 of the
   root metadata file MUST have been signed by: (1) a threshold of keys
@@ -195,7 +201,7 @@ _**5.3**. **Initialize the timestamp metadata role.**_
   properly signed, discard it, report the signature failure, then go to step
   5.6._
 
-* _**5.3.3**. **Check for a rollback attack, against the backstop metadata.**_
+* _**5.3.3**. **Check for a rollback attack, against the backstop metadata.**, if any._
 
   * _**5.3.3.1**. The backstop timestamp metadata version number, if any, MUST be
     less than or equal to the version number in the new timestamp metadata
@@ -432,7 +438,7 @@ client to using older metadata that was created after the backstop was
 established. It should be easier for a distribution to keep the backstop up to
 date since it doesn’t require key rotations.
 
-## Resisting Rollback and Freeze Attacks with Offline Devices.
+## Resisting Rollback and Freeze Attacks with Offline Devices
 
 This TAP enables a TUF system to use a large expiry window to support offline
 devices, since updating the rollback versions would block old unexpired
