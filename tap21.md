@@ -1,14 +1,12 @@
-* TAP: TBD
+* TAP: 21
 * Title: TUF Metadata Initialization and Backstop
-* Version: 1.0.0
-* Last-Modified: 04-11-2020
-* Author: Erick Tryzelaar
-* Status: Draft
+* Version: 1
+* Last-Modified: 21-03-2024
+* Author: Erick Tryzelaar, Joshua Lock
+* Status: Deferred
 * Content-Type: text/markdown
-* Requires: <TAP numbers>
 * Created: 18-September-2020
 * TUF-Version: 1.0.10
-* Post-History: <dates of postings to the TUF mailing list>
 
 # Abstract
 

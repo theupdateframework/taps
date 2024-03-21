@@ -17,6 +17,10 @@
 * [TAP 12: Improving keyid flexibility](tap12.md)
 * [TAP 14: Managing TUF Versions](tap14.md)
 
+## Deferred
+
+* [TAP21: TUF Metadata Initialization and Backstop](tap21.md)
+
 ## Rejected
 
 * [TAP 5: Setting URLs for roles in the root metadata file](tap5.md)
