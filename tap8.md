@@ -210,6 +210,8 @@ old rotate files for the old role should be deleted and removed from snapshot on
 the next snapshot key rotation. The client will determine the correct rotate file for the new role
 by starting from VERSION 1.
 
+The repository SHOULD set a limit to the number of rotate files per role. This limit should be clear to all key holders (for example, it could be in repository documentation or added to root metadata). Once this number of rotate files is reached, the repository will reject rotations for this role and the delegator should create a new delegation to a new role.
+
 ## Client workflow
 
 A client who wants to install foo now fetches Alice's targets file and will
@@ -369,6 +371,14 @@ by offline keys that may take some time to update.
 As a general note, this TAP only extends the possibilities of a target,
 but the delegation mechanism is still in place - i.e. a key higher up
 in the delegation can always revoke / modify the delegation itself.
+
+A key holder or attacker could upload a large number of rotate files to DoS the
+role or repository. This is similar to an existing attack where an attacker
+with access to a private key can upload several different versions of the same
+metadata file. To mitigate this attack on rotations, the repository should
+set a limit on the number of rotate files per role. If a role needs to change
+more than this limit, the delegator must re-delegate to a new role, re-setting
+any rotations.
 
 Baton - Baton: Certificate Agility for Android’s Decentralized Signing
 Infrastructure - http://people.scs.carleton.ca/~paulv/papers/wisec2014-baton.pdf
