@@ -21,6 +21,7 @@
 * [TAP 17: Remove Signature Wrapper from the TUF Specification](tap17.md)
 * [TAP 18: Ephemeral identity verification using sigstore's Fulcio for TUF developer key management](tap18.md)
 * [TAP 19: Content Addressable Systems and TUF](tap19.md)
+* [TAP 20: Self-revocation](tap20.md)
 
 ## Deferred
 
