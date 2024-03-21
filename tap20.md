@@ -1,4 +1,4 @@
-* TAP: TBD
+* TAP: 20
 * Title: Self-revocation
 * Version: 1
 * Last-Modified: 29-Jan-2024
