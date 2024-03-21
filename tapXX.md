@@ -174,9 +174,9 @@ _**5.2**. **Initialize the root metadata role.**_
 
 * _**5.2.6**. Repeat steps 5.2.1 to 5.2.5._
 
-* _**5.2.7**. **Check for a freeze attack**. The latest known time MUST be
-  lower than the expiration timestamp in the trusted root metadata file
-  (version N). If the trusted root metadata file has expired, abort the update
+* _**5.2.7**. **Check for a freeze attack**. The expiration timestamp in the
+  trusted root metadata file MUST be higher than the fixed update start time.
+  If the trusted root metadata file has expired, abort the update
   cycle, report the potential freeze attack. On the next update cycle, begin at
   step 5.0 and version N of the root metadata file._
 
@@ -225,11 +225,11 @@ _**5.3**. **Initialize the timestamp metadata role.**_
       equal the hashes in the new timestamp metadata file. If not, discard the
       new timestamp metadata file, then go to step 5.6._
 
-* _**5.3.4**. **Check for a freeze attack.** The latest known time MUST be lower
-  than the expiration timestamp in the new timestamp metadata file. If so, the
-  new timestamp metadata file becomes the trusted timestamp metadata file. If
-  the new timestamp metadata file has expired, discard it, then go to step
-  5.6._
+* _**5.3.4**. **Check for a freeze attack.** The expiration timestamp in the
+  new timestamp metadata file MUST be higher than the fixed update start time.
+  If so, the new timestamp metadata file becomes the trusted timestamp metadata
+  file. If the new timestamp metadata file has expired, discard it, then go to
+  step 5.6._
 
 _**5.4. Initialize the snapshot metadata file.**_
 
@@ -265,11 +265,11 @@ _**5.4. Initialize the snapshot metadata file.**_
     hashes in the new snapshot metadata file. If not, discard the new snapshot
     metadata file, then go to step 5.6._
 
-* _**5.4.6**. **Check for a freeze attack.** The latest known time MUST be
-  lower than the expiration timestamp in the new snapshot metadata file. If so,
-  the new snapshot metadata file becomes the trusted snapshot metadata file. If
-  the new snapshot metadata file has expired, discard it, then go to step
-  5.6._
+* _**5.4.6**. **Check for a freeze attack.** The expiration timestamp in the
+  new snapshot metadata file MUST be higher than the fixed update start time.
+  If so, the new snapshot metadata file becomes the trusted snapshot metadata
+  file. If the new snapshot metadata file has expired, discard it, then go to
+  step 5.6._
 
 _**5.5**. **Load the local targets metadata file, if any.**_
 
@@ -308,11 +308,11 @@ _**5.5**. **Load the local targets metadata file, if any.**_
     hashes in the new timestamp metadata file. If not, discard the new
     timestamp metadata file, then go to step 5.6._
 
-* _**5.5.6**. **Check for a freeze attack.** The latest known time MUST be
-  lower than the expiration timestamp in the new targets metadata file. If so,
-  the new targets metadata file becomes the trusted targets metadata file. If
-  the new targets metadata file has expired, discard it, then go to step
-  5.6._
+* _**5.5.6**. **Check for a freeze attack.** The expiration timestamp in the
+  new targets metadata file MUST be higher than the fixed update start time.
+  If so, the new targets metadata file becomes the trusted targets metadata
+  file. If the new targets metadata file has expired, discard it, then go to
+  step 5.6._
 
 _**5.7**_. **Update the root metadata file**, ...
 
