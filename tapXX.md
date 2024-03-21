@@ -56,13 +56,15 @@ Unfortunately these have limitations:
 Some devices and operating systems use a trusted boot mechanism to
 establish a chain of trust from a hardware-protected root of trust, which
 verifies the bootloader, which in turn verifies the kernel, and finally the
-user space. For example, UEFI [Secure Boot], Android’s [Verified Boot].  This
-technology can be used to establish a metadata backstop that cannot be
-manipulated by a local attacker, and can be be kept up to date more easily than
-rolling root metadata keys.
+user space. For example, UEFI [Secure Boot], Android’s [Verified Boot].
+Furthermore, standard OS primitives for read-only and access-controlled files
+provide less robust security mechanisms for protecting files from user
+tampering. These technologies can be used to establish a metadata backstop that
+cannot be easily manipulated by a local attacker, and can be be kept up to date
+more easily than rolling root metadata keys.
 
-The following three sections describe different scenarios to generationg backstop
-metadata:
+The following three sections describe different scenarios to generationg
+backstop metadata:
 
 ## Including all metadata in the backstop
 
