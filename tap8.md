@@ -1,9 +1,9 @@
 * TAP: 8
 * Title: Key rotation and explicit self-revocation
 * Version: 2
-* Last-Modified: 16-Nov-2022
+* Last-Modified: 26-Mar-2024
 * Author: Hannes Mehnert, Justin Cappos, Marina Moore
-* Status: Draft
+* Status: Accepted
 * Content-Type: text/markdown
 * Created: 10-May-2017
 
