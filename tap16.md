@@ -4,7 +4,7 @@
 * Last-Modified: 02/04/2024
 * Author: Marina Moore, Justin Cappos
 * Type: Standardization
-* Status: Draft
+* Status: Accepted
 * Content-Type: markdown
 * Created: 14/09/2020
 * +TUF-Version:
