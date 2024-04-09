@@ -77,7 +77,7 @@ from that proposal to support key revocation.
 ## Rotate file (from TAP 8)
 
 The signed portion of a `rotate` file is as follows (there's also a
-signatures wrapper as in tuf spec, not shown here):
+signatures wrapper as in the TUF specification, not shown here):
 
 ```python
 {
@@ -92,7 +92,7 @@ signatures wrapper as in tuf spec, not shown here):
 ```
 
 Where ROLE, KEYID, KEY, and THRESHOLD are as defined in the original
-tuf spec.  The value of ROLE has to be the same as the role for the
+TUF specification.  The value of ROLE has to be the same as the role for the
 delegation.  The value of THRESHOLD is its new value. VERSION is the index of
 this rotate file, incrementing by 1 on each rotation. The keys specify the new
 valid keys
@@ -100,6 +100,10 @@ and associated key ids (which may be a subset or superset of
 the old ones).  A rotate file does _not_ contain an expiration date,
 it is meant to be signed once and never modified.  The rotate
 file has to be signed with an old threshold of old keys.
+
+This rotate file will be named `ROLE.rotate.VERSION` where ROLE and VERSION are
+defined as above and go into a 'rotate' folder on the repository that
+contains all rotate files for the repository.
 
 
 ## Rotation to Null
@@ -130,6 +134,13 @@ This is the only case in which they can be replaced or
 modified.  If a client wants to rotate to a different
 key, without having access to their currently delegated private key,
 this requires a key revocation by the delegating metadata.
+
+## Client workflow
+
+Rotate files will be downloaded by clients as described in TAP 8. Once a
+rotate file is downloaded and verified, the client will check for a rotation
+to null. If such a rotation to null is found, the client will treat the given
+role as revoked.
 
 # Security Analysis
 
