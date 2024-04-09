@@ -131,7 +131,7 @@ where NULL is the null key.
 
 Rotation files are immutable unless replaced with a revocation.
 This is the only case in which they can be replaced or
-modified.  If a client wants to rotate to a different
+modified.  If a key holder wants to rotate to a different
 key, without having access to their currently delegated private key,
 this requires a key revocation by the delegating metadata.
 
