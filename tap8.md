@@ -138,7 +138,7 @@ delegations stay intact, the targets can rotate keys, remove keys, or add keys.
 ## Rotate file
 
 The signed portion of a `rotate` file is as follows (there's also a
-signatures wrapper as in tuf specification, not shown here):
+signatures wrapper as in the TUF specification, not shown here):
 
 ```python
 {
