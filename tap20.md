@@ -3,7 +3,7 @@
 * Version: 1
 * Last-Modified: 29-Jan-2024
 * Author: Marina Moore
-* Status: Draft
+* Status: Accepted
 * Content-Type: text/markdown
 * Created: 19-Jan-2024
 
@@ -39,7 +39,7 @@ still the source of trust, but allows the role to act independently.
 
 # Motivation
 
-Several use cases can benefit from an independent revocation mechanism:
+The following use case can benefit from an independent revocation mechanism:
 
 
 ## Community repositories
@@ -77,29 +77,33 @@ from that proposal to support key revocation.
 ## Rotate file (from TAP 8)
 
 The signed portion of a `rotate` file is as follows (there's also a
-signatures wrapper as in tuf spec, not shown here):
+signatures wrapper as in the TUF specification, not shown here):
 
 ```python
 {
-    "_type" : "rotate" ,
-    "previous" : PREV_FILENAME
+    "_type" : "rotate",
+    "version" : VERSION,
     "role" : ROLE,
     "keys" : {
         KEYID : KEY
         , ... } ,
-    "threshold" : THRESHOLD }
+    "threshold" : THRESHOLD
 }
 ```
 
 Where ROLE, KEYID, KEY, and THRESHOLD are as defined in the original
-tuf spec.  The value of ROLE has to be the same as the role for the
-delegation.  The value of THRESHOLD is its new value.  PREV_FILENAME is
-the name of the previous rotate file in the chain, or the empty string if this is
-the first rotate file for this role.  The keys specify the new valid keys
+TUF specification.  The value of ROLE has to be the same as the role for the
+delegation.  The value of THRESHOLD is its new value. VERSION is the index of
+this rotate file, incrementing by 1 on each rotation. The keys specify the new
+valid keys
 and associated key ids (which may be a subset or superset of
 the old ones).  A rotate file does _not_ contain an expiration date,
 it is meant to be signed once and never modified.  The rotate
 file has to be signed with an old threshold of old keys.
+
+This rotate file will be named `ROLE.rotate.VERSION` where ROLE and VERSION are
+defined as above and go into a 'rotate' folder on the repository that
+contains all rotate files for the repository.
 
 
 ## Rotation to Null
@@ -125,12 +129,18 @@ where NULL is the null key.
 
 ### Prioritizing Self Revocation
 
-Rotation files are immutable unless replaced with a revocation (rotate
-to null).  This is the only case in which they can be replaced or
-modified.  If a client wants to rotate to a different
+Rotation files are immutable unless replaced with a revocation.
+This is the only case in which they can be replaced or
+modified.  If a key holder wants to rotate to a different
 key, without having access to their currently delegated private key,
 this requires a key revocation by the delegating metadata.
 
+## Client workflow
+
+Rotate files will be downloaded by clients as described in TAP 8. Once a
+rotate file is downloaded and verified, the client will check for a rotation
+to null. If such a rotation to null is found, the client will treat the given
+role as revoked.
 
 # Security Analysis
 
@@ -138,10 +148,11 @@ There should be no negative security impact.  The major benefits are
 that many security-sensitive revocations that require key use by
 multiple parties, will now be much easier to do.
 
-Clients need to take care to check for rotation to a null key (rotate
+Clients need to take care to check for revocation (rotate
 files that contain a null key).  This shall be handled in the
 same manner as an invalid metadata signature on by the role possessing
-the key. The role will be invalid until it is re-delegated to with a new key.
+the key. The role will be invalid until it is re-delegated to with a new
+rolename and key.
 Clients MUST use snapshot metadata to ensure that they receive all rotate files
 in the chain.
 
@@ -162,7 +173,7 @@ verify the revocations.
 
 # Augmented Reference Implementation
 
-TODO
+https://github.com/theupdateframework/python-tuf/pull/2257/files
 
 # Copyright
 

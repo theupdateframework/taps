@@ -13,6 +13,7 @@
 * [TAP 11: Using POUFs for Interoperability](tap11.md)
 * [TAP 12: Improving keyid flexibility](tap12.md)
 * [TAP 15: Succinct hashed bin delegations](tap15.md)
+* [TAP 20: Self-revocation](tap20.md)
 
 ## Draft
 
@@ -21,7 +22,6 @@
 * [TAP 17: Remove Signature Wrapper from the TUF Specification](tap17.md)
 * [TAP 18: Ephemeral identity verification using sigstore's Fulcio for TUF developer key management](tap18.md)
 * [TAP 19: Content Addressable Systems and TUF](tap19.md)
-* [TAP 20: Self-revocation](tap20.md)
 
 ## Deferred
 
