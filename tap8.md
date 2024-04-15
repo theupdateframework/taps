@@ -1,9 +1,9 @@
 * TAP: 8
 * Title: Key rotation and explicit self-revocation
 * Version: 2
-* Last-Modified: 16-Nov-2022
+* Last-Modified: 26-Mar-2024
 * Author: Hannes Mehnert, Justin Cappos, Marina Moore
-* Status: Draft
+* Status: Accepted
 * Content-Type: text/markdown
 * Created: 10-May-2017
 
@@ -30,26 +30,12 @@ Snapshot and timestamp cannot use this rotation mechanism.
 
 Conceptually, the rotation process says if you trusted threshold of keys
 X = X_0, ... X_n, now instead trust threshold of keys Y = Y_0, ... Y_n.  Rotation
-of a key may be performed any number of times, transferring trust from X to Y, then
+of a role may be performed any number of times, transferring trust from X to Y, then
 from Y to Z, etc. Trust can even be transferred back from Z to X, allowing a key
 to be added to a role, then later removed. If a single key needs to be replaced,
 it can be safely rotated using the mechanism in this TAP.
 
-The mechanism in this TAP has an additional use case: if a rotation
-to a null key is detected, it causes the role to no longer be trusted.
-A role could use a rotation to a null key if they suspect a threshold of keys
-have been compromised
-(a lost hard drive, system breach, etc). The role is able to create a
-rotation to null without the help of the delegator, so they are able to
-explicitly revoke trust in the role immediately, improving response time
-to a key compromise. A rotation to a null key revokes trust in the role,
-not specific keys, so all keys associated with the role will be invalid
-after a rotation to null. The client will detect a rotation
-to a null key and treat it as if the metadata was unsigned.
-
-A delegator to a role A is able to help A recover from a rotation to null of A by
-delegating to a new set of keys for A with a new role name.
-Additionally, a delegator can overrule a rotate file by delegating to a new role
+A delegator can overrule a rotate file by delegating to a new role
 with a new set of keys. This ensures that the delegator is still the source of
 trust, but allows the role to act independently.
 
@@ -71,7 +57,7 @@ delegations to be redone whenever this quorum changed.) Adding and
 removing delegations of a project often uses the project role's key which is
 delegated to.  This project role gives persons with access to it elevated
 privileges, and needs intervention from a higher level of delegations if
-it needs to be rotated or revoked.
+it needs to be rotated.
 
 With TAP 8, the delegation can be assigned to a role (that contains a set
 of keys and a threshold value).  Developers could then collectively sign
@@ -130,15 +116,15 @@ role T to delegate to the new keyset e. If one of role D's keys is
 compromised, they have to wait for role T to replace the key with a new,
 trusted key.
 
-With this proposal, the owner of role D can replace their own key, and also
-revoke their key without relying on the delegator.  This will improve
+With this proposal, the owner of role D can replace their own key
+without relying on the delegator.  This will improve
 response time to key compromises and prevent key sharing by allowing keys to be
 rotated more regularly. Combined with multi-role delegations this allows
 project teams to shrink and grow without delegation to a project key.
 
 TUF already contains a key rotation mechanism, which is only specified
 and used for the root file.  This proposal allows the rotation
-mechanism to be used by other delegations, and extends it with self-revocation.
+mechanism to be used by other delegations.
 
 
 # Specification
@@ -152,7 +138,7 @@ delegations stay intact, the targets can rotate keys, remove keys, or add keys.
 ## Rotate file
 
 The signed portion of a `rotate` file is as follows (there's also a
-signatures wrapper as in tuf spec, not shown here):
+signatures wrapper as in the TUF specification, not shown here):
 
 ```python
 {
@@ -162,12 +148,12 @@ signatures wrapper as in tuf spec, not shown here):
     "keys" : {
         KEYID : KEY
         , ... } ,
-    "threshold" : THRESHOLD }
+    "threshold" : THRESHOLD
 }
 ```
 
 Where ROLE, KEYID, KEY, and THRESHOLD are as defined in the original
-tuf spec.  The value of ROLE has to be the same as the role for the
+tuf specification.  The value of ROLE has to be the same as the role for the
 delegation.  The value of THRESHOLD is its new value.  VERSION is
 the integer version number of rotate files for this role. Version
 numbers MUST increase by exactly 1 from the previous rotate file for
@@ -221,16 +207,13 @@ The client will then look for all files that begin with `rotate/foo.rotate` in
 the snapshot metadata. The client will process these in version order (ie starting
 with `rotate/foo.rotate.1`, then `rotate/foo.rotate.2` by first checking for this
 version file in a local cache. The client will then fetch the rotate file from
-remote. If the remote file is a rotation to null, and is signed with the currently
-trusted keys, the client will halt the verification of this metadata and act as if
-it is unverified when continuing the update process (and look for metadata from
-the next role in the pre-order depth-first search). Otherwise, the client should
+remote. The client should then
 ensure that the cached file is identical to the remote version. The client will
 then verify the rotate file using the currently trusted public key(s) for this role.
 If a rotate
 file is successfully verified, the client will update the set of trusted keys for
-this role to be the set listed in the rotate files. If key data is missing
-or there is a rotation to null, the targets file is invalid and the client will
+this role to be the set listed in the rotate files. If key data is missing,
+the targets file is invalid and the client will
 proceed with the update process as if verification for this role failed (by moving
 on to another trusted role for this target, or reporting an error to the user).
 
@@ -294,20 +277,6 @@ foo.rotate.2 is created, which contains the existing keyids as well as
 Evelyn's public key, and a threshold value of 3.  This
 is signed with at least 2 keys from the current set of keyids.
 
-## Rotation to Null
-
-Clients need to check for rotations to a null key, and any delegation pointing
-to a rotation to a null key is invalid.  The null key is a hard coded value used across
-tuf implementations. This enables a role to explicitly revoke their
-own key(s) by introducing a rotation to null.
-
-**Prioritizing Self Revocation**
-Rotation files are immutable unless replaced with a revocation (rotate
-to null).  This is the only case in which they can be replaced or
-modified.  If a client wants to rotate to a different
-key, without having access to their currently delegated private key,
-this requires a key revocation by the delegating metadata.
-
 Rotations which do not have any entry point anymore (the delegation they
 stem from has can been replaced with new keys) can be
 safely removed from the repository. If the delegation of foo is
@@ -327,7 +296,7 @@ The interaction between the Fulcio TAP and this TAP may impact the security
 considerations in this TAP. If the Fulcio server or OIDC issuer is compromised,
 an attacker could gain control over all TUF roles controlled by that entity.
 If this happens, the attacker could use TAP 8 to create large-scale rotations
-to null to perform a denial of service. However, this attack can be safely
+to perform a denial of service. However, this attack can be safely
 recovered from using the delegator to replace all effected keys. This is
 especially effective if the top-level targets is controlled by offline keys.
 For this reason, we recommend that both root and top-level targets are
@@ -347,17 +316,8 @@ provide a simple mechanism for extending and shrinking project membership
 without an individual with elevated privileges, but based
 on a threshold of signatures.
 
-Clients need to take care to check for rotation to a null key (rotate
-files that contain a null key).  This shall be handled in the
-same manner as an invalid metadata signature on by the role possessing
-the key. The role will be invalid until it is re-delegated to with a new key.
-Clients MUST use snapshot metadata to ensure that they recieve all rotate files
+Clients MUST use snapshot metadata to ensure that they receive all rotate files
 in the chain.
-
-Intentionally rotating to null enables a repository, a
-project, and individuals to explicitly revoke their key material
-themselves.  An individual whose key is compromised can introduce
-a rotation to null, and all delegations to them will be invalid.
 
 For mitigation of private key compromises, rotation can be used if and
 only if it can be assured that the legitimate holder is faster (at the
@@ -365,7 +325,7 @@ snapshot service, and/or at the client) than the attacker who got
 control over the private key.  Because this is hard to achieve, it is
 recommended for proper mitigation that the delegation itself is changed from
 the compromised key to a new key as soon as possible. Key revocation using
-rotation defined in this TAP can be used as a stop-gap for delegations made
+rotation defined in TAP 20 can be used as a stop-gap for delegations made
 by offline keys that may take some time to update.
 
 As a general note, this TAP only extends the possibilities of a target,
@@ -396,7 +356,7 @@ verify the rotation chain.
 
 # Augmented Reference Implementation
 
-TODO
+https://github.com/theupdateframework/python-tuf/pull/2257/files
 
 # Copyright
 
