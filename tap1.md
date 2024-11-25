@@ -1,14 +1,12 @@
----
-TAP: 1
-Title: TAP Purpose and Guidelines
-Version: 2
-Last-Modified: 30-Nov-2020
-Author: Trishank Karthik Kuppusamy, Lois Anne DeLong, Justin Cappos, Joshua Lock
-Status: Active
-Content-Type: text/markdown
-Created: 07-Sep-2016
-Post-History: 08-Sep-2016
----
+* TAP: 1
+* Title: TAP Purpose and Guidelines
+* Version: 2
+* Last-Modified: 30-Nov-2020
+* Author: Trishank Karthik Kuppusamy, Lois Anne DeLong, Justin Cappos, Joshua Lock
+* Status: Active
+* Content-Type: text/markdown
+* Created: 07-Sep-2016
+* Post-History: 08-Sep-2016
 
 # What is a TAP?
 
