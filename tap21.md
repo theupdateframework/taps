@@ -51,7 +51,7 @@ However, it does not reduce amount of bin metadata, nor the churn inherent in fr
 
 # Rationale
 
-Very large, frequently updated package registries have large developer communities. Only a small minority of these developers every publish packages themselves. The vast majority will only even interact with the registry via a dependency manager. These users [?] are the target audience for TUF. As such, their primary use-cases (i.e. adding and updating packages within their projects) ought to be prioritized when considering TUF repository design (at the registry level).
+Very large, frequently updated package registries have large developer communities. Only a small minority of these developers every publish packages themselves. The vast majority will only even interact with the registry via a dependency manager. These developers are the target audience for TUF. As such, their primary use-cases (i.e. adding and updating packages within their projects) ought to be prioritized when considering TUF repository design (at the registry level).
 
 These use-cases involve frequent downloads ("read" operations) of TUF repository metadata. If these downloads negatively impact the developer experience (eg. quadrupling time for common client operations), we are likely to see resistance to adopting and using TUF. Therefore, minimizing the impact of these downloads on developers is the primary design goal for this TAP. 
 
@@ -68,7 +68,6 @@ Assumptions:
 - (A2) Frequency of new releases: 60/minute
 - (A3) Number of bins: 16384
 - (A4) Number of dependencies in example project: 50
-- (A5) Average time between client updates: 60 minutes
 
 Calculations:
 - (C1) Likelihood that a bin will require an update in one minute: 0.37%
@@ -84,7 +83,9 @@ Calculations:
 
 The proposed architecture to scale out a large and high-volume TUF repository is to break it up into "sub-repos", based on a logical grouping (eg. per-vendor or per-package).
 
-Each sub-repo would be very simple, containing a limited but logically grouped set of targets. Hashed bins would not be required, since each would only contain an average of 10-15 targets. There should usually never be enough targets to warrant hashed bins, since each repo only contains the releases from a single package. However, if it were required, one could implement hashed bin selectively on a per-sub-repo basis.
+Each sub-repo will be a full TUF repository in its own right. However, they will be very simple, since they only contain a limited, but logically grouped, set of targets. Hashed bins should not be required, since each would only contain a relatively small number of targets.
+
+However, if it were required, a registry could implement hashed bins selectively on a per-sub-repo basis. Alternatively, the architecture of this TAP could be applied for selected sub-repos, in a quasi-recursive manner (eg. several large vendor namespaces, with a long tail of small vendors.)
 
 To provide trusted root metadata for all of these sub-repos, a "top-level repo" provides TUF signatures for these root metadata. The client thus ships with a single root metadata for the top-level repo, which enables it to download and verify the initial root metadata for each of the sub-repos.
 
@@ -104,9 +105,8 @@ Additionally, since the top-level repository only contains *initial* root metada
 
 This results in a very significant improvement in client-side downloads:
 
-    With hashed bins: ~10MB of initial TUF metadata that requires a full refresh every ~5hrs. (See "C4", above)
-
-    With TAP-21: ~7MB of initial TUF metadata that requires ~0.9MBs refreshed every week.
+- With hashed bins: ~10MB of initial TUF metadata that requires a full refresh every ~5hrs. (See "C4", above)
+- With TAP-21: ~7MB of initial TUF metadata that requires ~0.9MBs refreshed every week.
 
 
 ### Server-side perfomance improvement
@@ -154,7 +154,7 @@ A client implementing this TAP cannot reasonably ship hundreds of thousands of r
 
 # Security Analysis
 
-Each sub-repo is a full TUF repo, providing timestamp and snapshot metadata. However, in this scenario, we do not have a single view of all packages. The stated purpose of the top-level snapshot metadata is (according to [TAP-16](https://github.com/theupdateframework/taps/blob/master/tap16.md#rationale):
+Each sub-repo is a full TUF repo, providing timestamp and snapshot metadata. However, in this scenario, we do not have a single view of all packages. The stated purpose of the top-level snapshot metadata is (according to [TAP-16](https://github.com/theupdateframework/taps/blob/master/tap16.md#rationale)):
 
 > Snapshot metadata provides a consistent view of the repository in order to protect against mix-and-match attacks and rollback attacks. 
 
