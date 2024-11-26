@@ -124,9 +124,13 @@ This also implies that parallelizing of server-side operations would be much sim
 From the [TUF FAQ](https://theupdateframework.io/docs/faq/):
 > [T]he Snapshot role [...] provides a consistent view of the metadata available on a repo.
 
-One concern with the present proposal is that it lacks a global snapshot. See [Security Analysis](#security-analysis) (below) for a more detailed discussion on this topic.
+The architecture proposed in this TAP lacks a *global* snapshot. This is by design, as snapshot metadata is at the crux of the scalability challenges described above.
 
-This concern is only relevant to registries where package versions are tightly-coupled (such as Debian Apt repositories). However, package versions are loosely-coupled in registries of language libraries (eg. Packagist, PyPi), which is the intended audience for this TAP.
+The lack of a global snapshot makes this TAP unsuitable for registries where package versions are tightly-coupled (such as Debian Apt repositories). However, package versions are loosely-coupled in registries of language libraries (eg. Packagist, PyPi), which is the intended audience for this TAP. See [Security Analysis](#security-analysis) (below) for a more detailed discussion on this topic.
+
+Registries, including loosely coupled ones, may want to leverage snapshot metadata to make mirroring the TUF repository easier. For example, setting up a mirror would involve getting the latest snapshot, and downloading everything in it. Updating a mirror would involve getting the latest snapshot, diffing with the previous snapshot, and downloading the changes.
+
+While snapshot metadata is convenient as a mirror manifest, comparably diff'able data can be generated from filesystem "modified" timestamps, for example. Registry operators that are considering adoption of this TAP should take this use case into consideration.
 
 ### Size of the top-level repo remains large
 
