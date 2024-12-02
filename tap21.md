@@ -51,7 +51,7 @@ However, it does not reduce amount of bin metadata, nor the churn inherent in fr
 
 # Rationale
 
-Very large, frequently updated package registries have large developer communities. Only a small minority of these developers every publish packages themselves. The vast majority will only even interact with the registry via a dependency manager. These developers are the target audience for TUF. As such, their primary use-cases (i.e. adding and updating packages within their projects) ought to be prioritized when considering TUF repository design (at the registry level).
+Very large, frequently updated package registries have large developer communities. Only a small minority of these developers ever publish packages themselves. The vast majority will only even interact with the registry via a dependency manager. These developers are the target audience for TUF. As such, their primary use-cases (i.e. adding and updating packages within their projects) ought to be prioritized when considering TUF repository design (at the registry level).
 
 These use-cases involve frequent downloads ("read" operations) of TUF repository metadata. If these downloads negatively impact the developer experience (eg. quadrupling time for common client operations), we are likely to see resistance to adopting and using TUF. Therefore, minimizing the impact of these downloads on developers is the primary design goal for this TAP. 
 
