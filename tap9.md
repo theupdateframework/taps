@@ -15,7 +15,7 @@ GitHub issue](https://github.com/theupdateframework/python-tuf/issues/425#issuec
 in the main TUF repository. Most of the information and arguments that arose
 from that discussion have been captured in this document.
 
-At present, metadata used in TUF is comprised of two sections: `signatures` and
+At present, metadata used in TUF comprises two sections: `signatures` and
 `signed`. The actual metadata is in the `signed` section while the `signatures`
 section contains cryptographic signatures of the data in `signed`. These
 cryptographic signatures include a `keyid`, `method`, and `signature`. An
