@@ -22,6 +22,11 @@ This POUF uses a subset of the JSON object format, with floating-point numbers o
 
 In this POUF, metadata files are hosted on the repository using HTTP. The filenames for these files are ROLE.json where ROLE is the associated role name (root, targets, snapshot, or timestamp). A client downloads these files by HTTP post request. The location of the repository is preloaded onto the clients.
 
+Snapshot Merkle trees in this implementation will use sha256 to compute the digest of each node, and will use the following procedures for computing node digests:
+* A leaf digest is the sha256 hash of the cannonical json encoding of its `leaf_contents`.
+* An internal node's digest is the sha256 hash of its left child's digest + it's right child's digest, using utf-8 encoding.
+* The `path_directions` and `merkle_path` for each snapshot Merkle metadata file provide information needed to reconstruct the Merkle tree. For each node in the tree, starting with the given leaf node, the next `path_directions` will be -1 if the corresponding `merkle_path` is a right sibling of the current node, or 1 if it is a left sibling. So, a `path_direction` of -1 means that the parent node's digest will be the hash of the current node's digest + the next `merkle_path` digest (as the `merkle_path` is a right sibling).
+
 ## Message Handler Table
 
 This table lists the message handlers supported by the reference implementation.
@@ -336,6 +341,7 @@ The timestamp file is signed by a timestamp key.  It indicates the
          "spec_version" : SPEC_VERSION,
          "version" : VERSION,
          "expires" : EXPIRES,
+         ("merkle_root": ROOT_HASH),
          "meta" : METAFILES
        }
 
@@ -360,6 +366,8 @@ The timestamp file is signed by a timestamp key.  It indicates the
      the cryptographic hash function.  For example: { "sha256": HASH, ... }.
      HASH is the hexdigest of the cryptographic function computed on the
      snapshot.json metadata file.
+
+     ROOT_HASH is the hash of the Merkle tree's root node.
 
 ### mirrors.json
 The mirrors.json file is signed by the mirrors role.  It indicates which
@@ -399,6 +407,22 @@ mirror that will be used to download that file.  Successive mirrors with
 matching paths will only be tried if downloading from earlier mirrors fails.
 This behavior can be modified by the client code that uses the framework to,
 for example, randomly select from the listed mirrors.
+
+
+### Snapshot Merkle metadata
+
+Snapsot Merkle metadata is not signed. It lists version information for a metadata file, and a path through the Merkle tree to verify this information.
+
+```
+{ “leaf_contents”: {METAFILES},
+  “merkle_path”: {INDEX:HASH}
+  “path_directions”:{INDEX:DIR}
+}
+```
+
+Where `METAFILES` is the version information as defined for snapshot metadata,
+`INDEX` provides the ordering of nodes, `HASH` is the sha256 hash of the sibling node,
+and `DIR` is a `1` or `0` that indicates whether the given node is a left or right sibling.
 
 
 # Security Audit
