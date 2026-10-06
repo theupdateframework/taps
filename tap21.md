@@ -1,8 +1,10 @@
 * TAP: 21
 * Title: ML-DSA signing scheme for TUF metadata
-* Last-Modified: 2026-04-30
+* Version: 1
+* Last-Modified: 2026-09-30
 * Author: Fredrik Skogman
-* Status: Draft
+* Type: Standardization
+* Status: Accepted
 * Content-Type: text/markdown
 * Created: 2026-04-29
 
@@ -150,7 +152,7 @@ information into the `scheme` parameter.
     * Do not try multiple interpretations
     * Do not accept the same signature under HashML-DSA or another scheme
 
-# Security considerations
+# Security Analysis
 
 1. SHA-512 length extension: Not a concern. The signature is made over `domain
    || version || digest`. Length extension is more a concern when the
@@ -162,18 +164,39 @@ information into the `scheme` parameter.
    valid in the TUF metadata domain (collisions on the domain and
    version bytes are _very_ unlikely)
 
+# Backwards Compatibility
+
+This TAP is backwards compatible for repositories that do not use the
+`ml-dsa` keytype. Existing clients that do not support this TAP can
+continue to validate metadata signed with currently supported keytypes.
+
+Repositories that use `ml-dsa` signatures require clients that support
+this TAP. Clients that do not support the `ml-dsa` keytype will not be
+able to validate those signatures.
+
+# Augmented Reference Implementation
+
+The following implementations and tests support this TAP:
+
+* [go-tuf PR #780](https://github.com/theupdateframework/go-tuf/pull/780)
+  implements ML-DSA signing and verification.
+* [securesystemslib 1.5.0](https://github.com/secure-systems-lab/securesystemslib/blob/main/CHANGELOG.md#150)
+  implements ML-DSA signing and verification.
+* [tuf-conformance](https://github.com/theupdateframework/tuf-conformance/blob/main/tuf_conformance/test_keys.py)
+  includes ML-DSA keytype and scheme tests.
+
 # Appendix
 
 ## Metadata size analysis
 
 > [!NOTE]
-> All sizes are as TUF enodes them (hex for signatures and single line
+> All sizes are as TUF encodes them (hex for signatures and single line
 > PEM encoding for public keys).
-> Key sizes can differ a few bytes between keys for some key types,
+> Key sizes can differ by a few bytes between keys for some key types,
 > and also if the last `\n` is present or not in the JSON encoding of
 > PEM encoded keys.
-> Also metadata sizes can differs a bit due to whitespaces being
-> stripped or not, take them a indicator on the growth.
+> Metadata sizes can also differ due to whitespace being stripped or not,
+> so take them as an indicator of the growth.
 
 Looking at an example repository that relies on five shared
 root/targets keys and a shared key for snapshot and timestamp. Only
@@ -196,8 +219,8 @@ Or looking at it for a single key:
 | ML-DSA-87 | 3652 (20.1x)     | 9254 (64.3x)    |
 
 The above tables only include the raw key and signature byte sizes,
-the real world effect on a repository can so differ, in particular the
-targets file. Looking at an [example
+so the real world effect on a repository can differ, in particular for
+the targets file. Looking at an [example
 repository](https://github.com/sigstore/root-signing/tree/main/metadata)
 we can get a better feel:
 
@@ -216,7 +239,7 @@ removed for this example computation to keep it simpler.
 From FIPS 204 on application level hashing (§5.4):
 
 > In order to maintain the same level of security strength when the
-> content is hashed at the application level or using HashML-DSA , the
+> content is hashed at the application level or using HashML-DSA, the
 > digest that is signed needs to be generated using an approved hash
 > function or XOF (e.g., from FIPS 180 [8] or FIPS 202 [7]) that
 > provides at least 𝜆 bits of classical security strength against both
@@ -235,3 +258,7 @@ From FIPS 204 on application level hashing (§5.4):
 * [FIPS-204](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.204.pdf)
 * [TUF Specification](https://theupdateframework.github.io/specification/v1.0.34/index.html)
 * [RFC 9881](https://datatracker.ietf.org/doc/html/rfc9881)
+
+# Copyright
+
+This document has been placed in the public domain.
