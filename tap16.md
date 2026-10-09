@@ -1,10 +1,10 @@
 * TAP: 16
 * Title: Snapshot Merkle Trees
 * Version: 0
-* Last-Modified: 22/01/2021
+* Last-Modified: 02/04/2024
 * Author: Marina Moore, Justin Cappos
 * Type: Standardization
-* Status: Draft
+* Status: Accepted
 * Content-Type: markdown
 * Created: 14/09/2020
 * +TUF-Version:
@@ -111,7 +111,10 @@ In addition the path should contain direction information so that the client
 will know whether each listed node is a left or right sibling when reconstructing the
 tree.
 
-This information will be included in the following metadata format:
+While the exact format will depend on the algorithm specified in a POUF,
+each leaf must contain equivalent information to the version information
+defined for snapshot metadata. We provide an example metadata format:
+
 ```
 { “leaf_contents”: {METAFILES},
   “merkle_path”: {INDEX:HASH}
@@ -123,9 +126,16 @@ Where `METAFILES` is the version information as defined for snapshot metadata,
 `INDEX` provides the ordering of nodes, `HASH` is the hash of the sibling node,
 and `DIR` indicates whether the given node is a left or right sibling.
 
+Alternatively, if using a Merkle prefix tree, the hash of the `METAPATH` can
+be used as the location in the Merkle tree, with the version information in the
+node. The Merkle path and path directions can then be provided with this version
+information as the snapshot Merkle metadata file for each leaf.
+
+## Timestamp
+
 In addition, the following optional field will be added to timestamp metadata.
 If this field is included, the client should use snapshot Merkle metadata to
-verify updates instead:
+verify updates:
 
 ```
 ("merkle_root": ROOT_HASH)
@@ -136,7 +146,7 @@ Where `ROOT_HASH` is the hash of the Merkle tree's root node.
 Note that snapshot Merkle metadata files do not need to be signed by a snapshot
 key because the path information will be verified based on the Merkle root
 provided in timestamp. Removing these signatures will provide additional space
-savings for clients.
+savings for clients. The timestamp metadata must still be signed.
 
 Previous versions of snapshot Merkle metadata files using the current timestamp
 key must remain available to clients and auditors. The repository may store
@@ -149,10 +159,10 @@ If a client sees the `merkle_root` field in timestamp metadata, they will use
 the snapshot Merkle metadata to check version information. If this field is
 present, the client will download the snapshot Merkle metadata file only for
 the targets metadata the client is attempting to update. The client will verify the
-snapshot Merkle metadata file by reconstructing the Merkle tree and comparing
-the computed root hash to the hash provided in timestamp metadata. If the
-hashes do not match, the snapshot Merkle metadata is invalid. Otherwise, the
-client will use the version information in the verified snapshot Merkle
+snapshot Merkle metadata file by reconstructing the path through the Merkle tree
+and comparing the computed root hash to the hash provided in timestamp metadata.
+If the hashes do not match, the snapshot Merkle metadata is invalid. Otherwise,
+the client will use the version information in the verified snapshot Merkle
 metadata to proceed with the update.
 
 For additional rollback protection, the client may download previous versions
@@ -306,8 +316,8 @@ compatibility for clients and repositories.
 
 # Augmented Reference Implementation
 
-https://github.com/theupdateframework/python-tuf/pull/1113/
-TODO: auditor implementation
+* https://github.com/theupdateframework/python-tuf/pull/1113/
+* https://github.com/znewman01/scalingsnapshots/blob/main/sssim/src/authenticator/merkle.rs
 
 # Copyright
 
