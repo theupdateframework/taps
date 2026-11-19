@@ -1,7 +1,7 @@
 * TAP: 18
 * Title: Ephemeral identity verification using sigstore's Fulcio for TUF developer key management
-* Version: 0
-* Last-Modified: 06/04/2023
+* Version: 1
+* Last-Modified: 18/11/2026
 * Author: Marina Moore, Joshua Lock, Asra Ali, Luke Hinds, Jussi Kukkonen, Trishank Kuppusamy, axel simon
 * Type: Standardization
 * Status: Draft
@@ -25,7 +25,7 @@ In a previous draft of [PEP 480](https://www.python.org/dev/peps/pep-0480/), the
 In this TAP, we instead propose use of the sigstore project. Sigstore has a growing number of adoptions, and provides a simple mechanism for signers to verify their identity using short-lived keys and ad-hoc certificates issued on the basis of OIDC. Sigstore provides a few services, including [Fulcio](https://github.com/sigstore/fulcio) (a CA) and [Rekor](https://github.com/sigstore/rekor) (a transparency log). With sigstore, long-term efforts to keep private keys secure are not necessary, as signing keys are ephemeral and only used for a single signing event. Fulcio certificates and client generated signatures are published to a timestamped transparency log managed by Rekor so that verifiers can ensure that the certificates were valid at the time of the signature.
 
 # Specification
-In addition to supporting existing TUF targets delegations, this TAP adds support for delegations to any OIDC identity, including signer email addresses, to be verified by Fulcio. These delegations MAY replace public keys for signers (such as ed25519 keys) in order to simplify their key management. Fulcio generates short-lived signing keys and uses certificates to bind these keys to an identity backed by OIDC authentication. Because the ephemeral keys listed in the certificates are short-lived, the signer will not be responsible for protecting signing keys in the long term and in practice SHOULD discard them immediately after signing. Fulcio certificates are automatically uploaded to the timestamped Rekor transparency log, so repositories and clients can verify that the certificate was valid at the time of signing.
+In addition to supporting existing TUF targets delegations, this TAP adds support for delegations to any OIDC identity, including signer email addresses, to be verified by Fulcio. These delegations MAY replace public keys for signers (such as ed25519 keys) in order to simplify their key management. Signers generate short-lived signing keys locally, and Fulcio issues certificates that bind these keys to an identity backed by OIDC authentication. Because the ephemeral keys listed in the certificates are short-lived, the signer will not be responsible for protecting signing keys in the long term and in practice SHOULD discard them immediately after signing. Fulcio certificates are automatically uploaded to the timestamped Rekor transparency log, so repositories and clients can verify that the certificate was valid at the time of signing.
 
 ## Delegation format
 In order to facilitate use of Fulcio, delegations may list an OIDC identity, such as an email address, and location of a Fulcio server instead of a public key. To do so, this TAP adds a "sigstore-oidc" keytype for a KEY with the following format:
@@ -41,7 +41,7 @@ In order to facilitate use of Fulcio, delegations may list an OIDC identity, suc
 }
 ```
 
-Where IDENTITY is the OIDC identity of the party who is authorized to sign and ISSUER is the OIDC entity used by Fulcio for verification. For example, identity could be "hello@gmail.com" with an issuer "https://accounts.google.com". Both IDENTITY and ISSUER are required for this keytype.
+Where IDENTITY is the OIDC identity of the party who is authorized to sign and ISSUER is the OIDC entity used by Fulcio for verification. For example, identity could be "hello@gmail.com" with an issuer "https://accounts.google.com". Both IDENTITY and ISSUER are required for this keytype and MUST be non-empty. Verifiers MUST check that both match the certificate; a delegation with an empty IDENTITY or ISSUER is invalid.
 
 The root certificate or certificate chain for the Fulcio server MUST be obtained using the Sigstore [root of trust](https://github.com/sigstore/root-signing). The client MUST use a single Fulcio instance.
 
@@ -56,8 +56,8 @@ A signature using a Fulcio key MUST include the Fulcio certificate for use in ve
    "bundle": BUNDLE
  }
 ```
-Where BUNDLE is an object that contains the verification information (transparency log references or timestamps), Fulcio X.509 signing certificate, and a signature over targets metadata, conforming to the [format defined by Sigstore](https://github.com/sigstore/protobuf-specs/blob/main/protos/sigstore_bundle.proto). The transparency log verification information includes a signed timestamp (SET) from Rekor promising inclusion in the Rekor transparency log.
-SIGNATURE is the 'message_signature' from the bundle in hex-encoded form.
+Where BUNDLE is an object that contains the verification information (transparency log references or timestamps), Fulcio X.509 signing certificate, and a signature over targets metadata, conforming to the [format defined by Sigstore](https://github.com/sigstore/protobuf-specs/blob/main/protos/sigstore_bundle.proto) with media type `application/vnd.dev.sigstore.bundle.v0.3+json`. The transparency log verification information includes a signed timestamp (SET) from Rekor promising inclusion in the Rekor transparency log.
+SIGNATURE is the signature from the bundle's 'message_signature' in hex-encoded form, as required by the TUF specification for all signatures. Verifiers MUST reject the signature if SIGNATURE does not decode to the same bytes as the signature contained in BUNDLE.
 
 ## Signing
 In order to sign metadata using Fulcio, a signer MUST:
@@ -82,7 +82,7 @@ While performing the steps in the [TUF client workflow](https://theupdateframewo
 Offline verification includes the following steps:
 
 * Verify the signature on the certificate to ensure that the signature chains up to the trusted Fulcio root and that the identity and issuer in the certificate match those found in the delegation.
-* Verify the Fulcio certificate's bundled CT inclusion proof with the trusted certificate log public key.
+* Verify the Signed Certificate Timestamp (SCT) embedded in the Fulcio certificate with the trusted Certificate Transparency log public key.
 * Verify the signature on the TUF metadata using the key from the Fulcio certificate.
 * Verify the SET to ensure that the signature was signed during certificate validity.
 
@@ -131,7 +131,7 @@ Clients that do not recognize Fulcio certs will not be able to validate signatur
 
 # Augmented Reference Implementation
 
-The pull request [#181](https://github.com/theupdateframework/go-tuf/pull/181) in go-tuf adds this feature.
+[securesystemslib](https://github.com/secure-systems-lab/securesystemslib/blob/v1.6.0/securesystemslib/signer/_sigstore_signer.py) implements the `sigstore-oidc` keytype (`SigstoreKey`) and a `SigstoreSigner`, which python-tuf uses through its signer API. The implementation is currently marked experimental and must be enabled explicitly; as of securesystemslib 1.6.0 it does not yet implement the SIGNATURE equality check or reject an empty ISSUER as required above. An earlier go-tuf prototype ([#181](https://github.com/theupdateframework/go-tuf/pull/181)) was not merged.
 
 # Copyright
 This document has been placed in the public domain.
